@@ -1,9 +1,5 @@
 module Gargantext.Components.Forest.Tree.Node.Action.Search.Frame where
 
-import DOM.Simple as DOM
-import DOM.Simple.Event (MessageEvent)
-import DOM.Simple.EventListener (Callback, addEventListener, callback)
-import DOM.Simple.Window (window)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
@@ -11,15 +7,23 @@ import Data.Nullable (Nullable)
 import Data.String (toLower)
 import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
+import DOM.Simple as DOM
+import DOM.Simple.Console (log, log2)
+import DOM.Simple.Event (MessageEvent)
+import DOM.Simple.EventListener (Callback, addEventListener, callback)
+import DOM.Simple.Window (window)
+import Effect (Effect)
 import Reactix as R
 import Reactix.DOM.HTML as H
 import URI.Extra.QueryPairs as NQP
 import URI.Query as Query
 
+import Gargantext.Prelude
+
 import Gargantext.Components.Forest.Tree.Node.Action.Search.Types (DataField(..), Search, isIsTex_Advanced)
-import Gargantext.Prelude (discard, identity, pure, unit, ($), (<>), (==), class Show, show)
 import Gargantext.Utils.Reactix as R2
 
+thisModule :: String
 thisModule = "Gargantext.Components.Forest.Tree.Node.Action.Search.Frame"
 
 --------------------
@@ -82,26 +86,31 @@ iframeWithCpt :: R.Component IFrameProps
 iframeWithCpt = R2.hooksComponent thisModule "iframeWith" cpt
   where
     cpt { frameSource, iframeRef, search: (search /\ setSearch) } _ =
-      pure $ H.iframe { src: src frameSource search.term
-                      , width: "100%"
-                      , height: "100%"
-                      , ref: iframeRef
+      pure $ H.iframe { height: "100%"
                       , on: { load: \_ -> do
-                                 addEventListener window "message" (changeSearchOnMessage url)
-                                 R2.postMessage iframeRef search.term
+                                log "[iframeWith] iframe loaded"
+                                R2.addEventListener window "message" (changeSearchOnMessage url)
+                                R2.postMessage iframeRef search.term
                             }
+                      , ref: iframeRef
+                      , src: src frameSource search.term
+                      , width: "100%"
                       } []
       where
         url :: String
-        url =  frameUrl frameSource
+        url = frameUrl frameSource
 
-        changeSearchOnMessage :: String -> Callback MessageEvent
+        --changeSearchOnMessage :: String -> Callback MessageEvent
+        changeSearchOnMessage :: String -> (MessageEvent -> Effect Unit)
         changeSearchOnMessage url' =
-                callback $ \m -> if R2.getMessageOrigin m == url' then do
-                                   let {url'', term} = R2.getMessageData m
-                                   setSearch $ _ {url = url'', term = term}
-                                 else
-                                    pure unit
+          --callback $ \m -> do
+          \m -> do
+            log2 "[iframeWith] callback url'" url'
+            if R2.getMessageOrigin m == url' then do
+              let {url'', term} = R2.getMessageData m
+              setSearch $ _ {url = url'', term = term}
+            else
+              pure unit
 
         isTexTermUrl :: String -> String
         isTexTermUrl term = url <> query

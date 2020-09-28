@@ -7,7 +7,8 @@ import DOM.Simple.Console (log2)
 import DOM.Simple.Document (document)
 import DOM.Simple.Element as Element
 import DOM.Simple.Event as DE
-import DOM.Simple.Types (class IsNode)
+import DOM.Simple.EventListener (Callback, addEventListener, callback)
+import DOM.Simple.Types (class IsNode, class IsEventListener)
 import Data.Argonaut as Argonaut
 import Data.Argonaut as Json
 import Data.Argonaut.Core (Json)
@@ -345,3 +346,14 @@ focus nEl = case toMaybe nEl of
 
 setIndeterminateCheckbox :: R.Element -> Boolean -> Effect R.Element
 setIndeterminateCheckbox el val = pure $ (el .= "indeterminate") val
+
+addEventListener
+  :: forall listener event
+  .  IsEventListener listener
+  -- => DE.IsEvent event
+  => listener
+  -> String
+  -> event
+  -> Effect Unit
+addEventListener obj name cb =
+  delay unit $ \_ -> pure $ obj ... "addEventListener" $ args2 name cb
