@@ -87,11 +87,11 @@ nodePopupCpt = R2.hooksComponent thisModule "nodePopupView" cpt
         ]
       where
         tooltipProps = { className : ""
-                       , id        : "node-popup-tooltip"
-                       , title     : "Node settings"
                        , data: { toggle   : "tooltip"
                                , placement: "right"
                                }
+                       , id        : "node-popup-tooltip"
+                       , title     : "Node settings"
                          --, style: { top: y - 65.0, left: x + 10.0 }
                        }
 

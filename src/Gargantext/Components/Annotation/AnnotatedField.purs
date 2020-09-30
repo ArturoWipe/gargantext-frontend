@@ -53,13 +53,14 @@ annotatedFieldComponent = R2.hooksComponent thisModule "annotatedField" cpt
       mMenu@(_ /\ setMenu) <- R.useState' Nothing
 
       menuRef <- R.useRef Nothing
+      showMenuRef <- R.useRef Nothing
 
       let wrapperProps = { className: "annotated-field-wrapper" }
 
           onSelect :: String -> Maybe TermList -> MouseEvent -> Effect Unit
           onSelect text' Nothing event = do
             log2 "[onSelect] text'" text'
-            maybeShowMenu setMenu menuRef setTermList ngrams event
+            maybeShowMenu setMenu showMenuRef menuRef setTermList ngrams event
           onSelect text' (Just list) event = do
             log2 "[onSelect] text'" text'
             log2 "[onSelect] list" list
@@ -79,6 +80,9 @@ annotatedFieldComponent = R2.hooksComponent thisModule "annotatedField" cpt
                   }
             --setMenu (const $ menu)
             R.setRef menuRef menu
+            case R.readRef showMenuRef of
+              Nothing -> pure unit
+              Just showMenu -> showMenu unit
 
           mapCompile (Tuple t l) = {text: t, list: l, onSelect}
           compiled = map mapCompile $ compile ngrams text
@@ -86,11 +90,12 @@ annotatedFieldComponent = R2.hooksComponent thisModule "annotatedField" cpt
           runs =
             HTML.div { className: "annotated-field-runs" } $ map annotateRun compiled
       --pure $ HTML.div wrapperProps [maybeAddMenu mMenu runs]
-      pure $ HTML.div wrapperProps [ addMenu { menuRef }, runs ]
+      pure $ HTML.div wrapperProps [ addMenu { menuRef, showMenuRef }, runs ]
 
 
 type AddMenuProps = (
-  menuRef :: R.Ref (Maybe AnnotationMenu)
+    menuRef :: R.Ref (Maybe AnnotationMenu)
+  , showMenuRef :: R.Ref (Maybe (Unit -> Effect Unit))
   )
 
 
@@ -100,13 +105,18 @@ addMenu p = R.createElement addMenuCpt p []
 addMenuCpt :: R.Component AddMenuProps
 addMenuCpt = R2.hooksComponent thisModule "addMenu" cpt
   where
-    cpt { menuRef } _ = do
+    cpt { menuRef, showMenuRef } _ = do
       (mMenu /\ setmMenu) <- R.useState' (Nothing :: Maybe AnnotationMenu)
 
       R.useEffect' $ do
+        R.setRef showMenuRef $ Just $ \_ -> do
+          log "[addMenu] showMenuRef called"
+          setmMenu $ const $ R.readRef menuRef
+
+      R.useEffect' $ do
         let m = R.readRef menuRef
-        log2 "[addMenu] menuRef" m
-        log2 "[addMenu] mMenu" mMenu
+        -- log2 "[addMenu] menuRef" m
+        -- log2 "[addMenu] mMenu" mMenu
         setmMenu $ const m
 
       pure $ case mMenu of
@@ -114,7 +124,7 @@ addMenuCpt = R2.hooksComponent thisModule "addMenu" cpt
         Just menu -> annotationMenu setmMenu menu
 
 -- forall e. IsMouseEvent e => R2.Setter (Maybe AnnotationMenu) -> R2.Setter ? -> ? -> e -> Effect Unit
-maybeShowMenu setMenu menuRef setTermList ngrams event = do
+maybeShowMenu setMenu showMenuRef menuRef setTermList ngrams event = do
   s <- Sel.getSelection
   log2 "[maybeShowMenu] s" s
   case s of
@@ -143,6 +153,9 @@ maybeShowMenu setMenu menuRef setTermList ngrams event = do
             }
           --setMenu (const $ menu)
           R.setRef menuRef menu
+          case R.readRef showMenuRef of
+            Nothing -> pure unit
+            Just showMenu -> showMenu unit
     Nothing -> pure unit
     -- Nothing -> do
     --   R.setRef menuRef Nothing

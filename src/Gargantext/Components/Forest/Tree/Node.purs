@@ -157,11 +157,11 @@ nodeMainSpan isLeaf p@{ dispatch, folderOpen, frontends, handed, session } = R.c
     mNodePopupView props@{id, nodeType} onPopoverClose =
       nodePopupView { id
                     , dispatch
+                    , handed : props.handed
                     , name: name' props
                     , nodeType
                     , onPopoverClose
                     , session
-                    , handed : props.handed
                     }
 
     dropProps droppedFile isDragOver =
