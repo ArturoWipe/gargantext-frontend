@@ -247,7 +247,7 @@ checkboxes :: forall a
            -> R.Element
 checkboxes xs (val /\ set) =
   H.fieldset {} $ map (\a -> H.div {} [ H.input { type: "checkbox"
-                                           , checked: Set.member a val
+                                           , defaultChecked: Set.member a val
                                            , on: { click: \_ -> set
                                                              $ const
                                                              $ toggleSet a val
