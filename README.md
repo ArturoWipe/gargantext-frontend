@@ -42,7 +42,7 @@ root and you'll need root powers to get ownership back!
 Now build the docker image:
 
 ```shell
-docker-compose build frontend
+duild
 ```
 
 That's it, skip ahead to "Development".
