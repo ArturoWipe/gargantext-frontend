@@ -43,16 +43,16 @@ thisModule = "Gargantext.Components.Forest.Tree.Node"
 
 -- Main Node
 type NodeMainSpanProps = (
-    appReload     :: GUR.ReloadS
-  , asyncTasks    :: GAT.Reductor
-  , currentRoute  :: Routes.AppRoute
-  , folderOpen    :: R.State Boolean
-  , frontends     :: Frontends
-  , id            :: ID
-  , isLeaf        :: IsLeaf
-  , name          :: Name
-  , nodeType      :: GT.NodeType
-  , setPopoverRef :: R.Ref (Maybe (Boolean -> Effect Unit))
+    appReload       :: GUR.ReloadS
+  , asyncTasks      :: GAT.Reductor
+  , currentRouteRef :: R.Ref Routes.AppRoute
+  , folderOpen      :: R.State Boolean
+  , frontends       :: Frontends
+  , id              :: ID
+  , isLeaf          :: IsLeaf
+  , name            :: Name
+  , nodeType        :: GT.NodeType
+  , setPopoverRef   :: R.Ref (Maybe (Boolean -> Effect Unit))
   | CommonProps
   )
 
@@ -75,7 +75,7 @@ nodeMainSpan = R.createElement nodeMainSpanCpt
 
     cpt props@{ appReload
               , asyncTasks: (asyncTasks /\ dispatchAsyncTasks)
-              , currentRoute
+              , currentRouteRef
               , dispatch
               , folderOpen
               , frontends
@@ -101,7 +101,7 @@ nodeMainSpan = R.createElement nodeMainSpanCpt
               GT.LeftHanded  -> reverse
               GT.RightHanded -> identity
 
-      let isSelected = Just currentRoute == Routes.nodeTypeAppRoute nodeType (sessionId session) id
+      let isSelected = Just (R.readRef currentRouteRef) == Routes.nodeTypeAppRoute nodeType (sessionId session) id
 
       pure $ H.span (dropProps droppedFile isDragOver)
                 $ ordering

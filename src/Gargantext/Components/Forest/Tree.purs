@@ -31,7 +31,7 @@ import Gargantext.Components.Forest.Tree.Node.Action.Contact as Contact
 import Gargantext.Components.Forest.Tree.Node.Action.Update (updateRequest)
 import Gargantext.Components.Forest.Tree.Node.Action.Upload (uploadFile, uploadArbitraryFile)
 import Gargantext.Components.Forest.Tree.Node.Tools.FTree (FTree, LNode(..), NTree(..))
-import Gargantext.Ends (Frontends, toUrl)
+import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Loader (useLoader)
 import Gargantext.Routes (AppRoute)
 import Gargantext.Routes as GR
@@ -46,13 +46,13 @@ thisModule = "Gargantext.Components.Forest.Tree"
 
 ------------------------------------------------------------------------
 type CommonProps = (
-    appReload     :: GUR.ReloadS
-  , currentRoute  :: AppRoute
-  , frontends     :: Frontends
-  , handed        :: GT.Handed
-  , openNodes     :: R.State OpenNodes
-  , reload        :: GUR.ReloadS
-  , session       :: Session
+    appReload       :: GUR.ReloadS
+  , currentRouteRef :: R.Ref AppRoute
+  , frontends       :: Frontends
+  , handed          :: GT.Handed
+  , openNodes       :: R.State OpenNodes
+  , reload          :: GUR.ReloadS
+  , session         :: Session
   )
 
 ------------------------------------------------------------------------
@@ -70,7 +70,7 @@ treeView = R.createElement elCpt
 
     cpt { appReload
         , asyncTasks
-        , currentRoute
+        , currentRouteRef
         , frontends
         , handed
         , openNodes
@@ -80,7 +80,7 @@ treeView = R.createElement elCpt
         } _children = do
       pure $ treeLoadView { appReload
                           , asyncTasks
-                          , currentRoute
+                          , currentRouteRef
                           , frontends
                           , handed
                           , openNodes
@@ -97,7 +97,7 @@ treeLoadView = R.createElement elCpt
 
     cpt { appReload
         , asyncTasks
-        , currentRoute
+        , currentRouteRef
         , frontends
         , handed
         , openNodes
@@ -108,7 +108,7 @@ treeLoadView = R.createElement elCpt
       let fetch _ = getNodeTree session root
       let paint loaded = loadedTreeViewFirstLevel { appReload
                                                   , asyncTasks
-                                                  , currentRoute
+                                                  , currentRouteRef
                                                   , frontends
                                                   , handed
                                                   , openNodes
@@ -142,7 +142,7 @@ loadedTreeViewFirstLevel = R.createElement elCpt
 
     cpt { appReload
         , asyncTasks
-        , currentRoute
+        , currentRouteRef
         , frontends
         , handed
         , openNodes
@@ -155,7 +155,7 @@ loadedTreeViewFirstLevel = R.createElement elCpt
         H.div { className: if handed == GT.RightHanded then "righthanded" else "lefthanded" } [
           toHtmlFirstLevel { appReload
                            , asyncTasks
-                           , currentRoute
+                           , currentRouteRef
                            , frontends
                            , handed
                            , openNodes
@@ -187,7 +187,7 @@ toHtmlFirstLevel = R.createElement elCpt
 
     cpt p@{ appReload
           , asyncTasks
-          , currentRoute
+          , currentRouteRef
           , frontends
           , handed
           , openNodes
@@ -216,7 +216,7 @@ toHtmlFirstLevel = R.createElement elCpt
       pure $ H.li { className: if A.null ary then "no-children" else "with-children" } $
         [ nodeSpan { appReload
                    , asyncTasks
-                   , currentRoute
+                   , currentRouteRef
                    , dispatch: pAction
                    , folderOpen
                    , frontends
@@ -275,7 +275,7 @@ childNodeFirstLevel = R.createElement elCpt
 
     cpt props@{ appReload
               , asyncTasks
-              , currentRoute
+              , currentRouteRef
               , folderOpen
               , id
               , frontends
@@ -289,7 +289,7 @@ childNodeFirstLevel = R.createElement elCpt
       let fetch _ = getNodeTreeFirstLevel session id
       let paint loaded = childNodeFirstLevelPaint { appReload
                                                   , asyncTasks
-                                                  , currentRoute
+                                                  , currentRouteRef
                                                   , folderOpen
                                                   , frontends
                                                   , handed

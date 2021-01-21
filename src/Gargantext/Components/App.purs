@@ -47,6 +47,10 @@ appCpt = R.hooksComponentWithModule thisModule "app" cpt where
   cpt _ _ = do
     sessions   <- useSessions
     route      <- useHashRouter router Home
+    routeRef   <- R.useRef $ fst route
+
+    R.useEffect' $ do
+      if R.readRef routeRef /= fst route then R.setRef routeRef (fst route) else pure unit
 
     asyncTasksRef <- R.useRef Nothing
     treeReloadRef <- GUR.newI
@@ -65,7 +69,7 @@ appCpt = R.hooksComponentWithModule thisModule "app" cpt where
     let forested = forestLayout { appReload
                                 , asyncTasksRef
                                 , backend
-                                , currentRoute: fst route
+                                , currentRouteRef: routeRef
                                 , frontends
                                 , handed
                                 , sessions: fst sessions
@@ -75,7 +79,7 @@ appCpt = R.hooksComponentWithModule thisModule "app" cpt where
     let forestedTB = forestLayoutWithTopBar { appReload
                                             , asyncTasksRef
                                             , backend
-                                            , currentRoute: fst route
+                                            , currentRouteRef: routeRef
                                             , frontends
                                             , handed
                                             , sessions: fst sessions
@@ -139,7 +143,7 @@ appCpt = R.hooksComponentWithModule thisModule "app" cpt where
                       appReload
                     , asyncTasksRef
                     , backend
-                    , currentRoute: fst route
+                    , currentRouteRef: routeRef
                     , frontends
                     , handed
                     , sessions: fst sessions
@@ -162,7 +166,7 @@ appCpt = R.hooksComponentWithModule thisModule "app" cpt where
                 simpleLayout { handed } [
                   explorerLayout { asyncTasksRef
                                  , backend
-                                 , currentRoute: fst route
+                                 , currentRouteRef: routeRef
                                  , frontends
                                  , graphId
                                  , handed: fst handed
@@ -190,7 +194,7 @@ appCpt = R.hooksComponentWithModule thisModule "app" cpt where
                       appReload
                     , asyncTasksRef
                     , backend
-                    , currentRoute: fst route
+                    , currentRouteRef: routeRef
                     , frontends
                     , handed
                     , sessions: fst sessions

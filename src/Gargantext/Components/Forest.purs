@@ -25,15 +25,15 @@ thisModule :: String
 thisModule = "Gargantext.Components.Forest"
 
 type Props = (
-    appReload     :: GUR.ReloadS
-  , asyncTasksRef :: R.Ref (Maybe GAT.Reductor)
-  , backend       :: R.State (Maybe Backend)
-  , currentRoute  :: AppRoute
-  , frontends     :: Frontends
-  , handed        :: Handed
-  , sessions      :: Sessions
-  , showLogin     :: R.Setter Boolean
-  , treeReloadRef :: GUR.ReloadWithInitializeRef
+    appReload       :: GUR.ReloadS
+  , asyncTasksRef   :: R.Ref (Maybe GAT.Reductor)
+  , backend         :: R.State (Maybe Backend)
+  , currentRouteRef :: R.Ref AppRoute
+  , frontends       :: Frontends
+  , handed          :: Handed
+  , sessions        :: Sessions
+  , showLogin       :: R.Setter Boolean
+  , treeReloadRef   :: GUR.ReloadWithInitializeRef
   )
 
 forest :: R2.Component Props
@@ -45,7 +45,7 @@ forest = R.createElement forestCpt
     cpt { appReload
         , asyncTasksRef
         , backend
-        , currentRoute
+        , currentRouteRef
         , frontends
         , handed
         , sessions
@@ -56,37 +56,52 @@ forest = R.createElement forestCpt
       asyncTasks <- GAT.useTasks appReload reload
       openNodes  <- R2.useLocalStorageState R2.openNodesKey (Set.empty :: OpenNodes)
 
+      let tree s@(Session {treeId}) =
+            treeView { appReload
+                     , asyncTasks
+                     , currentRouteRef
+                     , frontends
+                     , handed
+                     , openNodes
+                     , reload
+                     , root: treeId
+                     , session: s
+                     } []
+      let trees = tree <$> unSessions sessions
+
       -- TODO If `treeReloadRef` is set, `reload` state should be updated
       R.useEffect' $ do
         R.setRef asyncTasksRef $ Just asyncTasks
         GUR.initializeI treeReloadRef reload
 
-      R2.useCache (
-          frontends
-        /\ currentRoute
-        /\ sessions
-        /\ fst openNodes
-        /\ fst appReload
-        /\ fst reload
-        /\ (fst asyncTasks).storage
-        /\ handed
-        )
-        (cpt' openNodes asyncTasks appReload reload showLogin backend)
-    cpt' openNodes asyncTasks appReload reload showLogin backend (frontends /\ currentRoute /\ sessions /\ _ /\ _ /\ _ /\ _ /\ handed) = do
       pure $ H.div { className: "forest" } $ [plus handed showLogin backend] <> trees
-      where
-        trees = tree <$> unSessions sessions
-        tree s@(Session {treeId}) =
-          treeView { appReload
-                  , asyncTasks
-                    , currentRoute
-                  , frontends
-                  , handed
-                  , openNodes
-                  , reload
-                  , root: treeId
-                  , session: s
-                  } []
+
+    --   R2.useCache (
+    --       frontends
+    --     /\ R.readRef currentRouteRef
+    --     /\ sessions
+    --     /\ fst openNodes
+    --     /\ fst appReload
+    --     /\ fst reload
+    --     /\ (fst asyncTasks).storage
+    --     /\ handed
+    --     )
+    --     (cpt' openNodes asyncTasks appReload reload showLogin backend currentRouteRef)
+    -- cpt' openNodes asyncTasks appReload reload showLogin backend currentRouteRef (frontends /\ _ /\ sessions /\ _ /\ _ /\ _ /\ _ /\ handed) = do
+    --   pure $ H.div { className: "forest" } $ [plus handed showLogin backend] <> trees
+      -- where
+      --   trees = tree <$> unSessions sessions
+      --   tree s@(Session {treeId}) =
+      --     treeView { appReload
+      --              , asyncTasks
+      --              , currentRouteRef
+      --              , frontends
+      --              , handed
+      --              , openNodes
+      --              , reload
+      --              , root: treeId
+      --              , session: s
+      --              } []
 
 plus :: Handed -> R.Setter Boolean -> R.State (Maybe Backend) -> R.Element
 plus handed showLogin backend = H.div { className: "row" } [
@@ -111,15 +126,15 @@ plus handed showLogin backend = H.div { className: "row" } [
 
 -------------------------
 type ForestLayoutProps = (
-    appReload     :: GUR.ReloadS
-  , asyncTasksRef :: R.Ref (Maybe GAT.Reductor)
-  , backend       :: R.State (Maybe Backend)
-  , currentRoute  :: AppRoute
-  , frontends     :: Frontends
-  , handed        :: R.State Handed
-  , sessions      :: Sessions
-  , showLogin     :: R.Setter Boolean
-  , treeReloadRef :: GUR.ReloadWithInitializeRef
+    appReload       :: GUR.ReloadS
+  , asyncTasksRef   :: R.Ref (Maybe GAT.Reductor)
+  , backend         :: R.State (Maybe Backend)
+  , currentRouteRef :: R.Ref AppRoute
+  , frontends       :: Frontends
+  , handed          :: R.State Handed
+  , sessions        :: Sessions
+  , showLogin       :: R.Setter Boolean
+  , treeReloadRef   :: GUR.ReloadWithInitializeRef
   )
 
 forestLayout :: R2.Component ForestLayoutProps
@@ -167,7 +182,7 @@ forestLayoutRaw props = R.createElement forestLayoutRawCpt props
     cpt { appReload
         , asyncTasksRef
         , backend
-        , currentRoute
+        , currentRouteRef
         , frontends
         , handed
         , sessions
@@ -183,7 +198,7 @@ forestLayoutRaw props = R.createElement forestLayoutRawCpt props
           forest { appReload
                  , asyncTasksRef
                  , backend
-                 , currentRoute
+                 , currentRouteRef
                  , frontends
                  , handed: fst handed
                  , sessions

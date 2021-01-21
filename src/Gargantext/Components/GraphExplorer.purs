@@ -43,15 +43,15 @@ thisModule :: String
 thisModule = "Gargantext.Components.GraphExplorer"
 
 type LayoutProps = (
-    asyncTasksRef :: R.Ref (Maybe GAT.Reductor)
-  , backend       :: R.State (Maybe Backend)
-  , currentRoute  :: AppRoute
-  , frontends     :: Frontends
-  , graphId       :: GET.GraphId
-  , handed        :: Types.Handed
-  , session       :: Session
-  , sessions      :: Sessions
-  , showLogin     :: R.State Boolean
+    asyncTasksRef   :: R.Ref (Maybe GAT.Reductor)
+  , backend         :: R.State (Maybe Backend)
+  , currentRouteRef :: R.Ref AppRoute
+  , frontends       :: Frontends
+  , graphId         :: GET.GraphId
+  , handed          :: Types.Handed
+  , session         :: Session
+  , sessions        :: Sessions
+  , showLogin       :: R.State Boolean
   )
 
 type Props =
@@ -95,7 +95,7 @@ explorerCpt = R.hooksComponentWithModule thisModule "explorer" cpt
   where
     cpt props@{ asyncTasksRef
               , backend
-              , currentRoute
+              , currentRouteRef
               , frontends
               , graph
               , graphId
@@ -163,7 +163,7 @@ explorerCpt = R.hooksComponentWithModule thisModule "explorer" cpt
             , RH.div { className: "row graph-row" } $ mainLayout handed $
                 tree { asyncTasksRef
                     , backend
-                    , currentRoute
+                    , currentRouteRef
                     , frontends
                     , handed
                     , reload: treeReload
@@ -220,12 +220,12 @@ explorerCpt = R.hooksComponentWithModule thisModule "explorer" cpt
 
     tree :: Record TreeProps -> R.Element
     tree { show: false } = RH.div { id: "tree" } []
-    tree { asyncTasksRef, backend, frontends, handed, currentRoute, reload, sessions, showLogin, treeReloadRef } =
+    tree { asyncTasksRef, backend, frontends, handed, currentRouteRef, reload, sessions, showLogin, treeReloadRef } =
       RH.div {className: "col-md-2 graph-tree"} [
         forest { appReload: reload
                , asyncTasksRef
                , backend
-               , currentRoute
+               , currentRouteRef
                , frontends
                , handed
                , sessions
@@ -242,16 +242,16 @@ explorerCpt = R.hooksComponentWithModule thisModule "explorer" cpt
 
 type TreeProps =
   (
-    asyncTasksRef :: R.Ref (Maybe GAT.Reductor)
-  , backend       :: R.State (Maybe Backend)
-  , currentRoute  :: AppRoute
-  , frontends     :: Frontends
-  , handed        :: Types.Handed
-  , reload        :: GUR.ReloadS
-  , sessions      :: Sessions
-  , show          :: Boolean
-  , showLogin     :: R.Setter Boolean
-  , treeReloadRef :: GUR.ReloadWithInitializeRef
+    asyncTasksRef   :: R.Ref (Maybe GAT.Reductor)
+  , backend         :: R.State (Maybe Backend)
+  , currentRouteRef :: R.Ref AppRoute
+  , frontends       :: Frontends
+  , handed          :: Types.Handed
+  , reload          :: GUR.ReloadS
+  , sessions        :: Sessions
+  , show            :: Boolean
+  , showLogin       :: R.Setter Boolean
+  , treeReloadRef   :: GUR.ReloadWithInitializeRef
   )
 
 type MSidebarProps =
