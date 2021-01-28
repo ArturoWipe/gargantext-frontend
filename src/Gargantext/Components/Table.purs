@@ -1,31 +1,29 @@
 module Gargantext.Components.Table where
 
-import Prelude
 import Data.Array as A
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
 import Data.Sequence as Seq
 import Data.Tuple (fst, snd)
-import Effect.Aff (Aff, launchAff_)
 import Data.Tuple.Nested ((/\))
-import DOM.Simple.Console (log2)
 import Effect (Effect)
-import Gargantext.Sessions (Session, get)
 import Reactix as R
 import Reactix.DOM.HTML as H
 
-import Gargantext.Components.Table.Types
+import Gargantext.Prelude
+
+import Gargantext.Components.Table.Types (ColumnName, OrderBy, OrderByDirection(..), Params, Props, TableContainerProps, columnName)
 import Gargantext.Components.Nodes.Lists.Types as NT
-import Gargantext.Components.Search
+import Gargantext.Components.Search (SearchType(..))
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Reactix (effectLink)
 
 thisModule :: String
 thisModule = "Gargantext.Components.Table"
 
+type Page = Int
+
 type State =
-  { page       :: Int
+  { page       :: Page
   , pageSize   :: PageSizes
   , orderBy    :: OrderBy
   , searchType :: SearchType
@@ -60,10 +58,10 @@ initialParams = stateParams {page: 1, pageSize: PS10, orderBy: Nothing, searchTy
 
 tableHeaderLayout :: Record TableHeaderLayoutProps -> R.Element
 tableHeaderLayout props = R.createElement tableHeaderLayoutCpt props []
-
-tableHeaderLayoutCpt :: R.Component TableHeaderLayoutProps
-tableHeaderLayoutCpt = R.hooksComponentWithModule thisModule "tableHeaderLayout" cpt
   where
+    tableHeaderLayoutCpt :: R.Component TableHeaderLayoutProps
+    tableHeaderLayoutCpt = R.hooksComponentWithModule thisModule "tableHeaderLayout" cpt
+
     cpt { afterCacheStateChange, cacheState, date, desc, query, title, user } _ =
       pure $ R.fragment
       [ R2.row
@@ -117,10 +115,10 @@ tableHeaderLayoutCpt = R.hooksComponentWithModule thisModule "tableHeaderLayout"
   
 table :: Record Props -> R.Element
 table props = R.createElement tableCpt props []
-
-tableCpt :: R.Component Props
-tableCpt = R.hooksComponentWithModule thisModule "table" cpt
   where
+    tableCpt :: R.Component Props
+    tableCpt = R.hooksComponentWithModule thisModule "table" cpt
+
     cpt {container, syncResetButton, colNames, wrapColElts, totalRecords, rows, params} _ = do
       let
         state = paramsState $ fst params
@@ -196,10 +194,10 @@ type SizeDDProps =
 
 sizeDD :: Record SizeDDProps -> R.Element
 sizeDD p = R.createElement sizeDDCpt p []
-
-sizeDDCpt :: R.Component SizeDDProps
-sizeDDCpt = R.hooksComponentWithModule thisModule "sizeDD" cpt
   where
+    sizeDDCpt :: R.Component SizeDDProps
+    sizeDDCpt = R.hooksComponentWithModule thisModule "sizeDD" cpt
+
     cpt {params: params /\ setParams} _ = do
       pure $ H.span {} [
         R2.select { className, defaultValue: show pageSize, on: {change} } sizes
@@ -223,8 +221,12 @@ textDescription currPage pageSize totalRecords =
     end  = if end' > totalRecords then totalRecords else end'
     msg = "Showing " <> show start <> " to " <> show end <> " of " <> show totalRecords
 
+changePage :: Page -> R.State Params -> Effect Unit
+changePage page (_ /\ setParams) =
+  setParams $ \p -> stateParams $ (paramsState p) { page = page }
+
 pagination :: R.State Params -> Int -> R.Element
-pagination (params /\ setParams) tp =
+pagination p@(params /\ setParams) tp =
   H.span {} $
     [ H.text " ", prev, first, ldots]
     <>
@@ -237,7 +239,6 @@ pagination (params /\ setParams) tp =
     [ rdots, last, next ]
     where
       {page} = paramsState params
-      changePage page = setParams $ \p -> stateParams $ (paramsState p) { page = page }
       prev = if page == 1 then
                H.text " Prev. "
              else
@@ -269,7 +270,7 @@ pagination (params /\ setParams) tp =
       changePageLink i s =
         H.span {}
           [ H.text " "
-          , effectLink (changePage i) s
+          , effectLink (changePage i p) s
           , H.text " "
           ]
 
