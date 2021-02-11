@@ -7,11 +7,12 @@ module Gargantext.Components.GraphExplorer.Button
 
 import Prelude
 
-import Data.Enum (fromEnum)
-import Data.Maybe (Maybe(..))
 import Data.DateTime as DDT
 import Data.DateTime.Instant as DDI
+import Data.Enum (fromEnum)
+import Data.Maybe (Maybe(..))
 import Data.String as DS
+import Data.Tuple (snd)
 import DOM.Simple.Console (log2)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
@@ -20,6 +21,7 @@ import Effect.Now as EN
 import Reactix as R
 import Reactix.DOM.HTML as H
 
+import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.Forest.Tree.Node.Action.Upload (uploadArbitraryDataURL)
 import Gargantext.Components.GraphExplorer.API (cloneGraph)
 import Gargantext.Components.GraphExplorer.Types as GET
@@ -29,6 +31,7 @@ import Gargantext.Hooks.Sigmax.Sigma as Sigma
 import Gargantext.Sessions (Session)
 import Gargantext.Utils.Reactix as R2
 
+thisModule :: String
 thisModule = "Gargantext.Components.GraphExplorer.Button"
 
 type Props = (
@@ -58,7 +61,8 @@ centerButton sigmaRef = simpleButton {
 
 
 type CameraButtonProps = (
-    id :: Int
+    asyncTasksRef :: R.Ref (Maybe GAT.Reductor)
+  , id :: Int
   , hyperdataGraph :: GET.HyperdataGraph
   , session :: Session
   , sigmaRef :: R.Ref Sigmax.Sigma
@@ -67,7 +71,8 @@ type CameraButtonProps = (
 
 
 cameraButton :: Record CameraButtonProps -> R.Element
-cameraButton { id
+cameraButton { asyncTasksRef
+             , id
              , hyperdataGraph: GET.HyperdataGraph { graph: GET.GraphData hyperdataGraph }
              , session
              , sigmaRef
@@ -102,8 +107,12 @@ cameraButton { id
                                                 , mCamera: Just camera }
         launchAff_ $ do
           clonedGraphId <- cloneGraph { id, hyperdataGraph, session }
-          ret <- uploadArbitraryDataURL session clonedGraphId (Just $ nowStr <> "-" <> "screenshot.png") screen
-          liftEffect $ treeReload unit
-          pure ret
+          task <- uploadArbitraryDataURL session clonedGraphId (Just $ nowStr <> "-" <> "screenshot.png") screen
+          case R.readRef asyncTasksRef of
+            Nothing -> pure unit
+            Just asyncTasks -> liftEffect $ do
+              snd asyncTasks $ GAT.Insert id task
+              treeReload unit
+          pure task
   , text: "Screenshot"
   }

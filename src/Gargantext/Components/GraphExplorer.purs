@@ -120,7 +120,8 @@ explorerCpt = R.hooksComponentWithModule thisModule "explorer" cpt
       graphVersionRef <- R.useRef (GUR.value graphVersion)
       treeReload <- GUR.new
       treeReloadRef <- GUR.newIInitialized treeReload
-      controls <- Controls.useGraphControls { forceAtlasS
+      controls <- Controls.useGraphControls { asyncTasksRef
+                                           , forceAtlasS
                                            , graph
                                            , graphId
                                            , hyperdataGraph

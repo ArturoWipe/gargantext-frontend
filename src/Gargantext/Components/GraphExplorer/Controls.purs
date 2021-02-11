@@ -20,6 +20,7 @@ import Prelude
 import Reactix as R
 import Reactix.DOM.HTML as RH
 
+import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.Graph as Graph
 import Gargantext.Components.GraphExplorer.Button (centerButton, cameraButton)
 import Gargantext.Components.GraphExplorer.RangeControl (edgeConfluenceControl, edgeWeightControl, nodeSizeControl)
@@ -35,7 +36,8 @@ thisModule :: String
 thisModule = "Gargantext.Components.GraphExplorer.Controls"
 
 type Controls =
-  ( edgeConfluence :: R.State Range.NumberRange
+  ( asyncTasksRef :: R.Ref (Maybe GAT.Reductor)
+  , edgeConfluence :: R.State Range.NumberRange
   , edgeWeight :: R.State Range.NumberRange
   , forceAtlasState :: R.State SigmaxT.ForceAtlasState
   , graph           :: SigmaxT.SGraph
@@ -160,11 +162,12 @@ controlsCpt = R.hooksComponentWithModule thisModule "controls" cpt
                    , RH.li { className: "nav-item" } [ multiSelectEnabledButton props.multiSelectEnabled ]  -- toggle multi node selection
               -- save button
                    , RH.li { className: "nav-item" } [ mouseSelectorSizeButton props.sigmaRef localControls.mouseSelectorSize ]
-                   , RH.li { className: "nav-item" } [ cameraButton { id: props.graphId
-                                      , hyperdataGraph: props.hyperdataGraph
-                                      , session: props.session
-                                      , sigmaRef: props.sigmaRef
-                                      , treeReload: props.treeReload } ]
+                   , RH.li { className: "nav-item" } [ cameraButton { asyncTasksRef: props.asyncTasksRef
+                                                                    , id: props.graphId
+                                                                    , hyperdataGraph: props.hyperdataGraph
+                                                                    , session: props.session
+                                                                    , sigmaRef: props.sigmaRef
+                                                                    , treeReload: props.treeReload } ]
             ]
           ]
           --   RH.ul {} [ -- change type button (?)
@@ -196,14 +199,16 @@ controlsCpt = R.hooksComponentWithModule thisModule "controls" cpt
           --   ]
           -- ]
 
-useGraphControls :: { forceAtlasS :: SigmaxT.ForceAtlasState
+useGraphControls :: { asyncTasksRef :: R.Ref (Maybe GAT.Reductor)
+                   , forceAtlasS :: SigmaxT.ForceAtlasState
                    , graph :: SigmaxT.SGraph
                    , graphId :: GET.GraphId
                    , hyperdataGraph :: GET.HyperdataGraph
                    , session :: Session
                    , treeReload :: Unit -> Effect Unit }
                  -> R.Hooks (Record Controls)
-useGraphControls { forceAtlasS
+useGraphControls { asyncTasksRef
+                 , forceAtlasS
                  , graph
                  , graphId
                  , hyperdataGraph
@@ -228,7 +233,8 @@ useGraphControls { forceAtlasS
   sigma <- Sigmax.initSigma
   sigmaRef <- R.useRef sigma
 
-  pure { edgeConfluence
+  pure { asyncTasksRef
+       , edgeConfluence
        , edgeWeight
        , forceAtlasState
        , graph
