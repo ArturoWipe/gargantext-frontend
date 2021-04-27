@@ -8,37 +8,43 @@ Prerequisite knowledge:
 ## Background
 
 React is a component-based user interface library for the web written
-in javascript. It provides a declarative API for building a Single
-Page (web) Application (SPA). React is the primary way we handle user
-interfaces in the `purescript-gargantext` codebase.
+in Javascript. It provides a declarative API for building a Single
+Page (web) Application (SPA). React is the primary way we handle User
+Interfaces (UI) in the `purescript-gargantext` codebase.
 
 React exposes two APIs:
 * The traditional `object` component model, where each component is a class
 * The new `hooks` model where each component is a function that follows some rules.
 
-Almost all of our UI code is written with the `Reactix` purescript
-library, a quite simple wrapper over the `hooks` api only. This is a
-pragmatic choice: we believe that it results in simpler, more
-understandable purescript code that is just more fun to maintain.
+Almost all of our UI code is written with the `Reactix` Purescript
+library, a quite simple wrapper over the `hooks` API only. This is
+a pragmatic choice: we believe that it results in simple, easy and
+understandable Purescript code that is just fun to maintain.
 
-This choice is not without downside, in particular some of those rules
-that components must follow *cannot be automatically enforced by the
-compiler for you*. Thus we lose one of the benefits a lot of people
-associate with languages with good type systems - "if it compiles, it
-will work".
+We acknowledge this choice is not without downside, in particular some
+of those rules that components must follow *cannot be automatically
+enforced by the compiler for you* yet. Thus for now we lose one of the
+benefits a lot of people associate with languages with good type systems
+- "if it compiles, it will work".
 
-To put it another way, you are essentially left with only the
-guarantees react provides - that it will work if you follow the rules,
-*some of which you will have to enforce yourself*. To some degree,
-it's *as if you're writing javascript with a type system*.
+To put it another way, currently you are essentially left with only the
+guarantees React provides - that it will work if you follow some good
+practices, *some of which you will have to enforce yourself*. To some
+degree, it's *as if you're writing javascript with a type system*.
 
-We appreciate some people might be uncomfortable with this tradeoff,
-but on the whole we think it's worked out pretty well for our needs.
+This trade-off worked out pretty well for our needs to start with the
+scientific project. Nevertheless, we are working on improving the state
+on the Type level side. Indeed we are working on improving our Types in
+focusing on invariants dealing with the User Interface we are building.
+The more we are using it, the more it will be well typed.
+
+You are welcome to join and help us to improve it, thanks in advance for
+your kind feedbacks.
 
 ## Let's learn Reactix!
 
-Let's start off by looking at some simple reactix code. It's kinda
-like writing html in purescript:
+Let's start off by looking at some simple Reactix code. It's kinda
+like writing html in Purescript:
 
 ```purescript
 import Reactix as R
@@ -114,14 +120,14 @@ There are three important things going on in the component definition:
 * We have added a `pure`, because the body of a component function is
   monadic (specifically the `Reactix.Hooks` monad).
 
-While an appropriate name in the react devtools is not to be sniffed
+While an appropriate name in the React devtools is not to be sniffed
 at, our last example really only scratches the surface of
 components. At risk of opening pandora's box, we can do *much* more!
 
 ### Adding interactivity: our first hook
 
 So far, we've made mild improvements over basic html. Since it's a bit
-dumb to force purescript on someone for something html could do, we
+dumb to force Purescript on someone for something html could do, we
 should probably do something it couldn't: interaction!
 
 We will make a component that simply counts how many times a button
@@ -163,7 +169,7 @@ How all of that actually happens under the hood is a little
 complicated, but let's pick off the easy bits.
 
 The `on` property is treated specially by the html constructors - it
-plumbs purescript functions into being and react event handlers. In
+plumbs Purescript functions into being and react event handlers. In
 this case, the `click` entry becomes an `onClick` handler. We ignore
 the provided event and call the setter function with an increment (to
 be applied to the current value).
@@ -247,7 +253,7 @@ the button, that would be the end of the story.
 Of course you want to click the button. And when you do that, a whole
 chain of events sets in motion:
 
-* The`click` handler is called, which...
+* The `click` handler is called, which...
 * Calls the setter function, which...
 * Increments the counter state, which...
 * Makes react rerender the component, which...
@@ -267,7 +273,7 @@ version.
 takes an initial value, `useState` takes a function to calculate an
 initial value. In our case, we have the value already, so `useState'`.
 
-### Going in circles: rerendering by changing props
+### Going in circles: rerendering by changing Props
 
 We have already explored one way of getting a component to rerender in
 response to the world - the `useState'` hook. Another way is to change
