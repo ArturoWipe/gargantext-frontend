@@ -5,8 +5,6 @@ import Gargantext.Prelude
 import Data.Maybe (Maybe(..))
 import Data.Nullable (null)
 import Data.Symbol (SProxy(..))
-import Data.Tuple (fst, snd)
-import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff)
 import Effect.Class (liftEffect)
@@ -64,7 +62,6 @@ type IsLeaf = Boolean
 
 nodeSpan :: R2.Component NodeMainSpanProps
 nodeSpan = R.createElement nodeSpanCpt
-
 nodeSpanCpt :: R.Component NodeMainSpanProps
 nodeSpanCpt = here.component "nodeSpan" cpt
   where
@@ -77,7 +74,6 @@ nodeSpanCpt = here.component "nodeSpan" cpt
 
 nodeMainSpan :: R2.Component NodeMainSpanProps
 nodeMainSpan = R.createElement nodeMainSpanCpt
-
 nodeMainSpanCpt :: R.Component NodeMainSpanProps
 nodeMainSpanCpt = here.component "nodeMainSpan" cpt
   where
@@ -127,35 +123,35 @@ nodeMainSpanCpt = here.component "nodeMainSpan" cpt
                    , nodeType
                    , session } []
 
-                , fileTypeView { dispatch, droppedFile, id, isDragOver, nodeType }
-                , H.div {} (map (\t -> asyncProgressBar { asyncTask: t
-                                                       , barType: Pie
-                                                       , nodeId: id
-                                                       , onFinish: onTaskFinish id t
-                                                       , session } []
-                                ) currentTasks'
-                           )
-                , if nodeType == GT.NodeUser
-                        then GV.versionView { session } []
-                        else H.div {} []
+        , fileTypeView { dispatch, droppedFile, id, isDragOver, nodeType }
+        , H.div {} (map (\t -> asyncProgressBar { asyncTask: t
+                                                , barType: Pie
+                                                , nodeId: id
+                                                , onFinish: onTaskFinish id t
+                                                , session } []
+                        ) currentTasks'
+                   )
+        , if nodeType == GT.NodeUser
+          then GV.versionView { session } []
+          else H.div {} []
 
-                , if showBox then
-                        Popover.popover { arrow: false
-                                        , open: false
-                                        , onClose: \_ -> pure unit
-                                        , onOpen:  \_ -> pure unit
-                                        , ref: popoverRef } [
-                        popOverIcon
-                        , mNodePopupView props (onPopoverClose popoverRef)
-                        ]
-                else H.div {} []
+        , if showBox then
+            Popover.popover { arrow: false
+                            , open: false
+                            , onClose: \_ -> pure unit
+                            , onOpen:  \_ -> pure unit
+                            , ref: popoverRef } [
+              popOverIcon
+              , mNodePopupView props (onPopoverClose popoverRef)
+              ]
+          else H.div {} []
 
-                , nodeActions { id
-                              , nodeType
-                              , refresh: const $ dispatch RefreshTree
-                              , session
-                              } []
-                ]
+        , nodeActions { id
+                      , nodeType
+                      , refresh: const $ dispatch RefreshTree
+                      , session
+                      } []
+        ]
         where
           onTaskFinish id' t _ = do
             GAT.finish id' t tasks
@@ -234,7 +230,6 @@ type FolderIconProps = (
 
 folderIcon :: R2.Component FolderIconProps
 folderIcon = R.createElement folderIconCpt
-
 folderIconCpt :: R.Component FolderIconProps
 folderIconCpt = here.component "folderIcon" cpt
   where
@@ -252,7 +247,6 @@ type ChevronIconProps = (
 
 chevronIcon :: R2.Component ChevronIconProps
 chevronIcon = R.createElement chevronIconCpt
-
 chevronIconCpt :: R.Component ChevronIconProps
 chevronIconCpt = here.component "chevronIcon" cpt
   where
@@ -295,7 +289,6 @@ type NodeActionsProps = ( nodeType :: GT.NodeType | NodeActionsCommon )
 
 nodeActions :: R2.Component NodeActionsProps
 nodeActions = R.createElement nodeActionsCpt
-
 nodeActionsCpt :: R.Component NodeActionsProps
 nodeActionsCpt = here.component "nodeActions" cpt where
   cpt props _ = pure (child props.nodeType) where
@@ -307,7 +300,6 @@ nodeActionsCpt = here.component "nodeActions" cpt where
 
 graphNodeActions :: R2.Leaf NodeActionsCommon
 graphNodeActions props = R.createElement graphNodeActionsCpt props []
-
 graphNodeActionsCpt :: R.Component NodeActionsCommon
 graphNodeActionsCpt = here.component "graphNodeActions" cpt where
   cpt { id, session, refresh } _ =
@@ -317,7 +309,6 @@ graphNodeActionsCpt = here.component "graphNodeActions" cpt where
 
 listNodeActions :: R2.Leaf NodeActionsCommon
 listNodeActions props = R.createElement listNodeActionsCpt props []
-
 listNodeActionsCpt :: R.Component NodeActionsCommon
 listNodeActionsCpt = here.component "listNodeActions" cpt where
   cpt { id, session, refresh } _ =

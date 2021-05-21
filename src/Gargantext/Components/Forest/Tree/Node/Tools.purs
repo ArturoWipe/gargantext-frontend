@@ -10,12 +10,11 @@ import Data.Set (Set)
 import Data.Set as Set
 import Data.String as S
 import Data.String.CodeUnits as DSCU
-import Data.Tuple.Nested ((/\))
-import DOM.Simple.Console (log2)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff, launchAff_)
 import Reactix as R
 import Reactix.DOM.HTML as H
+import Record as Record
 import Toestand as T
 
 import Gargantext.Components.Forest.Tree.Node.Action (Action, icon, text)
@@ -251,7 +250,7 @@ type NodeLinkProps = (
     frontends  :: Frontends
   , folderOpen :: T.Box Boolean
   , handed     :: GT.Handed
-  , id         :: Int
+  , id         :: GT.ID
   , isSelected :: Boolean
   , name       :: GT.Name
   , nodeType   :: GT.NodeType
@@ -260,9 +259,55 @@ type NodeLinkProps = (
 
 nodeLink :: R2.Component NodeLinkProps
 nodeLink = R.createElement nodeLinkCpt
-
 nodeLinkCpt :: R.Component NodeLinkProps
 nodeLinkCpt = here.component "nodeLink" cpt
+  where
+    cpt props@{ id, nodeType, session } _ = do
+      case nodeType of
+        GT.Graph -> useLoader { graphId: id, session } GraphAPI.graphVersions $ \graphVersions ->
+          nodeLinkGraphLoaded (Record.merge { graphVersions } props) []
+        _ -> pure $ nodeLinkLoaded props []
+
+type NodeLinkGraphLoadedProps =
+  ( graphVersions :: Record GraphAPI.GraphVersions
+  | NodeLinkProps )
+
+nodeLinkGraphLoaded :: R2.Component NodeLinkGraphLoadedProps
+nodeLinkGraphLoaded = R.createElement nodeLinkGraphLoadedCpt
+nodeLinkGraphLoadedCpt :: R.Component NodeLinkGraphLoadedProps
+nodeLinkGraphLoadedCpt = here.component "nodeLinkGraphLoaded" cpt
+  where
+    cpt { folderOpen
+        , frontends
+        , graphVersions: { gv_graph }
+        , handed
+        , id
+        , isSelected
+        , name
+        , nodeType
+        , session
+        } _ = do
+      let link = case gv_graph of
+            Nothing -> H.span (linkData id)
+            Just gv -> H.a (Record.merge { href: nodeLinkHref { frontends, id, nodeType, session } } (linkData id))
+
+      pure $
+        H.div { className: "node-link"
+              , on: { click: nodeLinkClick { folderOpen, isSelected } } }
+          [ link
+            [ nodeText { handed, isSelected, name } []
+            , nodeLinkTooltip { id, name, nodeType } []
+            ]
+          ]
+
+type NodeLinkLoadedProps =
+  (
+  | NodeLinkProps )
+
+nodeLinkLoaded :: R2.Component NodeLinkLoadedProps
+nodeLinkLoaded = R.createElement nodeLinkLoadedCpt
+nodeLinkLoadedCpt :: R.Component NodeLinkLoadedProps
+nodeLinkLoadedCpt = here.component "nodeLinkLoaded" cpt
   where
     cpt { folderOpen
         , frontends
@@ -273,30 +318,31 @@ nodeLinkCpt = here.component "nodeLink" cpt
         , nodeType
         , session
         } _ = do
-      popoverRef <- R.useRef null
-
       pure $
         H.div { className: "node-link"
-              , on: { click } }
-          [ H.a { href, data: { for: tooltipId id, tip: true } }
+              , on: { click: nodeLinkClick { folderOpen, isSelected } } }
+          [H.a (Record.merge { href: nodeLinkHref { frontends, id, nodeType, session } } (linkData id))
             [ nodeText { handed, isSelected, name } []
-            , ReactTooltip.reactTooltip { effect: "float", id: tooltipId id, type: "dark" }
-                [ R2.row
-                    [ H.h4 {className: GT.fldr nodeType true}
-                        [ H.text $ GT.prettyNodeType nodeType ]
-                    ]
-                , R2.row [ H.span {} [ H.text $ name ]]
-                ]
-              ]
+            , nodeLinkTooltip { id, name, nodeType } []
             ]
-
-      where
-        -- NOTE Don't toggle tree if it is not selected
-        -- click on closed -> open
-        -- click on open   -> ?
-        click _ = when (not isSelected) (T.write_ true folderOpen)
-        href = url frontends $ GT.NodePath (sessionId session) nodeType (Just id)
+          ]
 -- END node link
+
+linkData :: GT.ID -> { data :: { for :: String, tip :: Boolean } }
+linkData id = { data: { for: tooltipId id, tip: true } }
+
+nodeLinkClick :: forall e. { folderOpen :: T.Box Boolean
+                           , isSelected :: Boolean } -> e -> Effect Unit
+-- NOTE Don't toggle tree if it is not selected
+-- click on closed -> open
+-- click on open   -> ?
+nodeLinkClick { folderOpen, isSelected } _ = when (not isSelected) (T.write_ true folderOpen)
+
+nodeLinkHref :: { frontends :: Frontends
+                , id       :: GT.ID
+                , nodeType :: GT.NodeType
+                , session  :: Session } -> String
+nodeLinkHref { frontends, id, nodeType, session } = url frontends $ GT.NodePath (sessionId session) nodeType (Just id)
 
 type NodeTextProps =
   ( isSelected :: Boolean
@@ -306,7 +352,6 @@ type NodeTextProps =
 
 nodeText :: R2.Component NodeTextProps
 nodeText = R.createElement nodeTextCpt
-
 nodeTextCpt :: R.Component NodeTextProps
 nodeTextCpt = here.component "nodeText" cpt where
   cpt { isSelected, handed, name } _ =
@@ -326,3 +371,24 @@ nodeTextCpt = here.component "nodeText" cpt where
       Just s  -> s <> "..."
   name15 = name_ 15
   className = "node-text"
+
+type NodeLinkTooltipProps =
+  (
+    id       :: GT.ID
+  , name     :: GT.Name
+  , nodeType :: GT.NodeType
+  )
+
+nodeLinkTooltip :: R2.Component NodeLinkTooltipProps
+nodeLinkTooltip = R.createElement nodeLinkTooltipCpt
+nodeLinkTooltipCpt :: R.Component NodeLinkTooltipProps
+nodeLinkTooltipCpt = here.component "nodeLinkTooltip" cpt
+  where
+    cpt { id, name, nodeType } _ = do
+      pure $ ReactTooltip.reactTooltip { effect: "float", id: tooltipId id, type: "dark" }
+          [ R2.row
+              [ H.h4 {className: GT.fldr nodeType true}
+                  [ H.text $ GT.prettyNodeType nodeType ]
+              ]
+          , R2.row [ H.span {} [ H.text $ name ]]
+          ]
