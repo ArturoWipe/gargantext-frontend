@@ -1,15 +1,13 @@
 module Gargantext.Components.Forest.Tree.Node.Tools.Sync where
 
-import Gargantext.Prelude
-  ( Unit, bind, const, discard, pure, unit, ($), (<>), (==) )
 import Effect.Aff (Aff, launchAff_)
-import Data.Tuple.Nested ((/\))
 import Data.Maybe (Maybe(..))
-import Data.Tuple (fst)
 import Effect.Class (liftEffect)
 import Reactix.DOM.HTML as H
 import Reactix as R
 import Toestand as T
+
+import Gargantext.Prelude (Unit, bind, discard, pure, unit, ($), (<>), (==))
 
 import Gargantext.Components.GraphExplorer.API as GraphAPI
 import Gargantext.Types as GT
@@ -62,7 +60,7 @@ graphUpdateButtonCpt = here.component "graphUpdateButton" cpt
                          then "enabled"
                          else "disabled text-muted"
                    } [ H.span { className: "fa fa-refresh"
-                     , on: { click: onClick enabled' enabled } } []
+                              , on: { click: onClick enabled' enabled } } []
                      ]
       where
         onClick false _ = pure unit
@@ -86,7 +84,6 @@ type NodeActionsNodeListProps =
 
 nodeActionsNodeList :: Record NodeActionsNodeListProps -> R.Element
 nodeActionsNodeList p = R.createElement nodeActionsNodeListCpt p []
-
 nodeActionsNodeListCpt :: R.Component NodeActionsNodeListProps
 nodeActionsNodeListCpt = here.component "nodeActionsNodeList" cpt
   where
@@ -105,7 +102,6 @@ type NodeListUpdateButtonProps =
 
 nodeListUpdateButton :: Record NodeListUpdateButtonProps -> R.Element
 nodeListUpdateButton p = R.createElement nodeListUpdateButtonCpt p []
-
 nodeListUpdateButtonCpt :: R.Component NodeListUpdateButtonProps
 nodeListUpdateButtonCpt = here.component "nodeListUpdateButton" cpt
   where

@@ -4,7 +4,6 @@ import Affjax (defaultRequest, printError, request)
 import Affjax.RequestBody (RequestBody(..), formData, formURLEncoded)
 import Affjax.RequestHeader as ARH
 import Affjax.ResponseFormat as ResponseFormat
-import DOM.Simple.Console (log, log2)
 import Data.Argonaut (class DecodeJson, decodeJson, class EncodeJson, encodeJson)
 import Data.Either (Either(..))
 import Data.Foldable (foldMap)
@@ -12,17 +11,17 @@ import Data.FormURLEncoded as FormURLEncoded
 import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
 import Data.MediaType.Common (applicationFormURLEncoded, applicationJSON, multipartFormData)
-import Data.Tuple (Tuple(..))
-import DOM.Simple.Console (log2)
+import Data.Tuple (Tuple)
 import Effect.Aff (Aff, throwError)
 import Effect.Class (liftEffect)
 import Effect.Exception (error)
-import Milkis as Milkis
-import Unsafe.Coerce (unsafeCoerce)
 import Web.XHR.FormData as XHRFormData
 
 import Gargantext.Prelude
 import Gargantext.Utils.Reactix as R2
+
+here :: R2.Here
+here = R2.here "Gargantext.Config.REST"
 
 type Token = String
 
@@ -51,12 +50,14 @@ send m mtoken url reqbody = do
       R2.setCookie cookie
   case affResp of
     Left err -> do
-      _ <-  liftEffect $ log $ printError err
+      _ <-  liftEffect $ do
+        here.log2 "error during request to url" url
+        here.log $ printError err
       throwError $ error $ printError err
     Right resp -> do
-      --_ <-  liftEffect $ log json.status
-      --_ <-  liftEffect $ log json.headers
-      --_ <-  liftEffect $ log json.body
+      --_ <-  liftEffect $ here.log json.status
+      --_ <-  liftEffect $ here.log json.headers
+      --_ <-  liftEffect $ here.log json.body
       case decodeJson resp.body of
         Left err -> throwError $ error $ "decodeJson affResp.body: " <> show err
         Right b -> pure b
@@ -103,12 +104,12 @@ postWwwUrlencoded mtoken url bodyParams = do
              }
   case affResp of
     Left err -> do
-      _ <-  liftEffect $ log $ printError err
+      _ <-  liftEffect $ here.log $ printError err
       throwError $ error $ printError err
     Right resp -> do
-      --_ <- liftEffect $ log json.status
-      --_ <- liftEffect $ log json.headers
-      --_ <- liftEffect $ log json.body
+      --_ <- liftEffect $ here.log json.status
+      --_ <- liftEffect $ here.log json.headers
+      --_ <- liftEffect $ here.log json.body
       case decodeJson resp.body of
         Left err -> throwError $ error $ "decodeJson affResp.body: " <> show err
         Right b -> pure b
@@ -133,7 +134,7 @@ postMultipartFormData mtoken url body = do
              }
   case affResp of
     Left err -> do
-      _ <-  liftEffect $ log $ printError err
+      _ <-  liftEffect $ here.log $ printError err
       throwError $ error $ printError err
     Right resp -> do
       case decodeJson resp.body of
