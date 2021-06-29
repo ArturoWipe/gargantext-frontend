@@ -80,7 +80,7 @@ tree props = R.createElement treeCpt props []
 treeCpt :: R.Component Props
 treeCpt = here.component "tree" cpt
   where
-    cpt {path, session} _ = do
+    cpt {path, session, onClick} _ = do
       reload <- T.useBox T2.newReload
 
       pure $ metricsWithCacheLoadView {
@@ -91,6 +91,7 @@ treeCpt = here.component "tree" cpt
         , path
         , reload
         , session
+        , onClick
         }
 
 loaded :: Record MetricsProps -> Loaded -> R.Element

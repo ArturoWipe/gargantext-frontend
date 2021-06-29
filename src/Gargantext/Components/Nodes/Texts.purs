@@ -153,6 +153,7 @@ tabsCpt = here.component "tabs" cpt
   where
     cpt { cacheState, corpusId, corpusData, frontends, session, sidePanel, sidePanelState, corpusFilters } _ = do
       let path = initialPath
+      let onClick = Just \{ name } -> T.write_ (Just name) (corpusFilters.year)
 
       activeTab <- T.useBox 0
 
@@ -160,7 +161,7 @@ tabsCpt = here.component "tabs" cpt
           activeTab
         , tabs: [
             "Documents"       /\ R.fragment [
-                histo { path, session, corpusFilters }
+                histo { path, session, onClick }
               , docView' path TabDocs
               ]
           , "Trash"           /\ docView' path TabTrash

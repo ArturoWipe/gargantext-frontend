@@ -7,6 +7,12 @@ import Data.Generic.Rep.Eq (genericEq)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Effect.Aff (Aff)
+import Reactix as R
+import Reactix.DOM.HTML as H
+import Toestand as T
+
+import Gargantext.Prelude (class Eq, bind, map, pure, ($), (==))
+
 import Gargantext.Components.Charts.Options.Color (grey)
 import Gargantext.Components.Charts.Options.Data (dataSerie)
 import Gargantext.Components.Charts.Options.ECharts (Options(..), chart, xAxis', yAxis')
@@ -14,18 +20,13 @@ import Gargantext.Components.Charts.Options.Font (itemStyle, mkTooltip, template
 import Gargantext.Components.Charts.Options.Series (seriesBarD1)
 import Gargantext.Components.Nodes.Corpus.Chart.Common (metricsWithCacheLoadView)
 import Gargantext.Components.Nodes.Corpus.Chart.Types (MetricsProps, Path, Props, ReloadPath)
-import Gargantext.Components.Nodes.Corpus.Types (CorpusFilters)
 import Gargantext.Hooks.Loader (HashedResponse(..))
-import Gargantext.Prelude (class Eq, bind, map, pure, ($), (==))
 import Gargantext.Routes (SessionRoute(..))
 import Gargantext.Sessions (Session, get)
 import Gargantext.Types (ChartType(..))
 import Gargantext.Utils.CacheAPI as GUC
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
-import Reactix as R
-import Reactix.DOM.HTML as H
-import Toestand as T
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Corpus.Chart.Histo"
@@ -60,8 +61,8 @@ instance encodeHistoMetrics :: EncodeJson HistoMetrics where
 
 type Loaded = HistoMetrics
 
-chartOptions :: Record CorpusFilters -> HistoMetrics -> Options
-chartOptions corpusFilters (HistoMetrics { dates: dates', count: count'}) = Options
+chartOptions :: HistoMetrics -> Options
+chartOptions (HistoMetrics { dates: dates', count: count'}) = Options
   { mainTitle : "Histogram"
   , subTitle  : "Distribution of publications over time"
   , xAxis     : xAxis' dates'
@@ -70,7 +71,7 @@ chartOptions corpusFilters (HistoMetrics { dates: dates', count: count'}) = Opti
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
   , series    : [seriesBarD1 {name: "Number of publication / year"} $
                  map (\n -> dataSerie {value: n, itemStyle : itemStyle {color:grey}}) count']
-  , onClick   : Just \event -> T.write_ (Just event.name) corpusFilters.year
+  , onClick   : Nothing
   }
 
 getMetricsHash :: Session -> ReloadPath -> Aff String
@@ -90,35 +91,31 @@ handleResponse (HashedResponse { value: ChartMetrics ms }) = ms."data"
 mkRequest :: Session -> ReloadPath -> GUC.Request
 mkRequest session (_ /\ path@{ corpusId, limit, listId, tabType }) = GUC.makeGetRequest session $ chartUrl path
 
-type HistoProps =
-  ( corpusFilters :: Record CorpusFilters
-  | Props
-  )
-
-histo :: Record HistoProps -> R.Element
+histo :: Record Props -> R.Element
 histo props = R.createElement histoCpt props []
 
-histoCpt :: R.Component HistoProps
+histoCpt :: R.Component Props
 histoCpt = here.component "histo" cpt
   where
-    cpt { path, session, corpusFilters } _ = do
+    cpt { path, session, onClick } _ = do
       reload <- T.useBox T2.newReload
 
       pure $ metricsWithCacheLoadView {
           getMetricsHash
         , handleResponse
-        , loaded: loaded corpusFilters
+        , loaded
         , mkRequest: mkRequest session
         , path
         , reload
         , session
+        , onClick
         }
 
-loaded :: Record CorpusFilters -> Record MetricsProps -> HistoMetrics -> R.Element
-loaded corpusFilters { path, reload, session } l =
+loaded :: Record MetricsProps -> HistoMetrics -> R.Element
+loaded { path, reload, session } l =
   H.div {} [
   {-  U.reloadButton reload
   , U.chartUpdateButton { chartType: Histo, path, reload, session }
-  , -} chart $ chartOptions corpusFilters l
+  , -} chart $ chartOptions l
   ]
   -- TODO: parametrize ngramsType above
