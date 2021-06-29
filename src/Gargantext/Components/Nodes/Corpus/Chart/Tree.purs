@@ -51,6 +51,7 @@ scatterOptions nodes = Options
   , series    : [ mkTree TreeMap nodes]
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
+  , onClick   : Nothing
 -- TODO improve the formatter:
 -- https://ecomfe.github.io/echarts-examples/public/editor.html?c=treemap-obama
 

@@ -219,4 +219,3 @@ treeLeaf n v = TreeNode { name : n, value : v, children : []}
 -- | TODO
 -- https://ecomfe.github.io/echarts-examples/public/data/asset/data/life-expectancy-table.json
 -- https://ecomfe.github.io/echarts-examples/public/editor.html?c=scatter3D-dataset&gl=1
-

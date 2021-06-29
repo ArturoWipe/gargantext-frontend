@@ -1,15 +1,16 @@
 module Gargantext.Components.Nodes.Corpus.Types where
 
+import Gargantext.Prelude
+
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, (.:), (:=), (~>), jsonEmptyObject)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Eq (genericEq)
 import Data.List as List
 import Data.Maybe (Maybe(..))
-
-import Gargantext.Prelude
-
 import Gargantext.Components.Node (NodePoly)
 import Gargantext.Components.Nodes.Types (FTField, Field(..), FieldType(..), isJSON)
+import Reactix as R
+import Toestand as T
 
 newtype Hyperdata =
   Hyperdata { fields :: List.List FTField }
@@ -62,3 +63,17 @@ getCorpusInfo as = case List.head (List.filter isJSON as) of
                                                  , authors:""
                                                  , totalRecords: 0
                                                  }
+
+----
+
+type CorpusFilters =
+  ( year :: T.Box (Maybe String) -- "YYYY"
+  )
+
+defaultCorpusFilters :: R.Hooks (Record CorpusFilters)
+defaultCorpusFilters = do
+  year <- T.useBox Nothing
+
+  pure
+    { year
+    }

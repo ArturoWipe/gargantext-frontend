@@ -104,7 +104,3 @@ render CSourcesBar { corpusId, limit, listId, session } = metrics { path, sessio
            , listId: fromMaybe 0 listId
            , tabType: TabCorpus (TabNgramType $ modeTabType Sources)
            }
-
-
-
-

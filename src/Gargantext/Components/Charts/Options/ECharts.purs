@@ -4,26 +4,30 @@ import Prelude
 
 import CSS (italic)
 import CSS.Common (normal)
+import Data.Maybe (Maybe(..))
+import Effect (Effect)
 import Gargantext.Components.Charts.Options.Color (transparent, violet, black)
 import Gargantext.Components.Charts.Options.Data (DataLegend, dataSerie)
 import Gargantext.Components.Charts.Options.Font (IconOptions(..), Shape(..), TextStyle, chartFontStyle, chartFontWeight, icon, mkTooltip, Tooltip, mkToolBox)
 import Gargantext.Components.Charts.Options.Legend (legendType, LegendMode(..), PlainOrScroll(..), selectedMode, Orientation(..), orient)
 import Gargantext.Components.Charts.Options.Position (Align(..), LeftRelativePosition(..), TopRelativePosition(..), numberPosition, percentPosition, relativePosition)
 import Gargantext.Components.Charts.Options.Series (Series, seriesPieD1)
-import Gargantext.Components.Charts.Options.Type (DataZoom, Echarts, Legend, Option, Title, XAxis, YAxis, xAxis, yAxis)
+import Gargantext.Components.Charts.Options.Type (DataZoom, Echarts, Legend, Option, Title, XAxis, YAxis, MouseEvent, xAxis, yAxis)
+import Gargantext.Utils.Reactix as R2
 import React (ReactClass, unsafeCreateElementDynamic)
 import Reactix as R
-import Gargantext.Utils.Reactix as R2
+import Record.Extra as RX
 import Unsafe.Coerce (unsafeCoerce)
 
 foreign import eChartsClass :: ReactClass Echarts
+foreign import listenerFn1 :: forall evt. (evt -> Effect Unit) -> Effect Unit
 
 chart :: Options -> R.Element
-chart = echarts <<< chartWith <<< opts
+chart = echarts <<< chartWith
 
-chartWith :: Option -> Echarts
-chartWith option =
-  { option
+chartWith :: Options -> Echarts
+chartWith options =
+  { option: opts options
 --, className : Nothing
 --, style     : Nothing
 --, theme     : Nothing
@@ -35,8 +39,15 @@ chartWith option =
 --, optsLoading: Nothing
 --, onReady    : Nothing
 --, resizable  : Nothing
---, onEvents   : Nothing
+  , onEvents: getEvents options
   }
+    where
+      getEvents (Options { onClick }) =
+        { click: listenerFn1 \e -> case onClick of
+            -- sanitize parsing (see MouseEvent comment)
+            Just fn -> RX.pick (e :: MouseEvent) # fn
+            Nothing -> pure unit
+        }
 
 echarts :: Echarts -> R.Element
 echarts c = R2.buff $ unsafeCreateElementDynamic (unsafeCoerce eChartsClass) c []
@@ -155,6 +166,7 @@ data Options = Options
   , series    :: Array Series
   , addZoom   :: Boolean
   , tooltip   :: Tooltip
+  , onClick   :: Maybe (MouseEvent -> Effect Unit)
   }
 
 tooltipTriggerAxis :: Tooltip

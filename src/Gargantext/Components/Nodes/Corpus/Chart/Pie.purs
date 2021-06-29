@@ -77,6 +77,7 @@ chartOptionsBar (HistoMetrics { dates: dates', count: count'}) = Options
   , series    : [seriesBarD1 {name: "Number of publication / year"} $ map (\n -> dataSerie {name: "", itemStyle: itemStyle {color:blue}, value: n }) count']
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
+  , onClick   : Nothing
   }
 
 chartOptionsPie :: HistoMetrics -> Options
@@ -89,6 +90,7 @@ chartOptionsPie (HistoMetrics { dates: dates', count: count'}) = Options
   -- , series    : [seriesBarD1 {name: "Number of publication / year"} $ map (\n -> dataSerie {name: "", value: n }) count']
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
+  , onClick   : Nothing
   }
 
 getMetricsHash :: Session -> ReloadPath -> Aff String

@@ -1,24 +1,20 @@
 module Gargantext.Components.Nodes.Texts where
 
+import Gargantext.Prelude
+
+import DOM.Simple.Console (log2)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Effect.Aff (launchAff_)
-import Reactix as R
-import Reactix.DOM.HTML as H
-import Record as Record
-import Toestand as T
-
-import Gargantext.Prelude
-
 import Gargantext.Components.DocsTable as DT
 import Gargantext.Components.NgramsTable.Loader (clearCache)
 import Gargantext.Components.Node (NodePoly(..))
 import Gargantext.Components.Nodes.Corpus (loadCorpusWithChild)
 import Gargantext.Components.Nodes.Corpus.Chart.Histo (histo)
 import Gargantext.Components.Nodes.Corpus.Document as D
-import Gargantext.Components.Nodes.Corpus.Types (CorpusData, Hyperdata(..), getCorpusInfo, CorpusInfo(..))
+import Gargantext.Components.Nodes.Corpus.Types (CorpusData, CorpusFilters, CorpusInfo(..), Hyperdata(..), defaultCorpusFilters, getCorpusInfo)
 import Gargantext.Components.Nodes.Lists.Types as LT
 import Gargantext.Components.Nodes.Texts.Types as TT
 import Gargantext.Components.Tab as Tab
@@ -28,6 +24,10 @@ import Gargantext.Hooks.Loader (useLoader)
 import Gargantext.Sessions (WithSession, WithSessionContext, Session, sessionId, getCacheState)
 import Gargantext.Types (CTabNgramType(..), ListId, NodeID, SidePanelState(..), TabSubType(..), TabType(..))
 import Gargantext.Utils.Reactix as R2
+import Reactix as R
+import Reactix.DOM.HTML as H
+import Record as Record
+import Toestand as T
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Texts"
@@ -82,6 +82,11 @@ textsLayoutWithKeyCpt = here.component "textsLayoutWithKey" cpt
       cacheState <- T.useBox $ getCacheState LT.CacheOff session nodeId
       cacheState' <- T.useLive T.unequal cacheState
 
+      corpusFilters <- defaultCorpusFilters
+
+      R.useEffectOnce' do
+        T.listen (\{ new } -> log2 "filter" new) corpusFilters.year
+
       R.useEffectOnce' $ do
         T.listen (\{ new } -> afterCacheStateChange new) cacheState
 
@@ -90,6 +95,7 @@ textsLayoutWithKeyCpt = here.component "textsLayoutWithKey" cpt
           let NodePoly { date, hyperdata: Hyperdata h, name } = corpusNode
               CorpusInfo { authors, desc, query } = getCorpusInfo h.fields
               title = "Corpus " <> name
+
           R.fragment
             [ Table.tableHeaderLayout { cacheState
                                       , date
@@ -104,7 +110,9 @@ textsLayoutWithKeyCpt = here.component "textsLayoutWithKey" cpt
                    , frontends
                    , session
                    , sidePanel
-                   , sidePanelState }
+                   , sidePanelState
+                   , corpusFilters
+                   }
             ]
       where
         afterCacheStateChange cacheState = do
@@ -130,6 +138,7 @@ type TabsProps =
   ( cacheState     :: T.Box LT.CacheState
   , corpusData     :: CorpusData
   , corpusId       :: NodeID
+  , corpusFilters  :: Record CorpusFilters
   , frontends      :: Frontends
   , session        :: Session
   , sidePanel      :: T.Box (Maybe (Record TT.SidePanel))
@@ -142,7 +151,7 @@ tabs props = R.createElement tabsCpt props []
 tabsCpt :: R.Component TabsProps
 tabsCpt = here.component "tabs" cpt
   where
-    cpt { cacheState, corpusId, corpusData, frontends, session, sidePanel, sidePanelState } _ = do
+    cpt { cacheState, corpusId, corpusData, frontends, session, sidePanel, sidePanelState, corpusFilters } _ = do
       let path = initialPath
 
       activeTab <- T.useBox 0
@@ -151,7 +160,7 @@ tabsCpt = here.component "tabs" cpt
           activeTab
         , tabs: [
             "Documents"       /\ R.fragment [
-                histo { path, session }
+                histo { path, session, corpusFilters }
               , docView' path TabDocs
               ]
           , "Trash"           /\ docView' path TabTrash

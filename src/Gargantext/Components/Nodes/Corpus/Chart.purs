@@ -9,9 +9,9 @@ import Gargantext.Components.Nodes.Corpus.Chart.Tree (tree)
 import Gargantext.Components.Nodes.Corpus.Chart.Types (Props)
 import Gargantext.Types (ChartType(..))
 
-getChartFunction :: ChartType -> (Record Props -> R.Element)
-getChartFunction Histo = histo
-getChartFunction ChartBar = bar
-getChartFunction ChartPie = pie
-getChartFunction Scatter = metrics
-getChartFunction ChartTree = tree
+-- getChartFunction :: ChartType -> (Record Props -> R.Element)
+-- getChartFunction Histo = histo
+-- getChartFunction ChartBar = bar
+-- getChartFunction ChartPie = pie
+-- getChartFunction Scatter = metrics
+-- getChartFunction ChartTree = tree

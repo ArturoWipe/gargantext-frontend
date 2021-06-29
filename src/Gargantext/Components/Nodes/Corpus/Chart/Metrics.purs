@@ -82,6 +82,7 @@ scatterOptions metrics' = Options
   , series    : map2series $ metric2map metrics'
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
+  , onClick   : Nothing
   }
   where
     metric2map :: Array Metric -> Map TermList (Array Metric)
