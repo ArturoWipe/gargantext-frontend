@@ -61,8 +61,8 @@ instance encodeHistoMetrics :: EncodeJson HistoMetrics where
 
 type Loaded = HistoMetrics
 
-chartOptions :: HistoMetrics -> Options
-chartOptions (HistoMetrics { dates: dates', count: count'}) = Options
+chartOptions :: Record MetricsProps -> HistoMetrics -> Options
+chartOptions { onClick } (HistoMetrics { dates: dates', count: count'}) = Options
   { mainTitle : "Histogram"
   , subTitle  : "Distribution of publications over time"
   , xAxis     : xAxis' dates'
@@ -71,7 +71,7 @@ chartOptions (HistoMetrics { dates: dates', count: count'}) = Options
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
   , series    : [seriesBarD1 {name: "Number of publication / year"} $
                  map (\n -> dataSerie {value: n, itemStyle : itemStyle {color:grey}}) count']
-  , onClick   : Nothing
+  , onClick
   }
 
 getMetricsHash :: Session -> ReloadPath -> Aff String
@@ -112,10 +112,10 @@ histoCpt = here.component "histo" cpt
         }
 
 loaded :: Record MetricsProps -> HistoMetrics -> R.Element
-loaded { path, reload, session } l =
+loaded p@{ path, reload, session } l =
   H.div {} [
   {-  U.reloadButton reload
   , U.chartUpdateButton { chartType: Histo, path, reload, session }
-  , -} chart $ chartOptions l
+  , -} chart $ chartOptions p l
   ]
   -- TODO: parametrize ngramsType above

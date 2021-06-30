@@ -68,8 +68,8 @@ instance encodeHistoMetrics :: EncodeJson HistoMetrics where
 
 type Loaded = HistoMetrics
 
-chartOptionsBar :: HistoMetrics -> Options
-chartOptionsBar (HistoMetrics { dates: dates', count: count'}) = Options
+chartOptionsBar :: Record MetricsProps -> HistoMetrics -> Options
+chartOptionsBar { onClick } (HistoMetrics { dates: dates', count: count'}) = Options
   { mainTitle : "Bar"
   , subTitle  : "Count of MapTerm"
   , xAxis     : xAxis' $ map (\t -> joinWith " " $ map (take 3) $ A.take 3 $ filter (\s -> length s > 3) $ split (Pattern " ") t) dates'
@@ -77,11 +77,11 @@ chartOptionsBar (HistoMetrics { dates: dates', count: count'}) = Options
   , series    : [seriesBarD1 {name: "Number of publication / year"} $ map (\n -> dataSerie {name: "", itemStyle: itemStyle {color:blue}, value: n }) count']
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
-  , onClick   : Nothing
+  , onClick
   }
 
-chartOptionsPie :: HistoMetrics -> Options
-chartOptionsPie (HistoMetrics { dates: dates', count: count'}) = Options
+chartOptionsPie :: Record MetricsProps -> HistoMetrics -> Options
+chartOptionsPie { onClick } (HistoMetrics { dates: dates', count: count'}) = Options
   { mainTitle : "Pie"
   , subTitle  : "Distribution by MapTerm"
   , xAxis     : xAxis' []
@@ -90,7 +90,7 @@ chartOptionsPie (HistoMetrics { dates: dates', count: count'}) = Options
   -- , series    : [seriesBarD1 {name: "Number of publication / year"} $ map (\n -> dataSerie {name: "", value: n }) count']
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
-  , onClick   : Nothing
+  , onClick
   }
 
 getMetricsHash :: Session -> ReloadPath -> Aff String
@@ -131,11 +131,11 @@ pieCpt = here.component "pie" cpt
         }
 
 loadedPie :: Record MetricsProps -> HistoMetrics -> R.Element
-loadedPie { path, reload, session } loaded =
+loadedPie p@{ path, reload, session } loaded =
   H.div {} [
   {-  U.reloadButton reload
   , U.chartUpdateButton { chartType: ChartPie, path, reload, session }
-  , -} chart $ chartOptionsPie loaded
+  , -} chart $ chartOptionsPie p loaded
   ]
 
 
@@ -160,9 +160,9 @@ barCpt = here.component "bar" cpt
          }
 
 loadedBar :: Record MetricsProps -> Loaded -> R.Element
-loadedBar { path, reload, session } loaded =
+loadedBar p@{ path, reload, session } loaded =
   H.div {} [
   {-  U.reloadButton reload
   , U.chartUpdateButton { chartType: ChartBar, path, reload, session }
-  , -} chart $ chartOptionsBar loaded
+  , -} chart $ chartOptionsBar p loaded
   ]

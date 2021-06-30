@@ -2,7 +2,7 @@ module Gargantext.Components.Nodes.Texts where
 
 import Gargantext.Prelude
 
-import DOM.Simple.Console (log2)
+import DOM.Simple.Console (log, log2)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
@@ -14,7 +14,7 @@ import Gargantext.Components.Node (NodePoly(..))
 import Gargantext.Components.Nodes.Corpus (loadCorpusWithChild)
 import Gargantext.Components.Nodes.Corpus.Chart.Histo (histo)
 import Gargantext.Components.Nodes.Corpus.Document as D
-import Gargantext.Components.Nodes.Corpus.Types (CorpusData, CorpusFilters, CorpusInfo(..), Hyperdata(..), defaultCorpusFilters, getCorpusInfo)
+import Gargantext.Components.Nodes.Corpus.Types (CorpusData, CorpusInfo(..), Hyperdata(..), CorpusFilters, defaultCorpusFilters, getCorpusInfo)
 import Gargantext.Components.Nodes.Lists.Types as LT
 import Gargantext.Components.Nodes.Texts.Types as TT
 import Gargantext.Components.Tab as Tab
@@ -184,7 +184,8 @@ tabsCpt = here.component "tabs" cpt
                                         , session
                                         , tabType
                                         , sidePanel
-                                        , sidePanelState } []
+                                        , sidePanelState
+                                        } []
 
 type DocViewProps a = (
     cacheState     :: T.Box LT.CacheState

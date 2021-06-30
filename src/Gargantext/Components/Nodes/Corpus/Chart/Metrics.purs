@@ -73,8 +73,8 @@ instance decodeMetrics :: DecodeJson Metrics where
 
 type Loaded  = Array Metric
 
-scatterOptions :: Array Metric -> Options
-scatterOptions metrics' = Options
+scatterOptions :: Record MetricsProps -> Array Metric -> Options
+scatterOptions { onClick } metrics' = Options
   { mainTitle : "Ngrams Selection Metrics"
   , subTitle  : "Local metrics (Inc/Exc, Spe/Gen), Global metrics (TFICF maillage)"
   , xAxis     : xAxis { min: -1 }
@@ -82,7 +82,7 @@ scatterOptions metrics' = Options
   , series    : map2series $ metric2map metrics'
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
-  , onClick   : Nothing
+  , onClick
   }
   where
     metric2map :: Array Metric -> Map TermList (Array Metric)
@@ -143,9 +143,9 @@ metricsCpt = here.component "etrics" cpt
 
 
 loaded :: Record MetricsProps -> Loaded -> R.Element
-loaded { path, reload, session } loaded' =
+loaded p@{ path, reload, session } loaded' =
   H.div {} [
   {-  U.reloadButton reload
   , U.chartUpdateButton { chartType: Scatter, path, reload, session }
-  , -} chart $ scatterOptions loaded'
+  , -} chart $ scatterOptions p loaded'
   ]
