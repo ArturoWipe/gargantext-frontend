@@ -127,6 +127,7 @@ tabsCpt = here.component "tabs" cpt
               , sidePanelState
               , tabType: TabPairing TabDocs
               , totalRecords
+              , yearFilter: Nothing
               }
 
 

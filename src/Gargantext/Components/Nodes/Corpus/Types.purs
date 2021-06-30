@@ -63,17 +63,3 @@ getCorpusInfo as = case List.head (List.filter isJSON as) of
                                                  , authors:""
                                                  , totalRecords: 0
                                                  }
-
-----
-
-type CorpusFilters =
-  ( year :: T.Box (Maybe String) -- "YYYY"
-  )
-
-defaultCorpusFilters :: R.Hooks (Record CorpusFilters)
-defaultCorpusFilters = do
-  year <- T.useBox Nothing
-
-  pure
-    { year
-    }
