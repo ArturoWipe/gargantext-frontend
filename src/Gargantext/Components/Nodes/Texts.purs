@@ -7,9 +7,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
-import Effect (Effect)
 import Effect.Aff (launchAff_)
-import Gargantext.Components.Charts.Options.Type (MouseEvent)
 import Gargantext.Components.DocsTable as DT
 import Gargantext.Components.DocsTable.Types (Year)
 import Gargantext.Components.NgramsTable.Loader (clearCache)
@@ -85,13 +83,10 @@ textsLayoutWithKeyCpt = here.component "textsLayoutWithKey" cpt
       cacheState <- T.useBox $ getCacheState LT.CacheOff session nodeId
       cacheState' <- T.useLive T.unequal cacheState
 
-      yearFilterBox <- T.useBox (Nothing :: Maybe Year)
-      yearFilter <- T.useLive T.unequal yearFilterBox
+      yearFilter <- T.useBox (Nothing :: Maybe Year)
 
-      R.useEffect1' yearFilter $ log2 "filter" yearFilter
-
-
-      let onClick = Just \{ name } -> T.write_ (Just name) yearFilterBox
+      R.useEffectOnce' do
+        T.listen (\{ new } -> log2 "filter" new) yearFilter
 
       R.useEffectOnce' $ do
         T.listen (\{ new } -> afterCacheStateChange new) cacheState
@@ -117,7 +112,6 @@ textsLayoutWithKeyCpt = here.component "textsLayoutWithKey" cpt
                    , session
                    , sidePanel
                    , sidePanelState
-                   , onClick
                    , yearFilter
                    }
             ]
@@ -149,8 +143,7 @@ type TabsProps =
   , session        :: Session
   , sidePanel      :: T.Box (Maybe (Record TT.SidePanel))
   , sidePanelState :: T.Box SidePanelState
-  , onClick        :: Maybe (MouseEvent -> Effect Unit)
-  , yearFilter     :: Maybe Year
+  , yearFilter     :: T.Box (Maybe Year)
   )
 
 tabs :: Record TabsProps -> R.Element
@@ -159,9 +152,9 @@ tabs props = R.createElement tabsCpt props []
 tabsCpt :: R.Component TabsProps
 tabsCpt = here.component "tabs" cpt
   where
-    cpt { cacheState, corpusId, corpusData, frontends, session, sidePanel, sidePanelState, onClick, yearFilter } _ = do
-
+    cpt { cacheState, corpusId, corpusData, frontends, session, sidePanel, sidePanelState, yearFilter } _ = do
       let path = initialPath
+      let onClick = Just \{ name } -> T.write_ (Just name) (yearFilter)
 
       activeTab <- T.useBox 0
 
@@ -170,9 +163,9 @@ tabsCpt = here.component "tabs" cpt
         , tabs: [
             "Documents"       /\ R.fragment [
                 histo { path, session, onClick }
-              , docView' path yearFilter TabDocs
+              , docView' path TabDocs
               ]
-          , "Trash"           /\ docView' path yearFilter TabTrash
+          , "Trash"           /\ docView' path TabTrash
           -- , "More like fav"   /\ docView' path TabMoreLikeFav
           -- , "More like trash" /\ docView' path TabMoreLikeTrash
           ]
@@ -183,7 +176,7 @@ tabsCpt = here.component "tabs" cpt
                       , listId: corpusData.defaultListId
                       , limit: Nothing
                       , tabType: TabCorpus TabDocs }
-        docView' path yearFilter tabType = docView { cacheState
+        docView' path tabType = docView { cacheState
                                         , corpusData
                                         , corpusId
                                         , frontends
@@ -207,7 +200,7 @@ type DocViewProps a = (
   , tabType        :: TabSubType a
   , sidePanel      :: T.Box (Maybe (Record TT.SidePanel))
   , sidePanelState :: T.Box SidePanelState
-  , yearFilter     :: Maybe Year
+  , yearFilter     :: T.Box (Maybe Year)
   )
 
 docView :: forall a. R2.Component (DocViewProps a)

@@ -11,6 +11,7 @@ import Data.Tuple.Nested ((/\))
 import Effect.Aff (Aff)
 import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.DocsTable as DT
+import Gargantext.Components.DocsTable.Types (Year)
 import Gargantext.Components.NgramsTable as NT
 import Gargantext.Components.NgramsTable.Core as NTC
 import Gargantext.Components.Nodes.Annuaire.User.Contacts.Types (ContactData)
@@ -71,9 +72,10 @@ tabsCpt :: R.Component TabsProps
 tabsCpt = here.component "tabs" cpt where
   cpt props _ = do
     activeTab <- T.useBox 0
+    yearFilter <- T.useBox (Nothing :: Maybe Year)
 
-    pure $ Tab.tabs { activeTab, tabs: tabs' props }
-  tabs' props@{ sidePanel, sidePanelState } =
+    pure $ Tab.tabs { activeTab, tabs: tabs' yearFilter props }
+  tabs' yearFilter props@{ sidePanel, sidePanelState } =
     [ "Documents"     /\ docs
     , "Patents"       /\ ngramsView (viewProps Patents)
     , "Books"         /\ ngramsView (viewProps Books)
@@ -92,7 +94,7 @@ tabsCpt = here.component "tabs" cpt where
         , showSearch: true
         , tabType: TabPairing TabDocs
         , totalRecords
-        , yearFilter: Nothing
+        , yearFilter
         }
 
 type DTCommon =

@@ -69,7 +69,7 @@ type CommonProps =
   -- ^ tabType is not ideal here since it is too much entangled with tabs and
   -- ngramtable. Let's see how this evolves.  )
   , totalRecords   :: Int
-  , yearFilter     :: Maybe Year
+  , yearFilter     :: T.Box (Maybe Year)
   )
 
 type LayoutProps =
@@ -272,6 +272,7 @@ pageLayoutCpt = here.component "pageLayout" cpt where
             , yearFilter
             } _ = do
     cacheState' <- T.useLive T.unequal cacheState
+    yearFilter' <- T.useLive T.unequal yearFilter
 
     let path = { listId, mCorpusId, nodeId, params, query, tabType }
         handleResponse :: HashedResponse (TableResult Response) -> Tuple Int (Array DocumentsView)
@@ -279,7 +280,7 @@ pageLayoutCpt = here.component "pageLayout" cpt where
           where
 
             filters = filterDocs query
-                    >>> \res' -> case yearFilter of
+                    >>> \res' -> case yearFilter' of
                       Nothing -> res'
                       Just year -> filterDocsByYear year res'
 
