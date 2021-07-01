@@ -208,12 +208,13 @@ mock :: Boolean
 mock = false
 
 type PageParams = {
-    listId    :: Int
-  , mCorpusId :: Maybe Int
-  , nodeId    :: Int
-  , tabType   :: TabType
-  , query     :: Query
-  , params    :: TT.Params
+    listId      :: Int
+  , mCorpusId   :: Maybe Int
+  , nodeId      :: Int
+  , tabType     :: TabType
+  , query       :: Query
+  , params      :: TT.Params
+  , yearFilter  :: Maybe Year
   }
 
 getPageHash :: Session -> PageParams -> Aff String
@@ -274,7 +275,7 @@ pageLayoutCpt = here.component "pageLayout" cpt where
     cacheState' <- T.useLive T.unequal cacheState
     yearFilter' <- T.useLive T.unequal yearFilter
 
-    let path = { listId, mCorpusId, nodeId, params, query, tabType }
+    let path = { listId, mCorpusId, nodeId, params, query, tabType, yearFilter: yearFilter' }
         handleResponse :: HashedResponse (TableResult Response) -> Tuple Int (Array DocumentsView)
         handleResponse (HashedResponse { hash, value: res }) = ret
           where
@@ -547,9 +548,10 @@ tableRouteWithPage :: forall row.
                       , params :: TT.Params
                       , query ::  Query
                       , tabType :: TabType
+                      , yearFilter :: Maybe Year
                       | row } -> SessionRoute
-tableRouteWithPage { listId, nodeId, params: { limit, offset, orderBy, searchType }, query, tabType } =
-  NodeAPI Node (Just nodeId) $ "table" <> joinQueryStrings [tt, lst, lmt, odb, ofs, st, q]
+tableRouteWithPage { listId, nodeId, params: { limit, offset, orderBy, searchType }, query, tabType, yearFilter } =
+  NodeAPI Node (Just nodeId) $ "table" <> joinQueryStrings [tt, lst, lmt, odb, ofs, st, q, y]
   where
     lmt = queryParam "limit" limit
     lst = queryParam "list" listId
@@ -558,7 +560,7 @@ tableRouteWithPage { listId, nodeId, params: { limit, offset, orderBy, searchTyp
     st  = queryParam "searchType" searchType
     tt  = queryParamS "tabType" (showTabType' tabType)
     q   = queryParamS "query" query
-    -- y   = mQueryParam "year" year
+    y   = mQueryParam "year" yearFilter
 
 deleteAllDocuments :: Session -> Int -> Aff (Array Int)
 deleteAllDocuments session = delete session <<< documentsRoute

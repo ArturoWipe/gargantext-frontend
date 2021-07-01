@@ -1,6 +1,7 @@
 module Gargantext.Components.Nodes.Texts where
 
 import Gargantext.Prelude
+import Prelude
 
 import DOM.Simple.Console (log2)
 import Data.Generic.Rep (class Generic)
@@ -25,6 +26,7 @@ import Gargantext.Hooks.Loader (useLoader)
 import Gargantext.Sessions (WithSession, WithSessionContext, Session, sessionId, getCacheState)
 import Gargantext.Types (CTabNgramType(..), ListId, NodeID, SidePanelState(..), TabSubType(..), TabType(..))
 import Gargantext.Utils.Reactix as R2
+import Gargantext.Utils.Toestand as T2
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Record as Record
@@ -87,6 +89,7 @@ textsLayoutWithKeyCpt = here.component "textsLayoutWithKey" cpt
 
       R.useEffectOnce' do
         T.listen (\{ new } -> log2 "filter" new) yearFilter
+
 
       R.useEffectOnce' $ do
         T.listen (\{ new } -> afterCacheStateChange new) cacheState
