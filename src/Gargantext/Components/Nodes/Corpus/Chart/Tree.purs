@@ -43,7 +43,7 @@ instance encodeMetrics :: EncodeJson Metrics where
 type Loaded  = Array TreeNode
 
 scatterOptions :: Record MetricsProps -> Array TreeNode -> Options
-scatterOptions { onClick } nodes = Options
+scatterOptions { onClick, onInit } nodes = Options
   { mainTitle : "Tree"
   , subTitle  : "Tree Sub Title"
   , xAxis     : xAxis' []
@@ -52,6 +52,7 @@ scatterOptions { onClick } nodes = Options
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
   , onClick
+  , onInit
 -- TODO improve the formatter:
 -- https://ecomfe.github.io/echarts-examples/public/editor.html?c=treemap-obama
 
@@ -80,7 +81,7 @@ tree props = R.createElement treeCpt props []
 treeCpt :: R.Component Props
 treeCpt = here.component "tree" cpt
   where
-    cpt {path, session, onClick} _ = do
+    cpt {path, session, onClick, onInit} _ = do
       reload <- T.useBox T2.newReload
 
       pure $ metricsWithCacheLoadView {
@@ -92,6 +93,7 @@ treeCpt = here.component "tree" cpt
         , reload
         , session
         , onClick
+        , onInit
         }
 
 loaded :: Record MetricsProps -> Loaded -> R.Element

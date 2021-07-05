@@ -3,7 +3,7 @@ module Gargantext.Components.Nodes.Corpus.Chart.Types where
 import Data.Maybe (Maybe)
 import Data.Tuple (Tuple)
 import Effect (Effect)
-import Gargantext.Components.Charts.Options.Type (MouseEvent)
+import Gargantext.Components.Charts.Options.Type (EChartsInstance, MouseEvent)
 import Gargantext.Prelude (Unit)
 import Gargantext.Sessions (Session)
 import Gargantext.Types (TabType)
@@ -17,9 +17,10 @@ type Path = (
   )
 
 type Props = (
-    path :: Record Path
+    path    :: Record Path
   , session :: Session
   , onClick :: Maybe (MouseEvent -> Effect Unit)
+  , onInit  :: Maybe (EChartsInstance -> Effect Unit)
   )
 
 type MetricsProps = (

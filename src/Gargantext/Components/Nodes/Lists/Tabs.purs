@@ -161,7 +161,7 @@ ngramsViewCpt = here.component "ngramsView" cpt where
         ]
         charts params _        = [ chart params mode ]
 
-        chart path Authors    = pie     { path, session, onClick: Nothing }
-        chart path Institutes = tree    { path, session, onClick: Nothing }
-        chart path Sources    = bar     { path, session, onClick: Nothing }
-        chart path Terms      = metrics { path, session, onClick: Nothing }
+        chart path Authors    = pie     { path, session, onClick: Nothing, onInit: Nothing }
+        chart path Institutes = tree    { path, session, onClick: Nothing, onInit: Nothing }
+        chart path Sources    = bar     { path, session, onClick: Nothing, onInit: Nothing }
+        chart path Terms      = metrics { path, session, onClick: Nothing, onInit: Nothing }

@@ -69,7 +69,7 @@ instance encodeHistoMetrics :: EncodeJson HistoMetrics where
 type Loaded = HistoMetrics
 
 chartOptionsBar :: Record MetricsProps -> HistoMetrics -> Options
-chartOptionsBar { onClick } (HistoMetrics { dates: dates', count: count'}) = Options
+chartOptionsBar { onClick, onInit } (HistoMetrics { dates: dates', count: count'}) = Options
   { mainTitle : "Bar"
   , subTitle  : "Count of MapTerm"
   , xAxis     : xAxis' $ map (\t -> joinWith " " $ map (take 3) $ A.take 3 $ filter (\s -> length s > 3) $ split (Pattern " ") t) dates'
@@ -78,10 +78,11 @@ chartOptionsBar { onClick } (HistoMetrics { dates: dates', count: count'}) = Opt
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
   , onClick
+  , onInit
   }
 
 chartOptionsPie :: Record MetricsProps -> HistoMetrics -> Options
-chartOptionsPie { onClick } (HistoMetrics { dates: dates', count: count'}) = Options
+chartOptionsPie { onClick, onInit } (HistoMetrics { dates: dates', count: count'}) = Options
   { mainTitle : "Pie"
   , subTitle  : "Distribution by MapTerm"
   , xAxis     : xAxis' []
@@ -91,6 +92,7 @@ chartOptionsPie { onClick } (HistoMetrics { dates: dates', count: count'}) = Opt
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
   , onClick
+  , onInit
   }
 
 getMetricsHash :: Session -> ReloadPath -> Aff String
@@ -116,7 +118,7 @@ pie props = R.createElement pieCpt props []
 pieCpt :: R.Component Props
 pieCpt = here.component "pie" cpt
   where
-    cpt { path, session, onClick } _ = do
+    cpt { path, session, onClick, onInit } _ = do
       reload <- T.useBox T2.newReload
 
       pure $ metricsWithCacheLoadView {
@@ -128,6 +130,7 @@ pieCpt = here.component "pie" cpt
         , reload
         , session
         , onClick
+        , onInit
         }
 
 loadedPie :: Record MetricsProps -> HistoMetrics -> R.Element
@@ -145,7 +148,7 @@ bar props = R.createElement barCpt props []
 barCpt :: R.Component Props
 barCpt = here.component "bar" cpt
   where
-    cpt {path, session, onClick} _ = do
+    cpt {path, session, onClick, onInit} _ = do
       reload <- T.useBox T2.newReload
 
       pure $ metricsWithCacheLoadView {
@@ -157,6 +160,7 @@ barCpt = here.component "bar" cpt
          , reload
          , session
          , onClick
+         , onInit
          }
 
 loadedBar :: Record MetricsProps -> Loaded -> R.Element

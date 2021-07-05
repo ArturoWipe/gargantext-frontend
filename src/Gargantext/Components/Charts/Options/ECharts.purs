@@ -5,6 +5,7 @@ import Prelude
 import CSS (italic)
 import CSS.Common (normal)
 import Data.Maybe (Maybe(..))
+import Data.Nullable (toMaybe)
 import Effect (Effect)
 import Gargantext.Components.Charts.Options.Color (transparent, violet, black)
 import Gargantext.Components.Charts.Options.Data (DataLegend, dataSerie)
@@ -12,7 +13,7 @@ import Gargantext.Components.Charts.Options.Font (IconOptions(..), Shape(..), Te
 import Gargantext.Components.Charts.Options.Legend (legendType, LegendMode(..), PlainOrScroll(..), selectedMode, Orientation(..), orient)
 import Gargantext.Components.Charts.Options.Position (Align(..), LeftRelativePosition(..), TopRelativePosition(..), numberPosition, percentPosition, relativePosition)
 import Gargantext.Components.Charts.Options.Series (Series, seriesPieD1)
-import Gargantext.Components.Charts.Options.Type (DataZoom, Echarts, Legend, Option, Title, XAxis, YAxis, MouseEvent, xAxis, yAxis)
+import Gargantext.Components.Charts.Options.Type (DataZoom, EChartsInstance, Echarts, Legend, MouseEvent, Option, Title, XAxis, YAxis, EChartRef, xAxis, yAxis)
 import Gargantext.Utils.Reactix as R2
 import React (ReactClass, unsafeCreateElementDynamic)
 import Reactix as R
@@ -21,13 +22,16 @@ import Unsafe.Coerce (unsafeCoerce)
 
 foreign import eChartsClass :: ReactClass Echarts
 foreign import listenerFn1 :: forall evt. (evt -> Effect Unit) -> Effect Unit
+-- | @XXX some eCharts "actions" not working ("select", ...)
+-- | https://echarts.apache.org/en/api.html#echartsInstance.dispatchAction
+foreign import dispatchAction :: forall payload. EChartsInstance -> payload -> Effect Unit
 
 chart :: Options -> R.Element
 chart = echarts <<< chartWith
 
 chartWith :: Options -> Echarts
 chartWith options =
-  { option: opts options
+  { option    : opts options
 --, className : Nothing
 --, style     : Nothing
 --, theme     : Nothing
@@ -39,7 +43,8 @@ chartWith options =
 --, optsLoading: Nothing
 --, onReady    : Nothing
 --, resizable  : Nothing
-  , onEvents: getEvents options
+  , onEvents  : getEvents options
+  , ref       : refListener options
   }
     where
       getEvents (Options { onClick }) =
@@ -48,6 +53,14 @@ chartWith options =
             Just fn -> RX.pick (e :: MouseEvent) # fn
             Nothing -> pure unit
         }
+
+      refListener (Options { onInit }) = case onInit of
+        Nothing -> pure unit
+        Just fn -> listenerFn1 (_ # fn # execOnInit)
+
+      execOnInit fn = toMaybe >>> case _ of
+        Nothing                        -> pure unit
+        Just (ref :: Record EChartRef) -> fn =<< ref.getEchartsInstance
 
 echarts :: Echarts -> R.Element
 echarts c = R2.buff $ unsafeCreateElementDynamic (unsafeCoerce eChartsClass) c []
@@ -167,6 +180,19 @@ data Options = Options
   , addZoom   :: Boolean
   , tooltip   :: Tooltip
   , onClick   :: Maybe (MouseEvent -> Effect Unit)
+  -- (?) `onInit` custom listener
+  --
+  --      * in addition of the already existing `onReady` native listener
+  --        which is executed on chart mount, but does not provide any arg
+  --      * the React library also contained another native listener as
+  --        `ref`, which adds the React Ref of the mounted chart
+  --      * this additional `onInit` is executed after the "Apache Echarts"
+  --        has been "initialised" (see more details [1]),
+  --        it intends to return the `eChartsInstance` used for every
+  --        library actions
+  --
+  -- [1] https://echarts.apache.org/en/api.html#echarts.init
+  , onInit    :: Maybe (EChartsInstance -> Effect Unit)
   }
 
 tooltipTriggerAxis :: Tooltip

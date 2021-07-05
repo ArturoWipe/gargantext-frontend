@@ -14,6 +14,9 @@ import Gargantext.Types (class Optional)
 import React as R
 import Unsafe.Coerce (unsafeCoerce)
 
+-- | https://echarts.apache.org/en/api.html#echartsInstance
+foreign import data EChartsInstance :: Type
+
 newtype ChartAlign = ChartAlign String
 
 -- TODO: Maybe is not working here => use Optional
@@ -32,6 +35,7 @@ type Echarts =
 --, onReady     :: Maybe String   --  PropTypes.func,
 --, resizable   :: Maybe Boolean  -- PropTypes.bool,
   , onEvents    :: OnEvents   -- PropTypes.object
+  , ref         :: Effect Unit
   }
 
 type Option =
@@ -172,7 +176,7 @@ type Rich = {}
 -- |      https://echarts.apache.org/en/api.html#events
 type OnEvents =
   { click     :: Effect Unit
-  -- and many more...
+  -- ...
   }
 
 -- | @XXX "echarts-for-react" third party library bases on "apache-echarts"
@@ -199,5 +203,16 @@ type MouseEvent =
   , seriesName        :: String
   , seriesType        :: String
   , type              :: String
-  , value             :: String -- @WIP or Array ??
+  , value             :: String -- or Array ??
   }
+
+----
+
+-- | @XXX partial definition given by the third library author
+-- |      POJO containing a mix of ReactElement field and custom method attached
+-- |
+-- | https://github.com/hustcc/echarts-for-react#component-api--echarts-api
+type EChartRef =
+  ( getEchartsInstance :: Effect EChartsInstance
+  -- ...
+  )

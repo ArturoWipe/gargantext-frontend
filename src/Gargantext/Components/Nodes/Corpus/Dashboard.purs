@@ -241,6 +241,7 @@ renderChartCpt = here.component "renderChart" cpt
                  , listId: Just defaultListId
                  , session
                  , onClick: Nothing
+                 , onInit: Nothing
                  }
 
     -- aSchool school = H.div {className: "col-md-4 content"} [ chart $ focus school ]

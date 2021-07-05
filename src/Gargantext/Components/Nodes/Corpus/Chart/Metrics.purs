@@ -74,7 +74,7 @@ instance decodeMetrics :: DecodeJson Metrics where
 type Loaded  = Array Metric
 
 scatterOptions :: Record MetricsProps -> Array Metric -> Options
-scatterOptions { onClick } metrics' = Options
+scatterOptions { onClick, onInit } metrics' = Options
   { mainTitle : "Ngrams Selection Metrics"
   , subTitle  : "Local metrics (Inc/Exc, Spe/Gen), Global metrics (TFICF maillage)"
   , xAxis     : xAxis { min: -1 }
@@ -83,6 +83,7 @@ scatterOptions { onClick } metrics' = Options
   , addZoom   : false
   , tooltip   : mkTooltip { formatter: templateFormatter "{b0}" }
   , onClick
+  , onInit
   }
   where
     metric2map :: Array Metric -> Map TermList (Array Metric)
@@ -127,7 +128,7 @@ metrics props = R.createElement metricsCpt props []
 metricsCpt :: R.Component Props
 metricsCpt = here.component "etrics" cpt
   where
-    cpt {path, session, onClick } _ = do
+    cpt {path, session, onClick, onInit } _ = do
       reload <- T.useBox T2.newReload
 
       pure $ metricsWithCacheLoadView {
@@ -139,6 +140,7 @@ metricsCpt = here.component "etrics" cpt
         , reload
         , session
         , onClick
+        , onInit
         }
 
 

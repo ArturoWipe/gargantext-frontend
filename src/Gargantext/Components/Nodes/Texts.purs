@@ -1,14 +1,16 @@
 module Gargantext.Components.Nodes.Texts where
 
 import Gargantext.Prelude
-import Prelude
 
 import DOM.Simple.Console (log2)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
+import Data.Symbol (SProxy(..))
 import Data.Tuple.Nested ((/\))
 import Effect.Aff (launchAff_)
+import Gargantext.Components.Charts.Options.ECharts (dispatchAction)
+import Gargantext.Components.Charts.Options.Type (EChartsInstance)
 import Gargantext.Components.DocsTable as DT
 import Gargantext.Components.DocsTable.Types (Year)
 import Gargantext.Components.NgramsTable.Loader (clearCache)
@@ -23,13 +25,12 @@ import Gargantext.Components.Tab as Tab
 import Gargantext.Components.Table as Table
 import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Loader (useLoader)
-import Gargantext.Sessions (WithSession, WithSessionContext, Session, sessionId, getCacheState)
+import Gargantext.Sessions (WithSession, Session, getCacheState)
 import Gargantext.Types (CTabNgramType(..), ListId, NodeID, SidePanelState(..), TabSubType(..), TabType(..))
 import Gargantext.Utils.Reactix as R2
-import Gargantext.Utils.Toestand as T2
 import Reactix as R
 import Reactix.DOM.HTML as H
-import Record as Record
+import Record (set)
 import Toestand as T
 
 here :: R2.Here
@@ -87,9 +88,7 @@ textsLayoutWithKeyCpt = here.component "textsLayoutWithKey" cpt
 
       yearFilter <- T.useBox (Nothing :: Maybe Year)
 
-      R.useEffectOnce' do
-        T.listen (\{ new } -> log2 "filter" new) yearFilter
-
+      eChartsInstance <- T.useBox (Nothing :: Maybe EChartsInstance)
 
       R.useEffectOnce' $ do
         T.listen (\{ new } -> afterCacheStateChange new) cacheState
@@ -116,6 +115,7 @@ textsLayoutWithKeyCpt = here.component "textsLayoutWithKey" cpt
                    , sidePanel
                    , sidePanelState
                    , yearFilter
+                   , eChartsInstance
                    }
             ]
       where
@@ -139,14 +139,15 @@ modeTabType MoreLikeFav    = CTabAuthors  -- TODO
 modeTabType MoreLikeTrash  = CTabSources  -- TODO
 
 type TabsProps =
-  ( cacheState     :: T.Box LT.CacheState
-  , corpusData     :: CorpusData
-  , corpusId       :: NodeID
-  , frontends      :: Frontends
-  , session        :: Session
-  , sidePanel      :: T.Box (Maybe (Record TT.SidePanel))
-  , sidePanelState :: T.Box SidePanelState
-  , yearFilter     :: T.Box (Maybe Year)
+  ( cacheState      :: T.Box LT.CacheState
+  , corpusData      :: CorpusData
+  , corpusId        :: NodeID
+  , frontends       :: Frontends
+  , session         :: Session
+  , sidePanel       :: T.Box (Maybe (Record TT.SidePanel))
+  , sidePanelState  :: T.Box SidePanelState
+  , yearFilter      :: T.Box (Maybe Year)
+  , eChartsInstance :: T.Box (Maybe EChartsInstance)
   )
 
 tabs :: Record TabsProps -> R.Element
@@ -155,9 +156,23 @@ tabs props = R.createElement tabsCpt props []
 tabsCpt :: R.Component TabsProps
 tabsCpt = here.component "tabs" cpt
   where
-    cpt { cacheState, corpusId, corpusData, frontends, session, sidePanel, sidePanelState, yearFilter } _ = do
-      let path = initialPath
-      let onClick = Just \{ name } -> T.write_ (Just name) (yearFilter)
+    cpt { cacheState, corpusId, corpusData, frontends, session, sidePanel, sidePanelState, yearFilter, eChartsInstance } _ = do
+
+      let
+        path = initialPath
+
+        onInit = Just \i -> T.write_ (Just i) eChartsInstance
+
+        onClick = Just \opts@{ name } -> do
+          T.write_ (Just name) yearFilter
+          T.read eChartsInstance >>= case _ of
+            Nothing -> pure unit
+            Just i  -> do
+              -- @XXX due to lack of support for "echart.select" action,
+              --      have to manually rely on a set/unset selection
+              --      targeting the "echart.emphasis" action
+              dispatchAction i { type: "downplay" }
+              dispatchAction i $ set (SProxy :: SProxy "type") "highlight" opts
 
       activeTab <- T.useBox 0
 
@@ -165,7 +180,7 @@ tabsCpt = here.component "tabs" cpt
           activeTab
         , tabs: [
             "Documents"       /\ R.fragment [
-                histo { path, session, onClick }
+                histo { path, session, onClick, onInit }
               , docView' path TabDocs
               ]
           , "Trash"           /\ docView' path TabTrash
