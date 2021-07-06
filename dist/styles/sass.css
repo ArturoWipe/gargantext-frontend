@@ -4,6 +4,14 @@
 /*     padding-top: 15px */
 /*     padding-bottom: 15px */
 /*     float: none */
+#dafixedtop {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 910;
+}
+
 #corporatop.nav-tabs > li {
   padding-left: 1;
   padding-right: 1;
@@ -170,10 +178,6 @@
   top: 50px;
 }
 
-#dafixedtop {
-  z-index: 910;
-}
-
 #logo-designed {
   border: 15px;
 }
@@ -183,7 +187,10 @@
 }
 
 #page-wrapper {
-  margin-top: 96px;
+  padding-top: 40px;
+  padding-left: 16px;
+  padding-right: 16px;
+  width: 100%;
 }
 
 #user-page-header {
@@ -518,11 +525,26 @@ li .leaf:hover a.settings {
   opacity: var(--over50, 0);
 }
 
+#node-popup-tooltip {
+  position: fixed;
+}
 #node-popup-tooltip .tree .node {
   margin-top: 5px;
 }
 #node-popup-tooltip .tree .children .node {
   padding-left: 15px;
+}
+
+.right-handed #node-popup-tooltip {
+  top: 50%;
+  left: 16.6666666667%;
+  transform: translateY(-50%);
+}
+
+.left-handed #node-popup-tooltip {
+  top: 50%;
+  right: 16.6666666667%;
+  transform: translateY(-50%);
 }
 
 .panel-actions .almost-useable {
@@ -540,20 +562,66 @@ li .leaf:hover a.settings {
   overflow-y: scroll;
 }
 
-.forest-layout {
-  background-color: #fff;
-  position: fixed;
-  top: 3.7em;
-  width: 15%;
-  z-index: 909;
+.forest-layout-wrapper {
+  padding-left: 0;
+  padding-right: 0;
 }
 
-.left-handed .forest-layout {
-  left: 80%;
+.forest-layout {
+  padding-top: 8px;
+  z-index: 909;
+  position: fixed;
+  height: calc(100vh - 56px);
+  width: 100%;
+  max-width: inherit;
+  scrollbar-width: none;
+  overflow-y: scroll;
+  overflow-x: visible;
+  transition: border 150ms;
+}
+.forest-layout::-webkit-scrollbar {
+  display: none;
 }
 
 .right-handed .forest-layout {
-  left: 2%;
+  border-right: 1px solid #FFFFFF;
+}
+.right-handed .forest-layout:hover {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.left-handed .forest-layout {
+  border-left: 1px solid #FFFFFF;
+}
+.left-handed .forest-layout:hover {
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.forest-layout-teaser {
+  pointer-events: none;
+  position: fixed;
+  bottom: 0;
+  height: 24px;
+  width: calc(16.6666666667% - 1px);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
+}
+
+.right-handed .forest-layout-teaser {
+  left: 0;
+}
+
+.left-handed .forest-layout-teaser {
+  right: 0;
+}
+
+.left-handed .forest-layout {
+  padding-left: 8px;
+  padding-right: 16px;
+}
+
+.right-handed .forest-layout {
+  padding-left: 16px;
+  padding-right: 8px;
 }
 
 .code-editor .editor .code-area {
@@ -775,6 +843,20 @@ ul li {
 .join-button {
   padding-bottom: 100px;
   padding-top: 100px;
+}
+
+#app {
+  width: 100%;
+}
+
+.router-inner {
+  display: flex;
+}
+.router-inner.left-handed {
+  flex-direction: row;
+}
+.router-inner.right-handed {
+  flex-direction: row;
 }
 
 .range {

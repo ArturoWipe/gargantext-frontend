@@ -26,7 +26,7 @@ here :: R2.Here
 here = R2.here "Gargantext.Components.Forest"
 
 -- Shared by components here with Tree
-type Common = 
+type Common =
   ( frontends      :: Frontends
   , handed         :: T.Box Handed
   , reloadMainPage :: T2.ReloadS
@@ -42,7 +42,7 @@ type Props =
   , showLogin          :: T.Box Boolean
   , showTree           :: T.Box Boolean
   , tasks              :: T.Box GAT.Storage
-  | Common 
+  | Common
   )
 
 type TreeExtra = (
@@ -108,7 +108,7 @@ plusCpt = here.component "plus" cpt where
   cpt { backend, handed, showLogin } _ = do
     handed' <- T.useLive T.unequal handed
 
-    pure $ H.div { className: "row" }
+    pure $ H.div {}
       [ H.button { className: buttonClass handed'
                 , on: { click }
                 , title }
@@ -128,12 +128,20 @@ plusCpt = here.component "plus" cpt where
       title = "Add or remove connections to the server(s)."
       divClass = "fa fa-universal-access"
       buttonClass handed' =
-        "btn btn-primary col-5 " <> switchHanded "mr-1 ml-auto" "ml-1 mr-auto" handed'
+        "btn btn-primary d-block " <> switchHanded "mr-1 ml-auto" "ml-1 mr-auto" handed'
 
 forestLayout :: R2.Component Props
 forestLayout = R.createElement forestLayoutCpt
 forestLayoutCpt :: R.Component Props
 forestLayoutCpt = here.component "forestLayout" cpt where
-  cpt p _ = do
-    pure $ H.div { className: "forest-layout" }
-      [ forest p [] ]
+  cpt p _ = pure $
+
+    H.div { className: "forest-layout-wrapper col-md-2" }
+    [
+      H.div { className: "forest-layout" }
+      [
+        forest p []
+      ,
+        H.div { className: "forest-layout-teaser" } []
+      ]
+    ]

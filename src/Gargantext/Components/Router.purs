@@ -68,7 +68,7 @@ routerCpt = here.component "router" cpt where
     pure $ R.fragment
       ([ loginModal { boxes }
        , topBar { boxes } ] <>
-       [ H.div { className: handedClassName } $ reverseHanded handed' $
+       [ H.div { className: handedClassName <> " router-inner" } $ reverseHanded handed' $
          [ forest { boxes }
          , mainPage { boxes }
          , sidePanel { boxes }
