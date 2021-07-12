@@ -1,32 +1,25 @@
 module Gargantext.Components.Forest.Tree.Node.Tools where
 
-import Gargantext.Prelude
-  ( class Ord, class Read, class Show, Unit
-  , bind, const, discard, map, not, pure, read, show, when
-  , ($), (<), (<<<), (<>), (<$>), (<*>) )
 import Data.Maybe (fromMaybe, Maybe(..))
 import Data.Nullable (null)
 import Data.Set (Set)
 import Data.Set as Set
 import Data.String as S
 import Data.String.CodeUnits as DSCU
-import Data.Tuple.Nested ((/\))
-import DOM.Simple.Console (log2)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff, launchAff_)
-import Reactix as R
-import Reactix.DOM.HTML as H
-import Toestand as T
-
 import Gargantext.Components.Forest.Tree.Node.Action (Action, icon, text)
 import Gargantext.Components.InputWithEnter (inputWithEnter)
 import Gargantext.Ends (Frontends, url)
-import Gargantext.Hooks.Loader (useLoader)
+import Gargantext.Prelude (class Ord, class Read, class Show, Unit, bind, const, discard, map, mempty, not, pure, read, show, when, ($), (<), (<<<), (<>), (<$>), (<*>))
 import Gargantext.Sessions (Session, sessionId)
 import Gargantext.Types as GT
 import Gargantext.Utils (glyphicon, toggleSet)
-import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.ReactTooltip as ReactTooltip
+import Gargantext.Utils.Reactix as R2
+import Reactix as R
+import Reactix.DOM.HTML as H
+import Toestand as T
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Forest.Tree.Node.Tools"
@@ -103,7 +96,7 @@ type DefaultText = String
 
 formEdit :: forall prev next
           . DefaultText -> ((prev -> String) -> Effect next) -> R.Element
-formEdit defaultValue setter = 
+formEdit defaultValue setter =
   H.div { className: "form-group" }
   [ H.input { defaultValue, type: "text", on: { input }
             , placeholder: defaultValue, className: "form-control" }
@@ -136,7 +129,7 @@ formChoice :: forall a b c d
            -> (b -> Effect a)
            -- -> ((c -> b) -> Effect a)
            -> R.Element
-formChoice nodeTypes defaultNodeType setNodeType = 
+formChoice nodeTypes defaultNodeType setNodeType =
   H.div { className: "form-group"}
         [ R2.select { className: "form-control"
                     , on: { change: \e -> setNodeType $ fromMaybe defaultNodeType $ read $ R.unsafeEventValue e }
@@ -163,6 +156,67 @@ formButton nodeType setNodeType =
                         , style : { width: "100%" }
                         , on: { click: \_ -> setNodeType nodeType }
                         } [H.text $ "Confirmation"]
+
+------------------------------------------------------------------------
+
+formChoiceSafe' :: forall item m
+  .  Read item
+  => Array item
+  -> item
+  -> (item -> Effect m)
+  -> (item -> String)
+  -> R.Element
+formChoiceSafe' []  _   _   _    = mempty
+formChoiceSafe' [n] _   cbk prnt = formButton' n cbk prnt
+formChoiceSafe' arr def cbk prnt = formChoice' arr def cbk prnt
+
+formChoice' :: forall item m
+  .  Read item
+  => Array item
+  -> item
+  -> (item -> Effect m)
+  -> (item -> String)
+  -> R.Element
+formChoice' items def cbk prnt =
+
+  H.div { className: "form-group"}
+  [
+    R2.select
+    { className: "form-control with-icon-font"
+    , on: { change: \e -> cbk $ fromMaybe def $ read $ R.unsafeEventValue e }
+    } $
+    map option items
+  ]
+
+  where
+    option opt =
+      H.option { value: opt }
+      [ H.text $ prnt opt ]
+
+formButton' :: forall item m
+  .  item
+  -> (item -> Effect m)
+  -> (item -> String)
+  -> R.Element
+formButton' item cbk prnt =
+
+  H.div {}
+  [
+    H.text $ "Confirm the selection of: " <> prnt item
+  ,
+    cta
+  ]
+
+  where
+    cta =
+      H.button
+      { className : "cold-md-5 btn btn-primary center"
+      , type : "button"
+      , title: "Form Button"
+      , style : { width: "100%" }
+      , on: { click: \_ -> cbk item }
+      }
+      [ H.text "Confirmation" ]
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
