@@ -1,12 +1,16 @@
 module Gargantext.Components.Forest.Tree.Node.Action.Add where
 
-import Gargantext.Prelude
-
 import Data.Argonaut (class EncodeJson, jsonEmptyObject, (:=), (~>))
 import Data.Array (head, length)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple.Nested ((/\))
 import Effect.Aff (Aff, launchAff_)
+import Reactix as R
+import Reactix.DOM.HTML as H
+import Toestand as T
+
+import Gargantext.Prelude
+
 import Gargantext.Components.Forest.Tree.Node.Action (Action(..))
 import Gargantext.Components.Forest.Tree.Node.Settings (SettingsBox(..), settingsBox)
 import Gargantext.Components.Forest.Tree.Node.Tools (formChoiceSafe', panel, submitButton)
@@ -18,9 +22,6 @@ import Gargantext.Types (NodeType(..), charCodeIcon)
 import Gargantext.Types as GT
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
-import Reactix as R
-import Reactix.DOM.HTML as H
-import Toestand as T
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Forest.Tree.Node.Action.Add"

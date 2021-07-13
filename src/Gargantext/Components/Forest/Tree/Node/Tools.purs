@@ -1,5 +1,9 @@
 module Gargantext.Components.Forest.Tree.Node.Tools where
 
+import Gargantext.Prelude
+  ( class Ord, class Read, class Show, Unit
+  , bind, const, discard, map, not, pure, read, show, when, mempty
+  , ($), (<), (<<<), (<>), (<$>), (<*>) )
 import Data.Maybe (fromMaybe, Maybe(..))
 import Data.Nullable (null)
 import Data.Set (Set)
@@ -8,18 +12,18 @@ import Data.String as S
 import Data.String.CodeUnits as DSCU
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff, launchAff_)
+import Reactix as R
+import Reactix.DOM.HTML as H
+import Toestand as T
+
 import Gargantext.Components.Forest.Tree.Node.Action (Action, icon, text)
 import Gargantext.Components.InputWithEnter (inputWithEnter)
 import Gargantext.Ends (Frontends, url)
-import Gargantext.Prelude (class Ord, class Read, class Show, Unit, bind, const, discard, map, mempty, not, pure, read, show, when, ($), (<), (<<<), (<>), (<$>), (<*>))
 import Gargantext.Sessions (Session, sessionId)
 import Gargantext.Types as GT
 import Gargantext.Utils (glyphicon, toggleSet)
 import Gargantext.Utils.ReactTooltip as ReactTooltip
 import Gargantext.Utils.Reactix as R2
-import Reactix as R
-import Reactix.DOM.HTML as H
-import Toestand as T
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Forest.Tree.Node.Tools"

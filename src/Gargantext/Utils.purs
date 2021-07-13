@@ -1,7 +1,5 @@
 module Gargantext.Utils where
 
-import Prelude
-
 import Data.Char (fromCharCode)
 import Data.Either (Either(..))
 import Data.Foldable (class Foldable, foldr)
@@ -15,6 +13,7 @@ import Data.String as S
 import Data.String.CodeUnits (singleton)
 import Data.Unfoldable (class Unfoldable)
 import Effect (Effect)
+import Prelude
 import Partial.Unsafe (unsafePartial)
 import Web.HTML as WHTML
 import Web.HTML.Location as WHL

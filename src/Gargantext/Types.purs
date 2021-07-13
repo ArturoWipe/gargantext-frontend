@@ -1,7 +1,5 @@
 module Gargantext.Types where
 
-import Gargantext.Prelude
-
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, jsonEmptyObject, (.:), (:=), (~>))
 import Data.Argonaut.Decode.Error (JsonDecodeError(..))
 import Data.Array as A
@@ -21,6 +19,8 @@ import Partial.Unsafe (unsafePartial)
 import Prim.Row (class Union)
 import Reactix as R
 import URI.Query (Query)
+
+import Gargantext.Prelude
 
 data Handed = LeftHanded | RightHanded
 
@@ -248,7 +248,7 @@ instance readNodeType :: Read NodeType where
 -- (?) UI print Glyphicon directly on text node
 --
 --    * convert "Glyphicon ForkAwesome" classNames to CharCode [1]
---    * bypass React "dangerousInnerHTML" via  vanilla JavaScript coerce [2]
+--    * bypass React "dangerousInnerHTML" via vanilla JavaScript coerce [2]
 --      (see "forkawesome.css" dist file for conversion matching)
 --
 -- [1] https://stackoverflow.com/a/54002856/6003907
