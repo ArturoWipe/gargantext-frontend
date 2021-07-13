@@ -161,6 +161,7 @@ formButton nodeType setNodeType =
 
 formChoiceSafe' :: forall item m
   .  Read item
+  => Show item
   => Array item
   -> item
   -> (item -> Effect m)
@@ -172,6 +173,7 @@ formChoiceSafe' arr def cbk prnt = formChoice' arr def cbk prnt
 
 formChoice' :: forall item m
   .  Read item
+  => Show item
   => Array item
   -> item
   -> (item -> Effect m)
@@ -183,14 +185,16 @@ formChoice' items def cbk prnt =
   [
     R2.select
     { className: "form-control with-icon-font"
-    , on: { change: \e -> cbk $ fromMaybe def $ read $ R.unsafeEventValue e }
+    , on: { change }
     } $
     map option items
   ]
 
   where
+    change e = cbk $ fromMaybe def $ read $ R.unsafeEventValue e
+
     option opt =
-      H.option { value: opt }
+      H.option { value: show opt }
       [ H.text $ prnt opt ]
 
 formButton' :: forall item m

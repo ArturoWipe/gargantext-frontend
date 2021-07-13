@@ -76,7 +76,7 @@ addNodeViewCpt = here.component "addNodeView" cpt where
 
     let
         print nt = charCodeIcon nt
-                <> nbsp 3
+                <> nbsp 4
                 <> translate EN nt -- @TODO "EN" assumption
 
         SettingsBox {edit} = settingsBox nodeType'
