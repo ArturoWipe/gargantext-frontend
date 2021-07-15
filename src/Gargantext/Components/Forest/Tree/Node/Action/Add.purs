@@ -76,7 +76,7 @@ addNodeViewCpt = here.component "addNodeView" cpt where
     nodeType' <- T.useLive T.unequal nodeType
 
     let
-        print nt = charCodeIcon nt true
+        print nt = charCodeIcon nt false
                 -- as we are printing within an HTML text node,
                 -- margins will directly rely on content text spacing
                 <> nbsp 4
