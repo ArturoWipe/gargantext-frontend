@@ -60,6 +60,10 @@ routerCpt = here.component "router" cpt where
   cpt { boxes: boxes@{ handed } } _ = do
     handed'       <- T.useLive T.unequal handed
 
+    -- adding a state live for a Prop *not used* by the MainPage component
+    -- (this box store the flag for displaying or not the sidebar)
+    showTree <- T.useLive T.unequal boxes.showTree
+
     let handedClassName = case handed' of
           LeftHanded  -> "left-handed"
           RightHanded -> "right-handed"
@@ -102,8 +106,14 @@ topBarCpt = here.component "topBar" cpt where
 
 mainPage :: R2.Leaf Props
 mainPage p = R.createElement mainPageCpt p []
-mainPageCpt :: R.Component Props
-mainPageCpt = here.component "mainPage" cpt where
+-- So every times the user show/hide the sidebar, the mainPage will re-render
+-- on some pages
+-- It can be problematic, like with the page displaying a Docs and
+-- its associated chart, as they will re-render each time ShowTree changes
+--
+-- By adding a React.memo here, it won't re-render on ShowTree changes
+mainPageCpt :: R.Memo Props
+mainPageCpt = R.memo' $ here.component "mainPage" cpt where
   cpt { boxes } _ = do
     pure $ MainPage.mainPage { boxes } [ renderRoute { boxes } ]
 
