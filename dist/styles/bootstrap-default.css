@@ -9963,8 +9963,12 @@ h3 {
   border-left: 1px solid #dee2e6;
 }
 
-.forest-layout-teaser {
+.forest-layout-bottom-teaser {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
+}
+
+.forest-layout-top-teaser {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
 }
 
 /*# sourceMappingURL=bootstrap-default.css.map */

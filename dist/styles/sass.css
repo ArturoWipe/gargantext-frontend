@@ -392,10 +392,6 @@ li .leaf:hover a.settings {
   visibility: visible;
 }
 
-.forest-layout-content > .tree {
-  margin-top: 20px;
-}
-
 .tree ul li {
   position: relative;
 }
@@ -568,7 +564,6 @@ li .leaf:hover a.settings {
 }
 
 .forest-layout {
-  padding-top: 8px;
   z-index: 909;
   position: fixed;
   height: calc(100vh - 56px);
@@ -583,30 +578,81 @@ li .leaf:hover a.settings {
   display: none;
 }
 
-.forest-layout-teaser {
+.forest-layout-action {
+  display: flex;
+}
+.right-handed .forest-layout-action {
+  padding-left: 16px;
+  padding-right: 8px;
+}
+
+.left-handed .forest-layout-action {
+  padding-left: 8px;
+  padding-right: 16px;
+}
+
+.right-handed .forest-layout-action {
+  flex-direction: row;
+}
+.right-handed .forest-layout-action__button {
+  margin-right: 16px;
+}
+
+.left-handed .forest-layout-action {
+  flex-direction: row-reverse;
+}
+.left-handed .forest-layout-action__button {
+  margin-left: 16px;
+}
+
+.forest-layout-bottom-teaser {
+  z-index: 1;
   pointer-events: none;
   position: fixed;
   bottom: 0;
   height: 24px;
   width: calc(16.6666666667% - 1px);
 }
-
-.right-handed .forest-layout-teaser {
+.right-handed .forest-layout-bottom-teaser {
   left: 0;
 }
 
-.left-handed .forest-layout-teaser {
+.left-handed .forest-layout-bottom-teaser {
   right: 0;
 }
 
-.left-handed .forest-layout {
+.forest-layout-top-teaser {
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  top: 0;
+  height: 24px;
+  width: calc(100% - 1px);
+}
+.right-handed .forest-layout-top-teaser {
+  left: 0;
+}
+
+.left-handed .forest-layout-top-teaser {
+  right: 0;
+}
+
+.forest-layout-content > ul.tree {
+  margin-top: 24px;
+  margin-bottom: 0;
+}
+.right-handed .forest-layout-content > ul.tree {
+  padding-left: 16px;
+  padding-right: 8px;
+}
+
+.left-handed .forest-layout-content > ul.tree {
   padding-left: 8px;
   padding-right: 16px;
 }
 
-.right-handed .forest-layout {
-  padding-left: 16px;
-  padding-right: 8px;
+.forest-layout-content > ul.tree:last-child {
+  margin-bottom: 24px;
 }
 
 .code-editor .editor .code-area {

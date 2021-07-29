@@ -1,16 +1,5 @@
-/// Abtstract
-
-/// Add alpha channel to a color
-/// @access public
-/// @param {Color} $color - color to work with
-/// @param {Number} $percentage - percentage of `$color` opacity
-/// @return {Color}
-@function mixAlpha($color, $percentage) {
-  @return rgba($color, $percentage);
-}
-
-
 /// Misc
+///--------------------------
 
 .with-icon-font {
   font-family: ForkAwesome, $font-family-base;
@@ -18,6 +7,7 @@
 
 
 /// Tree
+///--------------------------
 
 /// (?) @TODO: More SASS structure (eg. exporting variables into component
 ///            SASS files)
@@ -31,6 +21,9 @@
   border-left: 1px solid $body-bg;
   &:hover { border-left: 1px solid $border-color; }
 }
-.forest-layout-teaser {
+.forest-layout-bottom-teaser {
   background: linear-gradient(to bottom, mixAlpha($body-bg, 0%) 0%, mixAlpha($body-bg, 100%) 45%);
+}
+.forest-layout-top-teaser {
+  background: linear-gradient(to top, mixAlpha($body-bg, 0%) 0%, mixAlpha($body-bg, 100%) 45%);
 }

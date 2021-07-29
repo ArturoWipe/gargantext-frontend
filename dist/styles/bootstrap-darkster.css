@@ -10011,8 +10011,12 @@ h3 {
   border-left: 1px solid #dee2e6;
 }
 
-.forest-layout-teaser {
+.forest-layout-bottom-teaser {
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, black 45%);
+}
+
+.forest-layout-top-teaser {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0) 0%, black 45%);
 }
 
 .navbar-dark.bg-primary {

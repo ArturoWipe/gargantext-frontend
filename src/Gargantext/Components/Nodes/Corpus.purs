@@ -71,13 +71,12 @@ corpusLayoutMainCpt = here.component "corpusLayoutMain" cpt
         H.div {} [
           H.div { className: "row" } [
             H.div { className: "col-1" } [ viewTypeSelector {state: viewType} ]
-          , H.div { className: "col-1" } [ FV.homeButton ]
           ]
         ]
       , H.div {} [corpusLayoutSelection {state: viewType, key, session, nodeId, tasks, reloadForest}]
       ]
 
-type SelectionProps = 
+type SelectionProps =
   ( nodeId  :: Int
   , key     :: String
   , session :: Session
@@ -134,7 +133,7 @@ corpusLayoutViewCpt = here.component "corpusLayoutView" cpt
       fieldsS <- T.useBox fieldsWithIndex
       fields' <- T.useLive T.unequal fieldsS
       fieldsRef <- R.useRef fields
-      
+
       -- handle props change of fields
       R.useEffect1' fields $ do
         if R.readRef fieldsRef == fields then
@@ -179,7 +178,7 @@ corpusLayoutViewCpt = here.component "corpusLayoutView" cpt
 
     onClickAdd :: forall e. T.Box FTFieldsWithIndex -> e -> Effect Unit
     onClickAdd fieldsS _ = do
-      T.modify_ (\(FTFieldsWithIndex fs) -> FTFieldsWithIndex $ 
+      T.modify_ (\(FTFieldsWithIndex fs) -> FTFieldsWithIndex $
         List.snoc fs $ { idx: List.length fs, ftField: defaultField }) fieldsS
 
 

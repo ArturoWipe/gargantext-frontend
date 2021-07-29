@@ -105,7 +105,6 @@ frameLayoutViewCpt = here.component "frameLayoutView" cpt
         _              ->
           pure $ H.div{} [
             FV.backButton
-            , FV.homeButton
             , H.div { className : "frame"
                     , rows: "100%,*" }
               [ -- H.script { src: "https://visio.gargantext.org/external_api.js"} [],
@@ -142,7 +141,7 @@ nodeFrameVisioCpt = here.component "nodeFrameVisio" cpt
           Just r  -> do
             api <- JM.jitsiMeetAPI (WURL.host url) { parentNode: r, roomName: frame_id }
             here.log2 "[nodeFrameVisio] api" api
-      
+
       pure $ H.div { ref } [ H.text $ WURL.host url ]
 
 type LoadProps   = ( nodeId  :: Int
