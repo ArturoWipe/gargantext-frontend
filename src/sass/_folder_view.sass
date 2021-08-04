@@ -1,3 +1,5 @@
+@use "./abstract/_members" as *
+
 .fv.folders
   display: grid
   grid-template-columns: 100px 100px 100px
@@ -13,3 +15,20 @@
 .fv.btn
   size: 100%
   width:100%
+
+.corpus-layout-selection
+  $self: &
+
+  display: flex
+
+  &__code
+    padding-left: space-x(2)
+    padding-right: space-x(2)
+
+  &--view-type-code
+
+    #{ $self }__folders
+      width: 50%
+
+    #{ $self }__code
+      width: 50%

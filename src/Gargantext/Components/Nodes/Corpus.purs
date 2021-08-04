@@ -1,23 +1,20 @@
 module Gargantext.Components.Nodes.Corpus where
 
+import DOM.Simple.Console (log2)
 import Data.Array as A
 import Data.Either (Either(..))
-import Data.Generic.Rep (class Generic)
 import Data.Eq.Generic (genericEq)
-import Data.Show.Generic (genericShow)
+import Data.Generic.Rep (class Generic)
+import Data.List (intercalate)
 import Data.List as List
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Show.Generic (genericShow)
+import Data.String.Extra (kebabCase)
 import Data.Tuple (Tuple(..))
-import DOM.Simple.Console (log2)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_, throwError)
 import Effect.Class (liftEffect)
 import Effect.Exception (error)
-import Reactix as R
-import Reactix.DOM.HTML as H
-import Simple.JSON as JSON
-import Toestand as T
-
 import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.CodeEditor as CE
 import Gargantext.Components.FolderView as FV
@@ -27,13 +24,17 @@ import Gargantext.Components.Nodes.Corpus.Types (CorpusData, Hyperdata(..))
 import Gargantext.Components.Nodes.Types (FTField, FTFieldList(..), FTFieldWithIndex, FTFieldsWithIndex(..), Field(..), FieldType(..), Hash, Index, defaultField, defaultHaskell', defaultJSON', defaultMarkdown', defaultPython')
 import Gargantext.Data.Array as GDA
 import Gargantext.Hooks.Loader (useLoader)
-import Gargantext.Prelude (class Eq, class Show, Unit, bind, discard, pure, show, unit, ($), (+), (-), (<), (<$>), (<<<), (<>), (==), (>))
+import Gargantext.Prelude (class Eq, class Show, Unit, bind, discard, pure, show, unit, ($), (+), (-), (<), (<$>), (<<<), (<>), (==), (>), eq)
 import Gargantext.Routes (SessionRoute(Children, NodeAPI))
 import Gargantext.Sessions (Session, get, put, sessionId)
 import Gargantext.Types (AffTableResult, NodeType(..))
 import Gargantext.Utils.Crypto as Crypto
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
+import Reactix as R
+import Reactix.DOM.HTML as H
+import Simple.JSON as JSON
+import Toestand as T
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Corpus"
@@ -94,7 +95,27 @@ corpusLayoutSelectionCpt = here.component "corpusLayoutSelection" cpt where
     state' <- T.useLive T.unequal state
     viewType <- T.read state
 
-    pure $ renderContent viewType nodeId session key tasks reloadForest
+    -- pure $ renderContent viewType nodeId session key tasks reloadForest
+    pure $
+
+      H.div
+      { className: intercalate " "
+          [ "corpus-layout-selection"
+          , "corpus-layout-selection--view-type-" <> (kebabCase $ show viewType)
+          ]
+      }
+      [
+        H.div
+        { className: "corpus-layout-selection__folders"
+        }
+        [ renderContent Folders nodeId session key tasks reloadForest ]
+      ,
+        R2.if' (viewType `eq` Code) $
+          H.div
+          { className: "corpus-layout-selection__code"
+          }
+          [ renderContent Code nodeId session key tasks reloadForest ]
+      ]
 
   renderContent Folders nodeId session key tasks reloadForest = FV.folderView { nodeId, session, backFolder: true, tasks, reloadForest }
   renderContent Code nodeId session key tasks _ = corpusLayoutWithKey { key, nodeId, session }
@@ -142,23 +163,39 @@ corpusLayoutViewCpt = here.component "corpusLayoutView" cpt
           R.setRef fieldsRef fields
           T.write_ fieldsWithIndex fieldsS
 
-      pure $ H.div {}
-        [ H.div { className: "row" }
-          [ H.div { className: "btn btn-primary " <> (saveEnabled fieldsWithIndex fields')
-                  , on: { click: onClickSave {fields: fields', nodeId, reload, session} }
-                  }
-            [ H.span { className: "fa fa-floppy-o" } [  ] ]
+      pure $
+
+        H.div
+        {}
+        [
+          H.div
+          { className: "mb-4" }
+          [
+            H.div
+            { className: "btn btn-primary " <> (saveEnabled fieldsWithIndex fields')
+            , on: { click: onClickSave {fields: fields', nodeId, reload, session} }
+            }
+            [ H.span { className: "fa fa-floppy-o" } [ ] ]
           ]
-        , H.div {}
-          [ fieldsCodeEditor { fields: fieldsS
-                             , nodeId
-                             , session } [] ]
-        , H.div { className: "row" }
-          [ H.div { className: "btn btn-primary"
-                  , on: { click: onClickAdd fieldsS }
-                  }
-            [ H.span { className: "fa fa-plus" } [  ]
-            ]
+        ,
+          H.div
+          {}
+          [
+            fieldsCodeEditor
+            { fields: fieldsS
+            , nodeId
+            , session }
+            []
+          ]
+        ,
+          H.div
+          { className: "mb-4" }
+          [
+            H.div
+            { className: "btn btn-primary"
+            , on: { click: onClickAdd fieldsS }
+            }
+            [ H.span { className: "fa fa-plus" } [  ] ]
           ]
         ]
 
@@ -263,11 +300,11 @@ fieldCodeEditorWrapper props = R.createElement fieldCodeEditorWrapperCpt props [
 fieldCodeEditorWrapperCpt :: R.Component FieldCodeEditorProps
 fieldCodeEditorWrapperCpt = here.component "fieldCodeEditorWrapperCpt" cpt
   where
-    cpt props@{canMoveDown, canMoveUp, field: Field {name, typ}, onMoveDown, onMoveUp, onRemove, onRename} _ = do
-      pure $ H.div { className: "row card" } [
+    cpt props@{canMoveDown, canMoveUp, field: Field { name }, onMoveDown, onMoveUp, onRemove, onRename} _ = do
+      pure $ H.div { className: "card mb-3" } [
         H.div { className: "card-header" } [
-          H.div { className: "code-editor-heading row" } [
-              H.div { className: "col-4" } [
+          H.div { className: "code-editor-heading row no-gutters justify-content-between" } [
+              H.div { className: "col-5" } [
                  inputWithEnter { onBlur: onRename
                                 , onEnter: \_ -> pure unit
                                 , onValueChanged: onRename
@@ -277,9 +314,8 @@ fieldCodeEditorWrapperCpt = here.component "fieldCodeEditorWrapperCpt" cpt
                                 , placeholder: "Enter file name"
                                 , type: "text" }
               ]
-            , H.div { className: "col-7" } []
-            , H.div { className: "buttons-right col-1" } ([
-                H.div { className: "btn btn-danger"
+            , H.div { className: "d-flex flex-column" } ([
+                H.div { className: "btn btn-danger mb-1"
                       , on: { click: \_ -> onRemove unit }
                       } [
                   H.span { className: "fa fa-trash" } [  ]

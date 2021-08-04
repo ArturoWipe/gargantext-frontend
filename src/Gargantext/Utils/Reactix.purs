@@ -437,3 +437,13 @@ boundingRect els =
                            , y: miny
                            , width: maxx - minx
                            , height: maxy - miny }
+
+-- | One-liner `if` simplifying render writing
+-- | (best for one child)
+if' :: Boolean -> R.Element -> R.Element
+if' = if _ then _ else mempty
+
+-- | One-liner `if` simplifying render writing
+-- | (best for multiple children)
+if_ :: Boolean -> Array (R.Element) -> R.Element
+if_ pred arr = if pred then (R.fragment arr) else mempty
