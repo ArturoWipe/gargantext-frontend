@@ -1,34 +1,31 @@
 module Gargantext.Components.Nodes.Corpus where
 
 import DOM.Simple.Console (log2)
+import Data.Array (snoc)
 import Data.Array as A
 import Data.Either (Either(..))
-import Data.Eq.Generic (genericEq)
-import Data.Generic.Rep (class Generic)
-import Data.List (intercalate)
 import Data.List as List
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Show.Generic (genericShow)
-import Data.String.Extra (kebabCase)
-import Data.Tuple (Tuple(..))
+import Data.Nullable (null)
+import Data.UUID as UUID
 import Effect (Effect)
-import Effect.Aff (Aff, launchAff_, throwError)
-import Effect.Class (liftEffect)
+import Effect.Aff (Aff, throwError)
 import Effect.Exception (error)
 import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.CodeEditor as CE
 import Gargantext.Components.FolderView as FV
 import Gargantext.Components.InputWithEnter (inputWithEnter)
 import Gargantext.Components.Node (NodePoly(..), HyperdataList)
-import Gargantext.Components.Nodes.Corpus.Types (CorpusData, Hyperdata(..))
-import Gargantext.Components.Nodes.Types (FTField, FTFieldList(..), FTFieldWithIndex, FTFieldsWithIndex(..), Field(..), FieldType(..), Hash, Index, defaultField, defaultHaskell', defaultJSON', defaultMarkdown', defaultPython')
+import Gargantext.Components.Nodes.Corpus.Types (CorpusData, Hyperdata)
+import Gargantext.Components.Nodes.Types (FTField, FTFieldWithIndex, FTFieldsWithIndex(..), Field(..), FieldType(..), Hash, Index, defaultHaskell', defaultJSON', defaultMarkdown', defaultPython')
 import Gargantext.Data.Array as GDA
-import Gargantext.Hooks.Loader (useLoader)
-import Gargantext.Prelude (class Eq, class Show, Unit, bind, discard, pure, show, unit, ($), (+), (-), (<), (<$>), (<<<), (<>), (==), (>), eq)
-import Gargantext.Routes (SessionRoute(Children, NodeAPI))
+import Gargantext.Prelude (Unit, bind, discard, pure, show, unit, ($), (<>), const, (<<<), (+), (==), (-), (<), (>), (<$>))
+import Gargantext.Routes (SessionRoute(Children, NodeAPI), Tile)
+import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, get, put, sessionId)
-import Gargantext.Types (AffTableResult, NodeType(..))
+import Gargantext.Types (NodeType(..), AffTableResult)
 import Gargantext.Utils.Crypto as Crypto
+import Gargantext.Utils.Popover as Popover
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
@@ -39,24 +36,46 @@ import Toestand as T
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Corpus"
 
-type Props = ( nodeId  :: Int, session :: Session, tasks :: T.Box GAT.Storage, reloadForest :: T2.ReloadS )
+type Props =
+  ( nodeId          :: Int
+  , session         :: Session
+  , tasks           :: T.Box GAT.Storage
+  , reloadForest    :: T2.ReloadS
+  , tileAxisXList   :: T.Box (Array (Record Tile))
+  , tileAxisYList   :: T.Box (Array (Record Tile))
+  )
 
 corpusLayout :: R2.Leaf Props
 corpusLayout props = R.createElement corpusLayoutCpt props []
 
 corpusLayoutCpt :: R.Component Props
 corpusLayoutCpt = here.component "corpusLayout" cpt where
-  cpt { nodeId, session, tasks, reloadForest } _ = do
-    pure $ corpusLayoutMain { key, nodeId, session, tasks, reloadForest }
+  cpt { nodeId
+      , session
+      , tasks
+      , reloadForest
+      , tileAxisXList
+      , tileAxisYList
+      } _ = do
+    pure $ corpusLayoutMain { key
+                            , nodeId
+                            , session
+                            , tasks
+                            , reloadForest
+                            , tileAxisXList
+                            , tileAxisYList
+                            }
       where
         key = show (sessionId session) <> "-" <> show nodeId
 
 type KeyProps =
-  ( nodeId  :: Int
-  , key     :: String
-  , session :: Session
-  , tasks   :: T.Box GAT.Storage
-  , reloadForest :: T2.ReloadS
+  ( nodeId          :: Int
+  , key             :: String
+  , session         :: Session
+  , tasks           :: T.Box GAT.Storage
+  , reloadForest    :: T2.ReloadS
+  , tileAxisXList   :: T.Box (Array (Record Tile))
+  , tileAxisYList   :: T.Box (Array (Record Tile))
   )
 
 corpusLayoutMain :: R2.Leaf KeyProps
@@ -65,158 +84,112 @@ corpusLayoutMain props = R.createElement corpusLayoutMainCpt props []
 corpusLayoutMainCpt :: R.Component KeyProps
 corpusLayoutMainCpt = here.component "corpusLayoutMain" cpt
   where
-    cpt { nodeId, key, session, tasks, reloadForest } _ = do
-      viewType <- T.useBox Folders
-
-      pure $ H.div {} [
-        H.div {} [
-          H.div { className: "row" } [
-            H.div { className: "col-1" } [ viewTypeSelector {state: viewType} ]
-          ]
-        ]
-      , H.div {} [corpusLayoutSelection {state: viewType, key, session, nodeId, tasks, reloadForest}]
-      ]
-
-type SelectionProps =
-  ( nodeId  :: Int
-  , key     :: String
-  , session :: Session
-  , state   :: T.Box ViewType
-  , tasks   :: T.Box GAT.Storage
-  , reloadForest :: T2.ReloadS
-  )
-
-corpusLayoutSelection :: R2.Leaf SelectionProps
-corpusLayoutSelection props = R.createElement corpusLayoutSelectionCpt props []
-
-corpusLayoutSelectionCpt :: R.Component SelectionProps
-corpusLayoutSelectionCpt = here.component "corpusLayoutSelection" cpt where
-  cpt { nodeId, session, key, state, tasks, reloadForest} _ = do
-    state' <- T.useLive T.unequal state
-    viewType <- T.read state
-
-    -- pure $ renderContent viewType nodeId session key tasks reloadForest
-    pure $
-
-      H.div
-      { className: intercalate " "
-          [ "corpus-layout-selection"
-          , "corpus-layout-selection--view-type-" <> (kebabCase $ show viewType)
-          ]
-      }
-      [
-        H.div
-        { className: "corpus-layout-selection__folders"
-        }
-        [ renderContent Folders nodeId session key tasks reloadForest ]
-      ,
-        R2.if' (viewType `eq` Code) $
-          H.div
-          { className: "corpus-layout-selection__code"
-          }
-          [ renderContent Code nodeId session key tasks reloadForest ]
-      ]
-
-  renderContent Folders nodeId session key tasks reloadForest = FV.folderView { nodeId, session, backFolder: true, tasks, reloadForest }
-  renderContent Code nodeId session key tasks _ = corpusLayoutWithKey { key, nodeId, session }
-
-type CorpusKeyProps =
-  ( nodeId  :: Int
-  , key     :: String
-  , session :: Session
-  )
-
-corpusLayoutWithKey :: R2.Leaf CorpusKeyProps
-corpusLayoutWithKey props = R.createElement corpusLayoutWithKeyCpt props []
-
-corpusLayoutWithKeyCpt :: R.Component CorpusKeyProps
-corpusLayoutWithKeyCpt = here.component "corpusLayoutWithKey" cpt where
-  cpt { nodeId, session } _ = do
-    reload <- T.useBox T2.newReload
-    reload' <- T.useLive T.unequal reload
-    useLoader { nodeId, reload: reload', session } loadCorpusWithReload $
-      \corpus -> corpusLayoutView { corpus, nodeId, reload, session }
-
-type ViewProps =
-  ( corpus  :: NodePoly Hyperdata
-  , nodeId  :: Int
-  , reload  :: T2.ReloadS
-  , session :: Session
-  )
-
-corpusLayoutView :: Record ViewProps -> R.Element
-corpusLayoutView props = R.createElement corpusLayoutViewCpt props []
-corpusLayoutViewCpt :: R.Component ViewProps
-corpusLayoutViewCpt = here.component "corpusLayoutView" cpt
-  where
-    cpt {corpus: (NodePoly {hyperdata: Hyperdata {fields: FTFieldList fields}}), nodeId, reload, session} _ = do
-      let fieldsWithIndex = FTFieldsWithIndex $ List.mapWithIndex (\idx -> \ftField -> { idx, ftField }) fields
-      fieldsS <- T.useBox fieldsWithIndex
-      fields' <- T.useLive T.unequal fieldsS
-      fieldsRef <- R.useRef fields
-
-      -- handle props change of fields
-      R.useEffect1' fields $ do
-        if R.readRef fieldsRef == fields then
-          pure unit
-        else do
-          R.setRef fieldsRef fields
-          T.write_ fieldsWithIndex fieldsS
+    cpt props@{ nodeId, session, tasks, reloadForest } _ = do
+      -- States
+      popoverRef <- R.useRef null
+      -- @addXTileCallback: open Code Corpus View into a new horizontal tile
+      addXTileCallback <- pure $ const do
+        id <- UUID.genUUID
+        newTile <- pure { id, route: GR.CorpusCode (sessionId session) nodeId }
+        T.modify_ (\arr -> snoc arr newTile) props.tileAxisXList
+        Popover.setOpen popoverRef false
+      -- @addYTileCallback: open Code Corpus View into a new vertical tile
+      addYTileCallback <- pure $ const do
+        id <- UUID.genUUID
+        newTile <- pure { id, route: GR.CorpusCode (sessionId session) nodeId }
+        T.modify_ (\arr -> snoc arr newTile) props.tileAxisYList
+        Popover.setOpen popoverRef false
 
       pure $
 
         H.div
         {}
         [
-          H.div
-          { className: "mb-4" }
+          Popover.popover
+          { arrow: false
+          , open: false
+          , onClose: const $ pure unit
+          , onOpen: const $ pure unit
+          , ref: popoverRef
+          }
           [
-            H.div
-            { className: "btn btn-primary " <> (saveEnabled fieldsWithIndex fields')
-            , on: { click: onClickSave {fields: fields', nodeId, reload, session} }
-            }
-            [ H.span { className: "fa fa-floppy-o" } [ ] ]
+            H.button
+            { className: "btn btn-primary" }
+            [
+              H.i { className: "fa fa-code" } []
+            ]
+          ,
+            H.div { className: "popover-content" }
+            [
+              H.div { className: "card" }
+              [
+                H.div { className: "list-group" }
+                [
+                  H.ul {}
+                  [
+                    -- Add vertical tile
+                    H.li {}
+                    [
+                      H.button
+                      { className: "btn btn-link"
+                      , on: { click: addYTileCallback }
+                      }
+                      [
+                        H.i { className: "fa fa-angle-double-right mr-2" } []
+                      ,
+                        H.text "open on new tile"
+                      ]
+                    ]
+                  ,
+                    -- Add horizontal tile
+                    H.li {}
+                    [
+                      H.button
+                      { className: "btn btn-link"
+                      , on: { click: addXTileCallback }
+                      }
+                      [
+                        H.i { className: "fa fa-angle-double-down mr-2" } []
+                      ,
+                        H.text "open on new tile"
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
           ]
+
         ,
-          H.div
-          {}
-          [
-            fieldsCodeEditor
-            { fields: fieldsS
-            , nodeId
-            , session }
-            []
-          ]
-        ,
-          H.div
-          { className: "mb-4" }
-          [
-            H.div
-            { className: "btn btn-primary"
-            , on: { click: onClickAdd fieldsS }
-            }
-            [ H.span { className: "fa fa-plus" } [  ] ]
-          ]
+          FV.folderView
+          { nodeId
+          , session
+          , backFolder: true
+          , tasks
+          , reloadForest
+          }
         ]
 
-    saveEnabled :: FTFieldsWithIndex -> FTFieldsWithIndex -> String
-    saveEnabled fs fsS = if fs == fsS then "disabled" else "enabled"
 
-    onClickSave :: forall e. { fields :: FTFieldsWithIndex
-                             , nodeId :: Int
-                             , reload :: T2.ReloadS
-                             , session :: Session } -> e -> Effect Unit
-    onClickSave {fields: FTFieldsWithIndex fields, nodeId, reload, session} _ = do
-      launchAff_ do
-        saveCorpus $ { hyperdata: Hyperdata {fields: FTFieldList $ (_.ftField) <$> fields}
-                     , nodeId
-                     , session }
-        liftEffect $ T2.reload reload
 
-    onClickAdd :: forall e. T.Box FTFieldsWithIndex -> e -> Effect Unit
-    onClickAdd fieldsS _ = do
-      T.modify_ (\(FTFieldsWithIndex fs) -> FTFieldsWithIndex $
-        List.snoc fs $ { idx: List.length fs, ftField: defaultField }) fieldsS
+loadCorpusWithChild :: Record LoadProps -> Aff CorpusData
+loadCorpusWithChild { nodeId: childId, session } = do
+  -- fetch corpus via lists parentId
+  (NodePoly {parentId: corpusId} :: NodePoly {}) <- get session $ listNodeRoute childId ""
+  corpusNode     <-  get session $ corpusNodeRoute     corpusId ""
+  defaultListIds <- (get session $ defaultListIdsRoute corpusId)
+                    :: forall a. JSON.ReadForeign a => AffTableResult (NodePoly a)
+  case (A.head defaultListIds.docs :: Maybe (NodePoly HyperdataList)) of
+    Just (NodePoly { id: defaultListId }) ->
+      pure { corpusId, corpusNode, defaultListId }
+    Nothing ->
+      throwError $ error "Missing default list"
+  where
+    corpusNodeRoute     = NodeAPI Corpus <<< Just
+    listNodeRoute       = NodeAPI Node <<< Just
+    defaultListIdsRoute = Children NodeList 0 1 Nothing <<< Just
+
+-----------------------------------
 
 
 type FieldsCodeEditorProps =
@@ -522,25 +495,6 @@ loadCorpus {nodeId, session} = do
     corpusNodeRoute     = NodeAPI Corpus <<< Just
     defaultListIdsRoute = Children NodeList 0 1 Nothing <<< Just
 
-
-loadCorpusWithChild :: Record LoadProps -> Aff CorpusData
-loadCorpusWithChild { nodeId: childId, session } = do
-  -- fetch corpus via lists parentId
-  (NodePoly {parentId: corpusId} :: NodePoly {}) <- get session $ listNodeRoute childId ""
-  corpusNode     <-  get session $ corpusNodeRoute     corpusId ""
-  defaultListIds <- (get session $ defaultListIdsRoute corpusId)
-                    :: forall a. JSON.ReadForeign a => AffTableResult (NodePoly a)
-  case (A.head defaultListIds.docs :: Maybe (NodePoly HyperdataList)) of
-    Just (NodePoly { id: defaultListId }) ->
-      pure { corpusId, corpusNode, defaultListId }
-    Nothing ->
-      throwError $ error "Missing default list"
-  where
-    corpusNodeRoute     = NodeAPI Corpus <<< Just
-    listNodeRoute       = NodeAPI Node <<< Just
-    defaultListIdsRoute = Children NodeList 0 1 Nothing <<< Just
-
-
 type LoadWithReloadProps =
   (
     reload :: T2.Reload
@@ -550,44 +504,4 @@ type LoadWithReloadProps =
 
 -- Just to make reloading effective
 loadCorpusWithChildAndReload :: Record LoadWithReloadProps -> Aff CorpusData
-loadCorpusWithChildAndReload {nodeId, reload, session} = loadCorpusWithChild {nodeId, session}
-
-data ViewType = Code | Folders
-derive instance Generic ViewType _
-instance Eq ViewType where
-  eq = genericEq
-instance Show ViewType where
-  show = genericShow
-
-type ViewTypeSelectorProps =
-  (
-    state :: T.Box ViewType
-  )
-
-viewTypeSelector :: Record ViewTypeSelectorProps -> R.Element
-viewTypeSelector p = R.createElement viewTypeSelectorCpt p []
-
-viewTypeSelectorCpt :: R.Component ViewTypeSelectorProps
-viewTypeSelectorCpt = here.component "viewTypeSelector" cpt
-  where
-    cpt {state} _ = do
-      state' <- T.useLive T.unequal state
-
-      pure $ H.div { className: "btn-group"
-                   , role: "group" } [
-          viewTypeButton Folders state' state
-        , viewTypeButton Code state' state
-        ]
-
-    viewTypeButton viewType state' state =
-      H.button { className: "btn btn-primary" <> active
-               , on: { click: \_ -> T.write viewType state }
-               , type: "button"
-               } [
-        H.i { className: "fa " <> (icon viewType) } []
-      ]
-      where
-        active = if viewType == state' then " active" else ""
-
-    icon Folders = "fa-folder"
-    icon Code = "fa-code"
+loadCorpusWithChildAndReload {nodeId, session} = loadCorpusWithChild {nodeId, session}

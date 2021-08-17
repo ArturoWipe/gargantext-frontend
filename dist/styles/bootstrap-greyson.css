@@ -9706,17 +9706,11 @@ h3 {
 }
 
 .right-handed .forest-layout {
-  border-right: 1px solid #fff;
-}
-.right-handed .forest-layout:hover {
-  border-right: 1px solid #dee2e6;
+  border-right: 2px solid #dee2e6;
 }
 
 .left-handed .forest-layout {
-  border-left: 1px solid #fff;
-}
-.left-handed .forest-layout:hover {
-  border-left: 1px solid #dee2e6;
+  border-left: 2px solid #dee2e6;
 }
 
 .forest-layout-bottom-teaser {
@@ -9725,6 +9719,20 @@ h3 {
 
 .forest-layout-top-teaser {
   background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
+}
+
+.main-page__horizontal-tiles {
+  border-top: 2px solid #dee2e6;
+}
+.main-page__horizontal-tiles .tile-block:not(:first-child) {
+  border-left: 2px solid #dee2e6;
+}
+
+.main-page__vertical-tiles {
+  border-left: 2px solid #dee2e6;
+}
+.main-page__vertical-tiles .tile-block:not(:first-child) {
+  border-top: 2px solid #dee2e6;
 }
 
 /*# sourceMappingURL=bootstrap-greyson.css.map */
