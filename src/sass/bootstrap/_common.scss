@@ -1,3 +1,5 @@
+@use '../abstract/_members' as main;
+
 /// Misc
 ///--------------------------
 
@@ -9,25 +11,35 @@
 /// Tree
 ///--------------------------
 
-/// (?) @TODO: More SASS structure (eg. exporting variables into component
+/// (?) @TODO: More SASS structure (eg. exporting theme variables into component
 ///            SASS files)
-///            For now we have cut-copy the rules here
-///
-/// Available solutions
-///   * https://lukeliutingchun.medium.com/scss-implement-styles-for-multiple-themes-with-the-content-directive-272da62e875a
+.forest-layout {
 
-.right-handed .forest-layout {
-  border-right: 2px solid $border-color;
+  @include main.right-handed {
+    border-right: 2px solid $border-color;
+  }
+
+  @include main.left-handed {
+    border-left: 2px solid $border-color;
+  }
 }
-.left-handed .forest-layout {
-  border-left: 2px solid $border-color;
-}
+
 .forest-layout-bottom-teaser {
-  background: linear-gradient(to bottom, mixAlpha($body-bg, 0%) 0%, mixAlpha($body-bg, 100%) 45%);
+  background: linear-gradient(
+    to bottom,
+    mixAlpha($body-bg, 0%) 0%,
+    mixAlpha($body-bg, 100%) 45%
+  );
 }
+
 .forest-layout-top-teaser {
-  background: linear-gradient(to top, mixAlpha($body-bg, 0%) 0%, mixAlpha($body-bg, 100%) 45%);
+  background: linear-gradient(
+    to top,
+    mixAlpha($body-bg, 0%) 0%,
+    mixAlpha($body-bg, 100%) 45%
+  );
 }
+
 .main-page__horizontal-tiles {
   border-top: 2px solid $border-color;
 
@@ -35,6 +47,7 @@
     border-left: 2px solid $border-color;
   }
 }
+
 .main-page__vertical-tiles {
   border-left: 2px solid $border-color;
 

@@ -1066,18 +1066,4 @@ ul li {
   width: 100%;
 }
 
-.corpus-layout-selection {
-  display: flex;
-}
-.corpus-layout-selection__code {
-  padding-left: 16px;
-  padding-right: 16px;
-}
-.corpus-layout-selection--view-type-code .corpus-layout-selection__folders {
-  width: 50%;
-}
-.corpus-layout-selection--view-type-code .corpus-layout-selection__code {
-  width: 50%;
-}
-
 /*# sourceMappingURL=sass.css.map */
