@@ -31,6 +31,7 @@ import Gargantext.Components.Nodes.Frame (frameLayout)
 import Gargantext.Components.Nodes.Home (homeLayout)
 import Gargantext.Components.Nodes.Lists as Lists
 import Gargantext.Components.Nodes.Texts as Texts
+import Gargantext.Components.Tile (tileBlock)
 import Gargantext.Components.TopBar as TopBar
 import Gargantext.Config (defaultFrontends, defaultBackends)
 import Gargantext.Ends (Backend)
@@ -164,6 +165,9 @@ mainPageCpt = here.component "mainPage" cpt where
                 , key: UUID.toString tile.id
                 , closeCallback: deleteTile tile boxes.tileAxisYList
                 }
+                [
+                  renderRoute { boxes, route: tile.route }
+                ]
         ]
 
       ,
@@ -183,44 +187,11 @@ mainPageCpt = here.component "mainPage" cpt where
               , key: UUID.toString tile.id
               , closeCallback: deleteTile tile boxes.tileAxisXList
               }
+              [
+                renderRoute { boxes, route: tile.route }
+              ]
       ]
 
-type TileBlockProps =
-  ( boxes         :: Boxes
-  , tile          :: Record Tile
-  , key           :: String
-  , closeCallback :: Unit -> Effect Unit
-  )
-
-tileBlock :: R2.Leaf TileBlockProps
-tileBlock p = R.createElement tileBlockCpt p []
-
-tileBlockCpt :: R.Component TileBlockProps
-tileBlockCpt = here.component "tileBlock" cpt where
-  cpt { boxes, tile: { route }, closeCallback } _ = do
-    -- Render
-    pure $
-
-      H.div
-      { className: "tile-block" }
-      [
-        H.div { className: "tile-block__header"}
-        [
-          H.i
-          { className: "btn fa fa-times"
-          , on: { click: closeCallback }
-          }
-          []
-        ]
-      ,
-        H.div { className: "tile-block__body" }
-        [
-          renderRoute
-          { boxes
-          , route
-          }
-        ]
-      ]
 
 forest :: R2.Leaf Props
 forest p = R.createElement forestCpt p []

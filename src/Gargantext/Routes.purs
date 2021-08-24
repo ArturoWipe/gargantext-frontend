@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.UUID (UUID)
-import Gargantext.Types (ChartOpts, ChartType, CorpusMetricOpts, CTabNgramType, Id, Limit, ListId, DocId, ContactId, NgramsGetOpts, NgramsGetTableAllOpts, NodeType, Offset, OrderBy, SearchOpts, SessionId, TabSubType, TabType, TermList)
+import Gargantext.Types (ChartOpts, ChartType, CorpusMetricOpts, CTabNgramType, Id, Limit, ListId, DocId, NgramsGetOpts, NgramsGetTableAllOpts, NodeType, Offset, OrderBy, SearchOpts, SessionId, TabSubType, TabType, TermList)
 import Gargantext.Types as GT
 
 data AppRoute
@@ -96,7 +96,7 @@ appPath (FolderShared s i)       = "folderShared/"  <> show s <> "/" <> show i
 appPath (Team s i)               = "team/"          <> show s <> "/" <> show i
 appPath (CorpusDocument s c l i) = "corpus/" <> show s <> "/" <> show c <> "/list/" <> show l <> "/document/" <> show i
 appPath (Corpus s i)             = "corpus/"     <> show s <> "/" <> show i
-appPath (CorpusCode s i)         = "corpus/"     <> show s <> "/" <> show i <> "/code"
+appPath (CorpusCode s i)         = "corpusCode/" <> show s <> "/" <> show i
 appPath (Document s l i)         = "list/"       <> show s <> "/" <> show l <> "/document/" <> show i
 appPath (Dashboard s i)          = "dashboard/"  <> show s <> "/" <> show i
 appPath (PGraphExplorer s i)     = "graph/"      <> show s <> "/" <> show i

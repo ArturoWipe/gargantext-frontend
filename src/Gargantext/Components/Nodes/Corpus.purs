@@ -1,6 +1,6 @@
 module Gargantext.Components.Nodes.Corpus where
 
-import DOM.Simple.Console (log2)
+import DOM.Simple.Console (log, log2)
 import Data.Array (snoc)
 import Data.Array as A
 import Data.Either (Either(..))
@@ -18,7 +18,9 @@ import Gargantext.Components.InputWithEnter (inputWithEnter)
 import Gargantext.Components.Node (NodePoly(..), HyperdataList)
 import Gargantext.Components.Nodes.Corpus.Types (CorpusData, Hyperdata)
 import Gargantext.Components.Nodes.Types (FTField, FTFieldWithIndex, FTFieldsWithIndex(..), Field(..), FieldType(..), Hash, Index, defaultHaskell', defaultJSON', defaultMarkdown', defaultPython')
+import Gargantext.Components.Tile (tileContext)
 import Gargantext.Data.Array as GDA
+import Gargantext.Hooks.LinkHandler (useLinkHandler)
 import Gargantext.Prelude (Unit, bind, discard, pure, show, unit, ($), (<>), const, (<<<), (+), (==), (-), (<), (>), (<$>))
 import Gargantext.Routes (SessionRoute(Children, NodeAPI), Tile)
 import Gargantext.Routes as GR
@@ -87,10 +89,18 @@ corpusLayoutMainCpt = here.component "corpusLayoutMain" cpt
     cpt props@{ nodeId, session, tasks, reloadForest } _ = do
       -- States
       popoverRef <- R.useRef null
+
+      -- @WIP
+      { goToRoute } <- useLinkHandler
+      foo <- pure $ const $ goToRoute $ GR.CorpusCode (sessionId session) nodeId
+
+
       -- @addXTileCallback: open Code Corpus View into a new horizontal tile
       addXTileCallback <- pure $ const do
         id <- UUID.genUUID
-        newTile <- pure { id, route: GR.CorpusCode (sessionId session) nodeId }
+        -- @WIP
+        -- newTile <- pure { id, route: GR.CorpusCode (sessionId session) nodeId }
+        newTile <- pure { id, route: GR.Corpus (sessionId session) nodeId }
         T.modify_ (\arr -> snoc arr newTile) props.tileAxisXList
         Popover.setOpen popoverRef false
       -- @addYTileCallback: open Code Corpus View into a new vertical tile
@@ -99,6 +109,7 @@ corpusLayoutMainCpt = here.component "corpusLayoutMain" cpt
         newTile <- pure { id, route: GR.CorpusCode (sessionId session) nodeId }
         T.modify_ (\arr -> snoc arr newTile) props.tileAxisYList
         Popover.setOpen popoverRef false
+
 
       pure $
 
@@ -152,6 +163,19 @@ corpusLayoutMainCpt = here.component "corpusLayoutMain" cpt
                         H.i { className: "fa fa-angle-double-down mr-2" } []
                       ,
                         H.text "open on new tile"
+                      ]
+                    ]
+
+                  ,
+                    -- @WIP
+                    H.li {}
+                    [
+                      H.button
+                      { className: "btn btn-link"
+                      , on: { click: foo }
+                      }
+                      [
+                        H.text "foo"
                       ]
                     ]
                   ]
