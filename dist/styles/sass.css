@@ -59,6 +59,10 @@
   line-height: 100%;
 }
 
+.tile-menu__item .fa {
+  margin-right: 8px;
+}
+
 .context-menu {
   position: absolute;
   left: 96px;
@@ -752,6 +756,12 @@ li .leaf:hover a.settings {
 .code-editor .editor .html.language-md ol li {
   list-style: decimal !important;
 }
+.code-editor__toolbar {
+  margin-bottom: 20px;
+}
+.code-editor__toolbar__type {
+  width: 200px;
+}
 
 .cache-toggle {
   cursor: pointer;
@@ -902,6 +912,7 @@ ul li {
 }
 .main-page__main-route {
   padding: 24px 32px;
+  width: 100%;
 }
 .main-page__vertical-tiles {
   display: flex;

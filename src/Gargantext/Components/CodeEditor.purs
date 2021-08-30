@@ -217,15 +217,15 @@ toolbarCpt = here.component "toolbar" cpt
       codeType' <- T.useLive T.unequal codeType
 
       pure $
-        H.div { className: "row no-gutters toolbar align-items-center mb-3" }
-          [ H.div { className: "col-4" }
+        H.div { className: "row no-gutters align-items-center mb-3 code-editor__toolbar" }
+          [ H.div { className: "code-editor__toolbar__type" }
                [ codeTypeSelector {
                    codeType
                   -- Handle rerendering of preview when viewType changed
                  , onChange: \ct -> onChange ct codeS'
                  }
                ]
-          , H.div { className: "col-4" }
+          , H.div {}
              [ viewTypeSelector {state: viewType} [] ]
           ]
 

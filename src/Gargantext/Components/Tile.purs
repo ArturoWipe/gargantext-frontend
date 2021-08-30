@@ -9,12 +9,8 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Routes (Tile)
-import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
-
-here :: R2.Here
-here = R2.here "Gargantext.Components.Tile"
 
 type Props =
   ( boxes         :: Boxes
@@ -27,7 +23,7 @@ tileBlock :: Record Props -> Array R.Element -> R.Element
 tileBlock = R.createElement tileBlockCpt
 
 tileBlockCpt :: R.Component Props
-tileBlockCpt = here.component "tileBlock" cpt where
+tileBlockCpt = R.hooksComponent "tileBlock" cpt where
   cpt props@{ closeCallback } children = do
 
     -- Render

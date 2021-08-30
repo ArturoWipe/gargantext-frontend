@@ -1,33 +1,29 @@
 module Gargantext.Components.Nodes.Corpus where
 
-import DOM.Simple.Console (log, log2)
-import Data.Array (snoc)
+import DOM.Simple.Console (log2)
 import Data.Array as A
 import Data.Either (Either(..))
 import Data.List as List
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (null)
-import Data.UUID as UUID
 import Effect (Effect)
 import Effect.Aff (Aff, throwError)
 import Effect.Exception (error)
 import Gargantext.AsyncTasks as GAT
+import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.CodeEditor as CE
 import Gargantext.Components.FolderView as FV
 import Gargantext.Components.InputWithEnter (inputWithEnter)
 import Gargantext.Components.Node (NodePoly(..), HyperdataList)
 import Gargantext.Components.Nodes.Corpus.Types (CorpusData, Hyperdata)
 import Gargantext.Components.Nodes.Types (FTField, FTFieldWithIndex, FTFieldsWithIndex(..), Field(..), FieldType(..), Hash, Index, defaultHaskell', defaultJSON', defaultMarkdown', defaultPython')
-import Gargantext.Components.Tile (tileContext)
+import Gargantext.Components.TileMenu (tileMenu)
 import Gargantext.Data.Array as GDA
-import Gargantext.Hooks.LinkHandler (useLinkHandler)
 import Gargantext.Prelude (Unit, bind, discard, pure, show, unit, ($), (<>), const, (<<<), (+), (==), (-), (<), (>), (<$>))
-import Gargantext.Routes (SessionRoute(Children, NodeAPI), Tile)
+import Gargantext.Routes (SessionRoute(Children, NodeAPI))
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, get, put, sessionId)
 import Gargantext.Types (NodeType(..), AffTableResult)
 import Gargantext.Utils.Crypto as Crypto
-import Gargantext.Utils.Popover as Popover
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
@@ -43,8 +39,7 @@ type Props =
   , session         :: Session
   , tasks           :: T.Box GAT.Storage
   , reloadForest    :: T2.ReloadS
-  , tileAxisXList   :: T.Box (Array (Record Tile))
-  , tileAxisYList   :: T.Box (Array (Record Tile))
+  , boxes           :: Boxes
   )
 
 corpusLayout :: R2.Leaf Props
@@ -56,16 +51,14 @@ corpusLayoutCpt = here.component "corpusLayout" cpt where
       , session
       , tasks
       , reloadForest
-      , tileAxisXList
-      , tileAxisYList
+      , boxes
       } _ = do
     pure $ corpusLayoutMain { key
                             , nodeId
                             , session
                             , tasks
                             , reloadForest
-                            , tileAxisXList
-                            , tileAxisYList
+                            , boxes
                             }
       where
         key = show (sessionId session) <> "-" <> show nodeId
@@ -76,8 +69,7 @@ type KeyProps =
   , session         :: Session
   , tasks           :: T.Box GAT.Storage
   , reloadForest    :: T2.ReloadS
-  , tileAxisXList   :: T.Box (Array (Record Tile))
-  , tileAxisYList   :: T.Box (Array (Record Tile))
+  , boxes           :: Boxes
   )
 
 corpusLayoutMain :: R2.Leaf KeyProps
@@ -86,42 +78,20 @@ corpusLayoutMain props = R.createElement corpusLayoutMainCpt props []
 corpusLayoutMainCpt :: R.Component KeyProps
 corpusLayoutMainCpt = here.component "corpusLayoutMain" cpt
   where
-    cpt props@{ nodeId, session, tasks, reloadForest } _ = do
-      -- States
-      popoverRef <- R.useRef null
-
-      -- @WIP
-      { goToRoute } <- useLinkHandler
-      foo <- pure $ const $ goToRoute $ GR.CorpusCode (sessionId session) nodeId
-
-
-      -- @addXTileCallback: open Code Corpus View into a new horizontal tile
-      addXTileCallback <- pure $ const do
-        id <- UUID.genUUID
-        -- @WIP
-        -- newTile <- pure { id, route: GR.CorpusCode (sessionId session) nodeId }
-        newTile <- pure { id, route: GR.Corpus (sessionId session) nodeId }
-        T.modify_ (\arr -> snoc arr newTile) props.tileAxisXList
-        Popover.setOpen popoverRef false
-      -- @addYTileCallback: open Code Corpus View into a new vertical tile
-      addYTileCallback <- pure $ const do
-        id <- UUID.genUUID
-        newTile <- pure { id, route: GR.CorpusCode (sessionId session) nodeId }
-        T.modify_ (\arr -> snoc arr newTile) props.tileAxisYList
-        Popover.setOpen popoverRef false
-
-
+    cpt { nodeId, session, tasks, reloadForest, boxes } _ = do
+      -- Computed
+      corpusCodeRoute <- pure $ const do
+        pure $ GR.CorpusCode (sessionId session) nodeId
+      -- Render
       pure $
 
-        H.div
-        {}
+        H.div {}
         [
-          Popover.popover
-          { arrow: false
-          , open: false
-          , onClose: const $ pure unit
-          , onOpen: const $ pure unit
-          , ref: popoverRef
+          tileMenu
+          { boxes
+          , currentTile: Just corpusCodeRoute
+          , xTile: Just corpusCodeRoute
+          , yTile: Just corpusCodeRoute
           }
           [
             H.button
@@ -129,61 +99,9 @@ corpusLayoutMainCpt = here.component "corpusLayoutMain" cpt
             [
               H.i { className: "fa fa-code" } []
             ]
-          ,
-            H.div { className: "popover-content" }
-            [
-              H.div { className: "card" }
-              [
-                H.div { className: "list-group" }
-                [
-                  H.ul {}
-                  [
-                    -- Add vertical tile
-                    H.li {}
-                    [
-                      H.button
-                      { className: "btn btn-link"
-                      , on: { click: addYTileCallback }
-                      }
-                      [
-                        H.i { className: "fa fa-angle-double-right mr-2" } []
-                      ,
-                        H.text "open on new tile"
-                      ]
-                    ]
-                  ,
-                    -- Add horizontal tile
-                    H.li {}
-                    [
-                      H.button
-                      { className: "btn btn-link"
-                      , on: { click: addXTileCallback }
-                      }
-                      [
-                        H.i { className: "fa fa-angle-double-down mr-2" } []
-                      ,
-                        H.text "open on new tile"
-                      ]
-                    ]
-
-                  ,
-                    -- @WIP
-                    H.li {}
-                    [
-                      H.button
-                      { className: "btn btn-link"
-                      , on: { click: foo }
-                      }
-                      [
-                        H.text "foo"
-                      ]
-                    ]
-                  ]
-                ]
-              ]
-            ]
           ]
-
+        ,
+          H.hr {}
         ,
           FV.folderView
           { nodeId

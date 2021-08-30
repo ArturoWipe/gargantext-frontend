@@ -9967,4 +9967,9 @@ h3 {
   border-top: 2px solid #dee2e6;
 }
 
+.tile-menu__popover {
+  border-radius: 0.25rem;
+  background-color: #fff;
+}
+
 /*# sourceMappingURL=bootstrap-herbie.css.map */

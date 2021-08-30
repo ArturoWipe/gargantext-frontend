@@ -1,16 +1,20 @@
 module Gargantext.Components.Nodes.Corpus.Code where
 
 import Data.List as List
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
+import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Node (NodePoly(..))
 import Gargantext.Components.Nodes.Corpus (fieldsCodeEditor, loadCorpusWithReload, saveCorpus)
 import Gargantext.Components.Nodes.Corpus.Types (Hyperdata(..))
 import Gargantext.Components.Nodes.Types (FTFieldList(..), FTFieldsWithIndex(..), defaultField)
+import Gargantext.Components.TileMenu (tileMenu)
 import Gargantext.Hooks.Loader (useLoader)
-import Gargantext.Prelude (Unit, bind, discard, pure, unit, ($), (<$>), (<>), (==))
-import Gargantext.Sessions (Session)
+import Gargantext.Prelude (Unit, bind, discard, pure, unit, ($), (<$>), (<>), (==), const)
+import Gargantext.Routes as GR
+import Gargantext.Sessions (Session, sessionId)
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
@@ -24,6 +28,7 @@ type Props =
   ( nodeId          :: Int
   , session         :: Session
   , reloadForest    :: T2.ReloadS
+  , boxes           :: Boxes
   )
 
 type ViewProps =
@@ -31,23 +36,24 @@ type ViewProps =
   , nodeId  :: Int
   , reload  :: T2.ReloadS
   , session :: Session
+  , boxes   :: Boxes
   )
 
 corpusCodeLayout :: R2.Leaf Props
 corpusCodeLayout props = R.createElement corpusCodeLayoutCpt props []
 corpusCodeLayoutCpt :: R.Component Props
 corpusCodeLayoutCpt = here.component "corpusCodeLayout" cpt where
-  cpt { nodeId, session } _ = do
+  cpt { nodeId, session, boxes } _ = do
     reload <- T.useBox T2.newReload
     reload' <- T.useLive T.unequal reload
     useLoader { nodeId, reload: reload', session } loadCorpusWithReload $
-      \corpus -> corpusCodeView { corpus, nodeId, reload, session }
+      \corpus -> corpusCodeView { corpus, nodeId, reload, session, boxes }
 
 corpusCodeView :: Record ViewProps -> R.Element
 corpusCodeView props = R.createElement corpusCodeViewCpt props []
 corpusCodeViewCpt :: R.Component ViewProps
 corpusCodeViewCpt = here.component "corpusCodeView" cpt where
-  cpt {corpus: (NodePoly {hyperdata: Hyperdata {fields: FTFieldList fields}}), nodeId, reload, session} _ = do
+  cpt {corpus: (NodePoly {hyperdata: Hyperdata {fields: FTFieldList fields}}), nodeId, reload, session, boxes} _ = do
     let fieldsWithIndex = FTFieldsWithIndex $ List.mapWithIndex (\idx -> \ftField -> { idx, ftField }) fields
     fieldsS <- T.useBox fieldsWithIndex
     fields' <- T.useLive T.unequal fieldsS
@@ -61,11 +67,30 @@ corpusCodeViewCpt = here.component "corpusCodeView" cpt where
         R.setRef fieldsRef fields
         T.write_ fieldsWithIndex fieldsS
 
+    corpusRoute <- pure $ const do
+      pure $ GR.Corpus (sessionId session) nodeId
+
     pure $
 
       H.div
       {}
       [
+        tileMenu
+        { boxes
+        , currentTile: Just corpusRoute
+        , xTile: Just corpusRoute
+        , yTile: Just corpusRoute
+        }
+        [
+          H.button
+          { className: "btn btn-primary" }
+          [
+            H.i { className: "fa fa-folder" } []
+          ]
+        ]
+      ,
+        H.hr {}
+      ,
         H.div
         { className: "mb-4" }
         [

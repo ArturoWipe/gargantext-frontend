@@ -7,6 +7,7 @@ import Data.Array as A
 import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
+import Data.UUID (UUID)
 import Data.UUID as UUID
 import Effect (Effect)
 import Gargantext.Components.App.Data (Boxes)
@@ -117,13 +118,16 @@ mainPageCpt = here.component "mainPage" cpt where
     tileAxisXList <- R2.useLive' boxes.tileAxisXList
     tileAxisYList <- R2.useLive' boxes.tileAxisYList
     -- Computed
-    let findTile id tile = eq id $ get (Proxy :: Proxy "id") tile
     let
+      findTile :: UUID -> Record Tile -> Boolean
+      findTile id tile = eq id $ get (Proxy :: Proxy "id") tile
+
       deleteTile :: Record Tile -> T.Box (Array (Record Tile)) -> (Unit -> Effect Unit)
       deleteTile tile listBox = const do
         list <- T.read listBox
         newList <- pure $ filter (_ # tile.id # findTile # not) list
         T.write_ newList listBox
+
     let hasHorizontalTiles = not $ eq 0 $ length tileAxisXList
     let hasVerticalTiles = not $ eq 0 $ length tileAxisYList
     -- Render
@@ -380,8 +384,7 @@ corpusCpt = here.component "corpus" cpt where
     pure $ authed (Record.merge { content: \session ->
                                    corpusLayout { nodeId
                                                 , session
-                                                , tileAxisXList: boxes.tileAxisXList
-                                                , tileAxisYList: boxes.tileAxisYList
+                                                , boxes
                                                 , tasks: boxes.tasks
                                                 , reloadForest: boxes.reloadForest
                                                 } } sessionProps) []
@@ -398,6 +401,7 @@ corpusCodeCpt = here.component "corpusCode" cpt where
         { content: \session -> corpusCodeLayout
             { nodeId
             , session
+            , boxes
             , reloadForest: boxes.reloadForest
             }
         }
@@ -541,9 +545,8 @@ teamCpt = here.component "team" cpt where
     pure $ authed (Record.merge { content: \session ->
                                    corpusLayout { nodeId
                                                 , session
+                                                , boxes
                                                 , tasks: boxes.tasks
-                                                , tileAxisYList: boxes.tileAxisYList
-                                                , tileAxisXList: boxes.tileAxisXList
                                                 , reloadForest: boxes.reloadForest } } sessionProps) []
 
 texts :: R2.Component SessionNodeProps
