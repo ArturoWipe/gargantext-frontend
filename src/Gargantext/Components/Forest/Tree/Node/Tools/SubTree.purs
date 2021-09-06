@@ -91,23 +91,20 @@ type CorpusTreeProps =
 subTreeViewLoaded :: R2.Component CorpusTreeProps
 subTreeViewLoaded = R.createElement subTreeViewLoadedCpt
 subTreeViewLoadedCpt :: R.Component CorpusTreeProps
-subTreeViewLoadedCpt = here.component "subTreeViewLoaded" cpt
-  where
-    cpt p@{ boxes: { handed } } _ = do
-      handed' <- T.useLive T.unequal handed
-      let pRender = Record.merge { render: subTreeTreeView } p
+subTreeViewLoadedCpt = here.component "subTreeViewLoaded" cpt where
+  cpt props _ = do
 
-      pure $ H.div {className:"tree"}
-        [ H.div { className: if handed' == GT.RightHanded
-                             then "righthanded"
-                             else "lefthanded"
-                }
-          [ subTreeTreeView (CorpusTreeRenderProps pRender) [] ]
-        ]
+    let pRender = Record.merge { render: subTreeTreeView } props
+
+    pure $
+
+      H.div { className: "subtree" }
+      [ subTreeTreeView (CorpusTreeRenderProps pRender) [] ]
 
 newtype CorpusTreeRenderProps = CorpusTreeRenderProps
   { render :: CorpusTreeRenderProps -> Array R.Element -> R.Element
-  | CorpusTreeProps }
+  | CorpusTreeProps
+  }
 
 subTreeTreeView :: CorpusTreeRenderProps -> Array R.Element -> R.Element
 subTreeTreeView = R2.ntCreateElement subTreeTreeViewCpt
@@ -120,7 +117,6 @@ subTreeTreeViewCpt = here.ntComponent "subTreeTreeView" cpt where
                                , subTreeParams
                                , tree: NTree (LNode { id: targetId, name, nodeType }) ary }) _ = do
     action' <- T.useLive T.unequal action
-    handed' <- T.useLive T.unequal handed
 
     let click e = do
           let action'' = if not validNodeType then Nothing else Just $ SubTreeOut { in: id, out: targetId }
@@ -130,20 +126,28 @@ subTreeTreeViewCpt = here.ntComponent "subTreeTreeView" cpt where
 
         children = (map (\ctree -> render (CorpusTreeRenderProps (p { tree = ctree })) []) sortedAry) :: Array R.Element
 
-    pure $ H.div {} $ GT.reverseHanded handed'
-      [ H.div { className: nodeClass validNodeType }
-        [ H.span { className: "text"
-                 , on: { click } }
-          [ nodeText { handed
-                     , isSelected: isSelected targetId action'
-                     , name: " " <> name } []
-          , H.span { className: "children" } children
+    pure $
+
+      H.div { className: nodeClass validNodeType }
+      [
+          H.span
+          { className: "subtree__text"
+          , on: { click }
+          }
+          [
+            nodeText
+            { handed
+            , isSelected: isSelected targetId action'
+            , name: " " <> name
+            } []
+          ,
+            H.span { className: "subtree__children" }
+            children
           ]
-        ]
       ]
     where
-      nodeClass vnt = "node " <> GT.fldr nodeType true <> " " <> validNodeTypeClass where
-        validNodeTypeClass = if vnt then "node-type-valid" else ""
+      nodeClass vnt = "subtree__node " <> GT.fldr nodeType true <> " " <> validNodeTypeClass where
+        validNodeTypeClass = if vnt then "subtree__node--valid" else ""
       SubTreeParams { valitypes } = subTreeParams
       sortedAry = A.sortWith (\(NTree (LNode {id:id'}) _) -> id')
         $ A.filter (\(NTree (LNode {id:id'}) _) -> id'/= id) ary

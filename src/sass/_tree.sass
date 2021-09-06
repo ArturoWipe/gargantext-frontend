@@ -129,6 +129,43 @@ li
       .text
         text-decoration: underline
 
+
+.subtree
+  $self: &
+
+  &__node
+    display: flex
+    margin-bottom: space-x(0.75)
+
+    &--valid
+      cursor: pointer
+
+      #{ $self }__text
+        text-decoration: underline
+        text-underline-offset: 1px // easing node reading (empirical)
+
+  @include right-handed
+
+    &__node
+      flex-direction: row
+      text-align: left
+
+    &__children #{ $self }__node
+      padding-left: space-x(1)
+
+  @include left-handed
+
+    &__node
+      flex-direction: row-reverse
+      text-align: right
+
+    &__children #{ $self }__node
+      padding-right: space-x(1)
+
+
+
+
+
 // based on https://codeburst.io/how-to-pure-css-pie-charts-w-css-variables-38287aea161e
 .progress-pie
   background: rgba(51, 122, 183, 0.1)
@@ -179,13 +216,6 @@ li
   //
   // @link https://gitlab.iscpif.fr/gargantext/purescript-gargantext/issues/302
   position: fixed
-
-  .tree
-    .node
-      margin-top: 5px
-    .children
-      .node
-        padding-left: 15px
 
 // @XXX "react-awesome-popover" lack of parent host parameter
 //

@@ -481,6 +481,33 @@ li .leaf:hover a.settings {
   text-decoration: underline;
 }
 
+.subtree__node {
+  display: flex;
+  margin-top: 6px;
+}
+.subtree__node--valid {
+  cursor: pointer;
+}
+.subtree__node--valid .subtree__text {
+  text-decoration: underline;
+  text-underline-offset: 1px;
+}
+.right-handed .subtree__node {
+  flex-direction: row;
+  text-align: left;
+}
+.right-handed .subtree__children .subtree__node {
+  padding-left: 8px;
+}
+
+.left-handed .subtree__node {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.left-handed .subtree__children .subtree__node {
+  padding-right: 8px;
+}
+
 .progress-pie {
   background: rgba(51, 122, 183, 0.1);
   border-radius: 100%;
@@ -520,12 +547,6 @@ li .leaf:hover a.settings {
 
 #node-popup-tooltip {
   position: fixed;
-}
-#node-popup-tooltip .tree .node {
-  margin-top: 5px;
-}
-#node-popup-tooltip .tree .children .node {
-  padding-left: 15px;
 }
 
 .right-handed #node-popup-tooltip {
