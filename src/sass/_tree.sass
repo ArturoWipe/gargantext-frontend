@@ -134,35 +134,61 @@ li
   $self: &
 
   &__node
-    display: flex
-    margin-bottom: space-x(0.75)
+    margin-top: space-x(0.25)
 
-    &--valid
+    &__text
+      display: flex
+      align-items: center // align icon with text
       cursor: pointer
 
-      #{ $self }__text
-        text-decoration: underline
-        text-underline-offset: 1px // easing node reading (empirical)
+    &__icons
+      display: flex
+
+      .fa
+        margin-left: space-x(0.25)
+        margin-right: space-x(0.25)
+
+    &--can-be-selected
+      text-decoration: underline
+      text-underline-offset: 2px // easing node reading (empirical)
+
+    @include right-handed
+
+      &__text
+        flex-direction: row
+        text-align: left
+
+      &__icons
+        flex-direction: row
+
+      &__children > #{ $self }__node
+        padding-left: space-x(2)
+
+    @include left-handed
+
+      &__text
+        flex-direction: row-reverse
+        text-align: right
+
+      &__icons
+        flex-direction: row-reverse
+
+      &__children > #{ $self }__node
+        padding-right: space-x(2)
+
+
+.node-text
+  display: inline-flex
+
+  &--selected
+    font-weight: bold
+    text-decoration: underline
 
   @include right-handed
-
-    &__node
-      flex-direction: row
-      text-align: left
-
-    &__children #{ $self }__node
-      padding-left: space-x(1)
+    flex-direction: row
 
   @include left-handed
-
-    &__node
-      flex-direction: row-reverse
-      text-align: right
-
-    &__children #{ $self }__node
-      padding-right: space-x(1)
-
-
+    flex-direction: row-reverse
 
 
 

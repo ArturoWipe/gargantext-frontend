@@ -482,30 +482,59 @@ li .leaf:hover a.settings {
 }
 
 .subtree__node {
-  display: flex;
-  margin-top: 6px;
+  margin-top: 2px;
 }
-.subtree__node--valid {
+.subtree__node__text {
+  display: flex;
+  align-items: center;
   cursor: pointer;
 }
-.subtree__node--valid .subtree__text {
-  text-decoration: underline;
-  text-underline-offset: 1px;
+.subtree__node__icons {
+  display: flex;
 }
-.right-handed .subtree__node {
+.subtree__node__icons .fa {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+.subtree__node--can-be-selected {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.right-handed .subtree__node__text {
   flex-direction: row;
   text-align: left;
 }
-.right-handed .subtree__children .subtree__node {
-  padding-left: 8px;
+.right-handed .subtree__node__icons {
+  flex-direction: row;
+}
+.right-handed .subtree__node__children > .subtree__node {
+  padding-left: 16px;
 }
 
-.left-handed .subtree__node {
+.left-handed .subtree__node__text {
   flex-direction: row-reverse;
   text-align: right;
 }
-.left-handed .subtree__children .subtree__node {
-  padding-right: 8px;
+.left-handed .subtree__node__icons {
+  flex-direction: row-reverse;
+}
+.left-handed .subtree__node__children > .subtree__node {
+  padding-right: 16px;
+}
+
+.node-text {
+  display: inline-flex;
+}
+.node-text--selected {
+  font-weight: bold;
+  text-decoration: underline;
+}
+.right-handed .node-text {
+  flex-direction: row;
+}
+
+.left-handed .node-text {
+  flex-direction: row-reverse;
 }
 
 .progress-pie {

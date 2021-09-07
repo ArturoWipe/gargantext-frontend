@@ -2,9 +2,12 @@ module Gargantext.Components.Forest.Tree.Node.Tools.SubTree where
 
 import Gargantext.Prelude
 
+import Data.Array (length)
 import Data.Array as A
 import Data.Either (Either)
+import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..))
+import Data.Tuple.Nested ((/\))
 import Effect.Aff (Aff)
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Forest.Tree.Node.Action (Props, Action, subTreeOut, setTreeOut)
@@ -16,8 +19,9 @@ import Gargantext.Hooks.Loader (useLoader)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session(..), get)
 import Gargantext.Types as GT
+import Gargantext.Utils ((?))
+import Gargantext.Utils.Reactix (if', useBox', useLive')
 import Gargantext.Utils.Reactix as R2
-import React.SyntheticEvent as E
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Record as Record
@@ -110,48 +114,75 @@ subTreeTreeView :: CorpusTreeRenderProps -> Array R.Element -> R.Element
 subTreeTreeView = R2.ntCreateElement subTreeTreeViewCpt
 subTreeTreeViewCpt :: R2.NTComponent CorpusTreeRenderProps
 subTreeTreeViewCpt = here.ntComponent "subTreeTreeView" cpt where
-  cpt (CorpusTreeRenderProps p@{ action
-                               , boxes: { handed }
-                               , id
+  cpt (CorpusTreeRenderProps p@{ id
                                , render
                                , subTreeParams
                                , tree: NTree (LNode { id: targetId, name, nodeType }) ary }) _ = do
-    action' <- T.useLive T.unequal action
+    -- Hooks
+    action <- useLive' p.action
+    isExpanded /\ isExpandedBox <- useBox' false
+    -- Computed
+    let
+        expandCbk _ = T.modify_ not isExpandedBox
 
-    let click e = do
-          let action'' = if not validNodeType then Nothing else Just $ SubTreeOut { in: id, out: targetId }
-          E.preventDefault  e
-          E.stopPropagation e
-          T.modify_ (\a -> setTreeOut a action'') action
+        selectCbk _ = do
+          params <- pure $
+            if validNodeType
+            then Just $ SubTreeOut { in: id, out: targetId }
+            else Nothing
+          T.modify_ (\a -> setTreeOut a params) p.action
 
         children = (map (\ctree -> render (CorpusTreeRenderProps (p { tree = ctree })) []) sortedAry) :: Array R.Element
 
+        hasChild = length children > 0
+
+    -- Render
     pure $
 
-      H.div { className: nodeClass validNodeType }
-      [
-          H.span
-          { className: "subtree__text"
-          , on: { click }
-          }
-          [
-            nodeText
-            { handed
-            , isSelected: isSelected targetId action'
-            , name: " " <> name
-            } []
-          ,
-            H.span { className: "subtree__children" }
-            children
+      H.div
+      { className: intercalate " "
+          [ "subtree__node"
+          , validNodeType ? "subtree__node--can-be-selected" $ ""
           ]
+      }
+      [
+          H.div
+          { className: "subtree__node__text" }
+          [
+            H.div
+            { className: "subtree__node__icons"
+            , on: { click: expandCbk }
+            }
+            [
+              H.span { className: GT.fldr nodeType true } []
+            ,
+              if' hasChild $
+
+                if isExpanded then
+                  H.span { className: "fa fa-chevron-down" } []
+                else
+                  H.span { className: "fa fa-chevron-right" } []
+            ]
+          ,
+            H.div
+            { on: { click: selectCbk } }
+            [
+              nodeText
+              { isSelected: isSelected targetId action
+              , name
+              }
+            ]
+          ]
+      ,
+        if' (hasChild && isExpanded) $
+          H.div { className: "subtree__node__children" }
+          children
       ]
     where
-      nodeClass vnt = "subtree__node " <> GT.fldr nodeType true <> " " <> validNodeTypeClass where
-        validNodeTypeClass = if vnt then "subtree__node--valid" else ""
       SubTreeParams { valitypes } = subTreeParams
       sortedAry = A.sortWith (\(NTree (LNode {id:id'}) _) -> id')
         $ A.filter (\(NTree (LNode {id:id'}) _) -> id'/= id) ary
       validNodeType = (A.elem nodeType valitypes) && (id /= targetId)
-      isSelected n action' = case (subTreeOut action') of
+      isSelected n action = case (subTreeOut action) of
         Nothing                   -> false
         (Just (SubTreeOut {out})) -> n == out
