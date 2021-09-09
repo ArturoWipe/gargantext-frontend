@@ -488,6 +488,7 @@ li .leaf:hover a.settings {
   display: flex;
   align-items: center;
   cursor: pointer;
+  font-size: 15px;
 }
 .subtree__node__icons {
   display: flex;
@@ -519,7 +520,7 @@ li .leaf:hover a.settings {
   flex-direction: row-reverse;
 }
 .left-handed .subtree__node__children > .subtree__node {
-  padding-right: 16px;
+  padding-right: 20px;
 }
 
 .node-text {
