@@ -3,9 +3,11 @@ module Gargantext.Components.DocsTable where
 
 import Gargantext.Prelude
 
+import DOM.Simple.Console (log, log2, log3)
 import DOM.Simple.Event as DE
 import Data.Array as A
-import Data.Either (Either)
+import Data.Either (Either(..))
+import Data.Foldable (foldl, intercalate)
 import Data.Generic.Rep (class Generic)
 import Data.Lens ((^.))
 import Data.Lens.At (at)
@@ -23,6 +25,7 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Category (rating)
 import Gargantext.Components.Category.Types (Star(..))
 import Gargantext.Components.DocsTable.Types (DocumentsView(..), Hyperdata(..), LocalUserScore, Query, Response(..), Year, sampleData)
@@ -32,17 +35,22 @@ import Gargantext.Components.Table as TT
 import Gargantext.Components.Table.Types as TT
 import Gargantext.Config.REST (RESTError)
 import Gargantext.Ends (Frontends, url)
+import Gargantext.Hooks.FormValidation.Types (VForm)
+import Gargantext.Hooks.FormValidation (useFormValidation)
+import Gargantext.Hooks.FormValidation.Unboxed as FV
 import Gargantext.Hooks.Loader (useLoader, useLoaderWithCacheAPI, HashedResponse(..))
+import Gargantext.Hooks.StateRecord (useStateRecord)
 import Gargantext.Routes (SessionRoute(NodeAPI))
 import Gargantext.Routes as Routes
 import Gargantext.Sessions (Session, sessionId, get, delete)
 import Gargantext.Types (ListId, NodeID, NodeType(..), OrderBy(..), SidePanelState(..), TabSubType, TabType, TableResult, showTabType')
-import Gargantext.Utils (sortWith)
+import Gargantext.Utils (sortWith, (?))
 import Gargantext.Utils.CacheAPI as GUC
 import Gargantext.Utils.QueryString (joinQueryStrings, mQueryParam, mQueryParamS, queryParam, queryParamS)
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
+import Record (merge)
 import Simple.JSON as JSON
 import Toestand as T
 
@@ -131,27 +139,60 @@ docViewCpt = here.component "docView" cpt where
       } _ = do
     cacheState' <- T.useLive T.unequal cacheState
     query' <- T.useLive T.unequal query
+    isDocumentModalVisibleBox <- T.useBox false
 
-    pure $ H.div { className: "doc-table-doc-view container1" }
-      [ R2.row
-        [ chart
-        , if showSearch then searchBar { query } [] else H.div {} []
-        , H.div {className: "col-md-12"}
-          [ pageLayout { boxes
-                       , cacheState
-                       , frontends
-                       , key: "docView-" <> (show cacheState')
-                       , listId
-                       , mCorpusId
-                       , nodeId
-                       , params
-                       , query: query'
-                       , session
-                       , sidePanel
-                       , tabType
-                       , totalRecords
-                       , yearFilter
-                       } [] ] ] ]
+    toggleModal <- pure $ const $
+      T.modify_ not isDocumentModalVisibleBox
+
+    pure $
+
+      R.fragment
+      [
+        H.div { className: "doc-table-doc-view container1" }
+        [ R2.row
+          [ chart
+          , if showSearch then searchBar { query } [] else H.div {} []
+          , H.div
+            { className: "col-md-12 row mb-3" }
+            [
+              H.div { className: "col-md-4" } []
+            ,
+              H.button
+              { className: "btn btn-light col-md-3"
+              , on: { click: toggleModal }
+              }
+              [
+                H.text "Add a document"
+              ]
+            ]
+          , H.div {className: "col-md-12"}
+            [ pageLayout { boxes
+                        , cacheState
+                        , frontends
+                        , key: "docView-" <> (show cacheState')
+                        , listId
+                        , mCorpusId
+                        , nodeId
+                        , params
+                        , query: query'
+                        , session
+                        , sidePanel
+                        , tabType
+                        , totalRecords
+                        , yearFilter
+                        } []
+            ]
+          ]
+        ]
+      ,
+        documentCreationModal
+        { visible: isDocumentModalVisibleBox
+        }
+        [
+          documentFormCreation
+          {}
+        ]
+      ]
 
 type SearchBarProps =
   ( query :: T.Box Query )
@@ -560,3 +601,209 @@ toggleSet :: forall a. Ord a => a -> Set a -> Set a
 toggleSet a s
   | Set.member a s = Set.delete a s
   | otherwise      = Set.insert a s
+
+---------------------------
+
+-- @TODO make structural interface for generic Modal use
+--       (also see: `Gargantext.Components.Login.Modal`)
+type DocumentCreationModalProps =
+  ( visible :: T.Box Boolean
+  )
+
+documentCreationModal :: R2.Component DocumentCreationModalProps
+documentCreationModal = R2.component documentCreationModalCpt
+documentCreationModalCpt :: R.Component DocumentCreationModalProps
+documentCreationModalCpt = here.component "documentCreationModal" cpt where
+  cpt { visible } children = do
+
+    isVisible <- R2.useLive' visible
+
+    toggleModal <- pure $ const $
+      T.modify_ not visible
+
+    R.createPortal
+      [ H.div
+        { id: "documentCreationModal"
+        , className: "modal"
+        , key: 0
+        , role: "dialog"
+        , data: { show: true }
+        , style: { display: isVisible ? "block" $ "none" }
+        }
+        [ H.div { className: "modal-dialog modal-lg", role: "document"}
+          [ H.div { className: "modal-content" }
+            [ H.div { className: "modal-header" }
+              [ H.div { className: "col-md-10 col-md-push-1" }
+                [ H.h2 { className: "text-primary center m-a-2" }
+                  [
+                    H.span {className: "center icon-text"}
+                    [ H.text "Add a new document" ]
+                  ]
+                ]
+              , H.button
+                { type: "button", className: "close"
+                , data: { dismiss: "modal" }
+                }
+                [
+                  H.a
+                  { on: { click: toggleModal }
+                  , className: "btn fa fa-times" }
+                  []
+                ]
+              ]
+            , H.div
+              { className: "modal-body" }
+              children
+            ]
+          ]
+        ]
+      ]
+      <$> R2.getPortalHost
+
+
+type DocumentFormData =
+  ( title     :: String
+  , source    :: String
+  , authors   :: String
+  , abstract  :: String
+  )
+
+documentDefaultData :: Record DocumentFormData
+documentDefaultData =
+  { title     : ""
+  , source    : ""
+  , authors   : ""
+  , abstract  : ""
+  }
+
+documentFormValidation :: Record DocumentFormData -> Effect VForm
+documentFormValidation r = foldl append mempty rules
+  where
+    rules =
+      [ FV.nonEmpty "title" r.title
+      , FV.nonEmpty "source" r.source
+      , FV.nonEmpty "authors" r.source
+      ]
+
+documentFormCreation :: R2.Leaf ()
+documentFormCreation = R2.leaf documentFormCreationCpt
+documentFormCreationCpt :: R.Component ()
+documentFormCreationCpt = here.component "documentFormCreation" cpt where
+  cpt _ _ = do
+    -- Hooks
+    { state, setStateKey, bindStateKey } <- useStateRecord documentDefaultData
+    fv <- useFormValidation
+
+    -- @onSubmit: exec whole form validation and execute callback
+    onSubmit <- pure $ do
+
+      result <- fv.try (\_ -> documentFormValidation state)
+
+      case result of
+        Left err -> log3 "document form error" state err
+        Right _  -> log "ok"
+
+    -- Render
+    pure $
+
+      H.form
+      { className: "document-form-creation" }
+      [
+        -- Title
+        H.div
+        { className: intercalate " "
+            [ "form-group"
+            , (fv.hasError' "title") ?
+                "form-group--error" $
+                mempty
+            ]
+        }
+        [
+          H.div { className: "form-group__label" }
+          [
+            H.label {} [ H.text "Title" ]
+          ]
+        ,
+          H.div { className: "form-group__field" }
+          [
+            B.formInput $
+              bindStateKey "title"
+          ,
+            R2.if' (fv.hasError' "title") $
+              H.div { className: "form-group__error" }
+              [ H.text "Please enter a title" ]
+          ]
+        ]
+      ,
+        -- Source
+        H.div
+        { className: intercalate " "
+            [ "form-group"
+            , (fv.hasError' "source") ?
+                "form-group--error" $
+                mempty
+            ]
+        }
+        [
+          H.div { className: "form-group__label" }
+          [
+            H.label {} [ H.text "Source" ]
+          ]
+        ,
+          H.div { className: "form-group__field" }
+          [
+            B.formInput $
+              bindStateKey "source"
+          ,
+            R2.if' (fv.hasError' "source") $
+              H.div { className: "form-group__error" }
+              [ H.text "Please enter a source" ]
+          ]
+        ]
+      ,
+        -- Authors
+        H.div
+        { className: intercalate " "
+            [ "form-group"
+            , (fv.hasError' "authors") ?
+                "form-group--error" $
+                mempty
+            ]
+        }
+        [
+          H.div { className: "form-group__label" }
+          [
+            H.label {} [ H.text "Authors" ]
+          ]
+        ,
+          H.div { className: "form-group__field" }
+          [
+            B.formInput $
+              { placeholder: "Author1, Author2, ..."
+              } `merge` bindStateKey "authors"
+          ,
+            R2.if' (fv.hasError' "authors") $
+              H.div { className: "form-group__error" }
+              [ H.text "Please enter at least one author" ]
+          ]
+        ]
+      ,
+        -- Abstract
+        H.div
+        { className: intercalate " "
+            [ "form-group"
+            ]
+        }
+        [
+          H.div { className: "form-group__label" }
+          [
+            H.label {} [ H.text "Abstract" ]
+          ]
+        ]
+      ,
+        -- Submit
+        H.div { className: "document-form-creation__submit" }
+        [
+          H.text "hello"
+        ]
+      ]
