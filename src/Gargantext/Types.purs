@@ -159,6 +159,7 @@ data NodeType = Annuaire
               | NodeFrameWrite
               | NodeFrameVisio
               | NodePublic NodeType
+              | NodePadagraph
 derive instance Generic NodeType _
 derive instance Eq NodeType
 instance JSON.ReadForeign NodeType where
@@ -198,6 +199,7 @@ instance Show NodeType where
   show NodeFrameVisio    = "NodeFrameVisio"
   show (NodePublic nt) = "NodePublic" <> show nt
   show NodeFile        = "NodeFile"
+  show NodePadagraph   = "NodePadagraph"
 
 
 instance Read NodeType where
@@ -223,9 +225,10 @@ instance Read NodeType where
   read "Annuaire"          = Just Annuaire
   read "NodeFrameWrite"    = Just NodeFrameWrite
   read "NodeFrameCalc"     = Just NodeFrameCalc
-  read "NodeFrameNotebook"     = Just NodeFrameNotebook
+  read "NodeFrameNotebook" = Just NodeFrameNotebook
   read "NodeFrameVisio"    = Just NodeFrameVisio
   read "NodeFile"          = Just NodeFile
+  read "NodePadagraph"     = Just NodePadagraph
   -- TODO NodePublic read ?
   read _                   = Nothing
 
@@ -265,6 +268,7 @@ translateFR = case _ of
   NodeFrameWrite      -> "Éditeur de texte"
   NodeFrameVisio      -> "Visio"
   NodePublic n        -> translateFR n
+  NodePadagraph       -> "Padagraph"
 
 translateEN :: NodeType -> String
 translateEN = case _ of
@@ -295,6 +299,7 @@ translateEN = case _ of
   NodeFrameWrite      -> "Write"
   NodeFrameVisio      -> "Visio"
   NodePublic n        -> translateEN n
+  NodePadagraph       -> "Padagraph"
 
 ------------------------------------------------------
 
@@ -349,6 +354,9 @@ getIcon NodeFrameVisio false = "video-camera"
 
 
 getIcon (NodePublic nt) b   = getIcon nt b
+
+getIcon NodePadagraph true = "line-chart"
+getIcon NodePadagraph false = "line-chart"
 
 getIcon _        true   = "folder-open"
 getIcon _        false  = "folder-o"
@@ -406,6 +414,7 @@ nodeTypePath NodeFrameNotebook = "code"
 nodeTypePath NodeFrameVisio    = "visio"
 nodeTypePath (NodePublic nt) = nodeTypePath nt
 nodeTypePath NodeFile        = "file"
+nodeTypePath NodePadagraph   = "padagraph"
 
 ------------------------------------------------------------
 type CorpusId   = Int

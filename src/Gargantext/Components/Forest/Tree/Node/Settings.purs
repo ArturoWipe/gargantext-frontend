@@ -57,7 +57,7 @@ instance Show NodeAction where
   show Share             = "Share"
   show Config            = "Config"
   show (Link _)          = "Link to " -- <> show x
-  show (Add _)          = "Add Child" -- foldl (\a b -> a <> show b) "Add " xs
+  show (Add _)           = "Add Child" -- foldl (\a b -> a <> show b) "Add " xs
   show (Merge _)         = "Merge with subtree" -- <> show t
   show (Publish _)       = "Publish" -- <> show x
   show AddingContact     = "AddingContact"
@@ -210,6 +210,7 @@ settingsBox Graph =
                           , Download -- TODO as GEXF or JSON
                           -- , Publish publishParams
                           , Delete
+                          , Add [ NodePadagraph ]
                           ]
               }
 
@@ -369,6 +370,12 @@ settingsBox NodeFile =
               , buttons: [ Publish publishParams
                          , Delete ]
               }
+
+settingsBox NodePadagraph =
+  SettingsBox { show: true
+              , edit: true
+              , doc: Documentation NodePadagraph
+              , buttons: [ Delete ]}
 
 
 settingsBox _ =
