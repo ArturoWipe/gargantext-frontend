@@ -1,4 +1,4 @@
-module Gargantext.Components.Bootstrap.FormInput (formInput) where
+module Gargantext.Components.Bootstrap.FormTextarea (formTextarea) where
 
 import Gargantext.Prelude
 
@@ -18,30 +18,24 @@ type Props =
 type Options =
   ( status :: String
   , className :: String
-  , type :: String
   , placeholder :: String
-  , size :: String
   )
 
 options :: Record Options
 options =
   { status: "enabled"
   , className: ""
-  , type: "text"
   , placeholder: ""
-  , size: "md"
   }
 
--- | Structural Component for the Bootstrap input
--- |
--- |    * size: `"md" (default) | "sm" | "lg"`
+-- | Structural Component for the Bootstrap textarea
 -- |
 -- | https://getbootstrap.com/docs/4.1/components/forms/
-formInput :: forall r. R2.OptLeaf Options Props r
-formInput = R2.optLeaf component options
+formTextarea :: forall r. R2.OptLeaf Options Props r
+formTextarea = R2.optLeaf component options
 
 componentName :: String
-componentName = "b-form-input"
+componentName = "b-form-textarea"
 
 bootstrapName :: String
 bootstrapName = "form-control"
@@ -60,22 +54,21 @@ component = R.hooksComponent componentName cpt where
       , componentName <> "--" <> status
       -- Bootstrap specific classNames
       , bootstrapName
-      , bootstrapName <> "-" <> props.size
       ]
 
     change <- pure $ onChange status callback
+
     -- Render
     pure $
 
-      H.input
+      H.textarea
       { className
       , on: { change }
       , disabled: elem status [ "disabled" ]
       , readOnly: elem status [ "idled" ]
       , placeholder: props.placeholder
-      , type: props.type
       , autoComplete: "off"
-      }
+      } []
 
 -- | * Change event will effectively be triggered according to the
 -- | component status props
