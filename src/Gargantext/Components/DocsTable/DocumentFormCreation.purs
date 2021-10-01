@@ -13,7 +13,7 @@ import Gargantext.Hooks.FormValidation (useFormValidation)
 import Gargantext.Hooks.FormValidation.Types (VForm)
 import Gargantext.Hooks.FormValidation.Unboxed as FV
 import Gargantext.Hooks.StateRecord (useStateRecord)
-import Gargantext.Utils ((?))
+import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -34,15 +34,6 @@ documentDefaultData =
   , authors   : ""
   , abstract  : ""
   }
-
-documentFormValidation :: Record DocumentFormData -> Effect VForm
-documentFormValidation r = foldl append mempty rules
-  where
-    rules =
-      [ FV.nonEmpty "title" r.title
-      , FV.nonEmpty "source" r.source
-      , FV.nonEmpty "authors" r.source
-      ]
 
 documentFormCreation :: R2.Leaf ()
 documentFormCreation = R2.leaf documentFormCreationCpt
@@ -156,7 +147,11 @@ documentFormCreationCpt = R.hooksComponent "documentFormCreation" cpt where
         [
           H.div { className: "form-group__label" }
           [
-            H.label {} [ H.text "Abstract" ]
+            H.label {} [ H.text $ "Abstract" <> nbsp 1 ]
+          ,
+            H.span
+            { className: "form-group__label--sub" }
+            [ H.text "optional" ]
           ]
         ,
           H.div { className: "form-group__field" }
@@ -169,6 +164,22 @@ documentFormCreationCpt = R.hooksComponent "documentFormCreation" cpt where
         -- Submit
         H.div { className: "document-form-creation__submit" }
         [
-          H.text "hello"
+          B.button
+          { callback: \_ -> onSubmit
+          -- , status: props.status == "deferred" ? "deferred" $ "enabled"
+          , variant: "primary"
+          , type: "submit"
+          , block: true
+          }
+          [ H.text "Add" ]
         ]
+      ]
+
+documentFormValidation :: Record DocumentFormData -> Effect VForm
+documentFormValidation r = foldl append mempty rules
+  where
+    rules =
+      [ FV.nonEmpty "title" r.title
+      , FV.nonEmpty "source" r.source
+      , FV.nonEmpty "authors" r.authors
       ]

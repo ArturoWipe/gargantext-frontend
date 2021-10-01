@@ -182,6 +182,8 @@ docViewCpt = here.component "docView" cpt where
         -- Document Creation Modal
         B.baseModal
         { isVisibleBox: isDocumentModalVisibleBox
+        , title: "Add a new document"
+        , hasCollapsibleBackground: false
         }
         [
           documentFormCreation

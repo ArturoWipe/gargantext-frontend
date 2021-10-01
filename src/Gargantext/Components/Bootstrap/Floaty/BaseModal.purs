@@ -2,12 +2,18 @@ module Gargantext.Components.Bootstrap.BaseModal (baseModal) where
 
 import Gargantext.Prelude
 
+import DOM.Simple (Window)
+import Data.Foldable (intercalate)
 import Effect (Effect)
-import Gargantext.Utils ((?))
+import Effect.Uncurried (EffectFn2, runEffectFn2)
+import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Toestand as T
+
+foreign import _addClassName :: EffectFn2 Window String Unit
+foreign import _removeClassName :: EffectFn2 Window String Unit
 
 type Props =
   ( isVisibleBox :: T.Box Boolean
@@ -16,58 +22,120 @@ type Props =
 
 type Options =
   ( id :: String
+  , title :: String
+  , hasBackground :: Boolean
+  , hasCollapsibleBackground :: Boolean
   )
 
 options :: Record Options
 options =
   { id: ""
+  , title: ""
+  , hasBackground: true
+  , hasCollapsibleBackground: true
   }
 
-cname :: String
-cname = "b-modal"
+componentName :: String
+componentName = "b-modal"
+
+vendorName :: String
+vendorName = "modal"
 
 baseModal :: forall r. R2.OptComponent Options Props r
 baseModal = R2.optComponent component options
 
 component :: R.Component Props
-component = R.hooksComponent cname cpt where
+component = R.hooksComponent componentName cpt where
   cpt { isVisibleBox
       , id
+      , title
+      , hasBackground
+      , hasCollapsibleBackground
       } children = do
-
+    -- State
     isVisible <- R2.useLive' isVisibleBox
 
+    -- Hooks
+    -- R.useEffect1' isVisible $
+      -- (isVisible ? addClassName $ removeClassName) window "modal-open"
+
+    -- Computed
+    let
+      className = intercalate " "
+        -- Component
+        [ componentName
+        , isVisible ?
+            componentName <> "--visible" $
+            componentName <> "--hidden"
+        -- Vendor
+        , vendorName
+        ]
+
+      hasHeader = not $ eq title ""
+
+    -- Render
     R.createPortal
       [
         H.div
         { id
-        , className: cname
+        , className
         , role: "dialog"
         , data: { show: true }
-        , style: { display: isVisible ? "block" $ "none" }
         }
-        [ H.div { className: "modal-dialog modal-lg", role: "document"}
-          [ H.div { className: "modal-content" }
-            [ H.div { className: "modal-header" }
-              [ H.div { className: "col-md-10 col-md-push-1" }
-                [ H.h2 { className: "text-primary center m-a-2" }
-                  [
-                    H.span {className: "center icon-text"}
-                    [ H.text "Add a new document" ]
-                  ]
+        [
+          R2.if' (hasBackground) $
+            H.div
+            { className: intercalate " "
+                [ componentName <> "__overlay"
+                , hasCollapsibleBackground ?
+                    componentName <> "__overlay--collapsible" $
+                    ""
                 ]
-              , H.button
-                { type: "button", className: "close"
-                , data: { dismiss: "modal" }
+            , on: { click: hasCollapsibleBackground ?
+                      toggle isVisibleBox $
+                      const $ pure unit
+                  }
+            }
+            [ H.text $ nbsp 1 ]
+        ,
+          H.div
+          { className: "modal-dialog modal-lg"
+          , role: "document"
+          }
+          [
+            H.div
+            { className: intercalate " "
+                [ componentName <> "__content"
+                , vendorName <> "-content"
+                ]
+            }
+            [
+              R2.if' (hasHeader) $
+                H.div
+                { className: intercalate " "
+                    [ componentName <> "__header"
+                    , vendorName <> "-header"
+                    ]
                 }
                 [
-                  H.a
-                  { on: { click: toggle }
-                  , className: "btn fa fa-times" }
-                  []
+                  H.div
+                  { className: componentName <> "__header__content" }
+                  [ H.text title ]
+                ,
+                  H.button
+                  { type: "button"
+                  , className: "close"
+                  , data: { dismiss: "modal" }
+                  }
+                  [
+                    H.a
+                    { on: { click: toggle isVisibleBox }
+                    , className: "btn fa fa-times" }
+                    []
+                  ]
                 ]
-              ]
-            , H.div
+            ,
+              H.div
               { className: "modal-body" }
               children
             ]
@@ -77,5 +145,11 @@ component = R.hooksComponent cname cpt where
       <$> R2.getPortalHost
 
 
-toggle :: forall event. event -> T.Box Boolean -> Effect Unit
-toggle _ = T.modify_ not
+toggle :: forall event. T.Box Boolean -> event -> Effect Unit
+toggle box _ = T.modify_ not box
+
+addClassName :: Window -> String -> Effect Unit
+addClassName = runEffectFn2 _addClassName
+
+removeClassName :: Window -> String -> Effect Unit
+removeClassName = runEffectFn2 _removeClassName
