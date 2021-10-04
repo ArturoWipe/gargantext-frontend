@@ -19,11 +19,13 @@ import Data.Set as Set
 import Data.String as Str
 import Data.Symbol (SProxy(..))
 import Data.Tuple (Tuple(..))
+import Data.Tuple.Nested ((/\))
 import Effect (Effect)
-import Effect.Aff (Aff)
+import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_)
 import Effect.Class (liftEffect)
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
 import Gargantext.Components.Category (rating)
 import Gargantext.Components.Category.Types (Star(..))
 import Gargantext.Components.DocsTable.DocumentFormCreation (documentFormCreation)
@@ -39,7 +41,7 @@ import Gargantext.Routes (SessionRoute(NodeAPI))
 import Gargantext.Routes as Routes
 import Gargantext.Sessions (Session, sessionId, get, delete)
 import Gargantext.Types (ListId, NodeID, NodeType(..), OrderBy(..), SidePanelState(..), TabSubType, TabType, TableResult, showTabType')
-import Gargantext.Utils (sortWith)
+import Gargantext.Utils (sortWith, (?))
 import Gargantext.Utils.CacheAPI as GUC
 import Gargantext.Utils.QueryString (joinQueryStrings, mQueryParam, mQueryParamS, queryParam, queryParamS)
 import Gargantext.Utils.Reactix as R2
@@ -131,13 +133,28 @@ docViewCpt = here.component "docView" cpt where
       , params
       , query
       } _ = do
+    -- State
     cacheState' <- T.useLive T.unequal cacheState
     query' <- T.useLive T.unequal query
     isDocumentModalVisibleBox <- T.useBox false
+    onDocumentCreationPending /\ onDocumentCreationPendingBox <-
+      R2.useBox' false
 
+    -- @toggleModalCallback
     toggleModal <- pure $ const $
       T.modify_ not isDocumentModalVisibleBox
 
+    -- @createDocumentCallback
+    -- @WIP: remote business for document creation
+    createDocumentCallback <- pure $ \fdata -> launchAff_ do
+
+      liftEffect $ T.write_ true onDocumentCreationPendingBox
+
+      delay $ Milliseconds 2000.0
+
+      liftEffect $ T.write_ false onDocumentCreationPendingBox
+
+    -- Render
     pure $
 
       R.fragment
@@ -187,7 +204,9 @@ docViewCpt = here.component "docView" cpt where
         }
         [
           documentFormCreation
-          {}
+          { callback: createDocumentCallback
+          , status: onDocumentCreationPending ? Deferred $ Enabled
+          }
         ]
       ]
 

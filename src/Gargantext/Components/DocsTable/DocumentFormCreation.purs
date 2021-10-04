@@ -1,16 +1,17 @@
 module Gargantext.Components.DocsTable.DocumentFormCreation
   ( documentFormCreation
+  , FormData
   ) where
 
 import Gargantext.Prelude
 
-import DOM.Simple.Console (log, log3)
+import DOM.Simple.Console (log3)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, intercalate)
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Hooks.FormValidation (useFormValidation)
-import Gargantext.Hooks.FormValidation.Types (VForm)
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Hooks.FormValidation (VForm, useFormValidation)
 import Gargantext.Hooks.FormValidation.Unboxed as FV
 import Gargantext.Hooks.StateRecord (useStateRecord)
 import Gargantext.Utils (nbsp, (?))
@@ -18,30 +19,27 @@ import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Record (merge)
+import Record.Extra (pick)
 
-
-type DocumentFormData =
-  ( title     :: String
-  , source    :: String
-  , authors   :: String
-  , abstract  :: String
+type Props =
+  ( callback  :: Record FormData -> Effect Unit
+  , status    :: ComponentStatus
+  | Options
   )
 
-documentDefaultData :: Record DocumentFormData
-documentDefaultData =
-  { title     : ""
-  , source    : ""
-  , authors   : ""
-  , abstract  : ""
-  }
+type Options = ( | FormData )
 
-documentFormCreation :: R2.Leaf ()
-documentFormCreation = R2.leaf documentFormCreationCpt
-documentFormCreationCpt :: R.Component ()
-documentFormCreationCpt = R.hooksComponent "documentFormCreation" cpt where
-  cpt _ _ = do
+options :: Record Options
+options = merge {} defaultData
+
+documentFormCreation :: forall r. R2.OptLeaf Options Props r
+documentFormCreation = R2.optLeaf component options
+
+component :: R.Component Props
+component = R.hooksComponent "documentFormCreation" cpt where
+  cpt props _ = do
     -- Hooks
-    { state, setStateKey, bindStateKey } <- useStateRecord documentDefaultData
+    { state, bindStateKey } <- useStateRecord (pick props :: Record FormData)
     fv <- useFormValidation
 
     -- @onSubmit: exec whole form validation and execute callback
@@ -50,8 +48,8 @@ documentFormCreationCpt = R.hooksComponent "documentFormCreation" cpt where
       result <- fv.try (\_ -> documentFormValidation state)
 
       case result of
-        Left err -> log3 "document form error" state err
-        Right _  -> log "ok"
+        Left err -> log3 "document form validation error" state err
+        Right _  -> props.callback state
 
     -- Render
     pure $
@@ -166,7 +164,7 @@ documentFormCreationCpt = R.hooksComponent "documentFormCreation" cpt where
         [
           B.button
           { callback: \_ -> onSubmit
-          -- , status: props.status == "deferred" ? "deferred" $ "enabled"
+          , status: props.status == Deferred ? Deferred $ Enabled
           , variant: "primary"
           , type: "submit"
           , block: true
@@ -175,7 +173,22 @@ documentFormCreationCpt = R.hooksComponent "documentFormCreation" cpt where
         ]
       ]
 
-documentFormValidation :: Record DocumentFormData -> Effect VForm
+type FormData =
+  ( title     :: String
+  , source    :: String
+  , authors   :: String
+  , abstract  :: String
+  )
+
+defaultData :: Record FormData
+defaultData =
+  { title     : ""
+  , source    : ""
+  , authors   : ""
+  , abstract  : ""
+  }
+
+documentFormValidation :: Record FormData -> Effect VForm
 documentFormValidation r = foldl append mempty rules
   where
     rules =

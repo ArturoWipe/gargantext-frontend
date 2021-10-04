@@ -6,6 +6,7 @@ import Data.Array (elem)
 import Data.Foldable (intercalate)
 import Effect (Effect)
 import Gargantext.Components.Bootstrap.Spinner (spinner)
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
 import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import React.SyntheticEvent as SE
@@ -13,12 +14,12 @@ import Reactix as R
 import Reactix.DOM.HTML as H
 
 type Props =
-  ( callback :: Unit -> Effect Unit
+  ( callback  :: Unit -> Effect Unit
   | Options
   )
 
 type Options =
-  ( status    :: String
+  ( status    :: ComponentStatus
   , size      :: String
   , variant   :: String
   , type      :: String
@@ -28,7 +29,7 @@ type Options =
 
 options :: Record Options
 options =
-  { status    : "enabled"
+  { status    : Enabled
   , size      : "md"
   , variant   : "primary"
   , type      : "button"
@@ -61,7 +62,7 @@ component = R.hooksComponent componentName cpt where
       [ props.className
       -- BEM classNames
       , componentName
-      , componentName <> "--" <> status
+      , componentName <> "--" <> show status
       -- Bootstrap specific classNames
       , bootstrapName
       , bootstrapName <> "-" <> props.variant
@@ -78,11 +79,11 @@ component = R.hooksComponent componentName cpt where
       H.button
       { className
       , on: { click }
-      , disabled: elem status [ "disabled", "deferred" ]
+      , disabled: elem status [ Disabled, Deferred ]
       , type: props.type
       }
 
-      [ R2.if' (status == "deferred") $
+      [ R2.if' (status == Deferred) $
           spinner
           { className: componentName <> "__spinner"
           }
@@ -96,12 +97,12 @@ component = R.hooksComponent componentName cpt where
 -- | Clicked event will effectively be triggered according to the
 -- | component status props
 onClick :: forall event.
-     String
+     ComponentStatus
   -> (Unit -> Effect Unit)
   -> SE.SyntheticEvent_ event
   -> Effect Unit
 onClick status callback event = do
   SE.preventDefault event
-  if   status == "enabled"
+  if   status == Enabled
   then callback unit
-  else pure $ unit
+  else pure unit

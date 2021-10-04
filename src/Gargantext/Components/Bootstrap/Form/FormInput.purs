@@ -4,32 +4,33 @@ import Gargantext.Prelude
 
 import Data.Foldable (elem, intercalate)
 import Effect (Effect)
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Unsafe.Coerce (unsafeCoerce)
 
 type Props =
-  ( callback :: String -> Effect Unit
-  , value :: String
+  ( callback    :: String -> Effect Unit
+  , value       :: String
   | Options
   )
 
 type Options =
-  ( status :: String
-  , className :: String
-  , type :: String
+  ( status      :: ComponentStatus
+  , className   :: String
+  , type        :: String
   , placeholder :: String
-  , size :: String
+  , size        :: String
   )
 
 options :: Record Options
 options =
-  { status: "enabled"
-  , className: ""
-  , type: "text"
-  , placeholder: ""
-  , size: "md"
+  { status      : Enabled
+  , className   : ""
+  , type        : "text"
+  , placeholder : ""
+  , size        : "md"
   }
 
 -- | Structural Component for the Bootstrap input
@@ -57,7 +58,7 @@ component = R.hooksComponent componentName cpt where
       [ props.className
       -- BEM classNames
       , componentName
-      , componentName <> "--" <> status
+      , componentName <> "--" <> show status
       -- Bootstrap specific classNames
       , bootstrapName
       , bootstrapName <> "-" <> props.size
@@ -70,8 +71,8 @@ component = R.hooksComponent componentName cpt where
       H.input
       { className
       , on: { change }
-      , disabled: elem status [ "disabled" ]
-      , readOnly: elem status [ "idled" ]
+      , disabled: elem status [ Disabled ]
+      , readOnly: elem status [ Idled ]
       , placeholder: props.placeholder
       , type: props.type
       , autoComplete: "off"
@@ -82,11 +83,11 @@ component = R.hooksComponent componentName cpt where
 -- | * Also directly returns the newly input value
 -- | (usage not so different from `targetValue` of ReactBasic)
 onChange :: forall event.
-     String
+     ComponentStatus
   -> (String -> Effect Unit)
   -> event
   -> Effect Unit
 onChange status callback event = do
-  if   status == "enabled"
+  if   status == Enabled
   then callback $ (unsafeCoerce event).target.value
-  else pure $ unit
+  else pure unit

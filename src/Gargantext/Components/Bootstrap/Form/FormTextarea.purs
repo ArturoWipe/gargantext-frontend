@@ -4,28 +4,29 @@ import Gargantext.Prelude
 
 import Data.Foldable (elem, intercalate)
 import Effect (Effect)
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Unsafe.Coerce (unsafeCoerce)
 
 type Props =
-  ( callback :: String -> Effect Unit
-  , value :: String
+  ( callback      :: String -> Effect Unit
+  , value         :: String
   | Options
   )
 
 type Options =
-  ( status :: String
-  , className :: String
-  , placeholder :: String
+  ( status        :: ComponentStatus
+  , className     :: String
+  , placeholder   :: String
   )
 
 options :: Record Options
 options =
-  { status: "enabled"
-  , className: ""
-  , placeholder: ""
+  { status        : Enabled
+  , className     : ""
+  , placeholder   : ""
   }
 
 -- | Structural Component for the Bootstrap textarea
@@ -51,7 +52,7 @@ component = R.hooksComponent componentName cpt where
       [ props.className
       -- BEM classNames
       , componentName
-      , componentName <> "--" <> status
+      , componentName <> "--" <> show status
       -- Bootstrap specific classNames
       , bootstrapName
       ]
@@ -64,8 +65,8 @@ component = R.hooksComponent componentName cpt where
       H.textarea
       { className
       , on: { change }
-      , disabled: elem status [ "disabled" ]
-      , readOnly: elem status [ "idled" ]
+      , disabled: elem status [ Disabled ]
+      , readOnly: elem status [ Idled ]
       , placeholder: props.placeholder
       , autoComplete: "off"
       } []
@@ -75,11 +76,11 @@ component = R.hooksComponent componentName cpt where
 -- | * Also directly returns the newly input value
 -- | (usage not so different from `targetValue` of ReactBasic)
 onChange :: forall event.
-     String
+     ComponentStatus
   -> (String -> Effect Unit)
   -> event
   -> Effect Unit
 onChange status callback event = do
-  if   status == "enabled"
+  if   status == Enabled
   then callback $ (unsafeCoerce event).target.value
-  else pure $ unit
+  else pure unit
