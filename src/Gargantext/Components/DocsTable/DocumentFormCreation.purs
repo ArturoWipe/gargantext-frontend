@@ -1,6 +1,7 @@
 module Gargantext.Components.DocsTable.DocumentFormCreation
   ( documentFormCreation
   , FormData
+  , create
   ) where
 
 import Gargantext.Prelude
@@ -9,11 +10,16 @@ import DOM.Simple.Console (log3)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, intercalate)
 import Effect (Effect)
+import Effect.Aff (Aff)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Config.REST (RESTError)
 import Gargantext.Hooks.FormValidation (VForm, useFormValidation)
 import Gargantext.Hooks.FormValidation.Unboxed as FV
 import Gargantext.Hooks.StateRecord (useStateRecord)
+import Gargantext.Routes as GR
+import Gargantext.Sessions (Session, post)
+import Gargantext.Types as GT
 import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -197,3 +203,13 @@ documentFormValidation r = foldl append mempty rules
       , FV.nonEmpty "source" r.source
       , FV.nonEmpty "authors" r.authors
       ]
+
+
+---------------------------------------------------
+
+create ::
+     Session
+  -> GT.ID
+  -> Record FormData
+  -> Aff (Either RESTError GT.ID)
+create session id = post session $ GR.NodeDocument id

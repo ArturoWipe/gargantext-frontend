@@ -57,6 +57,7 @@ data SessionRoute
   | CorpusMetricsHash { listId :: ListId, tabType :: TabType }  (Maybe Id)
   | Chart ChartOpts (Maybe Id)
   | ChartHash { chartType :: ChartType, listId :: Maybe ListId, tabType :: TabType } (Maybe Id)
+  | NodeDocument Id
   -- | AnnuaireContact AnnuaireId DocId
 
 instance Show AppRoute where

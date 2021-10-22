@@ -195,7 +195,8 @@ sessionPath (R.ChartHash { chartType, listId, tabType } i) =
     <> "&listType=" <> show MapTerm -- listId
     <> defaultListAddMaybe listId
 -- sessionPath (R.NodeAPI (NodeContact s a i) i) = sessionPath $ "annuaire/" <> show a <> "/contact/" <> show i
-
+sessionPath (R.NodeAPI Phylo pId p) = "phyloscape?nodeId=" <> (show $ fromMaybe 0 pId) <> p
+sessionPath (R.NodeDocument id) = "node/" <> (show id) <> "/document/upload/async"
 
 ------- misc routing stuff
 

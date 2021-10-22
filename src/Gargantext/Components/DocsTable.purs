@@ -3,6 +3,7 @@ module Gargantext.Components.DocsTable where
 
 import Gargantext.Prelude
 
+import DOM.Simple.Console (log2)
 import DOM.Simple.Event as DE
 import Data.Array as A
 import Data.Either (Either)
@@ -28,7 +29,7 @@ import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
 import Gargantext.Components.Category (rating)
 import Gargantext.Components.Category.Types (Star(..))
-import Gargantext.Components.DocsTable.DocumentFormCreation (documentFormCreation)
+import Gargantext.Components.DocsTable.DocumentFormCreation as DFC
 import Gargantext.Components.DocsTable.Types (DocumentsView(..), Hyperdata(..), LocalUserScore, Query, Response(..), Year, sampleData)
 import Gargantext.Components.Nodes.Lists.Types as NT
 import Gargantext.Components.Nodes.Texts.Types as TextsT
@@ -148,11 +149,21 @@ docViewCpt = here.component "docView" cpt where
     -- @WIP: remote business for document creation
     createDocumentCallback <- pure $ \fdata -> launchAff_ do
 
-      liftEffect $ T.write_ true onDocumentCreationPendingBox
+      -- liftEffect $ T.write_ true onDocumentCreationPendingBox
 
-      delay $ Milliseconds 2000.0
+      -- delay $ Milliseconds 2000.0
 
-      liftEffect $ T.write_ false onDocumentCreationPendingBox
+      -- liftEffect $ T.write_ false onDocumentCreationPendingBox
+
+      liftEffect $
+        T.write_ true onDocumentCreationPendingBox
+
+      res <- DFC.create session nodeId fdata
+
+      liftEffect do
+        log2 "RESULT" res
+        T.write_ false onDocumentCreationPendingBox
+
 
     -- Render
     pure $
@@ -203,7 +214,7 @@ docViewCpt = here.component "docView" cpt where
         , hasCollapsibleBackground: false
         }
         [
-          documentFormCreation
+          DFC.documentFormCreation
           { callback: createDocumentCallback
           , status: onDocumentCreationPending ? Deferred $ Enabled
           }
