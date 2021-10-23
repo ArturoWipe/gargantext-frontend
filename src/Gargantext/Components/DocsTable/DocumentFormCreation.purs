@@ -54,7 +54,7 @@ component = R.hooksComponent "documentFormCreation" cpt where
       result <- fv.try (\_ -> documentFormValidation state)
 
       case result of
-        Left err -> log3 "document form validation error" state err
+        Left err -> log3 "documentFormCreation validation error" state err
         Right _  -> props.callback state
 
     -- Render

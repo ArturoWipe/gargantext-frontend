@@ -6,7 +6,7 @@ import Gargantext.Prelude
 import DOM.Simple.Console (log2)
 import DOM.Simple.Event as DE
 import Data.Array as A
-import Data.Either (Either)
+import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
 import Data.Lens ((^.))
 import Data.Lens.At (at)
@@ -146,24 +146,18 @@ docViewCpt = here.component "docView" cpt where
       T.modify_ not isDocumentModalVisibleBox
 
     -- @createDocumentCallback
-    -- @WIP: remote business for document creation
     createDocumentCallback <- pure $ \fdata -> launchAff_ do
-
-      -- liftEffect $ T.write_ true onDocumentCreationPendingBox
-
-      -- delay $ Milliseconds 2000.0
-
-      -- liftEffect $ T.write_ false onDocumentCreationPendingBox
 
       liftEffect $
         T.write_ true onDocumentCreationPendingBox
 
       res <- DFC.create session nodeId fdata
 
-      liftEffect do
-        log2 "RESULT" res
-        T.write_ false onDocumentCreationPendingBox
-
+      liftEffect $ case res of
+        Left err -> do
+          log2 "createDocumentCallback error" err
+          T.write_ false onDocumentCreationPendingBox
+        Right _ -> pure unit -- @WIP reload page
 
     -- Render
     pure $
