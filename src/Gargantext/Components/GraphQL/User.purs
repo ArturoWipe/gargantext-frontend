@@ -1,9 +1,15 @@
 module Gargantext.Components.GraphQL.User where
 
-import Data.Maybe (Maybe(..), maybe)
 import Gargantext.Prelude
+
+import Data.Maybe (Maybe(..), maybe)
+import Gargantext.Components.Nodes.Annuaire.User.Contacts.Types (HyperdataUser(..))
+import GraphQL.Client.GetFields (getFieldsStandard)
 import Type.Proxy (Proxy(..))
 
+
+uFields = getFieldsStandard (Proxy :: _ User)
+huFields = getFieldsStandard (Proxy :: _ HyperdataUser)
 
 type User
   = { u_id        :: Int

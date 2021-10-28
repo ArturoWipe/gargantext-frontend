@@ -16,6 +16,7 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.GraphQL (queryGql)
+import Gargantext.Components.GraphQL.User (uFields, huFields)
 import Gargantext.Components.InputWithEnter (inputWithEnter)
 import Gargantext.Components.Nodes.Annuaire.Tabs as Tabs
 import Gargantext.Components.Nodes.Annuaire.User.Contacts.Types (Contact(..), ContactData, ContactTouch(..), ContactWhere(..), ContactWho(..), HyperdataContact(..), HyperdataUser(..), _city, _country, _firstName, _labTeamDeptsJoinComma, _lastName, _mail, _office, _organizationJoinComma, _ouFirst, _phone, _role, _shared, _touch, _who, defaultContactTouch, defaultContactWhere, defaultContactWho, defaultHyperdataContact, defaultHyperdataUser)
@@ -245,17 +246,18 @@ getUser session id = do
   { users } <- queryGql "get user"
                { users: { user_id: id } =>>
                  { u_id
-                 , u_hyperdata:
-                   { _hu_shared:
-                     { _hc_title
-                     , _hc_source
-                     , _hc_who:
-                       { _cw_firstName
-                       , _cw_lastName }
-                     , _hc_where:
-                       { _cw_organization }
-                     }
-                   }
+                 , u_hyperdata: huFields
+--                 , u_hyperdata:
+--                   { _hu_shared:
+--                     { _hc_title
+--                     , _hc_source
+--                     , _hc_who:
+--                       { _cw_firstName
+--                       , _cw_lastName }
+--                     , _hc_where:
+--                       { _cw_organization }
+--                     }
+--                   }
                  , u_username
                  , u_email } }
   liftEffect $ here.log2 "[getUser] users" users
