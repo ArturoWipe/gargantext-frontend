@@ -22,7 +22,7 @@ import Data.Symbol (SProxy(..))
 import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
-import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_)
+import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
@@ -41,7 +41,7 @@ import Gargantext.Hooks.Loader (useLoader, useLoaderWithCacheAPI, HashedResponse
 import Gargantext.Routes (SessionRoute(NodeAPI))
 import Gargantext.Routes as Routes
 import Gargantext.Sessions (Session, sessionId, get, delete)
-import Gargantext.Types (ListId, NodeID, NodeType(..), OrderBy(..), SidePanelState(..), TabSubType, TabType, TableResult, showTabType')
+import Gargantext.Types (FrontendError(..), ListId, NodeID, NodeType(..), OrderBy(..), SidePanelState(..), TabSubType, TabType, TableResult, showTabType')
 import Gargantext.Utils (sortWith, (?))
 import Gargantext.Utils.CacheAPI as GUC
 import Gargantext.Utils.QueryString (joinQueryStrings, mQueryParam, mQueryParamS, queryParam, queryParamS)
@@ -155,7 +155,9 @@ docViewCpt = here.component "docView" cpt where
 
       liftEffect $ case res of
         Left err -> do
+          err' <- pure (FRESTError { error: err })
           log2 "createDocumentCallback error" err
+          T.modify_ (A.cons $ err') boxes.errors
           T.write_ false onDocumentCreationPendingBox
         Right _ -> pure unit -- @WIP reload page
 

@@ -24,8 +24,9 @@ import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
-import Record (merge)
+import Record (merge, rename)
 import Record.Extra (pick)
+import Type.Proxy (Proxy(..))
 
 type Props =
   ( callback  :: Record FormData -> Effect Unit
@@ -212,4 +213,7 @@ create ::
   -> GT.ID
   -> Record FormData
   -> Aff (Either RESTError GT.ID)
-create session id = post session $ GR.NodeDocument id
+create session id = post session (GR.NodeDocument id) <<< r
+  where
+    r = rename (Proxy :: Proxy "source")
+               (Proxy :: Proxy "sources")
