@@ -88,6 +88,7 @@ asyncTaskTTriggersAppReload (GT.AsyncTaskWithType { typ }) = asyncTaskTriggersAp
 
 asyncTaskTriggersMainPageReload :: GT.AsyncTaskType -> Boolean
 asyncTaskTriggersMainPageReload GT.UpdateNgramsCharts = true
+-- asyncTaskTriggersMainPageReload GT.NodeDocument       = true
 asyncTaskTriggersMainPageReload _                     = false
 
 asyncTaskTTriggersMainPageReload :: GT.AsyncTaskWithType -> Boolean

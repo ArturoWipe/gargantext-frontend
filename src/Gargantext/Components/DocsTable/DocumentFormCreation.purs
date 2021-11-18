@@ -10,6 +10,7 @@ import DOM.Simple.Console (log3)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, intercalate)
 import Data.Maybe (Maybe(..))
+import Data.String (null)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Gargantext.Components.Bootstrap as B
@@ -144,6 +145,35 @@ component = R.hooksComponent "documentFormCreation" cpt where
           ]
         ]
       ,
+        -- Date
+        H.div
+        { className: intercalate " "
+            [ "form-group"
+            , (fv.hasError' "date") ?
+                "form-group--error" $
+                mempty
+            ]
+        }
+        [
+          H.div
+          { className: "form-group__label" }
+          [
+            H.label {} [ H.text $ "Date" ]
+          ]
+        ,
+          H.div
+          { className: "form-group__field" }
+          [
+            B.formInput $
+            { type: "date"
+            } `Record.merge` bindStateKey "date"
+          ,
+            R2.if' (fv.hasError' "date") $
+              H.div { className: "form-group__error" }
+              [ H.text "Please enter a valid date" ]
+          ]
+        ]
+      ,
         -- Abstract
         H.div
         { className: intercalate " "
@@ -151,7 +181,8 @@ component = R.hooksComponent "documentFormCreation" cpt where
             ]
         }
         [
-          H.div { className: "form-group__label" }
+          H.div
+          { className: "form-group__label" }
           [
             H.label {} [ H.text $ "Abstract" <> nbsp 1 ]
           ,
@@ -160,7 +191,8 @@ component = R.hooksComponent "documentFormCreation" cpt where
             [ H.text "optional" ]
           ]
         ,
-          H.div { className: "form-group__field" }
+          H.div
+          { className: "form-group__field" }
           [
             B.formTextarea $
             { rows: 5
@@ -186,6 +218,7 @@ type FormData =
   ( title     :: String
   , source    :: String
   , authors   :: String
+  , date      :: String
   , abstract  :: String
   )
 
@@ -194,6 +227,7 @@ defaultData =
   { title     : ""
   , source    : ""
   , authors   : ""
+  , date      : ""
   , abstract  : ""
   }
 
@@ -204,20 +238,11 @@ documentFormValidation r = foldl append mempty rules
       [ FV.nonEmpty "title" r.title
       , FV.nonEmpty "source" r.source
       , FV.nonEmpty "authors" r.authors
+      , FV.date "date" r.date
       ]
 
 
 ---------------------------------------------------
-
--- create ::
---      Session
---   -> GT.ID
---   -> Record FormData
---   -> Aff (Either RESTError GT.ID)
--- create session id = post session (GR.NodeDocument id) <<< r
---   where
---     r = rename (Proxy :: Proxy "source")
---                (Proxy :: Proxy "sources")
 
 create ::
      Session

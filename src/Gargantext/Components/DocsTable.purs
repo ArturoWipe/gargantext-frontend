@@ -24,6 +24,7 @@ import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
+import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
@@ -155,8 +156,10 @@ docViewCpt = here.component "docView" cpt where
       eTask <- DFC.create session nodeId fdata
 
       handleRESTError boxes.errors eTask
-        \t -> liftEffect do
-          here.log2 "[nodeDocument] NodeDocument task:" t
+        \task -> liftEffect do
+          -- @WIP
+          -- GAT.insert nodeId task boxes.tasks
+          here.log2 "[nodeDocument] NodeDocument task:" task
 
     -- Render
     pure $
