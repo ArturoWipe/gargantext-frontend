@@ -9,6 +9,7 @@ import Gargantext.Prelude
 import DOM.Simple.Console (log3)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, intercalate)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Gargantext.Components.Bootstrap as B
@@ -24,7 +25,7 @@ import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
-import Record (merge, rename)
+import Record as Record
 import Record.Extra (pick)
 import Type.Proxy (Proxy(..))
 
@@ -37,7 +38,7 @@ type Props =
 type Options = ( | FormData )
 
 options :: Record Options
-options = merge {} defaultData
+options = Record.merge {} defaultData
 
 documentFormCreation :: forall r. R2.OptLeaf Options Props r
 documentFormCreation = R2.optLeaf component options
@@ -135,7 +136,7 @@ component = R.hooksComponent "documentFormCreation" cpt where
           [
             B.formInput $
             { placeholder: "ex: author1, author2, …"
-            } `merge` bindStateKey "authors"
+            } `Record.merge` bindStateKey "authors"
           ,
             R2.if' (fv.hasError' "authors") $
               H.div { className: "form-group__error" }
@@ -163,7 +164,7 @@ component = R.hooksComponent "documentFormCreation" cpt where
           [
             B.formTextarea $
             { rows: 5
-            } `merge` bindStateKey "abstract"
+            } `Record.merge` bindStateKey "abstract"
           ]
         ]
       ,
@@ -208,12 +209,36 @@ documentFormValidation r = foldl append mempty rules
 
 ---------------------------------------------------
 
+-- create ::
+--      Session
+--   -> GT.ID
+--   -> Record FormData
+--   -> Aff (Either RESTError GT.ID)
+-- create session id = post session (GR.NodeDocument id) <<< r
+--   where
+--     r = rename (Proxy :: Proxy "source")
+--                (Proxy :: Proxy "sources")
+
 create ::
      Session
   -> GT.ID
   -> Record FormData
-  -> Aff (Either RESTError GT.ID)
-create session id = post session (GR.NodeDocument id) <<< r
+  -> Aff (Either RESTError GT.AsyncTaskWithType)
+create session id =
+      rename
+  >>> post session request
+  >=> case _ of
+    Left err   -> pure $ Left err
+    Right task -> pure $ Right $ GT.AsyncTaskWithType
+      { task
+      , typ: GT.NodeDocument
+      }
+
   where
-    r = rename (Proxy :: Proxy "source")
-               (Proxy :: Proxy "sources")
+
+    request = GR.NodeAPI GT.Node (Just id)
+      (GT.asyncTaskTypePath GT.NodeDocument)
+
+    rename = Record.rename
+      (Proxy :: Proxy "source")
+      (Proxy :: Proxy "sources")

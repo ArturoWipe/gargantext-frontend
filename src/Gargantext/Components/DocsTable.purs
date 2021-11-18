@@ -6,7 +6,7 @@ import Gargantext.Prelude
 import DOM.Simple.Console (log2)
 import DOM.Simple.Event as DE
 import Data.Array as A
-import Data.Either (Either(..))
+import Data.Either (Either)
 import Data.Generic.Rep (class Generic)
 import Data.Lens ((^.))
 import Data.Lens.At (at)
@@ -36,12 +36,13 @@ import Gargantext.Components.Nodes.Texts.Types as TextsT
 import Gargantext.Components.Table as TT
 import Gargantext.Components.Table.Types as TT
 import Gargantext.Config.REST (RESTError)
+import Gargantext.Config.Utils (handleRESTError)
 import Gargantext.Ends (Frontends, url)
 import Gargantext.Hooks.Loader (useLoader, useLoaderWithCacheAPI, HashedResponse(..))
 import Gargantext.Routes (SessionRoute(NodeAPI))
 import Gargantext.Routes as Routes
 import Gargantext.Sessions (Session, sessionId, get, delete)
-import Gargantext.Types (FrontendError(..), ListId, NodeID, NodeType(..), OrderBy(..), SidePanelState(..), TabSubType, TabType, TableResult, showTabType')
+import Gargantext.Types (ListId, NodeID, NodeType(..), OrderBy(..), SidePanelState(..), TabSubType, TabType, TableResult, showTabType')
 import Gargantext.Utils (sortWith, (?))
 import Gargantext.Utils.CacheAPI as GUC
 import Gargantext.Utils.QueryString (joinQueryStrings, mQueryParam, mQueryParamS, queryParam, queryParamS)
@@ -151,15 +152,11 @@ docViewCpt = here.component "docView" cpt where
       liftEffect $
         T.write_ true onDocumentCreationPendingBox
 
-      res <- DFC.create session nodeId fdata
+      eTask <- DFC.create session nodeId fdata
 
-      liftEffect $ case res of
-        Left err -> do
-          err' <- pure (FRESTError { error: err })
-          log2 "createDocumentCallback error" err
-          T.modify_ (A.cons $ err') boxes.errors
-          T.write_ false onDocumentCreationPendingBox
-        Right _ -> pure unit -- @WIP reload page
+      handleRESTError boxes.errors eTask
+        \t -> liftEffect do
+          here.log2 "[nodeDocument] NodeDocument task:" t
 
     -- Render
     pure $
