@@ -141,6 +141,7 @@ unhide :: Document -> String -> Effect Unit
 unhide d s = do
   setText s   `toElements` "#phyloName"
   turnVisible `toElements` "#phyloName"
+  turnVisible `toElements` "#phyloTopBar"
   turnVisible `toElements` ".reset"
   turnVisible `toElements` ".label"
   turnVisible `toElements` ".heading"

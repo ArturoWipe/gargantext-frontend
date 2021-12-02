@@ -1,4 +1,4 @@
-module Gargantext.Components.Bootstrap.FormInput (formInput) where
+module Gargantext.Components.Bootstrap.FormSelect (formSelect) where
 
 import Gargantext.Prelude
 
@@ -7,7 +7,6 @@ import Effect (Effect)
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Sizing(..))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
-import Reactix.DOM.HTML as H
 import Unsafe.Coerce (unsafeCoerce)
 
 type Props =
@@ -33,14 +32,27 @@ options =
   , size        : MediumSize
   }
 
--- | Structural Component for the Bootstrap input
+-- | Structural Component for the Bootstrap select
+-- |
+-- |  ```purescript
+-- |  formSelect { callback, value }
+-- |  [
+-- |    H.option
+-- |    { value: "foo" }
+-- |    [ H.text "foo" ]
+-- |  ,
+-- |    H.option
+-- |    { value: "bar" }
+-- |    [ H.text "bar" ]
+-- |  ]
+-- |  ```
 -- |
 -- | https://getbootstrap.com/docs/4.1/components/forms/
-formInput :: forall r. R2.OptLeaf Options Props r
-formInput = R2.optLeaf component options
+formSelect :: forall r. R2.OptComponent Options Props r
+formSelect = R2.optComponent component options
 
 componentName :: String
-componentName = "b-form-input"
+componentName = "b-form-select"
 
 bootstrapName :: String
 bootstrapName = "form-control"
@@ -49,7 +61,7 @@ component :: R.Component Props
 component = R.hooksComponent componentName cpt where
   cpt props@{ callback
             , status
-            } _ = do
+            } children = do
     -- Computed
     className <- pure $ intercalate " "
       -- provided custom className
@@ -65,17 +77,15 @@ component = R.hooksComponent componentName cpt where
     change <- pure $ onChange status callback
     -- Render
     pure $
-
-      H.input
+      R2.select
       { className
       , on: { change }
       , disabled: elem status [ Disabled ]
       , readOnly: elem status [ Idled ]
-      , placeholder: props.placeholder
       , type: props.type
-      , autoComplete: "off"
       , value: props.value
       }
+      children
 
 -- | * Change event will effectively be triggered according to the
 -- | component status props

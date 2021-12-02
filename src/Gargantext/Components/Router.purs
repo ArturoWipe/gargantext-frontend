@@ -103,7 +103,9 @@ topBarCpt = here.component "topBar" cpt where
 
     let children = case route' of
           GR.PGraphExplorer _s _g -> [ GETB.topBar { boxes } ]
-          _                       -> []
+          -- @WIP: portal use, remove route pattern matching, send
+          --       GETB.topBar through below portal
+          _                       -> [ H.div { id: "portal-topbar" } [] ]
 
     pure $ TopBar.topBar { boxes } children
 

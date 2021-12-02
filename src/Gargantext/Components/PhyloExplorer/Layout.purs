@@ -5,8 +5,10 @@ module Gargantext.Components.PhyloExplorer.Layout
 import Gargantext.Prelude
 
 import DOM.Simple (document, window)
+import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.PhyloExplorer.Draw (drawPhylo, highlightSource, setGlobalD3Reference, setGlobalDependencies, unhide)
+import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (PhyloDataSet(..), Source(..), sortSources)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
@@ -30,6 +32,8 @@ layoutCpt = here.component "layout" cpt where
       } _ = do
     -- States
     sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
+
+    mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
     R.useEffectOnce' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
@@ -92,34 +96,9 @@ layoutCpt = here.component "layout" cpt where
         --   , className: "button draw"
         --   }
         --   [ H.text "draw" ]
-        -- ,
-        -- <!-- source selector -->
-          R2.select
-          { id: "checkSource"
-          , className: "select-source"
-          , defaultValue: ""
-          , on: { change: \e -> highlightSource window e.target.value }
-          } $
-          [
-            H.option
-            { disabled: true
-            , value: ""
-            }
-            [ H.text "select a source ↴" ]
-          ,
-            H.option
-            { value: "unselect" }
-            [ H.text "unselect source ✕" ]
-          ]
-          <>
-            flip map sources
-            ( \(Source { id, label }) ->
-                H.option
-                { value: id }
-                [ H.text label ]
-            )
+        --
 
-        ,
+
         -- <!-- search bar -->
           H.label
           { id: "search-label"
@@ -243,6 +222,22 @@ layoutCpt = here.component "layout" cpt where
         }
         []
 
+
+      ,
+        -- <!-- PORTAL: topbar -->
+        R2.createPortal' mTopBarHost
+        [
+          -- H.div
+          -- { id: "phyloTopBar"
+          -- -- , visibility: "hidden"
+          -- }
+          -- [
+          --   topBar
+          --   { sourceList: sources
+          --   , sourceCallback: highlightSource window
+          --   }
+          -- ]
+        ]
       ]
 
 --------------------------------------------------------

@@ -9,6 +9,7 @@ import DOM.Simple.Document (document)
 import DOM.Simple.Element as Element
 import DOM.Simple.Event as DE
 import DOM.Simple.Types (class IsNode, class IsElement, DOMRect)
+import Data.Array (singleton)
 import Data.Array as A
 import Data.Either (hush)
 import Data.Function.Uncurried (Fn1, runFn1, Fn2, runFn2)
@@ -16,6 +17,7 @@ import Data.Maybe (Maybe(..), fromJust, fromMaybe)
 import Data.Nullable (Nullable, null, toMaybe)
 import Data.Tuple (Tuple)
 import Data.Tuple.Nested ((/\))
+import Data.UUID as UUID
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff, launchAff_, killFiber)
 import Effect.Class (liftEffect)
@@ -495,3 +497,20 @@ useBox' default = do
   box <- T.useBox default
   b <- useLive' box
   pure $ b /\ box
+
+-- | Reactix `fragment` with key support
+fragmentWithKey :: String -> Array R.Element -> R.Element
+fragmentWithKey key es = R.rawCreateElement (R.react .. "Fragment") { key } es
+
+-- | * Create portal via a `Maybe DOM.Element`,
+-- | * Also resolve ReactJS erratic runtime error where portal children element
+-- |   within it does not have "key" [1]
+-- |
+-- | [1] `Warning: Each child in a list should have a unique "key" prop.`
+createPortal' :: Maybe DOM.Element -> Array R.Element -> R.Element
+createPortal' mHost children =
+  let key = unsafeCoerce UUID.genUUID
+  in case mHost of
+    Nothing -> mempty
+    Just host -> flip R.createPortal host $ singleton $
+      fragmentWithKey key children

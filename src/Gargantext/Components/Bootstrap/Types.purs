@@ -1,5 +1,6 @@
 module Gargantext.Components.Bootstrap.Types
   ( ComponentStatus(..)
+  , Sizing(..)
   ) where
 
 import Gargantext.Prelude
@@ -38,3 +39,28 @@ derive instance Generic ComponentStatus _
 derive instance Eq ComponentStatus
 instance Show ComponentStatus where
   show a = kebabCase $ genericShow a
+
+----------------------------------------------------------------------
+
+-- | Common sizing values used by various Bootstrap components
+-- |
+-- | Bootstrap components using sizing use:
+-- |    * only 3 possible values
+-- |    * `MediumSize` value by default
+-- |    * (not to be confused with Bootstrap className utilities also using
+-- |      a measuring scale)
+-- |
+-- | Examples:
+-- |    * https://getbootstrap.com/docs/4.1/components/input-group/#sizing
+-- |    * https://getbootstrap.com/docs/4.1/components/button-group/#sizing
+data Sizing =
+    SmallSize
+  | MediumSize
+  | LargeSize
+
+derive instance Generic Sizing _
+derive instance Eq Sizing
+instance Show Sizing where
+  show SmallSize  = "sm"
+  show MediumSize = "md"
+  show LargeSize  = "lg"

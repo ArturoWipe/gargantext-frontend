@@ -279,9 +279,6 @@ function findValueByPrefix(prefix) {
 
 function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
-  /* ** draw the sources box ** */
-
-  document.querySelector("#checkSource").style.display  = "inline-block";
 
   /* ** draw the search box ** */
 
