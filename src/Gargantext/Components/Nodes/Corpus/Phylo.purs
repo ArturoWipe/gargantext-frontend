@@ -6,15 +6,19 @@ import Gargantext.Prelude
 
 import Affjax as AX
 import Affjax.ResponseFormat as ResponseFormat
+import DOM.Simple (document, querySelector)
 import DOM.Simple.Console (log2)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
+import Data.Tuple.Nested ((/\))
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
+import FFI.Simple ((..), (.=))
 import Gargantext.Components.PhyloExplorer.JSON (PhyloJSONSet)
 import Gargantext.Components.PhyloExplorer.Layout (layout)
 import Gargantext.Components.PhyloExplorer.Types (PhyloDataSet, parsePhyloJSONSet)
+import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Sessions (Session)
 import Gargantext.Types (NodeID)
 import Gargantext.Utils.Reactix as R2
@@ -22,25 +26,41 @@ import Reactix as R
 import Simple.JSON as JSON
 import Toestand as T
 
-
-here :: R2.Here
-here = R2.here "Gargantext.Components.Nodes.Corpus.Phylo"
-
 type Props =
   ( nodeId :: NodeID
   , session :: Session
   )
 
 phyloLayout :: R2.Component Props
-phyloLayout = R.createElement phyloLayoutCpt
-phyloLayoutCpt :: R.Component Props
-phyloLayoutCpt = here.component "phyloLayout" cpt where
-  cpt _ _ = do
+phyloLayout = R.createElement component
 
-    fetchedDataBox <- T.useBox (Nothing :: Maybe PhyloDataSet)
-    fetchedData    <- T.useLive T.unequal fetchedDataBox
+componentName :: String
+componentName = "Gargantext.Components.Nodes.Corpus.Phylo.Main"
 
-    R.useEffectOnce' $ launchAff_ do
+component :: R.Component Props
+component = R.hooksComponent componentName cpt where
+  cpt { nodeId } _ = do
+
+    fetchedData /\ fetchedDataBox <- R2.useBox' (Nothing :: Maybe PhyloDataSet)
+
+    useFirstEffect' do
+      -- @XXX: inopinent <div> (see Gargantext.Components.Router) (@TODO?)
+      mEl <- querySelector document ".main-page__main-route .container"
+      case mEl of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "display") "none"
+      -- @XXX: reset "main-page__main-route" wrapper margin
+      --       see Gargantext.Components.Router) (@TODO?)
+      mEl' <- querySelector document ".main-page__main-route"
+      case mEl' of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "padding") "initial"
+
+    useFirstEffect' $ launchAff_ do
       result <- fetchPhyloJSON
       liftEffect $ case result of
         Left err  -> log2 "error" err
@@ -48,7 +68,7 @@ phyloLayoutCpt = here.component "phyloLayout" cpt where
 
     pure case fetchedData of
       Nothing           -> mempty
-      Just phyloDataSet -> layout { phyloDataSet } []
+      Just phyloDataSet -> layout { phyloDataSet, nodeId } []
 
 
 fetchPhyloJSON :: Aff (Either String PhyloDataSet)
