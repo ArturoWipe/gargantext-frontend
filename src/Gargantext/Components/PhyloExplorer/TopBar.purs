@@ -4,10 +4,13 @@ module Gargantext.Components.PhyloExplorer.TopBar
 
 import Gargantext.Prelude
 
+import DOM.Simple.Console (log)
+import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.PhyloExplorer.Types (Source(..))
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Components.PhyloExplorer.Types (GlobalTerm(..), Source(..))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -19,66 +22,38 @@ here :: R2.Here
 here = R2.here "Gargantext.Components.PhyloExplorer.TopBar"
 
 type Props =
-  ( sourceCallback  :: String -> Effect Unit
-  , sourceList      :: Array Source
+  ( sourceCallback             :: String -> Effect Unit
+  , sourceList                 :: Array Source
+  , autocompleteSearchCallback :: String -> Effect (Maybe GlobalTerm)
+  , autocompleteSubmitCallback :: Maybe GlobalTerm -> Effect Unit
   )
 
 topBar :: R2.Leaf Props
 topBar = R2.leaf topBarCpt
--- topBarCpt :: R.Component Props
--- topBarCpt = here.component "main" cpt where
---   cpt props _ = do
---     -- States
---     let defaultSource = ""
-
---     source /\ sourceBox <- R2.useBox' defaultSource
-
---     -- Effects
---     R.useEffect1' source $ props.sourceCallback source
-
---     -- Render
---     pure $
-
---       H.div
---       { className: "phylo-topbar" }
---       [
---         B.formSelect
---         { className: "select-source"
---         , value: source
---         , callback: flip T.write_ sourceBox
---         } $
---         [
---           H.option
---           { disabled: true
---           , value: ""
---           }
---           [ H.text "select a source ↴" ]
---         ,
---           H.option
---           { value: "unselect" }
---           [ H.text "unselect source ✕" ]
---         ]
---         <>
---           flip map props.sourceList
---           ( \(Source { id, label }) ->
---               H.option
---               { value: id }
---               [ H.text label ]
---           )
---       ]
-
 topBarCpt :: R.Component Props
 topBarCpt = here.component "main" cpt where
   cpt props _ = do
     -- States
     let defaultSource = ""
+    let defaultSearch = ""
+    let defaultResult = (Nothing :: Maybe GlobalTerm)
 
     source /\ sourceBox <- R2.useBox' defaultSource
+    search /\ searchBox <- R2.useBox' defaultSearch
+    result /\ resultBox <- R2.useBox' defaultResult
 
-    -- @onChange
-    onChange <- pure $ \new -> do
-      T.write_ new sourceBox
-      props.sourceCallback new
+    -- Behaviors
+    onSourceChange <- pure $
+          flip T.write sourceBox
+      >=> props.sourceCallback
+
+    onAutocompleteChange <- pure $
+          flip T.write searchBox
+      >=> props.autocompleteSearchCallback
+      >=> flip T.write_ resultBox
+
+    onAutocompleteSubmit <- pure $
+      const $ props.autocompleteSubmitCallback result
 
     -- Render
     pure $
@@ -86,27 +61,57 @@ topBarCpt = here.component "main" cpt where
       H.div
       { className: "phylo-topbar" }
       [
-        B.formSelect
-        { className: "select-source"
-        , value: source
-        , callback: onChange
-        } $
+        -- Source
+        H.div
+        { className: "phylo-topbar__source"}
         [
-          H.option
-          { disabled: true
-          , value: ""
-          }
-          [ H.text "select a source ↴" ]
-        ,
-          H.option
-          { value: "unselect" }
-          [ H.text "unselect source ✕" ]
+          B.formSelect
+          { className: "phylo-topbar"
+          , value: source
+          , callback: onSourceChange
+          } $
+          [
+            H.option
+            { disabled: true
+            , value: ""
+            }
+            [ H.text "Select a source" ]
+          ,
+            H.option
+            { value: "unselect" }
+            [ H.text "unselect ✕" ]
+          ]
+          <>
+            flip map props.sourceList
+
+              \(Source { id, label }) ->
+                H.option
+                { value: id }
+                [ H.text label ]
+
         ]
-        <>
-          flip map props.sourceList
-          ( \(Source { id, label }) ->
-              H.option
-              { value: id }
-              [ H.text label ]
-          )
+      ,
+        -- Search
+        H.form
+        { on: { submit: onAutocompleteSubmit }
+        , className: "phylo-topbar__autocomplete"
+        }
+        [
+          B.formInput
+          { className: "phylo-topbar__suggestion"
+          -- , status: Disabled
+          , value: case result of
+              Nothing                     -> ""
+              Just (GlobalTerm { label }) -> label
+          -- (?) noop: see `onAutocompleteChange`
+          , callback: const $ pure unit
+          }
+        ,
+          B.formInput
+          { className: "phylo-topbar__search"
+          , callback: onAutocompleteChange
+          , value: search
+          , placeholder: "Find a term"
+          }
+        ]
       ]

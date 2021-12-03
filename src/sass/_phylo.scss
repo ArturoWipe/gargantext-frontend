@@ -1,3 +1,7 @@
+@use "./abstract/_members" as *;
+
+$topbar-input-width: 200px;
+
 /* fonts */
 
 @font-face {
@@ -536,39 +540,6 @@ i.how:hover span {
   font-size: 12px;
 }
 
-.search {
-  margin-left: 10px;
-  visibility: hidden;
-  position: absolute;
-  z-index: 7;
-  font-size: 14px;
-  background-color: transparent;
-  outline: 0;
-  border-width: 0 0 2px;
-  border-color: #0d1824
-}
-
-.search-label {
-  visibility: hidden;
-  margin-left: 5px;
-}
-
-.search:focus {
-  border-color: #F0684D
-}
-
-.autocomplete {
-  margin-left: 10px;
-  visibility: hidden;
-  position: absolute;
-  z-index: 7;
-  font-size: 14px;
-  background-color: transparent;
-  color: silver;
-  z-index: 1;
-  border: none;
-}
-
 .loading {
   visibility: hidden;
 }
@@ -579,25 +550,33 @@ i.how:hover span {
   font-weight: bold;
 }
 
-.select-source {
-  margin-left: 10px;
-  display: none;
+////////////////////////////////////////////////////////////////
 
-  border: 1.5px solid #0d1824;
-  cursor: pointer;
-  outline: 0;
-  background: transparent;
-  border-image: none;
-  outline-offset: -2px;
+.phylo-topbar {
+  display: flex;
 
-  outline-color: transparent;
-  box-shadow: none;
-  -webkit-appearance: none;
-}
+  &__source {
+    width: $topbar-input-width;
+    margin-right: space-x(1);
+  }
 
-option {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 150px;
+  &__autocomplete {
+    display: flex;
+    width: $topbar-input-width;
+    position: relative;
+  }
+
+  &__suggestion {
+    pointer-events: none;
+    color: silver;
+  }
+
+  &__search {
+    z-index: 1;
+    position: absolute;
+    // overriding Bootstrap native bgcolor
+    &.form-control {
+      background-color: transparent;
+    }
+  }
 }

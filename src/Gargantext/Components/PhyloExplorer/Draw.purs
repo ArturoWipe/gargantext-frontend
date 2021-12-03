@@ -1,21 +1,26 @@
 module Gargantext.Components.PhyloExplorer.Draw
   ( drawPhylo
   , highlightSource
-  , unhide
+  , autocompleteSearch, autocompleteSubmit
+  , onPhyloReady
   , setGlobalDependencies, setGlobalD3Reference
   ) where
 
 import Gargantext.Prelude
 
-import DOM.Simple (Document, Window, querySelectorAll)
+import DOM.Simple (Document, Window, querySelector, querySelectorAll)
+import DOM.Simple.Console (log, log2)
+import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.FoldableWithIndex (forWithIndex_)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), isJust, maybe)
+import Data.String as String
 import Effect (Effect)
-import Effect.Uncurried (EffectFn1, EffectFn7, runEffectFn1, runEffectFn7)
-import FFI.Simple (applyTo, getProperty, (..), (.=), (.?))
+import Effect.Uncurried (EffectFn1, EffectFn4, EffectFn7, runEffectFn1, runEffectFn4, runEffectFn7)
+import FFI.Simple (applyTo, getProperty, setProperty, (..), (.=), (.?))
 import Gargantext.Components.PhyloExplorer.Types (AncestorLink, Branch, BranchLink, GlobalTerm(..), Group(..), Link, Period, PhyloDataSet(..))
+import Gargantext.Utils (getter)
 import Graphics.D3.Base (D3, D3Eff)
 import Graphics.D3.Selection as D3S
 import Graphics.D3.Util (ffi)
@@ -45,6 +50,22 @@ foreign import _drawWordCloud :: forall a. EffectFn1 (Array a) Unit
 
 drawWordCloud :: forall a. Array a -> Effect Unit
 drawWordCloud = runEffectFn1 _drawWordCloud
+
+foreign import _showLabel :: EffectFn1 String Unit
+
+showLabel :: String -> Effect Unit
+showLabel = runEffectFn1 _showLabel
+
+foreign import _termClick ::
+  EffectFn4
+  String
+  String
+  Int
+  String
+  Unit
+
+termClick :: String -> String -> Int -> String -> Effect Unit
+termClick = runEffectFn4 _termClick
 
 -----------------------------------------------------------
 
@@ -137,8 +158,9 @@ setGlobalD3Reference window d3 = void $ pure $ (window .= "d3") d3
 
 -----------------------------------------------------------
 
-unhide :: Document -> String -> Effect Unit
-unhide d s = do
+onPhyloReady :: Document -> String -> Effect Unit
+onPhyloReady d s = do
+  -- Unhide some elements
   setText s   `toElements` "#phyloName"
   turnVisible `toElements` "#phyloName"
   turnVisible `toElements` "#phyloTopBar"
@@ -146,6 +168,9 @@ unhide d s = do
   turnVisible `toElements` ".label"
   turnVisible `toElements` ".heading"
   turnVisible `toElements` ".export"
+
+  -- Draw the search box
+
 
   where
     toElements fn query = querySelectorAll d query >>= flip for_ fn
@@ -222,3 +247,70 @@ highlightSource window value =
       void $
             D3S.rootSelect ("#peak-" <> bid)
         >>= D3S.classed "peak-focus-source" true
+
+
+-- autocompleteSearch :: Document -> Array GlobalTerm -> String -> Effect Unit
+-- autocompleteSearch d terms query =
+--   let
+--     hasMinLen = String.length >>> (_ > 0)
+
+--   in do
+--     mEl  <- querySelector d "#search-autocomplete"
+--     term <- pure
+
+--       if hasMinLen query
+--       then findGlobalTermByPrefix terms query
+--       else Nothing
+
+--     case term of
+--       Nothing                     -> pure unit
+--       Just (GlobalTerm { label }) -> case mEl of
+
+--         Nothing -> pure unit
+--         Just el -> (void <<< pure <<< setProperty "value" el) label
+
+
+autocompleteSearch ::
+     Array GlobalTerm
+  -> String
+  -> Effect (Maybe GlobalTerm)
+autocompleteSearch terms query =
+  let
+    hasMinLen = String.length >>> (_ > 0)
+
+  in pure
+
+    if hasMinLen query
+    then findGlobalTermByPrefix terms query
+    else Nothing
+
+-- autocompleteSubmit :: Array GlobalTerm -> String -> Effect Unit
+-- autocompleteSubmit terms query = do
+--   term <- pure $ findGlobalTermByPrefix terms query
+
+--   case term of
+--     Nothing                          -> pure unit
+--     Just (GlobalTerm { label, fdt }) -> do
+--       showLabel "search"
+--       termClick label fdt 0 "search"
+
+autocompleteSubmit :: Maybe (GlobalTerm) -> Effect Unit
+autocompleteSubmit = case _ of
+  Nothing                          -> pure unit
+  Just (GlobalTerm { label, fdt }) -> do
+    showLabel "search"
+    termClick label fdt 0 "search"
+
+
+findGlobalTermByPrefix :: Array GlobalTerm -> String -> Maybe GlobalTerm
+findGlobalTermByPrefix terms prefix =
+  let
+    needle = String.toLower prefix
+    fn s
+        = getter _.label
+      >>> String.toLower
+      >>> String.stripPrefix (String.Pattern s)
+      >>> isJust
+
+  in
+    Array.find (fn needle) terms

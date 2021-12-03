@@ -1642,39 +1642,6 @@ i.how:hover span {
   font-size: 12px;
 }
 
-.search {
-  margin-left: 10px;
-  visibility: hidden;
-  position: absolute;
-  z-index: 7;
-  font-size: 14px;
-  background-color: transparent;
-  outline: 0;
-  border-width: 0 0 2px;
-  border-color: #0d1824;
-}
-
-.search-label {
-  visibility: hidden;
-  margin-left: 5px;
-}
-
-.search:focus {
-  border-color: #F0684D;
-}
-
-.autocomplete {
-  margin-left: 10px;
-  visibility: hidden;
-  position: absolute;
-  z-index: 7;
-  font-size: 14px;
-  background-color: transparent;
-  color: silver;
-  z-index: 1;
-  border: none;
-}
-
 .loading {
   visibility: hidden;
 }
@@ -1685,25 +1652,28 @@ i.how:hover span {
   font-weight: bold;
 }
 
-.select-source {
-  margin-left: 10px;
-  display: none;
-  border: 1.5px solid #0d1824;
-  cursor: pointer;
-  outline: 0;
-  background: transparent;
-  border-image: none;
-  outline-offset: -2px;
-  outline-color: transparent;
-  box-shadow: none;
-  -webkit-appearance: none;
+.phylo-topbar {
+  display: flex;
 }
-
-option {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 150px;
+.phylo-topbar__source {
+  width: 200px;
+  margin-right: 8px;
+}
+.phylo-topbar__autocomplete {
+  display: flex;
+  width: 200px;
+  position: relative;
+}
+.phylo-topbar__suggestion {
+  pointer-events: none;
+  color: silver;
+}
+.phylo-topbar__search {
+  z-index: 1;
+  position: absolute;
+}
+.phylo-topbar__search.form-control {
+  background-color: transparent;
 }
 
 /*# sourceMappingURL=sass.css.map */

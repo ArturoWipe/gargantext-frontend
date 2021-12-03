@@ -1,56 +1,7 @@
 exports._drawPhylo = drawPhylo;
 exports._drawWordCloud = drawWordCloud;
-
-// set javascript date from a string year
-function yearToDate(year) {
-  var d = new Date()
-  d.setYear(parseInt(year));
-  d.setMonth(0);
-  d.setDate(1);
-  return d;
-}
-
-function stringToDate(str) {
-var arr = (str.replace('"','')).split('-');
-var d = new Date();
-d.setYear(parseInt(arr[0]));
-d.setMonth(parseInt(arr[1]));
-d.setMonth(d.getMonth() - 1);
-d.setDate(parseInt(arr[2]));
-return d;
-}
-
-function utcStringToDate(str) {
-var arr = ((str.replace('"','')).replace(' UTC','')).split(/[\s-:]+/);
-var d = new Date();
-d.setYear(parseInt(arr[0]));
-d.setMonth(parseInt(arr[1]));
-d.setDate(parseInt(arr[2]));
-d.setHours(parseInt(arr[3]),parseInt(arr[4]),parseInt(arr[5]))
-return d;
-}
-
-function stringArrToArr(str) {
-var arr = ((str.replace('["','')).replace('"]','')).split('","');
-return arr;
-}
-
-function intArrToArr(int) {
-var arr = ((int.replace('[','')).replace(']','')).split(',');
-return arr;
-}
-
-function yearToDateHacked(w) {
-var d = new Date(2020,0,0);
-d.setDate(d.getDate() + (w * 7));
-return d
-}
-
-function toCoord(id) {
-  var x = parseFloat(d3.select("#group" + id).attr("cx")),
-      y = parseFloat(d3.select("#group" + id).attr("cy"));
-  return [x,y];
-}
+exports._showLabel = showLabel;
+exports._termClick = termClick;
 
 function toXLabels(branches, groups, xMax) {
 
@@ -223,19 +174,6 @@ for (var i = 0; i < elements.length; i++) {
 return Object.values(grouped);
 };
 
-
-function findValueByPrefix(prefix) {
-  for(var i = 0; i < window.terms.length; i++) {
-    var object = (window.terms)[i];
-      if(object.label.toLowerCase().startsWith(prefix.toLowerCase()))
-      {
-          return object;
-      }
-
-  }
-  return null;
-}
-
  function drawWordCloud (groups) {
 
     let labels = {},
@@ -276,17 +214,109 @@ function findValueByPrefix(prefix) {
     })
   }
 
+  function showLabel(type) {
+    if ((document.getElementsByClassName("header"))[0].style.visibility != "hidden") {
+      showHeading()
+    }
+    doubleClick()
+    let ngrams = document.getElementsByClassName("ngrams")
+    let groups = document.getElementsByClassName("group-inner")
+    if (ngrams[0].style.visibility == "hidden") {
+      document.getElementById("label").classList.add("labeled")
+      for (var i = 0; i < groups.length; i++) {
+        groups[i].style.fill = "#fff";
+      }
+      for (var i = 0; i < ngrams.length; i++){
+        ngrams[i].style.visibility = "visible";
+      }
+    } else {
+      if (type != "search") {
+        document.getElementById("label").classList.remove("labeled")
+        for (var i = 0; i < groups.length; i++) {
+          groups[i].style.fill = "#61a3a9";
+        }
+        for (var i = 0; i < ngrams.length; i++){
+          ngrams[i].style.visibility = "hidden";
+        }
+      }
+    }
+  }
+
+  function termClick (txt,idx,nodeId,typeNode) {
+
+    // remove old focus
+    initPath()
+
+    // catch the last transformations
+    if (typeNode == "group") {
+      var transform = d3.select("#group" + nodeId).node().getAttribute("transform");
+    } else if (typeNode == "head") {
+      var transform = d3.select("#head" + nodeId).node().getAttribute("transform");
+    } else {
+      var transform = (d3.selectAll(".header").nodes())[0].getAttribute("transform");
+    }
+
+    // focus
+
+    document.querySelector("#phyloPhylo").innerHTML = txt;
+    document.querySelector("#phyloPhylo").classList.add("phylo-focus");
+    document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
+
+    // highlight the groups
+
+    var terms = document.getElementsByClassName("fdt-" + idx),
+        periods = groupTermsBy(terms,"from");
+
+    var groups  = [];
+
+    for (var i = 0; i < terms.length; i++) {
+      groups.push(d3.select("#group" + (terms[i]).getAttribute("gid")));
+      branchFocus.push((terms[i]).getAttribute("bid"));
+    }
+
+    highlightGroups(groups.map(g => g.node()));
+    drawWordCloud(groups.map(g => g.node()));
+
+    // highlight the cross branches links
+
+    var bids  = [];
+
+    for (var i = 0; i < periods.length; i++) {
+      if (i != periods.length - 1) {
+        for (var j = 0; j < periods[i].length; j++) {
+          bids.push(periods[i][j][2])
+          var x1 = periods[i][j][0],
+              y1 = periods[i][j][1];
+          for (var k = 0; k < periods[i + 1].length; k++) {
+            var x2 = periods[i + 1][k][0],
+                y2 = periods[i + 1][k][1];
+            if ((periods[i][j][2] != periods[i + 1][k][2]) && (!bids.includes(periods[i + 1][k][2]))) {
+              // draw the links between branches
+              panel
+                .append("path")
+                .attr("class","term-path")
+                .attr("d", function(d) {
+                  return "M" + x1 + "," + y1
+                    + "C" + x2 + "," + y1
+                    + " " + x2 + "," + y2
+                    + " " + x2 + "," + y2;
+                })
+                .attr("transform",transform)
+                .style("stroke-opacity", 0.4)
+                .lower();
+            }
+            bids.push(periods[i + 1][k][2])
+          }
+        }
+      }
+    }
+
+    d3.selectAll(".path-unfocus").lower();
+  }
+
 
 function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
-
-  /* ** draw the search box ** */
-
-  var inputSearch = document.getElementById("search-box");
-  inputSearch.style.visibility = "visible";
-  inputSearch.addEventListener("keyup", autocomplete);
-  document.getElementById("search-autocomplete").style.visibility = "visible";
-  document.getElementById("search-label").style.visibility = "visible";
 
   /* ** draw the isoline ** */
 
@@ -584,60 +614,6 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   d3.select("#label").on("click", function(e, l) {
     showLabel(l);
   });
-
-  function autocomplete(e) {
-      var txt = e.target.value;
-
-      if (txt.length < 1) {
-        document.getElementById("search-autocomplete").value = '';
-        return;
-      }
-
-      var placeholder = findValueByPrefix(txt);
-
-      if (placeholder !== null) {
-        document.getElementById("search-autocomplete").value = placeholder.label;
-      } else {
-        document.getElementById("search-autocomplete").value = '';
-      }
-
-      // press enter
-      if (e.keyCode === 13) {
-        e.preventDefault();
-        if (placeholder !== null) {
-          showLabel("search")
-          termClick(placeholder.label,placeholder.fdt,0,"search")
-        }
-      }
-  }
-
-  function showLabel(type) {
-    if ((document.getElementsByClassName("header"))[0].style.visibility != "hidden") {
-      showHeading()
-    }
-    doubleClick()
-    let ngrams = document.getElementsByClassName("ngrams")
-    let groups = document.getElementsByClassName("group-inner")
-    if (ngrams[0].style.visibility == "hidden") {
-      document.getElementById("label").classList.add("labeled")
-      for (var i = 0; i < groups.length; i++) {
-        groups[i].style.fill = "#fff";
-      }
-      for (var i = 0; i < ngrams.length; i++){
-        ngrams[i].style.visibility = "visible";
-      }
-    } else {
-      if (type != "search") {
-        document.getElementById("label").classList.remove("labeled")
-        for (var i = 0; i < groups.length; i++) {
-          groups[i].style.fill = "#61a3a9";
-        }
-        for (var i = 0; i < ngrams.length; i++){
-          ngrams[i].style.visibility = "hidden";
-        }
-      }
-    }
-  }
 
   /* role & dynamic */
 
@@ -1054,78 +1030,6 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
       }
     }
 
-  }
-
-  function termClick (txt,idx,nodeId,typeNode) {
-
-    // remove old focus
-    initPath()
-
-    // catch the last transformations
-    if (typeNode == "group") {
-      var transform = d3.select("#group" + nodeId).node().getAttribute("transform");
-    } else if (typeNode == "head") {
-      var transform = d3.select("#head" + nodeId).node().getAttribute("transform");
-    } else {
-      var transform = (d3.selectAll(".header").nodes())[0].getAttribute("transform");
-    }
-
-    // focus
-
-    document.querySelector("#phyloPhylo").innerHTML = txt;
-    document.querySelector("#phyloPhylo").classList.add("phylo-focus");
-    document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
-
-    // highlight the groups
-
-    var terms = document.getElementsByClassName("fdt-" + idx),
-        periods = groupTermsBy(terms,"from");
-
-    var groups  = [];
-
-    for (var i = 0; i < terms.length; i++) {
-      groups.push(d3.select("#group" + (terms[i]).getAttribute("gid")));
-      branchFocus.push((terms[i]).getAttribute("bid"));
-    }
-
-    highlightGroups(groups.map(g => g.node()));
-    drawWordCloud(groups.map(g => g.node()));
-
-    // highlight the cross branches links
-
-    var bids  = [];
-
-    for (var i = 0; i < periods.length; i++) {
-      if (i != periods.length - 1) {
-        for (var j = 0; j < periods[i].length; j++) {
-          bids.push(periods[i][j][2])
-          var x1 = periods[i][j][0],
-              y1 = periods[i][j][1];
-          for (var k = 0; k < periods[i + 1].length; k++) {
-            var x2 = periods[i + 1][k][0],
-                y2 = periods[i + 1][k][1];
-            if ((periods[i][j][2] != periods[i + 1][k][2]) && (!bids.includes(periods[i + 1][k][2]))) {
-              // draw the links between branches
-              panel
-                .append("path")
-                .attr("class","term-path")
-                .attr("d", function(d) {
-                  return "M" + x1 + "," + y1
-                    + "C" + x2 + "," + y1
-                    + " " + x2 + "," + y2
-                    + " " + x2 + "," + y2;
-                })
-                .attr("transform",transform)
-                .style("stroke-opacity", 0.4)
-                .lower();
-            }
-            bids.push(periods[i + 1][k][2])
-          }
-        }
-      }
-    }
-
-    d3.selectAll(".path-unfocus").lower();
   }
 
   function peakOver (b,i) {

@@ -15,6 +15,7 @@ import Data.Date as Date
 import Data.Generic.Rep (class Generic)
 import Data.Int as Int
 import Data.Maybe (Maybe(..), maybe)
+import Data.Newtype (class Newtype)
 import Data.Number as Number
 import Data.Show.Generic (genericShow)
 import Data.String as String
@@ -295,6 +296,7 @@ newtype GlobalTerm = GlobalTerm
   , fdt   :: String
   }
 
+derive instance Newtype GlobalTerm _
 derive instance Generic GlobalTerm _
 derive instance Eq GlobalTerm
 instance Show GlobalTerm where show = genericShow

@@ -5,11 +5,11 @@ module Gargantext.Components.PhyloExplorer.Layout
 import Gargantext.Prelude
 
 import DOM.Simple (document, window)
-import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
-import Gargantext.Components.PhyloExplorer.Draw (drawPhylo, highlightSource, setGlobalD3Reference, setGlobalDependencies, unhide)
+import FFI.Simple ((..))
+import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, drawPhylo, highlightSource, onPhyloReady, setGlobalD3Reference, setGlobalDependencies)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
-import Gargantext.Components.PhyloExplorer.Types (PhyloDataSet(..), Source(..), sortSources)
+import Gargantext.Components.PhyloExplorer.Types (GlobalTerm, PhyloDataSet(..), Source, sortSources)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (d3)
@@ -33,11 +33,13 @@ layoutCpt = here.component "layout" cpt where
     -- States
     sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
 
+    -- @WIP: move vale to PhyloDataSet?
+    terms /\ termsBox <- R2.useBox' (mempty :: Array GlobalTerm)
+
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
     R.useEffectOnce' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
-      unhide document o.name
       setGlobalD3Reference window d3
       setGlobalDependencies window (PhyloDataSet o)
       drawPhylo
@@ -48,6 +50,9 @@ layoutCpt = here.component "layout" cpt where
         o.ancestorLinks
         o.branchLinks
         o.bb
+      onPhyloReady document o.name
+      -- @WIP: handling global variables
+      T.write_ (window .. "terms") termsBox
 
     -- Render
     pure $
@@ -70,55 +75,6 @@ layoutCpt = here.component "layout" cpt where
           , className: "phylo-name"
           }
           []
-        ,
-        -- <!-- folder bar -->
-        --   H.label
-        --   { id: "file-label"
-        --   , for: "file-path"
-        --   , className: "input-file"
-        --   }
-        --   [ H.text "load a phylomemy →" ]
-        -- ,
-        --   H.input
-        --   { id: "file-path"
-        --   , type: "file"
-        --   , maxLength: "10"
-        --   }
-        -- ,
-        --   H.label
-        --   { id: "file-name"
-        --   , className: "input-name"
-        --   }
-        --   []
-        -- ,
-        --   H.button
-        --   { id: "draw"
-        --   , className: "button draw"
-        --   }
-        --   [ H.text "draw" ]
-        --
-
-
-        -- <!-- search bar -->
-          H.label
-          { id: "search-label"
-          , className: "search-label"
-          }
-          [ H.text "find a term →" ]
-        ,
-          H.input
-          { id: "search-box"
-          , type: "text"
-          , className: "search"
-          }
-        ,
-          H.input
-          { id: "search-autocomplete"
-          , text: "text"
-          , className: "autocomplete"
-          , disabled: true
-          , value: ""
-          }
         ]
       ,
 
@@ -227,16 +183,18 @@ layoutCpt = here.component "layout" cpt where
         -- <!-- PORTAL: topbar -->
         R2.createPortal' mTopBarHost
         [
-          -- H.div
-          -- { id: "phyloTopBar"
-          -- -- , visibility: "hidden"
-          -- }
-          -- [
-          --   topBar
-          --   { sourceList: sources
-          --   , sourceCallback: highlightSource window
-          --   }
-          -- ]
+          H.div
+          { id: "phyloTopBar"
+          -- , visibility: "hidden"
+          }
+          [
+            topBar
+            { sourceList: sources
+            , sourceCallback: highlightSource window
+            , autocompleteSearchCallback: autocompleteSearch terms
+            , autocompleteSubmitCallback: autocompleteSubmit
+            }
+          ]
         ]
       ]
 
