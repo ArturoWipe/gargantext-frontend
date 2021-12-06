@@ -249,27 +249,6 @@ highlightSource window value =
         >>= D3S.classed "peak-focus-source" true
 
 
--- autocompleteSearch :: Document -> Array GlobalTerm -> String -> Effect Unit
--- autocompleteSearch d terms query =
---   let
---     hasMinLen = String.length >>> (_ > 0)
-
---   in do
---     mEl  <- querySelector d "#search-autocomplete"
---     term <- pure
-
---       if hasMinLen query
---       then findGlobalTermByPrefix terms query
---       else Nothing
-
---     case term of
---       Nothing                     -> pure unit
---       Just (GlobalTerm { label }) -> case mEl of
-
---         Nothing -> pure unit
---         Just el -> (void <<< pure <<< setProperty "value" el) label
-
-
 autocompleteSearch ::
      Array GlobalTerm
   -> String
@@ -284,15 +263,6 @@ autocompleteSearch terms query =
     then findGlobalTermByPrefix terms query
     else Nothing
 
--- autocompleteSubmit :: Array GlobalTerm -> String -> Effect Unit
--- autocompleteSubmit terms query = do
---   term <- pure $ findGlobalTermByPrefix terms query
-
---   case term of
---     Nothing                          -> pure unit
---     Just (GlobalTerm { label, fdt }) -> do
---       showLabel "search"
---       termClick label fdt 0 "search"
 
 autocompleteSubmit :: Maybe (GlobalTerm) -> Effect Unit
 autocompleteSubmit = case _ of

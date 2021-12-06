@@ -9950,6 +9950,13 @@ h3 {
     border-color: #dee2e6;
   }
 }
+.custom-select:disabled[readonly],
+.form-control[readonly] {
+  background-color: #fff;
+  color: #6c757d;
+  border-style: dashed;
+}
+
 .with-icon-font {
   font-family: ForkAwesome, Montserrat;
 }

@@ -567,16 +567,26 @@ i.how:hover span {
   }
 
   &__suggestion {
+    // as the input is above the "search" one, and is used only as an
+    // autocompletion term, we remove every interaction on it...
     pointer-events: none;
-    color: silver;
+    // ...overriding Bootstrap native rules to just display its text node to
+    // the user
+    &.form-control {
+      border-color: transparent;
+    }
   }
 
   &__search {
     z-index: 1;
     position: absolute;
-    // overriding Bootstrap native bgcolor
+    // (see above comment about "suggestion")
     &.form-control {
       background-color: transparent;
     }
+  }
+
+  &__submit {
+    display: none;
   }
 }

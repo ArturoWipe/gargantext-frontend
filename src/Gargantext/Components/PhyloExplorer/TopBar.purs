@@ -4,7 +4,6 @@ module Gargantext.Components.PhyloExplorer.TopBar
 
 import Gargantext.Prelude
 
-import DOM.Simple.Console (log)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
@@ -93,13 +92,12 @@ topBarCpt = here.component "main" cpt where
       ,
         -- Search
         H.form
-        { on: { submit: onAutocompleteSubmit }
-        , className: "phylo-topbar__autocomplete"
+        { className: "phylo-topbar__autocomplete"
         }
         [
           B.formInput
           { className: "phylo-topbar__suggestion"
-          -- , status: Disabled
+          , status: Idled
           , value: case result of
               Nothing                     -> ""
               Just (GlobalTerm { label }) -> label
@@ -113,5 +111,12 @@ topBarCpt = here.component "main" cpt where
           , value: search
           , placeholder: "Find a term"
           }
+        ,
+          B.button
+          { callback: onAutocompleteSubmit
+          , type: "submit"
+          , className: "phylo-topbar__submit"
+          }
+          [ H.text "" ]
         ]
       ]

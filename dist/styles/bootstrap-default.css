@@ -9945,6 +9945,13 @@ h3 {
     border-color: #dee2e6;
   }
 }
+.custom-select:disabled[readonly],
+.form-control[readonly] {
+  background-color: #fff;
+  color: #6c757d;
+  border-style: dashed;
+}
+
 .with-icon-font {
   font-family: ForkAwesome, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }

@@ -1666,7 +1666,9 @@ i.how:hover span {
 }
 .phylo-topbar__suggestion {
   pointer-events: none;
-  color: silver;
+}
+.phylo-topbar__suggestion.form-control {
+  border-color: transparent;
 }
 .phylo-topbar__search {
   z-index: 1;
@@ -1674,6 +1676,9 @@ i.how:hover span {
 }
 .phylo-topbar__search.form-control {
   background-color: transparent;
+}
+.phylo-topbar__submit {
+  display: none;
 }
 
 /*# sourceMappingURL=sass.css.map */
