@@ -160,17 +160,12 @@ setGlobalD3Reference window d3 = void $ pure $ (window .= "d3") d3
 
 onPhyloReady :: Document -> String -> Effect Unit
 onPhyloReady d s = do
-  -- Unhide some elements
-  setText s   `toElements` "#phyloName"
-  turnVisible `toElements` "#phyloName"
+  turnVisible `toElements` "#phyloToolBar"
   turnVisible `toElements` "#phyloTopBar"
   turnVisible `toElements` ".reset"
   turnVisible `toElements` ".label"
   turnVisible `toElements` ".heading"
   turnVisible `toElements` ".export"
-
-  -- Draw the search box
-
 
   where
     toElements fn query = querySelectorAll d query >>= flip for_ fn
@@ -178,8 +173,6 @@ onPhyloReady d s = do
     turnVisible el = do
       style <- pure $ (el .. "style")
       pure $ (style .= "visibility") "visible"
-
-    setText name el = pure $ (el .= "innerHTML") name
 
 -----------------------------------------------------------
 

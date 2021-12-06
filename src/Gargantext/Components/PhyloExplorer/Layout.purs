@@ -7,6 +7,7 @@ import Gargantext.Prelude
 import DOM.Simple (document, window)
 import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..))
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, drawPhylo, highlightSource, onPhyloReady, setGlobalD3Reference, setGlobalDependencies)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (GlobalTerm, PhyloDataSet(..), Source, sortSources)
@@ -31,12 +32,11 @@ layoutCpt = here.component "layout" cpt where
   cpt { phyloDataSet: (PhyloDataSet o)
       } _ = do
     -- States
-    sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
-
-    -- @WIP: move vale to PhyloDataSet?
-    terms /\ termsBox <- R2.useBox' (mempty :: Array GlobalTerm)
-
+    isDisplayed /\ isReadyBox <- R2.useBox' false
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
+    sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
+    -- @WIP: move value to PhyloDataSet?
+    terms /\ termsBox <- R2.useBox' (mempty :: Array GlobalTerm)
 
     R.useEffectOnce' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
@@ -51,174 +51,149 @@ layoutCpt = here.component "layout" cpt where
         o.branchLinks
         o.bb
       onPhyloReady document o.name
+      T.write_ true isReadyBox
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
 
     -- Render
     pure $
+
       H.div
       { className: "phylo" }
       [
-
-
-      -- <!-- row 1 -->
-        H.div
-        { className: "phylo-title font-bold" }
-        [ H.text "Mèmiescape" ]
+        R2.if' (not isDisplayed) $
+          B.spinner
+          { className: "phylo__spinner" }
       ,
-        H.div
-        { className: "phylo-folder" }
+        R.fragment
         [
-        -- <!-- title bar (static mode) -->
-          H.label
-          { id: "phyloName"
-          , className: "phylo-name"
+          -- Phylo Tool Bar
+          H.div
+          { id: "phyloToolBar"
+          , style: { visibility: "hidden" } }
+          [
+            phyloCorpusInfo
+            { nbDocs        : o.nbDocs
+            , nbFoundations : o.nbFoundations
+            , nbPeriods     : o.nbPeriods
+            }
+          ,
+            phyloHow
+            {}
+          ,
+            phyloPhylo
+            {}
+          ,
+            phyloPhyloInfo
+            { nbTerms     : o.nbTerms
+            , nbGroups    : o.nbGroups
+            , nbBranches  : o.nbBranches
+            }
+          ]
+        ,
+
+        -- <!-- row 2 & 3 -->
+          H.div
+          { id: "phyloIsoLine"
+          , className: "phylo-isoline"
           }
           []
-        ]
-      ,
-
-
-      -- <!-- row 2 & 3 -->
-        phyloCorpus {} []
-      ,
-        phyloCorpusInfo
-        { nbDocs        : o.nbDocs
-        , nbFoundations : o.nbFoundations
-        , nbPeriods     : o.nbPeriods
-        }
-        []
-      ,
-        phyloHow {} []
-      ,
-        phyloPhylo {} []
-      ,
-
-
-        phyloPhyloInfo
-        { nbTerms     : o.nbTerms
-        , nbGroups    : o.nbGroups
-        , nbBranches  : o.nbBranches
-        }
-        []
-      ,
-        H.div
-        { id: "phyloIsoLine"
-        , className: "phylo-isoline"
-        }
-        []
-      ,
-        H.div
-        { id: "phyloIsolineInfo"
-        , className: "phylo-isoline-info"
-        }
-        [
+        ,
           H.div
-          { className: "btn-group" }
-          [
-            H.button
-            { id: "reset"
-            , className: "button reset"
-            }
-            [
-              H.i
-              { className: "fa fa-arrows-alt" }
-              []
-            ]
-          ,
-            H.button
-            { id: "label"
-            , className: "button label"
-            }
-            [
-              H.i
-              { className: "fa fa-dot-circle-o" }
-              []
-            ]
-          ,
-            H.button
-            { id: "heading"
-            , className: "button heading"
-            }
-            [
-              H.i
-              { className: "fa fa-sort-alpha-asc" }
-              []
-            ]
-          ,
-            H.button
-            { id: "export"
-            , className: "button export"
-            }
-            [
-              H.i
-              { className: "fas fa-camera" }
-              []
-            ]
-          ]
-        ]
-      ,
-
-      -- <!-- row 4 -->
-        H.div
-        { id: "phyloScape"
-        , className: "phylo-scape"
-        }
-        []
-      ,
-        H.div
-        { id: "phyloTimeline"
-        , className: "phylo-timeline"
-        }
-        []
-      ,
-        H.div
-        { id: "phyloGraph"
-        , className: "phylo-graph"
-        }
-        []
-
-
-      ,
-        -- <!-- PORTAL: topbar -->
-        R2.createPortal' mTopBarHost
-        [
-          H.div
-          { id: "phyloTopBar"
-          -- , visibility: "hidden"
+          { id: "phyloIsolineInfo"
+          , className: "phylo-isoline-info"
           }
           [
-            topBar
-            { sourceList: sources
-            , sourceCallback: highlightSource window
-            , autocompleteSearchCallback: autocompleteSearch terms
-            , autocompleteSubmitCallback: autocompleteSubmit
+            H.div
+            { className: "btn-group" }
+            [
+              H.button
+              { id: "reset"
+              , className: "button reset"
+              }
+              [
+                H.i
+                { className: "fa fa-arrows-alt" }
+                []
+              ]
+            ,
+              H.button
+              { id: "label"
+              , className: "button label"
+              }
+              [
+                H.i
+                { className: "fa fa-dot-circle-o" }
+                []
+              ]
+            ,
+              H.button
+              { id: "heading"
+              , className: "button heading"
+              }
+              [
+                H.i
+                { className: "fa fa-sort-alpha-asc" }
+                []
+              ]
+            ,
+              H.button
+              { id: "export"
+              , className: "button export"
+              }
+              [
+                H.i
+                { className: "fas fa-camera" }
+                []
+              ]
+            ]
+          ]
+        ,
+
+        -- <!-- row 4 -->
+          H.div
+          { id: "phyloScape"
+          , className: "phylo-scape"
+          }
+          []
+        ,
+          H.div
+          { id: "phyloTimeline"
+          , className: "phylo-timeline"
+          }
+          []
+        ,
+          H.div
+          { id: "phyloGraph"
+          , className: "phylo-graph"
+          }
+          []
+
+
+        ,
+          -- <!-- PORTAL: topbar -->
+          R2.createPortal' mTopBarHost
+          [
+            H.div
+            { id: "phyloTopBar"
+            , style: { visibility: "hidden" }
             }
+            [
+              topBar
+              { sourceList: sources
+              , sourceCallback: highlightSource window
+              , autocompleteSearchCallback: autocompleteSearch terms
+              , autocompleteSubmitCallback: autocompleteSubmit
+              }
+            ]
           ]
         ]
       ]
 
---------------------------------------------------------
-
-phyloCorpus :: R2.Component ()
-phyloCorpus = R.createElement phyloCorpusCpt
-phyloCorpusCpt :: R.Component ()
-phyloCorpusCpt = here.component "phyloCorpus" cpt where
-  cpt _ _ = do
-    -- Render
-    pure $
-
-      H.div
-      { id: "phyloCorpus"
-      , className: "phylo-corpus"
-      }
-      [ H.text "corpus" ]
-
-
 ---------------------------------------------------------
 
-phyloHow :: R2.Component ()
-phyloHow = R.createElement phyloHowCpt
+phyloHow :: R2.Leaf ()
+phyloHow = R2.leaf phyloHowCpt
 phyloHowCpt :: R.Component ()
 phyloHowCpt = here.component "phyloHow" cpt where
   cpt _ _ = do
@@ -256,8 +231,8 @@ phyloHowCpt = here.component "phyloHow" cpt where
 
 ---------------------------------------------------------
 
-phyloPhylo :: R2.Component ()
-phyloPhylo = R.createElement phyloPhyloCpt
+phyloPhylo :: R2.Leaf ()
+phyloPhylo = R2.leaf phyloPhyloCpt
 phyloPhyloCpt :: R.Component ()
 phyloPhyloCpt = here.component "phyloPhylo" cpt where
   cpt _ _ = do
@@ -279,8 +254,8 @@ type PhyloCorpusInfoProps =
   , nbPeriods     :: Int
   )
 
-phyloCorpusInfo :: R2.Component PhyloCorpusInfoProps
-phyloCorpusInfo = R.createElement phyloCorpusInfoCpt
+phyloCorpusInfo :: R2.Leaf PhyloCorpusInfoProps
+phyloCorpusInfo = R2.leaf phyloCorpusInfoCpt
 phyloCorpusInfoCpt :: R.Component PhyloCorpusInfoProps
 phyloCorpusInfoCpt = here.component "phyloCorpusInfo" cpt where
   cpt props _ = do
@@ -323,8 +298,8 @@ type PhyloPhyloInfoProps =
   , nbBranches  :: Int
   )
 
-phyloPhyloInfo :: R2.Component PhyloPhyloInfoProps
-phyloPhyloInfo = R.createElement phyloPhyloInfoCpt
+phyloPhyloInfo :: R2.Leaf PhyloPhyloInfoProps
+phyloPhyloInfo = R2.leaf phyloPhyloInfoCpt
 phyloPhyloInfoCpt :: R.Component PhyloPhyloInfoProps
 phyloPhyloInfoCpt = here.component "phyloPhyloInfo" cpt where
   cpt props _ = do

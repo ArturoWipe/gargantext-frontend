@@ -4,6 +4,7 @@ module Gargantext.Components.Bootstrap
 
 import Gargantext.Components.Bootstrap.BaseModal(baseModal) as Exports
 import Gargantext.Components.Bootstrap.Button(button) as Exports
+import Gargantext.Components.Bootstrap.Cloak(cloak) as Exports
 import Gargantext.Components.Bootstrap.Div(div', div_) as Exports
 import Gargantext.Components.Bootstrap.FormInput(formInput) as Exports
 import Gargantext.Components.Bootstrap.FormSelect(formSelect) as Exports
