@@ -1652,16 +1652,28 @@ i.how:hover span {
   font-weight: bold;
 }
 
+.phylo {
+  position: relative;
+}
+.phylo__spinner {
+  position: absolute;
+  font-size: 6px;
+  height: 100px;
+  width: 100px;
+  top: calc( 50% - 50px );
+  left: calc( 50% - 50px );
+}
+
 .phylo-topbar {
   display: flex;
 }
 .phylo-topbar__source {
-  width: 200px;
+  width: 304px;
   margin-right: 8px;
 }
 .phylo-topbar__autocomplete {
   display: flex;
-  width: 200px;
+  width: 304px;
   position: relative;
 }
 .phylo-topbar__suggestion {

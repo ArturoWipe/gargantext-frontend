@@ -1,6 +1,7 @@
 module Gargantext.Components.Bootstrap.Types
   ( ComponentStatus(..)
   , Sizing(..)
+  , SpinnerTheme(..)
   ) where
 
 import Gargantext.Prelude
@@ -64,3 +65,18 @@ instance Show Sizing where
   show SmallSize  = "sm"
   show MediumSize = "md"
   show LargeSize  = "lg"
+
+----------------------------------------------------------------------
+
+-- | Theme values used by Bootstrap Spinner
+-- |
+-- | https://getbootstrap.com/docs/4.4/components/spinners/
+data SpinnerTheme =
+    BorderTheme
+  | GrowTheme
+
+derive instance Generic SpinnerTheme _
+derive instance Eq SpinnerTheme
+instance Show SpinnerTheme where
+  show BorderTheme = "border"
+  show GrowTheme   = "grow"

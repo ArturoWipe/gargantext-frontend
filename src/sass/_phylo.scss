@@ -1,6 +1,6 @@
 @use "./abstract/_members" as *;
 
-$topbar-input-width: 200px;
+$topbar-input-width: 304px;
 
 /* fonts */
 
@@ -548,6 +548,26 @@ i.how:hover span {
   visibility:hidden;
   text-transform: capitalize;
   font-weight: bold;
+}
+
+////////////////////////////////////////////////////////////////
+
+.phylo {
+  position: relative;
+
+  &__spinner {
+    $size: 100px;
+    $weight: 6px;
+
+    position: absolute;
+    font-size: $weight;
+    height: $size;
+    width: $size;
+    // (?) `centered` mixin will not work here, due to Bootstrap process
+    //     interfering with the transform rule
+    top: calc( 50% - #{ $size / 2 } );
+    left: calc( 50% - #{ $size / 2 } );
+  }
 }
 
 ////////////////////////////////////////////////////////////////
