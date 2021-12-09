@@ -11,6 +11,7 @@ import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, drawPhylo, highlightSource, onPhyloReady, setGlobalD3Reference, setGlobalDependencies)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources)
+import Gargantext.Types (NodeID)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (d3)
@@ -23,6 +24,7 @@ here = R2.here "Gargantext.Components.PhyloExplorer"
 
 type Props =
   ( phyloDataSet :: PhyloDataSet
+  , nodeId       :: NodeID
   )
 
 layout :: R2.Component Props
@@ -30,14 +32,18 @@ layout = R.createElement layoutCpt
 layoutCpt :: R.Component Props
 layoutCpt = here.component "layout" cpt where
   cpt { phyloDataSet: (PhyloDataSet o)
+      , nodeId
       } _ = do
     -- States
+    let topBarPortalKey = "portal-topbar::" <> show nodeId
+
     isDisplayed /\ isReadyBox <- R2.useBox' false
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
     sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
     -- @WIP: move value to PhyloDataSet?
     terms /\ termsBox <- R2.useBox' (mempty :: Array Term)
 
+    -- Effects
     R.useEffectOnce' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
       setGlobalD3Reference window d3
@@ -65,8 +71,8 @@ layoutCpt = here.component "layout" cpt where
           B.spinner
           { className: "phylo__spinner" }
       ,
-        R.fragment
-        [
+        -- R.fragment
+        -- [
           -- Phylo Tool Bar
           H.div
           { id: "phyloToolBar"
@@ -174,20 +180,15 @@ layoutCpt = here.component "layout" cpt where
           -- <!-- PORTAL: topbar -->
           R2.createPortal' mTopBarHost
           [
-            H.div
-            { id: "phyloTopBar"
-            , style: { visibility: "hidden" }
+            topBar
+            { sourceList: sources
+            , sourceCallback: highlightSource window
+            , autocompleteSearchCallback: autocompleteSearch terms
+            , autocompleteSubmitCallback: autocompleteSubmit
+            , key: topBarPortalKey
             }
-            [
-              topBar
-              { sourceList: sources
-              , sourceCallback: highlightSource window
-              , autocompleteSearchCallback: autocompleteSearch terms
-              , autocompleteSubmitCallback: autocompleteSubmit
-              }
-            ]
           ]
-        ]
+        -- ]
       ]
 
 ---------------------------------------------------------

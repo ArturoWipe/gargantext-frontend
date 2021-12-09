@@ -8,7 +8,7 @@
 /// @param {Color} $color - color to work with
 /// @param {Number} $percentage - percentage of `$color` opacity
 /// @return {Color} $color
-@function mixAlpha($color, $percentage) {
+@function mix-alpha($color, $percentage) {
   @return rgba($color, $percentage);
 }
 

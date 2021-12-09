@@ -17,7 +17,6 @@ import Gargantext.Components.Forest as Forest
 import Gargantext.Components.GraphExplorer as GraphExplorer
 import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
-import Gargantext.Components.GraphExplorer.TopBar as GETB
 import Gargantext.Components.Lang (LandingLang(LL_EN))
 import Gargantext.Components.Login (login)
 import Gargantext.Components.Nodes.Annuaire (annuaireLayout)
@@ -41,7 +40,7 @@ import Gargantext.Routes (AppRoute, Tile)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, WithSession)
 import Gargantext.Sessions as Sessions
-import Gargantext.Types (CorpusId, Handed(..), ListId, NodeID, NodeType(..), SessionId, SidePanelState(..), reverseHanded)
+import Gargantext.Types (CorpusId, Handed(..), ListId, NodeID, NodeType(..), SessionId, SidePanelState(..))
 import Gargantext.Utils.Reactix (getElementById)
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -86,16 +85,17 @@ routerCpt = here.component "router" cpt where
             ]
           R2.addClass app [ handedClassName handed' ]
 
+    -- Render
     pure $ R.fragment
-      ([ loginModal { boxes }
-       , topBar { boxes }
+      [ loginModal { boxes }
+       , TopBar.topBar { boxes }
        , errorsView { errors: boxes.errors } []
        , H.div { className: "router-inner" }
          [ forest { boxes }
          , mainPage { boxes }
          , sidePanel { boxes }
          ]
-       ])
+       ]
 
 
 loginModal :: R2.Leaf Props
@@ -108,20 +108,6 @@ loginModalCpt = here.component "loginModal" cpt
 
         pure $ if showLogin' then login' boxes else H.div {} []
 
-topBar :: R2.Leaf Props
-topBar p = R.createElement topBarCpt p []
-topBarCpt :: R.Component Props
-topBarCpt = here.component "topBar" cpt where
-  cpt { boxes: boxes@{ route } } _ = do
-    route' <- T.useLive T.unequal route
-
-    let children = case route' of
-          GR.PGraphExplorer _s _g -> [ GETB.topBar { boxes } ]
-          -- @WIP: portal use, remove route pattern matching, send
-          --       GETB.topBar through below portal
-          _                       -> [ H.div { id: "portal-topbar" } [] ]
-
-    pure $ TopBar.topBar { boxes } children
 
 mainPage :: R2.Leaf Props
 mainPage p = R.createElement mainPageCpt p []

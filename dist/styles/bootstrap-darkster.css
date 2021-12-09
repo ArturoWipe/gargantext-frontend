@@ -10186,18 +10186,57 @@ h3 {
   background-color: #fff;
 }
 
-/* styles for menu.html template (navbar etc) */
-/* #dafixedtop .navbar-text, #graphsfixedtop .navbar-text */
-/*     margin: 0 */
-/*     padding-top: 15px */
-/*     padding-bottom: 15px */
-/*     float: none */
-#dafixedtop {
+.main-topbar {
   position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 910;
+}
+
+.main-topbar__hand-button .nav-link, .main-topbar__help-button .nav-link {
+  padding-left: initial;
+  padding-right: initial;
+}
+
+.main-topbar__logo {
+  margin-right: initial;
+}
+
+.right-handed .main-topbar {
+  flex-direction: row;
+}
+
+.right-handed .main-topbar__logo {
+  margin-left: 0;
+  margin-right: 16px;
+}
+
+.right-handed .main-topbar__hand-button {
+  margin-left: 16px;
+  margin-right: 8px;
+}
+
+.right-handed .main-topbar__help-button {
+  margin-left: 8px;
+  margin-right: 16px;
+}
+
+.left-handed .main-topbar {
+  flex-direction: row-reverse;
+}
+
+.left-handed .main-topbar__logo {
+  margin-left: 16px;
+  margin-right: 0;
+}
+
+.left-handed .main-topbar__hand-button {
+  margin-left: 8px;
+  margin-right: 16px;
+}
+
+.left-handed .main-topbar__help-button {
+  margin-left: 16px;
+  margin-right: 8px;
 }
 
 #corporatop.nav-tabs > li {
@@ -12001,18 +12040,18 @@ i.how:hover span {
 }
 
 .phylo-topbar {
-  margin-left: 16px;
-  margin-right: 16px;
+  padding: 0 8px;
   height: 100%;
+  visibility: hidden;
   display: flex;
 }
 
 .right-handed .phylo-topbar {
-  border-left: 1px solid rgba(255, 255, 255, 0.75);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .left-handed .phylo-topbar {
-  border-right: 1px solid rgba(255, 255, 255, 0.75);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .phylo-topbar__source {

@@ -144,7 +144,7 @@ setGlobalD3Reference window d3 = void $ pure $ (window .= "d3") d3
 onPhyloReady :: Document -> String -> Effect Unit
 onPhyloReady d s = do
   turnVisible `toElements` "#phyloToolBar"
-  turnVisible `toElements` "#phyloTopBar"
+  turnVisible `toElements` ".phylo-topbar"
   turnVisible `toElements` ".reset"
   turnVisible `toElements` ".label"
   turnVisible `toElements` ".heading"

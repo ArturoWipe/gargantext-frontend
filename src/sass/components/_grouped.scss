@@ -46,7 +46,7 @@
   &__overlay {
     width: 100%;
     height: 100%;
-    background-color: mixAlpha($black, 50%);
+    background-color: mix-alpha($black, 50%);
     position: absolute;
 
     &--collapsible {

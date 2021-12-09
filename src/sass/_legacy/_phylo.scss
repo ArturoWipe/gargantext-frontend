@@ -576,6 +576,9 @@ i.how:hover span {
 .phylo-topbar {
   @include layout.asideTopbar();
 
+  // @WIP
+  visibility: hidden;
+
   display: flex;
 
   &__source {

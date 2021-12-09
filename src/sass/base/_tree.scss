@@ -15,16 +15,16 @@
 .forest-layout-bottom-teaser {
   background: linear-gradient(
     to bottom,
-    mixAlpha($body-bg, 0%) 0%,
-    mixAlpha($body-bg, 100%) 45%
+    mix-alpha($body-bg, 0%) 0%,
+    mix-alpha($body-bg, 100%) 45%
   );
 }
 
 .forest-layout-top-teaser {
   background: linear-gradient(
     to top,
-    mixAlpha($body-bg, 0%) 0%,
-    mixAlpha($body-bg, 100%) 45%
+    mix-alpha($body-bg, 0%) 0%,
+    mix-alpha($body-bg, 100%) 45%
   );
 }
 

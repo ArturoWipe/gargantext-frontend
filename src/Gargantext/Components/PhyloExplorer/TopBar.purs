@@ -25,6 +25,7 @@ type Props =
   , sourceList                 :: Array Source
   , autocompleteSearchCallback :: String -> Effect (Maybe Term)
   , autocompleteSubmitCallback :: Maybe Term -> Effect Unit
+  , key :: String
   )
 
 topBar :: R2.Leaf Props

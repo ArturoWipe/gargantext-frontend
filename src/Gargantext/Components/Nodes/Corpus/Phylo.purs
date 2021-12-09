@@ -35,7 +35,7 @@ phyloLayout :: R2.Component Props
 phyloLayout = R.createElement phyloLayoutCpt
 phyloLayoutCpt :: R.Component Props
 phyloLayoutCpt = here.component "phyloLayout" cpt where
-  cpt _ _ = do
+  cpt { nodeId } _ = do
 
     fetchedDataBox <- T.useBox (Nothing :: Maybe PhyloDataSet)
     fetchedData    <- T.useLive T.unequal fetchedDataBox
@@ -48,7 +48,7 @@ phyloLayoutCpt = here.component "phyloLayout" cpt where
 
     pure case fetchedData of
       Nothing           -> mempty
-      Just phyloDataSet -> layout { phyloDataSet } []
+      Just phyloDataSet -> layout { phyloDataSet, nodeId } []
 
 
 fetchPhyloJSON :: Aff (Either String PhyloDataSet)

@@ -2,15 +2,20 @@
 @use '../abstract/_variables' as *;
 
 @mixin asideTopbar() {
-  margin-left: space-x(2);
-  margin-right: space-x(2);
+  padding: 0 space-x(1);
   height: 100%;
 
   @include right-handed() {
-    border-left: 1px solid $navbar-dark-hover-color;
+    border-left:
+      1px
+      solid
+      mix-alpha($navbar-dark-hover-color, 10%);
   }
 
   @include left-handed() {
-    border-right: 1px solid $navbar-dark-hover-color;
+    border-right:
+      1px
+      solid
+      mix-alpha($navbar-dark-hover-color, 10%);
   }
 }
