@@ -23,7 +23,7 @@ import Effect.Aff (Aff, launchAff, launchAff_, killFiber)
 import Effect.Class (liftEffect)
 import Effect.Exception (error)
 import Effect.Uncurried (EffectFn1, EffectFn3, mkEffectFn1, mkEffectFn2, runEffectFn1, runEffectFn3)
-import FFI.Simple ((..), (...), (.=), defineProperty, delay, args2, args3)
+import FFI.Simple (applyTo, args2, args3, defineProperty, delay, getProperty, (..), (...), (.=))
 import Partial.Unsafe (unsafePartial)
 import React (class ReactPropFields, Children, ReactClass, ReactElement)
 import React as React
@@ -475,7 +475,6 @@ boundingRect els =
 
 --------------------------------------
 
-
 -- | One-liner `if` simplifying render writing
 -- | (best for one child)
 if' :: Boolean -> R.Element -> R.Element
@@ -514,3 +513,23 @@ createPortal' mHost children =
     Nothing -> mempty
     Just host -> flip R.createPortal host $ singleton $
       fragmentWithKey key children
+
+--------------------------------------
+
+-- @XXX: FFI.Simple `(...)` throws error (JavaScript issue)
+--       need to decompose computation
+--
+--       (?) chained prototype property issue?
+applyTo_ :: forall src arg res. src -> String -> Array arg -> res
+applyTo_ src name args =
+  let fn = getProperty name src
+  in applyTo fn src args
+
+infixl 4 applyTo_ as ~~
+
+-- @WIP: DOM.Simple lack of "ClassList" module
+addClass :: forall el. el -> Array String -> Effect Unit
+addClass el args = pure $ (el .. "classList") ~~ "add" $ args
+
+removeClass :: forall el. el -> Array String -> Effect Unit
+removeClass el args = pure $ (el .. "classList") ~~ "remove" $ args

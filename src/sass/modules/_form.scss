@@ -1,0 +1,10 @@
+@use '../abstract/_variables' as *;
+
+@mixin inputError() {
+  border-color: $danger;
+
+  &:focus, &:active {
+    border-color: $danger;
+    box-shadow: 0 0 0 1px $danger;
+  }
+}

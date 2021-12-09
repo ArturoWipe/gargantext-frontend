@@ -1,0 +1,16 @@
+@use '../abstract/_members' as *;
+@use '../abstract/_variables' as *;
+
+@mixin asideTopbar() {
+  margin-left: space-x(2);
+  margin-right: space-x(2);
+  height: 100%;
+
+  @include right-handed() {
+    border-left: 1px solid $navbar-dark-hover-color;
+  }
+
+  @include left-handed() {
+    border-right: 1px solid $navbar-dark-hover-color;
+  }
+}

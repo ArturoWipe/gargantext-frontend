@@ -1,0 +1,5 @@
+@use '../abstract/_variables' as *;
+
+.with-icon-font {
+  font-family: ForkAwesome, $font-family-base;
+}

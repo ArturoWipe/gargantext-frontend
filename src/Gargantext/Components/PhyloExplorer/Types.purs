@@ -3,7 +3,7 @@ module Gargantext.Components.PhyloExplorer.Types
   , parsePhyloJSONSet
   , Branch(..), Period(..), Group(..)
   , Link(..), AncestorLink(..), BranchLink(..)
-  , GlobalTerm(..)
+  , Term(..)
   , Source(..)
   , sortSources
   ) where
@@ -291,15 +291,15 @@ parseBranchLinks
 
 -----------------------------------------------------------
 
-newtype GlobalTerm = GlobalTerm
+newtype Term = Term
   { label :: String
   , fdt   :: String
   }
 
-derive instance Newtype GlobalTerm _
-derive instance Generic GlobalTerm _
-derive instance Eq GlobalTerm
-instance Show GlobalTerm where show = genericShow
+derive instance Newtype Term _
+derive instance Generic Term _
+derive instance Eq Term
+instance Show Term where show = genericShow
 
 -----------------------------------------------------------
 

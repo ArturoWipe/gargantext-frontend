@@ -1,4 +1,5 @@
-@use "./abstract/_members" as *;
+@use '../abstract/_members' as *;
+@use '../modules/_layout' as layout;
 
 $topbar-input-width: 304px;
 
@@ -573,6 +574,8 @@ i.how:hover span {
 ////////////////////////////////////////////////////////////////
 
 .phylo-topbar {
+  @include layout.asideTopbar();
+
   display: flex;
 
   &__source {

@@ -10,7 +10,7 @@ import FFI.Simple ((..))
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, drawPhylo, highlightSource, onPhyloReady, setGlobalD3Reference, setGlobalDependencies)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
-import Gargantext.Components.PhyloExplorer.Types (GlobalTerm, PhyloDataSet(..), Source, sortSources)
+import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (d3)
@@ -36,7 +36,7 @@ layoutCpt = here.component "layout" cpt where
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
     sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
     -- @WIP: move value to PhyloDataSet?
-    terms /\ termsBox <- R2.useBox' (mempty :: Array GlobalTerm)
+    terms /\ termsBox <- R2.useBox' (mempty :: Array Term)
 
     R.useEffectOnce' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources

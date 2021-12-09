@@ -42,6 +42,7 @@ import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, WithSession)
 import Gargantext.Sessions as Sessions
 import Gargantext.Types (CorpusId, Handed(..), ListId, NodeID, NodeType(..), SessionId, SidePanelState(..), reverseHanded)
+import Gargantext.Utils.Reactix (getElementById)
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -66,17 +67,30 @@ router props = R.createElement routerCpt props []
 routerCpt :: R.Component Props
 routerCpt = here.component "router" cpt where
   cpt { boxes: boxes@{ handed } } _ = do
+    -- States
     handed'       <- T.useLive T.unequal handed
 
-    let handedClassName = case handed' of
-          LeftHanded  -> "left-handed"
-          RightHanded -> "right-handed"
+    -- Effects
+    let
+      handedClassName = case _ of
+        LeftHanded  -> "left-handed"
+        RightHanded -> "right-handed"
+
+    R.useEffect1' handed' $
+      getElementById "app" >>= case _ of
+        Nothing  -> pure unit
+        Just app -> do
+          R2.removeClass app
+            [ handedClassName LeftHanded
+            , handedClassName RightHanded
+            ]
+          R2.addClass app [ handedClassName handed' ]
 
     pure $ R.fragment
       ([ loginModal { boxes }
        , topBar { boxes }
        , errorsView { errors: boxes.errors } []
-       , H.div { className: handedClassName <> " router-inner" } $ reverseHanded handed' $
+       , H.div { className: "router-inner" }
          [ forest { boxes }
          , mainPage { boxes }
          , sidePanel { boxes }

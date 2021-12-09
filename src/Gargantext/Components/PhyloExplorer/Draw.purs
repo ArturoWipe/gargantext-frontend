@@ -8,8 +8,7 @@ module Gargantext.Components.PhyloExplorer.Draw
 
 import Gargantext.Prelude
 
-import DOM.Simple (Document, Window, querySelector, querySelectorAll)
-import DOM.Simple.Console (log, log2)
+import DOM.Simple (Document, Window, querySelectorAll)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (for_)
@@ -18,9 +17,11 @@ import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.String as String
 import Effect (Effect)
 import Effect.Uncurried (EffectFn1, EffectFn4, EffectFn7, runEffectFn1, runEffectFn4, runEffectFn7)
-import FFI.Simple (applyTo, getProperty, setProperty, (..), (.=), (.?))
-import Gargantext.Components.PhyloExplorer.Types (AncestorLink, Branch, BranchLink, GlobalTerm(..), Group(..), Link, Period, PhyloDataSet(..))
+import FFI.Simple ((..), (.=), (.?))
+import Gargantext.Components.PhyloExplorer.Types (AncestorLink, Branch, BranchLink, Term(..), Group(..), Link, Period, PhyloDataSet(..))
 import Gargantext.Utils (getter)
+import Gargantext.Utils.Reactix ((~~))
+import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (D3, D3Eff)
 import Graphics.D3.Selection as D3S
 import Graphics.D3.Util (ffi)
@@ -73,24 +74,6 @@ orDie :: forall err a. Maybe a -> err -> Either err a
 orDie (Just a) _   = Right a
 orDie Nothing  err = Left err
 
--- @XXX: FFI.Simple `(...)` throws error (JavaScript issue)
---       need to decompose computation
---
---       (?) chained prototype property issue?
-applyTo_ :: forall src arg res. src -> String -> Array arg -> res
-applyTo_ src name args =
-  let fn = getProperty name src
-  in applyTo fn src args
-
-infixl 4 applyTo_ as ~~
-
--- @WIP: DOM.Simple lack of "ClassList" module
-addClass :: forall el. el -> Array String -> Effect Unit
-addClass el args = pure $ (el .. "classList") ~~ "add" $ args
-
-removeClass :: forall el. el -> Array String -> Effect Unit
-removeClass el args = pure $ (el .. "classList") ~~ "remove" $ args
-
 -- @WIP: "Graphics.D3.Selection" lack of "filter" function
 -- @WIP: "Graphics.D3.Selection" lack of "nodes" function
 selectionFilter :: forall d. String -> D3S.Selection d -> D3Eff (D3S.Selection D3S.Void)
@@ -117,7 +100,7 @@ setGlobalDependencies w (PhyloDataSet o)
     _ <- pure $ (w .= "weighted") o.weighted
 
     (freq :: Array Int)         <- pure $ w .. "freq"
-    (terms :: Array GlobalTerm) <- pure $ w .. "terms"
+    (terms :: Array Term) <- pure $ w .. "terms"
 
     for_ o.groups \(Group g) -> do
 
@@ -141,7 +124,7 @@ setGlobalDependencies w (PhyloDataSet o)
           -- append an item to the global window.terms
           case (terms .? val') of
             Just _  -> pure unit
-            Nothing -> void <<< pure $ (terms .= val') $ GlobalTerm
+            Nothing -> void <<< pure $ (terms .= val') $ Term
               { label: l .. idx'
               , fdt  : val'
               }
@@ -189,14 +172,14 @@ highlightSource window value =
     then
           selectionFilter ".source-focus" groups
       >>= selectionNodes
-      >>= flip for_ (flip addClass [ "group-unfocus" ])
+      >>= flip for_ (flip R2.addClass [ "group-unfocus" ])
     else
       pure unit
 
 
     -- unselected all the groups
     _ <-  selectionNodes groups
-      >>= flip for_ (flip removeClass [ "source-focus" ])
+      >>= flip for_ (flip R2.removeClass [ "source-focus" ])
 
     if hasLdView
     then
@@ -231,8 +214,8 @@ highlightSource window value =
 
     selectNodeGroup :: forall el. el -> Effect Unit
     selectNodeGroup el = do
-      removeClass el [ "group-unfocus" ]
-      addClass el [ "source-focus" ]
+      R2.removeClass el [ "group-unfocus" ]
+      R2.addClass el [ "source-focus" ]
       fill "#a6bddb" el
 
       bid <- pure $ (el ~~ "getAttribute") [ "bId" ]
@@ -243,9 +226,9 @@ highlightSource window value =
 
 
 autocompleteSearch ::
-     Array GlobalTerm
+     Array Term
   -> String
-  -> Effect (Maybe GlobalTerm)
+  -> Effect (Maybe Term)
 autocompleteSearch terms query =
   let
     hasMinLen = String.length >>> (_ > 0)
@@ -253,20 +236,20 @@ autocompleteSearch terms query =
   in pure
 
     if hasMinLen query
-    then findGlobalTermByPrefix terms query
+    then findTermByPrefix terms query
     else Nothing
 
 
-autocompleteSubmit :: Maybe (GlobalTerm) -> Effect Unit
+autocompleteSubmit :: Maybe Term -> Effect Unit
 autocompleteSubmit = case _ of
   Nothing                          -> pure unit
-  Just (GlobalTerm { label, fdt }) -> do
+  Just (Term { label, fdt }) -> do
     showLabel "search"
     termClick label fdt 0 "search"
 
 
-findGlobalTermByPrefix :: Array GlobalTerm -> String -> Maybe GlobalTerm
-findGlobalTermByPrefix terms prefix =
+findTermByPrefix :: Array Term -> String -> Maybe Term
+findTermByPrefix terms prefix =
   let
     needle = String.toLower prefix
     fn s

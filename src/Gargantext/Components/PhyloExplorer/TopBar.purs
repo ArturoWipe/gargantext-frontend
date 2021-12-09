@@ -9,7 +9,7 @@ import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
-import Gargantext.Components.PhyloExplorer.Types (GlobalTerm(..), Source(..))
+import Gargantext.Components.PhyloExplorer.Types (Term(..), Source(..))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -23,8 +23,8 @@ here = R2.here "Gargantext.Components.PhyloExplorer.TopBar"
 type Props =
   ( sourceCallback             :: String -> Effect Unit
   , sourceList                 :: Array Source
-  , autocompleteSearchCallback :: String -> Effect (Maybe GlobalTerm)
-  , autocompleteSubmitCallback :: Maybe GlobalTerm -> Effect Unit
+  , autocompleteSearchCallback :: String -> Effect (Maybe Term)
+  , autocompleteSubmitCallback :: Maybe Term -> Effect Unit
   )
 
 topBar :: R2.Leaf Props
@@ -35,7 +35,7 @@ topBarCpt = here.component "main" cpt where
     -- States
     let defaultSource = ""
     let defaultSearch = ""
-    let defaultResult = (Nothing :: Maybe GlobalTerm)
+    let defaultResult = (Nothing :: Maybe Term)
 
     source /\ sourceBox <- R2.useBox' defaultSource
     search /\ searchBox <- R2.useBox' defaultSearch
@@ -65,8 +65,7 @@ topBarCpt = here.component "main" cpt where
         { className: "phylo-topbar__source"}
         [
           B.formSelect
-          { className: "phylo-topbar"
-          , value: source
+          { value: source
           , callback: onSourceChange
           } $
           [
@@ -100,7 +99,7 @@ topBarCpt = here.component "main" cpt where
           , status: Idled
           , value: case result of
               Nothing                     -> ""
-              Just (GlobalTerm { label }) -> label
+              Just (Term { label }) -> label
           -- (?) noop: see `onAutocompleteChange`
           , callback: const $ pure unit
           }

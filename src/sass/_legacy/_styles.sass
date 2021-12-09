@@ -1,4 +1,4 @@
-@use "./abstract/_members" as *
+@use '../abstract/_members' as *
 
 .cache-toggle
   cursor: pointer
@@ -105,10 +105,10 @@ select.form-control
 .router-inner
   display: flex
 
-  &.left-handed
-    flex-direction: row
+  @include left-handed
+    flex-direction: row-reverse
 
-  &.right-handed
+  @include right-handed
     flex-direction: row
 
 
