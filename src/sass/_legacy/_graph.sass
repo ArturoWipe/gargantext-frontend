@@ -1,3 +1,5 @@
+@use '../modules/_layout' as layout
+
 @mixin sidePanelCommon
   position: absolute
   max-height: 600px
@@ -85,3 +87,6 @@
     overflow-y: scroll
     width: 300px
     top: 50px
+
+.graph-topbar
+  @include layout.asideTopbar

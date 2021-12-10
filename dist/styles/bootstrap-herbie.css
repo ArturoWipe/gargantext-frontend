@@ -10132,6 +10132,10 @@ h3 {
   z-index: 910;
 }
 
+.main-topbar.navbar-dark .navbar-text:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
 .main-topbar__hand-button .nav-link, .main-topbar__help-button .nav-link {
   padding-left: initial;
   padding-right: initial;
@@ -10361,6 +10365,19 @@ h3 {
   overflow-y: scroll;
   width: 300px;
   top: 50px;
+}
+
+.graph-topbar {
+  padding: 0 8px;
+  height: 100%;
+}
+
+.right-handed .graph-topbar {
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.left-handed .graph-topbar {
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 #logo-designed {
@@ -11987,11 +12004,11 @@ i.how:hover span {
 }
 
 .right-handed .phylo-topbar {
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .left-handed .phylo-topbar {
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .phylo-topbar__source {

@@ -1,10 +1,15 @@
 @use '../abstract/_members' as *
+@use '../abstract/_variables' as *
 
 .main-topbar
   position: sticky
   top: 0
   // correction for the popover
   z-index: 910
+
+  // add hovering effect
+  &.navbar-dark .navbar-text:hover
+    color: $navbar-dark-hover-color
 
   // remove Bootstrap native rules
   &__hand-button .nav-link,
