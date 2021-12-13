@@ -498,13 +498,16 @@ useBox' default = do
   pure $ b /\ box
 
 -- | Reactix `fragment` with key support
+-- |
+-- | (!) provided key won't be displayed within Chromium ReactJS widget's
+-- |     Components section
 fragmentWithKey :: String -> Array R.Element -> R.Element
 fragmentWithKey key es = R.rawCreateElement (R.react .. "Fragment") { key } es
 
--- | Create portal via a `Maybe DOM.Element`,
+-- | Create portal via a `Maybe DOM.Element
 createPortal' :: Maybe DOM.Element -> Array R.Element -> R.Element
 createPortal' Nothing     _        = mempty
-createPortal' (Just host) children = R.createPortal [ R.fragment children ] host
+createPortal' (Just host) children = R.createPortal children host
 
 --------------------------------------
 

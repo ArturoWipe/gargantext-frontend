@@ -35,6 +35,7 @@ layoutCpt = here.component "layout" cpt where
       , nodeId
       } _ = do
     -- States
+    -- @WIP
     let topBarPortalKey = "portal-topbar::" <> show nodeId
 
     isDisplayed /\ isReadyBox <- R2.useBox' false
@@ -71,124 +72,122 @@ layoutCpt = here.component "layout" cpt where
           B.spinner
           { className: "phylo__spinner" }
       ,
-        -- R.fragment
-        -- [
-          -- Phylo Tool Bar
-          H.div
-          { id: "phyloToolBar"
-          , style: { visibility: "hidden" } }
-          [
-            phyloCorpusInfo
-            { nbDocs        : o.nbDocs
-            , nbFoundations : o.nbFoundations
-            , nbPeriods     : o.nbPeriods
-            }
-          ,
-            phyloHow
-            {}
-          ,
-            phyloPhylo
-            {}
-          ,
-            phyloPhyloInfo
-            { nbTerms     : o.nbTerms
-            , nbGroups    : o.nbGroups
-            , nbBranches  : o.nbBranches
-            }
-          ]
+        H.div
+        { id: "phyloToolBar"
+        , style: { visibility: "hidden" } }
+        [
+          phyloCorpusInfo
+          { nbDocs        : o.nbDocs
+          , nbFoundations : o.nbFoundations
+          , nbPeriods     : o.nbPeriods
+          }
         ,
+          phyloHow
+          {}
+        ,
+          phyloPhylo
+          {}
+        ,
+          phyloPhyloInfo
+          { nbTerms     : o.nbTerms
+          , nbGroups    : o.nbGroups
+          , nbBranches  : o.nbBranches
+          }
+        ]
+      ,
 
-        -- <!-- row 2 & 3 -->
+      -- <!-- row 2 & 3 -->
+        H.div
+        { id: "phyloIsoLine"
+        , className: "phylo-isoline"
+        }
+        []
+      ,
+        H.div
+        { id: "phyloIsolineInfo"
+        , className: "phylo-isoline-info"
+        }
+        [
           H.div
-          { id: "phyloIsoLine"
-          , className: "phylo-isoline"
-          }
-          []
-        ,
-          H.div
-          { id: "phyloIsolineInfo"
-          , className: "phylo-isoline-info"
-          }
+          { className: "btn-group" }
           [
-            H.div
-            { className: "btn-group" }
+            H.button
+            { id: "reset"
+            , className: "button reset"
+            }
             [
-              H.button
-              { id: "reset"
-              , className: "button reset"
-              }
-              [
-                H.i
-                { className: "fa fa-arrows-alt" }
-                []
-              ]
-            ,
-              H.button
-              { id: "label"
-              , className: "button label"
-              }
-              [
-                H.i
-                { className: "fa fa-dot-circle-o" }
-                []
-              ]
-            ,
-              H.button
-              { id: "heading"
-              , className: "button heading"
-              }
-              [
-                H.i
-                { className: "fa fa-sort-alpha-asc" }
-                []
-              ]
-            ,
-              H.button
-              { id: "export"
-              , className: "button export"
-              }
-              [
-                H.i
-                { className: "fas fa-camera" }
-                []
-              ]
+              H.i
+              { className: "fa fa-arrows-alt" }
+              []
+            ]
+          ,
+            H.button
+            { id: "label"
+            , className: "button label"
+            }
+            [
+              H.i
+              { className: "fa fa-dot-circle-o" }
+              []
+            ]
+          ,
+            H.button
+            { id: "heading"
+            , className: "button heading"
+            }
+            [
+              H.i
+              { className: "fa fa-sort-alpha-asc" }
+              []
+            ]
+          ,
+            H.button
+            { id: "export"
+            , className: "button export"
+            }
+            [
+              H.i
+              { className: "fas fa-camera" }
+              []
             ]
           ]
-        ,
+        ]
+      ,
 
-        -- <!-- row 4 -->
-          H.div
-          { id: "phyloScape"
-          , className: "phylo-scape"
-          }
-          []
-        ,
-          H.div
-          { id: "phyloTimeline"
-          , className: "phylo-timeline"
-          }
-          []
-        ,
-          H.div
-          { id: "phyloGraph"
-          , className: "phylo-graph"
-          }
-          []
+      -- <!-- row 4 -->
+        H.div
+        { id: "phyloScape"
+        , className: "phylo-scape"
+        }
+        []
+      ,
+        H.div
+        { id: "phyloTimeline"
+        , className: "phylo-timeline"
+        }
+        []
+      ,
+        H.div
+        { id: "phyloGraph"
+        , className: "phylo-graph"
+        }
+        []
 
 
-        ,
-          -- <!-- PORTAL: topbar -->
-          R2.createPortal' mTopBarHost
+      ,
+        -- <!-- PORTAL: topbar -->
+        R2.createPortal' mTopBarHost
+        [
+          R2.fragmentWithKey topBarPortalKey
           [
             topBar
             { sourceList: sources
             , sourceCallback: highlightSource window
             , autocompleteSearchCallback: autocompleteSearch terms
             , autocompleteSubmitCallback: autocompleteSubmit
-            , key: topBarPortalKey
             }
           ]
-        -- ]
+        ]
       ]
 
 ---------------------------------------------------------
