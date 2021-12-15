@@ -8,7 +8,7 @@ import DOM.Simple (document, window)
 import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..))
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, drawPhylo, highlightSource, onPhyloReady, setGlobalD3Reference, setGlobalDependencies)
+import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, drawPhylo, highlightSource, setGlobalD3Reference, setGlobalDependencies, resetView)
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources)
@@ -59,7 +59,6 @@ layoutCpt = here.component "layout" cpt where
         o.ancestorLinks
         o.branchLinks
         o.bb
-      onPhyloReady document o.name
       T.write_ true isReadyBox
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
@@ -73,133 +72,136 @@ layoutCpt = here.component "layout" cpt where
       H.div
       { className: "phylo" }
       [
-        -- <!-- Preloading spinner -->
+        -- Preloading spinner
         R2.if' (not isDisplayed) $
           B.spinner
           { className: "phylo__spinner" }
       ,
-        -- <!-- Toolbar -->
-        R2.if' (isToolBarDisplayed) $
-          toolBar {}
-
-      ,
-        H.div
-        { id: "phyloToolBar"
-        , style: { visibility: "hidden" } }
-        [
-          phyloCorpusInfo
-          { nbDocs        : o.nbDocs
-          , nbFoundations : o.nbFoundations
-          , nbPeriods     : o.nbPeriods
-          }
-        ,
-          phyloHow
-          {}
-        ,
-          phyloPhylo
-          {}
-        ,
-          phyloPhyloInfo
-          { nbTerms     : o.nbTerms
-          , nbGroups    : o.nbGroups
-          , nbBranches  : o.nbBranches
-          }
-        ]
-      ,
-
-      -- <!-- row 2 & 3 -->
-        H.div
-        { id: "phyloIsoLine"
-        , className: "phylo-isoline"
-        }
-        []
-      ,
-        H.div
-        { id: "phyloIsolineInfo"
-        , className: "phylo-isoline-info"
-        }
-        [
-          H.div
-          { className: "btn-group" }
-          [
-            H.button
-            { id: "reset"
-            , className: "button reset"
-            }
-            [
-              H.i
-              { className: "fa fa-arrows-alt" }
-              []
-            ]
-          ,
-            H.button
-            { id: "label"
-            , className: "button label"
-            }
-            [
-              H.i
-              { className: "fa fa-dot-circle-o" }
-              []
-            ]
-          ,
-            H.button
-            { id: "heading"
-            , className: "button heading"
-            }
-            [
-              H.i
-              { className: "fa fa-sort-alpha-asc" }
-              []
-            ]
-          ,
-            H.button
-            { id: "export"
-            , className: "button export"
-            }
-            [
-              H.i
-              { className: "fas fa-camera" }
-              []
-            ]
-          ]
-        ]
-      ,
-
-      -- <!-- row 4 -->
-        H.div
-        { id: "phyloScape"
-        , className: "phylo-scape"
-        }
-        []
-      ,
-        H.div
-        { id: "phyloTimeline"
-        , className: "phylo-timeline"
-        }
-        []
-      ,
-        H.div
-        { id: "phyloGraph"
-        , className: "phylo-graph"
-        }
-        []
-
-
-      ,
-        -- <!-- PORTAL: topbar -->
+        -- Topbar
         R2.createPortal' mTopBarHost
         [
           R2.fragmentWithKey topBarPortalKey
           [
-            topBar
-            { sourceList: sources
-            , sourceCallback: highlightSource window
-            , autocompleteSearchCallback: autocompleteSearch terms
-            , autocompleteSubmitCallback: autocompleteSubmit
-            , toolBarFlag: isToolBarDisplayed
-            , toolBarCallback: toggleToolBar
+            R2.if' (isDisplayed) $
+              topBar
+              { sourceList: sources
+              , sourceCallback: highlightSource window
+              , autocompleteSearchCallback: autocompleteSearch terms
+              , autocompleteSubmitCallback: autocompleteSubmit
+              , toolBarFlag: isToolBarDisplayed
+              , toolBarCallback: toggleToolBar
+              }
+          ]
+        ]
+      ,
+        -- Toolbar
+        R2.if' (isToolBarDisplayed) $
+          toolBar
+          { nodeId
+          , resetViewCallback: const resetView
+          }
+
+      ,
+        -- LEGACY GRID
+        H.div
+        { className: "phylo-grid" }
+        [
+          H.div
+          { id: "phyloToolBar"
+          , style: { visibility: "hidden" } }
+          [
+            phyloCorpusInfo
+            { nbDocs        : o.nbDocs
+            , nbFoundations : o.nbFoundations
+            , nbPeriods     : o.nbPeriods
+            }
+          ,
+            phyloHow
+            {}
+          ,
+            phyloPhylo
+            {}
+          ,
+            phyloPhyloInfo
+            { nbTerms     : o.nbTerms
+            , nbGroups    : o.nbGroups
+            , nbBranches  : o.nbBranches
             }
           ]
+        ,
+          H.div
+          { id: "phyloIsoLine"
+          , className: "phylo-isoline"
+          }
+          []
+        ,
+          H.div
+          { id: "phyloIsolineInfo"
+          , className: "phylo-isoline-info"
+          }
+          [
+            H.div
+            { className: "btn-group" }
+            [
+              H.button
+              { id: "reset"
+              , className: "button reset"
+              }
+              [
+                H.i
+                { className: "fa fa-arrows-alt" }
+                []
+              ]
+            ,
+              H.button
+              { id: "label"
+              , className: "button label"
+              }
+              [
+                H.i
+                { className: "fa fa-dot-circle-o" }
+                []
+              ]
+            ,
+              H.button
+              { id: "heading"
+              , className: "button heading"
+              }
+              [
+                H.i
+                { className: "fa fa-sort-alpha-asc" }
+                []
+              ]
+            ,
+              H.button
+              { id: "export"
+              , className: "button export"
+              }
+              [
+                H.i
+                { className: "fas fa-camera" }
+                []
+              ]
+            ]
+          ]
+        ,
+          H.div
+          { id: "phyloScape"
+          , className: "phylo-scape"
+          }
+          []
+        ,
+          H.div
+          { id: "phyloTimeline"
+          , className: "phylo-timeline"
+          }
+          []
+        ,
+          H.div
+          { id: "phyloGraph"
+          , className: "phylo-graph"
+          }
+          []
         ]
       ]
 

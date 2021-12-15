@@ -2,9 +2,15 @@ exports._drawPhylo = drawPhylo;
 exports._drawWordCloud = drawWordCloud;
 exports._showLabel = showLabel;
 exports._termClick = termClick;
+exports._resetView = resetView;
+
+// Global thread dependencies:
+//    * d3 <Object> (main D3 proxy)
 
 var branchFocus = [];
 var panel = undefined; // <SVGElement>
+var svg = undefined; // <SVGElement>
+var zoom = undefined; // <Function> (D3 chained method)
 
 function toXLabels(branches, groups, xMax) {
 
@@ -471,6 +477,12 @@ return Object.values(grouped);
     return (Array.from(new Set(branches))).length;
   }
 
+  function resetView() {
+    svg.transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity);
+  }
+
 
 function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
@@ -569,7 +581,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
          h = div1.height
       ydiv = div1.y;
 
-  const svg = d3
+  svg = d3
       .select('#phyloScape')
       .append("svg")
       .attr("viewBox",[0,0,w,h]);
@@ -695,7 +707,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
   /* zoom */
 
-  var zoom = d3.zoom()
+  zoom = d3.zoom()
       .scaleExtent([1,50])
       .extent([[xo,yo],[wo,ho]])
       .on("zoom", function(e) {
@@ -703,14 +715,6 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
       });
 
   svg.call(zoom).on("dblclick.zoom",null).on("dblclick",doubleClick);
-
-  d3.select("#reset").on("click",reset);
-
-  function reset() {
-    svg.transition()
-        .duration(750)
-        .call(zoom.transform, d3.zoomIdentity);
-  }
 
   function debounce(fn, wait, immediate) {
     var timeout;

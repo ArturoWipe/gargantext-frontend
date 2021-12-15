@@ -23,7 +23,7 @@ $topbar-input-width: 304px;
 
 /* grid */
 
-.phylo {
+.phylo-grid {
   font-family: "Inter-Regular";
   font-size: 16px;
   display: grid;
@@ -102,18 +102,6 @@ $topbar-input-width: 304px;
   grid-row: 2 / 4;
   grid-column: 3 / 15;
   /*background: rgba(223,216,200,0.25);  */
-}
-
-.phylo-isoline-info {
-  grid-row: 2 / 4;
-  grid-column: 15 / 16;
-  padding-top: 20%;
-  padding-bottom: 20%;
-  padding-left: 15px;
-
-  .btn-group {
-    display: initial;
-  }
 }
 
 /* -------------------- */
@@ -582,8 +570,6 @@ i.how:hover span {
   padding-left: $margin;
   padding-right: $margin;
   display: flex;
-  // @WIP
-  visibility: hidden;
 
   &__toolbar {
     width: $toolbar-button-width;
@@ -627,5 +613,33 @@ i.how:hover span {
 
   &__submit {
     display: none;
+  }
+}
+
+////////////////////////////////////////////////////////////////
+
+.phylo-toolbar {
+  $margin: space-x(0.5);
+
+  display: flex;
+
+  @include right-handed {
+    flex-direction: row;
+
+    &__reset,
+    &__node,
+    &__screenshot {
+      margin-right: $margin
+    }
+  }
+
+  @include left-handed {
+    flex-direction: row-reverse;
+
+    &__reset,
+    &__node,
+    &__screenshot {
+      margin-left: $margin
+    }
   }
 }

@@ -2,8 +2,8 @@ module Gargantext.Components.PhyloExplorer.Draw
   ( drawPhylo
   , highlightSource
   , autocompleteSearch, autocompleteSubmit
-  , onPhyloReady
   , setGlobalDependencies, setGlobalD3Reference
+  , resetView
   ) where
 
 import Gargantext.Prelude
@@ -47,15 +47,18 @@ drawPhylo ::
   -> Effect Unit
 drawPhylo = runEffectFn7 _drawPhylo
 
+
 foreign import _drawWordCloud :: forall a. EffectFn1 (Array a) Unit
 
 drawWordCloud :: forall a. Array a -> Effect Unit
 drawWordCloud = runEffectFn1 _drawWordCloud
 
+
 foreign import _showLabel :: EffectFn1 String Unit
 
 showLabel :: String -> Effect Unit
 showLabel = runEffectFn1 _showLabel
+
 
 foreign import _termClick ::
   EffectFn4
@@ -67,6 +70,12 @@ foreign import _termClick ::
 
 termClick :: String -> String -> Int -> String -> Effect Unit
 termClick = runEffectFn4 _termClick
+
+
+foreign import _resetView :: Effect Unit
+
+resetView :: Effect Unit
+resetView = _resetView
 
 -----------------------------------------------------------
 
@@ -138,24 +147,6 @@ setGlobalDependencies w (PhyloDataSet o)
 -- @XXX: prevent PureScript from not injecting D3
 setGlobalD3Reference :: Window -> D3 -> Effect Unit
 setGlobalD3Reference window d3 = void $ pure $ (window .= "d3") d3
-
------------------------------------------------------------
-
-onPhyloReady :: Document -> String -> Effect Unit
-onPhyloReady d s = do
-  turnVisible `toElements` "#phyloToolBar"
-  turnVisible `toElements` ".phylo-topbar"
-  turnVisible `toElements` ".reset"
-  turnVisible `toElements` ".label"
-  turnVisible `toElements` ".heading"
-  turnVisible `toElements` ".export"
-
-  where
-    toElements fn query = querySelectorAll d query >>= flip for_ fn
-
-    turnVisible el = do
-      style <- pure $ (el .. "style")
-      pure $ (style .= "visibility") "visible"
 
 -----------------------------------------------------------
 

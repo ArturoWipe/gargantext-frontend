@@ -11250,7 +11250,7 @@ select.form-control {
   src: url("../fonts/phylo/Inter-Bold.woff2") format("woff2"), url("../fonts/phylo/Inter-Bold.woff") format("woff");
 }
 /* grid */
-.phylo {
+.phylo-grid {
   font-family: "Inter-Regular";
   font-size: 16px;
   display: grid;
@@ -11327,18 +11327,6 @@ select.form-control {
   grid-row: 2/4;
   grid-column: 3/15;
   /*background: rgba(223,216,200,0.25);  */
-}
-
-.phylo-isoline-info {
-  grid-row: 2/4;
-  grid-column: 15/16;
-  padding-top: 20%;
-  padding-bottom: 20%;
-  padding-left: 15px;
-}
-
-.phylo-isoline-info .btn-group {
-  display: initial;
 }
 
 /* -------------------- */
@@ -11770,7 +11758,6 @@ i.how:hover span {
   padding-left: 4px;
   padding-right: 4px;
   display: flex;
-  visibility: hidden;
 }
 
 .right-handed .phylo-topbar {
@@ -11820,6 +11807,26 @@ i.how:hover span {
 
 .phylo-topbar__submit {
   display: none;
+}
+
+.phylo-toolbar {
+  display: flex;
+}
+
+.right-handed .phylo-toolbar {
+  flex-direction: row;
+}
+
+.right-handed .phylo-toolbar__reset, .right-handed .phylo-toolbar__node, .right-handed .phylo-toolbar__screenshot {
+  margin-right: 4px;
+}
+
+.left-handed .phylo-toolbar {
+  flex-direction: row-reverse;
+}
+
+.left-handed .phylo-toolbar__reset, .left-handed .phylo-toolbar__node, .left-handed .phylo-toolbar__screenshot {
+  margin-left: 4px;
 }
 
 /*# sourceMappingURL=bootstrap-greyson.css.map */
