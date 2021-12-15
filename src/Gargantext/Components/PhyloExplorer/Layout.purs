@@ -9,6 +9,7 @@ import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..))
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, drawPhylo, highlightSource, onPhyloReady, setGlobalD3Reference, setGlobalDependencies)
+import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources)
 import Gargantext.Types (NodeID)
@@ -43,6 +44,7 @@ layoutCpt = here.component "layout" cpt where
     sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
     -- @WIP: move value to PhyloDataSet?
     terms /\ termsBox <- R2.useBox' (mempty :: Array Term)
+    isToolBarDisplayed /\ isToolBarDisplayedBox <- R2.useBox' false
 
     -- Effects
     R.useEffectOnce' $ do
@@ -62,15 +64,24 @@ layoutCpt = here.component "layout" cpt where
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
 
+    -- Behaviors
+    toggleToolBar <- pure $ const $ T.modify_ not isToolBarDisplayedBox
+
     -- Render
     pure $
 
       H.div
       { className: "phylo" }
       [
+        -- <!-- Preloading spinner -->
         R2.if' (not isDisplayed) $
           B.spinner
           { className: "phylo__spinner" }
+      ,
+        -- <!-- Toolbar -->
+        R2.if' (isToolBarDisplayed) $
+          toolBar {}
+
       ,
         H.div
         { id: "phyloToolBar"
@@ -185,6 +196,8 @@ layoutCpt = here.component "layout" cpt where
             , sourceCallback: highlightSource window
             , autocompleteSearchCallback: autocompleteSearch terms
             , autocompleteSubmitCallback: autocompleteSubmit
+            , toolBarFlag: isToolBarDisplayed
+            , toolBarCallback: toggleToolBar
             }
           ]
         ]

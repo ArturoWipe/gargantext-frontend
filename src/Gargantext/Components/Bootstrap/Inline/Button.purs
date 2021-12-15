@@ -6,7 +6,7 @@ import Data.Array (elem)
 import Data.Foldable (intercalate)
 import Effect (Effect)
 import Gargantext.Components.Bootstrap.Spinner (spinner)
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), ComponentStatus(..), Sizing(..), Variant(..))
 import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import React.SyntheticEvent as SE
@@ -20,8 +20,8 @@ type Props =
 
 type Options =
   ( status    :: ComponentStatus
-  , size      :: String
-  , variant   :: String
+  , size      :: Sizing
+  , variant   :: ButtonVariant
   , type      :: String
   , className :: String
   , block     :: Boolean
@@ -30,16 +30,14 @@ type Options =
 options :: Record Options
 options =
   { status    : Enabled
-  , size      : "md"
-  , variant   : "primary"
+  , size      : MediumSize
+  , variant   : ButtonVariant Primary
   , type      : "button"
   , className : ""
   , block     : false
   }
 
 -- | Structural Component for the Bootstrap button
--- |
--- |    * size: `"md" (default) | "sm" | "lg"`
 -- |
 -- | https://getbootstrap.com/docs/4.0/components/buttons/
 button :: forall r. R2.OptComponent Options Props r
@@ -65,8 +63,8 @@ component = R.hooksComponent componentName cpt where
       , componentName <> "--" <> show status
       -- Bootstrap specific classNames
       , bootstrapName
-      , bootstrapName <> "-" <> props.variant
-      , bootstrapName <> "-" <> props.size
+      , bootstrapName <> "-" <> show props.variant
+      , bootstrapName <> "-" <> show props.size
       , props.block == true ?
           bootstrapName <> "-block" $
           mempty

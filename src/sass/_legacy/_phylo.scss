@@ -574,22 +574,35 @@ i.how:hover span {
 ////////////////////////////////////////////////////////////////
 
 .phylo-topbar {
+  $margin: space-x(0.5);
+  $toolbar-button-width: 128px;
+
   @include layout.asideTopbar();
 
+  padding-left: $margin;
+  padding-right: $margin;
+  display: flex;
   // @WIP
   visibility: hidden;
 
-  display: flex;
+  &__toolbar {
+    width: $toolbar-button-width;
+    margin-left: $margin;
+    margin-right: $margin;
+  }
 
   &__source {
     width: $topbar-input-width;
-    margin-right: space-x(1);
+    margin-left: $margin;
+    margin-right: $margin;
   }
 
   &__autocomplete {
     display: flex;
     width: $topbar-input-width;
     position: relative;
+    margin-left: $margin;
+    margin-right: $margin;
   }
 
   &__suggestion {

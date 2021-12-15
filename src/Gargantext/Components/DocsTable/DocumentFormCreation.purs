@@ -13,7 +13,7 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), ComponentStatus(..), Variant(..))
 import Gargantext.Config.REST (RESTError)
 import Gargantext.Hooks.FormValidation (VForm, useFormValidation)
 import Gargantext.Hooks.FormValidation.Unboxed as FV
@@ -205,7 +205,7 @@ component = R.hooksComponent "documentFormCreation" cpt where
           B.button
           { callback: \_ -> onSubmit
           , status: props.status == Deferred ? Deferred $ Enabled
-          , variant: "primary"
+          , variant: ButtonVariant Primary
           , type: "submit"
           , block: true
           }

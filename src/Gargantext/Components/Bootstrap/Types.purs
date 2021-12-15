@@ -1,5 +1,6 @@
 module Gargantext.Components.Bootstrap.Types
   ( ComponentStatus(..)
+  , Variant(..), ButtonVariant(..)
   , Sizing(..)
   , SpinnerTheme(..)
   ) where
@@ -39,7 +40,41 @@ data ComponentStatus =
 derive instance Generic ComponentStatus _
 derive instance Eq ComponentStatus
 instance Show ComponentStatus where
-  show a = kebabCase $ genericShow a
+  show = kebabCase <<< genericShow
+
+----------------------------------------------------------------------
+
+-- | Common variant style used by various Bootstrap components
+-- |
+-- |    * some component will combine different variant style
+data Variant =
+    Primary
+  | Secondary
+  | Success
+  | Danger
+  | Warning
+  | Info
+  | Light
+  | Dark
+
+derive instance Generic Variant _
+derive instance Eq Variant
+instance Show Variant where
+  show = kebabCase <<< genericShow
+
+-- Component declinations
+
+data ButtonVariant =
+    ButtonVariant Variant
+  | OutlinedButtonVariant Variant
+  | LinkButtonVariant
+
+derive instance Generic ButtonVariant _
+derive instance Eq ButtonVariant
+instance Show ButtonVariant where
+  show (ButtonVariant a)         = (kebabCase <<< genericShow) a
+  show (OutlinedButtonVariant a) = (append "outline-" <<< kebabCase <<< genericShow) a
+  show LinkButtonVariant         = "link"
 
 ----------------------------------------------------------------------
 

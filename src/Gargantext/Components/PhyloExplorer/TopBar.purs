@@ -8,29 +8,32 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), ComponentStatus(..), Variant(..))
 import Gargantext.Components.PhyloExplorer.Types (Term(..), Source(..))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Toestand as T
 
 -- @WIP: * change "source" default value "" to `Maybe String`
-
-here :: R2.Here
-here = R2.here "Gargantext.Components.PhyloExplorer.TopBar"
-
 type Props =
   ( sourceCallback             :: String -> Effect Unit
   , sourceList                 :: Array Source
   , autocompleteSearchCallback :: String -> Effect (Maybe Term)
   , autocompleteSubmitCallback :: Maybe Term -> Effect Unit
+  , toolBarFlag                :: Boolean
+  , toolBarCallback            :: Unit -> Effect Unit
   )
 
+here :: R2.Here
+here = R2.here "Gargantext.Components.PhyloExplorer.TopBar"
+
 topBar :: R2.Leaf Props
-topBar = R2.leaf topBarCpt
-topBarCpt :: R.Component Props
-topBarCpt = here.component "main" cpt where
+topBar = R2.leaf component
+
+component :: R.Component Props
+component = here.component "main" cpt where
   cpt props _ = do
     -- States
     let defaultSource = ""
@@ -60,6 +63,16 @@ topBarCpt = here.component "main" cpt where
       H.div
       { className: "phylo-topbar" }
       [
+        -- Toolbar toggle
+        B.button
+        { className: "phylo-topbar__toolbar"
+        , callback: props.toolBarCallback
+        , variant: props.toolBarFlag ?
+            ButtonVariant Light $
+            OutlinedButtonVariant Light
+        }
+        [ H.text $ props.toolBarFlag ? "Hide toolbar" $ "Show toolbar" ]
+      ,
         -- Source
         H.div
         { className: "phylo-topbar__source"}
