@@ -4,11 +4,11 @@ module Gargantext.Components.PhyloExplorer.Layout
 
 import Gargantext.Prelude
 
-import DOM.Simple (document, window)
+import DOM.Simple (window)
 import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..))
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, drawPhylo, highlightSource, setGlobalD3Reference, setGlobalDependencies, resetView)
+import Gargantext.Components.PhyloExplorer.Draw (DisplayView(..), autocompleteSearch, autocompleteSubmit, changeDisplayView, drawPhylo, highlightSource, resetView, setGlobalD3Reference, setGlobalDependencies)
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources)
@@ -36,15 +36,22 @@ layoutCpt = here.component "layout" cpt where
       , nodeId
       } _ = do
     -- States
-    -- @WIP
+    let defaultDisplayView = HeadingMode
     let topBarPortalKey = "portal-topbar::" <> show nodeId
 
-    isDisplayed /\ isReadyBox <- R2.useBox' false
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
+
+    isDisplayed /\ isReadyBox <- R2.useBox' false
     sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
     -- @WIP: move value to PhyloDataSet?
     terms /\ termsBox <- R2.useBox' (mempty :: Array Term)
     isToolBarDisplayed /\ isToolBarDisplayedBox <- R2.useBox' false
+    displayView /\ displayViewBox <- R2.useBox' defaultDisplayView
+
+    -- Behaviors
+    changeViewCallback <- pure $
+          flip T.write displayViewBox
+      >=> changeDisplayView
 
     -- Effects
     R.useEffectOnce' $ do
@@ -59,6 +66,7 @@ layoutCpt = here.component "layout" cpt where
         o.ancestorLinks
         o.branchLinks
         o.bb
+      changeDisplayView displayView
       T.write_ true isReadyBox
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
@@ -97,8 +105,9 @@ layoutCpt = here.component "layout" cpt where
         -- Toolbar
         R2.if' (isToolBarDisplayed) $
           toolBar
-          { nodeId
-          , resetViewCallback: const resetView
+          { resetViewCallback: const resetView
+          , displayView
+          , changeViewCallback
           }
 
       ,

@@ -8,14 +8,16 @@ import Data.Array (intercalate)
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
-import Gargantext.Types (NodeID)
+import Gargantext.Components.PhyloExplorer.Draw (DisplayView(..))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
 
 type Props =
-  ( nodeId              :: NodeID
-  , resetViewCallback   :: Unit -> Effect Unit
+  ( resetViewCallback   :: Unit -> Effect Unit
+  , displayView         :: DisplayView
+  , changeViewCallback  :: DisplayView -> Effect Unit
   )
 
 here :: R2.Here
@@ -26,10 +28,10 @@ toolBar = R2.leaf component
 
 component :: R.Component Props
 component = here.component "main" cpt where
-  cpt props _ = do
-    -- States
-    let dropdownId = "phylo-toolbar-dropdown--" <> show props.nodeId
-
+  cpt { resetViewCallback
+      , displayView
+      , changeViewCallback
+      } _ = do
     -- Render
     pure $
 
@@ -39,55 +41,58 @@ component = here.component "main" cpt where
         -- Reset view button
         B.button
         { className: "phylo-toolbar__reset"
-        , callback: props.resetViewCallback
+        , callback: resetViewCallback
         , variant: OutlinedButtonVariant Secondary
         }
         [
           H.text "Reset view"
         ]
       ,
-        -- Node display mode
-
-        -- (?) Bootstrap "dropdown" is best for declarative integration
-        -- (see https://gitlab.iscpif.fr/pdominique/hello-gargan/wikis/4%E2%80%94UI-library#other-re-usable-logic )
         H.div
         { className: intercalate " "
             [ "phylo-toolbar__node"
-            , "dropdown"
+            , "btn-group"
             ]
+        , role: "group"
         }
         [
-          H.div
-          { className: "btn btn-secondary dropdown-toggle"
-          , type: "button"
-          , id: dropdownId
+          B.button
+          { title: "Show node header"
+          , callback: \_ -> changeViewCallback HeadingMode
+          , variant: OutlinedButtonVariant Secondary
+          , className: displayView == HeadingMode ?
+              "active" $
+              ""
           }
           [
-            H.text "Node display mode"
+            B.icon
+            { name: "header" }
           ]
         ,
-          H.div
-          { className: "dropdown-menu"
-          , "aria-labelledby": dropdownId
+          B.button
+          { title: "Show node inner label"
+          , callback: \_ -> changeViewCallback LabelMode
+          , variant: OutlinedButtonVariant Secondary
+          , className: displayView == LabelMode ?
+              "active" $
+              ""
           }
           [
-            H.a
-            { className: "dropdown-item" }
-            [
-              H.text "Label"
-            ]
-          ,
-            H.a
-            { className: "dropdown-item" }
-            [
-              H.text "Heading"
-            ]
-          ,
-            H.a
-            { className: "dropdown-item" }
-            [
-              H.text "Clear"
-            ]
+            B.icon
+            { name: "dot-circle-o" }
+          ]
+        ,
+          B.button
+          { title: "Show default landing view"
+          , callback: \_ -> changeViewCallback LandingMode
+          , variant: OutlinedButtonVariant Secondary
+          , className: displayView == LandingMode ?
+              "active" $
+              ""
+          }
+          [
+            B.icon
+            { name: "circle" }
           ]
         ]
       ,

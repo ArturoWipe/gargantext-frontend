@@ -25,6 +25,7 @@ type Options =
   , type      :: String
   , className :: String
   , block     :: Boolean
+  , title     :: String
   )
 
 options :: Record Options
@@ -35,6 +36,7 @@ options =
   , type      : "button"
   , className : ""
   , block     : false
+  , title     : ""
   }
 
 -- | Structural Component for the Bootstrap button
@@ -79,6 +81,7 @@ component = R.hooksComponent componentName cpt where
       , on: { click }
       , disabled: elem status [ Disabled, Deferred ]
       , type: props.type
+      , title: props.title
       }
 
       [ R2.if' (status == Deferred) $

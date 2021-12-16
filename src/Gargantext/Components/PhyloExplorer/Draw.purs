@@ -4,15 +4,16 @@ module Gargantext.Components.PhyloExplorer.Draw
   , autocompleteSearch, autocompleteSubmit
   , setGlobalDependencies, setGlobalD3Reference
   , resetView
+  , changeDisplayView, DisplayView(..)
   ) where
 
 import Gargantext.Prelude
 
-import DOM.Simple (Document, Window, querySelectorAll)
+import DOM.Simple (Window)
 import Data.Array as Array
-import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.FoldableWithIndex (forWithIndex_)
+import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.String as String
 import Effect (Effect)
@@ -54,12 +55,6 @@ drawWordCloud :: forall a. Array a -> Effect Unit
 drawWordCloud = runEffectFn1 _drawWordCloud
 
 
-foreign import _showLabel :: EffectFn1 String Unit
-
-showLabel :: String -> Effect Unit
-showLabel = runEffectFn1 _showLabel
-
-
 foreign import _termClick ::
   EffectFn4
   String
@@ -77,11 +72,25 @@ foreign import _resetView :: Effect Unit
 resetView :: Effect Unit
 resetView = _resetView
 
------------------------------------------------------------
 
-orDie :: forall err a. Maybe a -> err -> Either err a
-orDie (Just a) _   = Right a
-orDie Nothing  err = Left err
+foreign import _showLabel :: Effect Unit
+
+showLabel :: Effect Unit
+showLabel = _showLabel
+
+
+foreign import _showHeading :: Effect Unit
+
+showHeading :: Effect Unit
+showHeading = _showHeading
+
+
+foreign import _showLanding :: Effect Unit
+
+showLanding :: Effect Unit
+showLanding = _showLanding
+
+-----------------------------------------------------------
 
 -- @WIP: "Graphics.D3.Selection" lack of "filter" function
 -- @WIP: "Graphics.D3.Selection" lack of "nodes" function
@@ -235,7 +244,7 @@ autocompleteSubmit :: Maybe Term -> Effect Unit
 autocompleteSubmit = case _ of
   Nothing                          -> pure unit
   Just (Term { label, fdt }) -> do
-    showLabel "search"
+    showLabel
     termClick label fdt 0 "search"
 
 
@@ -251,3 +260,19 @@ findTermByPrefix terms prefix =
 
   in
     Array.find (fn needle) terms
+
+-----------------------------------------------------------
+
+data DisplayView
+  = LabelMode
+  | HeadingMode
+  | LandingMode
+
+derive instance Generic DisplayView _
+derive instance Eq DisplayView
+
+changeDisplayView :: DisplayView -> Effect Unit
+changeDisplayView = case _ of
+  LabelMode   -> showLabel
+  HeadingMode -> showHeading
+  LandingMode -> showLanding

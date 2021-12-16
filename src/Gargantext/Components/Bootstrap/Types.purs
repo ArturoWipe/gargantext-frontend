@@ -30,8 +30,8 @@ import Data.String.Extra (kebabCase)
 -- |      strong UI/UX (eg. a input in a "read-only" mode: UI can be alter to
 -- |      underline the lack of its main writing feature, but without telling
 -- |      to the user that the input is per-se inoperative)
-data ComponentStatus =
-    Enabled
+data ComponentStatus
+  = Enabled
   | Disabled
   | Deferred
   | Idled
@@ -47,8 +47,8 @@ instance Show ComponentStatus where
 -- | Common variant style used by various Bootstrap components
 -- |
 -- |    * some component will combine different variant style
-data Variant =
-    Primary
+data Variant
+  = Primary
   | Secondary
   | Success
   | Danger
@@ -64,8 +64,8 @@ instance Show Variant where
 
 -- Component declinations
 
-data ButtonVariant =
-    ButtonVariant Variant
+data ButtonVariant
+  = ButtonVariant Variant
   | OutlinedButtonVariant Variant
   | LinkButtonVariant
 
@@ -89,8 +89,8 @@ instance Show ButtonVariant where
 -- | Examples:
 -- |    * https://getbootstrap.com/docs/4.1/components/input-group/#sizing
 -- |    * https://getbootstrap.com/docs/4.1/components/button-group/#sizing
-data Sizing =
-    SmallSize
+data Sizing
+  = SmallSize
   | MediumSize
   | LargeSize
 
@@ -106,8 +106,8 @@ instance Show Sizing where
 -- | Theme values used by Bootstrap Spinner
 -- |
 -- | https://getbootstrap.com/docs/4.4/components/spinners/
-data SpinnerTheme =
-    BorderTheme
+data SpinnerTheme
+  = BorderTheme
   | GrowTheme
 
 derive instance Generic SpinnerTheme _

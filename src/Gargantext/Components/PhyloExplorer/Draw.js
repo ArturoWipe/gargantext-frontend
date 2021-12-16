@@ -1,17 +1,36 @@
-exports._drawPhylo = drawPhylo;
-exports._drawWordCloud = drawWordCloud;
-exports._showLabel = showLabel;
-exports._termClick = termClick;
-exports._resetView = resetView;
+exports._drawPhylo        = drawPhylo;
+exports._drawWordCloud    = drawWordCloud;
+exports._showLabel        = showLabel;
+exports._termClick        = termClick;
+exports._resetView        = resetView;
+exports._showLabel        = showLabel;
+exports._showHeading      = showHeading;
+exports._showLanding      = showLanding;
 
-// Global thread dependencies:
-//    * d3 <Object> (main D3 proxy)
 
-var branchFocus = [];
-var panel = undefined; // <SVGElement>
-var svg = undefined; // <SVGElement>
-var zoom = undefined; // <Function> (D3 chained method)
+//  (?) Global thread dependencies:
+//    * d3 <Object> (main D3 proxy))
+//    * window <Window>
+//    * document <HTMLDocument>
 
+var branchFocus           = [];        // <Array> of <Int> bId
+var panel                 = undefined; // <Object> instanceof d3.selection
+var svg                   = undefined; // <Object> instanceof d3.selection
+var svg3                  = undefined; // <Object> instanceof d3.selection
+var zoom                  = undefined; // <Function> see https://github.com/d3/d3-zoom#zoom
+
+/**
+ * @name toXLabels
+ * @param {Branch} branches
+ * @param {Group} groups
+ * @param {Float} xMax
+ * @returns {Object}
+ *    <Int> x
+ *    <String> label
+ *    <Int> inf
+ *    <Int> sup
+ *    <Int> bId
+ */
 function toXLabels(branches, groups, xMax) {
 
   var xLabels = branches.map(function(b) {
@@ -51,7 +70,13 @@ function toXLabels(branches, groups, xMax) {
              bId : b.bId};
   })
 }
-
+/**
+ * @name xOverFlow
+ * @param {Object} ticks instanceof d3.selection
+ * @param {Array} arr <Array>
+ *    <Float>
+ *    <Int>
+ */
 function xOverFlow(ticks,arr) {
   ticks.each(function(t,i){
       var text = d3.select(this),
@@ -74,7 +99,15 @@ function xOverFlow(ticks,arr) {
 
   })
 }
-
+/**
+ * @name addMarkX
+ * @param {Object} ticks instanceof d3.selection
+ * @param {Array} ws <Float>
+ * @param {Array} ids <Int>
+ * @this {Window}
+ * @unpure {Object} d3
+ * @unpure {Array.<Number>} branchFocus
+ */
 function addMarkX(ticks,ws,ids) {
   ticks.each(function(t,i){
       d3.select(this)
@@ -91,13 +124,22 @@ function addMarkX(ticks,ws,ids) {
       }
   })
 }
-
+/**
+ * @name setMarkYLabel
+ * @param {Object} labels instanceof d3.selection
+ * @unpure {Object} d3
+ */
 function setMarkYLabel(labels) {
   labels.each(function(l,i){
       d3.select(this).attr("dx","-5").attr("class","y-label").attr("id","y-label-" +  d3.timeYear(l).getFullYear());
   })
 }
-
+/**
+ * @name addMarkY
+ * @param {Object} ticks instanceof d3.selection
+ * @this {Window}
+ * @unpure {Object} d3
+ */
 function addMarkY(ticks) {
   ticks.each(function(d,i){
       if (d3.timeYear(d) < d) {
@@ -114,21 +156,40 @@ function addMarkY(ticks) {
       }
   })
 }
-
+/**
+ * @name addDays
+ * @param {String|Date} date
+ * @param {Int} days
+ * @returns {Date}
+ */
 function addDays(date, days) {
   var result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 }
-
+/**
+ * @name removeDays
+ * @param {String|Date} date
+ * @param {Int} days
+ * @returns {Date}
+ */
 function removeDays(date, days) {
   var result = new Date(date);
   result.setDate(result.getDate() - days);
   return result;
 }
-
+/**
+ * @name setYDomain
+ * @param {Object} labels
+ *    <Date> from
+ *    <String> label
+ *    <Date> to
+ *    <Int> y
+ * @returns {Array}
+ *    <Date>
+ *    <Date>
+ */
 function setYDomain(labels) {
-
   var ts = ["week","month","day","year","epoch"];
 
   //console.log(labels)
@@ -163,327 +224,410 @@ function setYDomain(labels) {
   // inf = new Date((inf - 1),6,0);
   // inf = new Date((1950 - 1),6,0);
   // sup = new Date((sup + 1),0,0);
+
   return [inf,sup];
 }
-
+/**
+ * @name groupTermsBy
+ * @param {HTMLCollection} elements
+ * @param {String} attr
+ * @returns {Array}
+ *    <Array>
+ *        <String> stringified float
+ *        <String> stringified float
+ *        <String> stringified int
+ *    <Array>
+ *        <String> stringified float
+ *        <String> stringified float
+ *        <String> stringified int
+ */
 function groupTermsBy(elements, attr) {
-let grouped = {},
-    curr = "";
-for (var i = 0; i < elements.length; i++) {
-  let from = elements[i].getAttribute(attr)
-  if (curr != from) {
-    grouped[from] = [[(elements[i]).getAttribute("gx"),(elements[i]).getAttribute("gy"),(elements[i]).getAttribute("bid")]];
-    curr = from
-  } else {
-    grouped[from].push([(elements[i]).getAttribute("gx"),(elements[i]).getAttribute("gy"),(elements[i]).getAttribute("bid")]);
+  let grouped = {},
+      curr = "";
+  for (var i = 0; i < elements.length; i++) {
+    let from = elements[i].getAttribute(attr)
+    if (curr != from) {
+      grouped[from] = [[(elements[i]).getAttribute("gx"),(elements[i]).getAttribute("gy"),(elements[i]).getAttribute("bid")]];
+      curr = from
+    } else {
+      grouped[from].push([(elements[i]).getAttribute("gx"),(elements[i]).getAttribute("gy"),(elements[i]).getAttribute("bid")]);
+    }
   }
+  return Object.values(grouped);
 }
-return Object.values(grouped);
-};
+/**
+ * @name drawWordCloud
+ * @param {Array.<SVGCircleElement>} groups
+ * @unpure {Object} d3
+ * @unpure {Object} svg3 instanceof d3.selection
+ */
+function drawWordCloud (groups) {
+  let labels = {},
+      count  = 0;
 
- function drawWordCloud (groups) {
+  d3.selectAll(".word-cloud").remove();
 
-    let labels = {},
-        count  = 0;
-
-    d3.selectAll(".word-cloud").remove();
-
-    groups.forEach(function(g){
-      let gid = (g.getAttribute("id")).replace("group","");
-      let terms = d3.selectAll(".term").filter(".g-" + gid).nodes();
-      terms.forEach(function(t){
-        count ++;
-        if (labels[t.getAttribute("fdt")] == undefined) {
-          labels[t.getAttribute("fdt")] = {"freq" : 1, "label" : t.getAttribute("label")}
-        } else {
-          labels[t.getAttribute("fdt")].freq = labels[t.getAttribute("fdt")].freq + 1
-        }
-      })
-    });
-
-    labels = (Object.values(labels)).map(function(l){
-      return {"freq":(l.freq / count),"label":l.label};
-    }).sort(function(l1,l2){
-      return l2.freq - l1.freq;
+  groups.forEach(function(g){
+    let gid = (g.getAttribute("id")).replace("group","");
+    let terms = d3.selectAll(".term").filter(".g-" + gid).nodes();
+    terms.forEach(function(t){
+      count ++;
+      if (labels[t.getAttribute("fdt")] == undefined) {
+        labels[t.getAttribute("fdt")] = {"freq" : 1, "label" : t.getAttribute("label")}
+      } else {
+        labels[t.getAttribute("fdt")].freq = labels[t.getAttribute("fdt")].freq + 1
+      }
     })
+  });
 
-    let y = 20
-    let opacity = d3.scaleLinear().domain([Math.log((labels[labels.length - 1]).freq),Math.log((labels[0]).freq)]).range([0.5,1]);
+  labels = (Object.values(labels)).map(function(l){
+    return {"freq":(l.freq / count),"label":l.label};
+  }).sort(function(l1,l2){
+    return l2.freq - l1.freq;
+  })
 
-    labels.forEach(function(l){
-      y = y + 12;
-      window.svg3.append("text")
-          .attr("class","word-cloud")
-          .attr("x", 10)
-          .attr("y", y)
-          .style("opacity", opacity(Math.log(l.freq)))
-          .text(l.label);
-    })
+  let y = 20
+  let opacity = d3.scaleLinear().domain([Math.log((labels[labels.length - 1]).freq),Math.log((labels[0]).freq)]).range([0.5,1]);
+
+  labels.forEach(function(l){
+    y = y + 12;
+    svg3.append("text")
+        .attr("class","word-cloud")
+        .attr("x", 10)
+        .attr("y", y)
+        .style("opacity", opacity(Math.log(l.freq)))
+        .text(l.label);
+  })
+}
+/**
+ * @name showLabel
+ * @unpure {HTMLDocument} document
+ */
+function showLabel() {
+  var ngrams = document.getElementsByClassName("ngrams");
+  var groups = document.getElementsByClassName("group-inner");
+  var headers = document.getElementsByClassName("header");
+
+  doubleClick();
+
+  Array.from(groups).forEach(function(item) {
+    item.style.fill = "#fff";
+  })
+
+  Array.from(ngrams).forEach(function(item) {
+    item.style.visibility = "visible"
+  })
+
+  Array.from(headers).forEach(function(item) {
+    item.style.visibility = "hidden";
+  })
+}
+/**
+ * @name showHeading
+ * @unpure {Window.<Boolean>} window.ldView
+ * @unpure {Object} d3
+ * @unpure {HTMLDocument} document
+ */
+function showHeading() {
+  var ngrams = document.getElementsByClassName("ngrams");
+  var groups = document.getElementsByClassName("group-inner");
+  var headers = document.getElementsByClassName("header");
+
+  window.ldView = true;
+
+  doubleClick();
+
+  d3.selectAll(".group-path")
+    .classed("path-heading", true);
+
+  Array.from(groups).forEach(function(item) {
+    item.style.fill = "#f5eee6";
+    item.classList.add("group-heading");
+  })
+
+  Array.from(ngrams).forEach(function(item) {
+    item.style.visibility = "hidden";
+  })
+
+  Array.from(headers).forEach(function(item) {
+    item.style.visibility = "visible";
+  })
+}
+/**
+ * @name showLanding
+ * @unpure {Window.<Boolean>} window.ldView
+ * @unpure {Object} d3
+ * @unpure {HTMLDocument} document
+ */
+function showLanding() {
+  var ngrams = document.getElementsByClassName("ngrams");
+  var groups = document.getElementsByClassName("group-inner");
+  var headers = document.getElementsByClassName("header")
+
+  window.ldView = true;
+
+  doubleClick();
+
+  d3.selectAll(".group-path")
+    .classed("path-heading", false);
+
+  Array.from(ngrams).forEach(function(item) {
+    item.style.fill = "#61a3a9";
+  })
+
+  Array.from(groups).forEach(function(item) {
+    item.style.fill = "#61a3a9";
+    item.classList.remove("group-heading");
+  })
+
+  Array.from(headers).forEach(function(item) {
+    item.style.visibility = "hidden"
+  })
+}
+/**
+ * @name doubleClick
+ * @unpure {Window.<Boolean>} window.highlighted
+ * @unpure {Object} d3
+ * @unpure {Array.<Int>} branchFocus
+ * @unpure {HTMLDocument} document
+ */
+function doubleClick() {
+  window.highlighted = false;
+  headerOut();
+  d3.selectAll(".group-inner")
+    .classed("group-unfocus",false)
+    .classed("group-focus",false);
+  d3.selectAll(".group-path")
+    .classed("path-unfocus",false)
+    .classed("path-focus",false);
+  d3.selectAll(".term-path").remove();
+  // @WIP
+  document.querySelector("#phyloPhylo").innerHTML = "phylomemy";
+  document.querySelector("#phyloPhylo").classList.remove("phylo-focus");
+  document.querySelector("#phyloGroups").innerHTML = window.nbGroups;
+  document.querySelector("#phyloTerms").innerHTML = window.nbTerms;
+  document.querySelector("#phyloBranches").innerHTML = window.nbBranches;
+  document.querySelector("#phyloGroups").classList.remove("phylo-focus");
+  document.querySelector("#phyloTerms").classList.remove("phylo-focus");
+  document.querySelector("#phyloBranches").classList.remove("phylo-focus");
+  d3.selectAll(".peak").classed("peak-focus",false);
+  d3.selectAll(".peak").classed("peak-focus-source",false);
+  d3.selectAll(".x-mark").style("fill","#4A5C70");
+  branchFocus = [];
+}
+/**
+ * @name headerOut
+ * @unpure {Object} d3
+ */
+function headerOut() {
+  d3.selectAll(".header").nodes().forEach(function(header){
+    header.style["font-size"] = header.getAttribute("mem-size") + "px";
+    header.style["opacity"] = header.getAttribute("mem-opac");
+  })
+}
+/**
+ * @name termClick
+ * @param {String} txt
+ * @param {String} idx stringified int
+ * @param {Int} nodeId
+ * @param {String} typeNode "group|head|search"
+ * @unpure {Object} d3
+ * @unpure {HTMLDocument} document
+ * @unpure {Array.<Int>} branchFocus
+ * @unpure {Object} panel instanceof d3.selection
+ */
+function termClick (txt,idx,nodeId,typeNode) {
+  // remove old focus
+  initPath()
+
+  // catch the last transformations
+  if (typeNode == "group") {
+    var transform = d3.select("#group" + nodeId).node().getAttribute("transform");
+  } else if (typeNode == "head") {
+    var transform = d3.select("#head" + nodeId).node().getAttribute("transform");
+  } else {
+    var transform = (d3.selectAll(".header").nodes())[0].getAttribute("transform");
   }
 
-  function showLabel(type) {
-    if ((document.getElementsByClassName("header"))[0].style.visibility != "hidden") {
-      showHeading()
-    }
-    doubleClick()
-    let ngrams = document.getElementsByClassName("ngrams")
-    let groups = document.getElementsByClassName("group-inner")
-    if (ngrams[0].style.visibility == "hidden") {
-      document.getElementById("label").classList.add("labeled")
-      for (var i = 0; i < groups.length; i++) {
-        groups[i].style.fill = "#fff";
-      }
-      for (var i = 0; i < ngrams.length; i++){
-        ngrams[i].style.visibility = "visible";
-      }
-    } else {
-      if (type != "search") {
-        document.getElementById("label").classList.remove("labeled")
-        for (var i = 0; i < groups.length; i++) {
-          groups[i].style.fill = "#61a3a9";
+  // focus
+
+  document.querySelector("#phyloPhylo").innerHTML = txt;
+  document.querySelector("#phyloPhylo").classList.add("phylo-focus");
+  document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
+
+  // highlight the groups
+
+  var terms = document.getElementsByClassName("fdt-" + idx),
+      periods = groupTermsBy(terms,"from");
+
+  var groups  = [];
+
+  for (var i = 0; i < terms.length; i++) {
+    groups.push(d3.select("#group" + (terms[i]).getAttribute("gid")));
+    branchFocus.push((terms[i]).getAttribute("bid"));
+  }
+
+  highlightGroups(groups.map(g => g.node()));
+  drawWordCloud(groups.map(g => g.node()));
+
+  // highlight the cross branches links
+
+  var bids  = [];
+
+  for (var i = 0; i < periods.length; i++) {
+    if (i != periods.length - 1) {
+      for (var j = 0; j < periods[i].length; j++) {
+        bids.push(periods[i][j][2])
+        var x1 = periods[i][j][0],
+            y1 = periods[i][j][1];
+        for (var k = 0; k < periods[i + 1].length; k++) {
+          var x2 = periods[i + 1][k][0],
+              y2 = periods[i + 1][k][1];
+          if ((periods[i][j][2] != periods[i + 1][k][2]) && (!bids.includes(periods[i + 1][k][2]))) {
+            // draw the links between branches
+            panel
+              .append("path")
+              .attr("class","term-path")
+              .attr("d", function(d) {
+                return "M" + x1 + "," + y1
+                  + "C" + x2 + "," + y1
+                  + " " + x2 + "," + y2
+                  + " " + x2 + "," + y2;
+              })
+              .attr("transform",transform)
+              .style("stroke-opacity", 0.4)
+              .lower();
+          }
+          bids.push(periods[i + 1][k][2])
         }
-        for (var i = 0; i < ngrams.length; i++){
-          ngrams[i].style.visibility = "hidden";
-        }
       }
     }
   }
 
-  function showHeading() {
-    if ((document.getElementsByClassName("ngrams"))[0].style.visibility != "hidden") {
-      showLabel("header")
+  d3.selectAll(".path-unfocus").lower();
+}
+/**
+ * @name initPath
+ * @unpure {Window.<Boolean>} window.highlighted
+ * @unpure {Window.<Boolean>} window.ldView
+ * @unpure {Object} d3
+ * @unpure {Array.<Int>} branchFocus
+ */
+function initPath () {
+  window.highlighted = true;
+  window.ldView = false;
+  let groups = d3.selectAll(".group-inner");
+  (groups.nodes()).map(function(g){
+    if (!g.classList.contains("source-focus")) {
+      g.classList.add("group-unfocus");
+      g.classList.remove("group-focus");
     }
-    landingView()
-  }
+  })
+  d3.selectAll(".group-path")
+    .classed("path-unfocus",true)
+    .classed("path-focus",false);
+  d3.selectAll(".term-path").remove();
+  d3.selectAll(".peak").classed("peak-focus",false);
+  d3.selectAll(".peak").classed("peak-focus-source",false);
+  d3.selectAll(".x-mark").style("fill","#4A5C70");
+  branchFocus = [];
+}
+/**
+ * @name highlightGroups
+ * @param {Array.<SVGCircleElement>} groups
+ * @unpure {Window.<Boolean>} window.highlighted
+ * @unpure {HTMLDocument} document
+ * @unpure {Object} d3
+ */
+function highlightGroups (groups) {
 
-  function landingView() {
-    window.ldView = true;
-    doubleClick()
-    let headers = document.getElementsByClassName("header")
-    let groups = document.getElementsByClassName("group-inner")
-    if (headers[0].style.visibility == "hidden") {
-      document.getElementById("heading").classList.add("headed")
-      for (var i = 0; i < groups.length; i++) {
-        groups[i].style.fill = "#f5eee6";
-        groups[i].classList.add("group-heading")
-      }
-      d3.selectAll(".group-path").classed("path-heading",true);
-      for (var i = 0; i < headers.length; i++){
-        headers[i].style.visibility = "visible";
-      }
-    } else {
-      document.getElementById("heading").classList.remove("headed")
-      for (var i = 0; i < groups.length; i++) {
-        groups[i].style.fill = "#61a3a9";
-        groups[i].classList.remove("group-heading")
-      }
-      d3.selectAll(".group-path").classed("path-heading",false);
-      for (var i = 0; i < headers.length; i++){
-        headers[i].style.visibility = "hidden";
-      }
-    }
-  }
+  window.ldView = false;
 
-  function doubleClick() {
-    window.highlighted = false;
-    headerOut();
-    d3.selectAll(".group-inner")
-      .classed("group-unfocus",false)
-      .classed("group-focus",false);
-    d3.selectAll(".group-path")
-      .classed("path-unfocus",false)
-      .classed("path-focus",false);
-    d3.selectAll(".term-path").remove();
-    document.querySelector("#phyloPhylo").innerHTML = "phylomemy";
-    document.querySelector("#phyloPhylo").classList.remove("phylo-focus");
-    document.querySelector("#phyloGroups").innerHTML = window.nbGroups;
-    document.querySelector("#phyloTerms").innerHTML = window.nbTerms;
-    document.querySelector("#phyloBranches").innerHTML = window.nbBranches;
-    document.querySelector("#phyloGroups").classList.remove("phylo-focus");
-    document.querySelector("#phyloTerms").classList.remove("phylo-focus");
-    document.querySelector("#phyloBranches").classList.remove("phylo-focus");
-    d3.selectAll(".peak").classed("peak-focus",false);
-    d3.selectAll(".peak").classed("peak-focus-source",false);
-    d3.selectAll(".x-mark").style("fill","#4A5C70");
-    branchFocus = [];
-  }
+  // console.log(groups)
 
-  function headerOut() {
-    d3.selectAll(".header").nodes().forEach(function(header){
-      header.style["font-size"] = header.getAttribute("mem-size") + "px";
-      header.style["opacity"] = header.getAttribute("mem-opac");
-    })
-  }
+  let paths = document.getElementsByClassName("group-path"),
+      gids  = [];
 
-  function termClick (txt,idx,nodeId,typeNode) {
-
-    // remove old focus
-    initPath()
-
-    // catch the last transformations
-    if (typeNode == "group") {
-      var transform = d3.select("#group" + nodeId).node().getAttribute("transform");
-    } else if (typeNode == "head") {
-      var transform = d3.select("#head" + nodeId).node().getAttribute("transform");
-    } else {
-      var transform = (d3.selectAll(".header").nodes())[0].getAttribute("transform");
-    }
-
-    // focus
-
-    document.querySelector("#phyloPhylo").innerHTML = txt;
-    document.querySelector("#phyloPhylo").classList.add("phylo-focus");
-    document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
+  for (var i = 0; i < groups.length; i++) {
 
     // highlight the groups
 
-    var terms = document.getElementsByClassName("fdt-" + idx),
-        periods = groupTermsBy(terms,"from");
+    groups[i]
+      .classList.add("group-focus");
+    groups[i]
+      .classList.remove("group-unfocus");
+      // .classed("group-unfocus", false)
+      // .classed("group-focus", true);
 
-    var groups  = [];
+    gids.push(groups[i].getAttribute("gid"))
 
-    for (var i = 0; i < terms.length; i++) {
-      groups.push(d3.select("#group" + (terms[i]).getAttribute("gid")));
-      branchFocus.push((terms[i]).getAttribute("bid"));
-    }
+    // highlight the branches peak
 
-    highlightGroups(groups.map(g => g.node()));
-    drawWordCloud(groups.map(g => g.node()));
+    let bid = groups[i].getAttribute("bId")
 
-    // highlight the cross branches links
-
-    var bids  = [];
-
-    for (var i = 0; i < periods.length; i++) {
-      if (i != periods.length - 1) {
-        for (var j = 0; j < periods[i].length; j++) {
-          bids.push(periods[i][j][2])
-          var x1 = periods[i][j][0],
-              y1 = periods[i][j][1];
-          for (var k = 0; k < periods[i + 1].length; k++) {
-            var x2 = periods[i + 1][k][0],
-                y2 = periods[i + 1][k][1];
-            if ((periods[i][j][2] != periods[i + 1][k][2]) && (!bids.includes(periods[i + 1][k][2]))) {
-              // draw the links between branches
-              panel
-                .append("path")
-                .attr("class","term-path")
-                .attr("d", function(d) {
-                  return "M" + x1 + "," + y1
-                    + "C" + x2 + "," + y1
-                    + " " + x2 + "," + y2
-                    + " " + x2 + "," + y2;
-                })
-                .attr("transform",transform)
-                .style("stroke-opacity", 0.4)
-                .lower();
-            }
-            bids.push(periods[i + 1][k][2])
-          }
-        }
-      }
-    }
-
-    d3.selectAll(".path-unfocus").lower();
-  }
-
-  function initPath () {
-    window.highlighted = true;
-    window.ldView = false;
-    let groups = d3.selectAll(".group-inner");
-    (groups.nodes()).map(function(g){
-      if (!g.classList.contains("source-focus")) {
-        g.classList.add("group-unfocus");
-        g.classList.remove("group-focus");
-      }
-    })
-    d3.selectAll(".group-path")
-      .classed("path-unfocus",true)
-      .classed("path-focus",false);
-    d3.selectAll(".term-path").remove();
-    d3.selectAll(".peak").classed("peak-focus",false);
-    d3.selectAll(".peak").classed("peak-focus-source",false);
-    d3.selectAll(".x-mark").style("fill","#4A5C70");
-    branchFocus = [];
-  }
-
-  function highlightGroups (groups) {
-
-    window.ldView = false;
-
-    // console.log(groups)
-
-    let paths = document.getElementsByClassName("group-path"),
-        gids  = [];
-
-    for (var i = 0; i < groups.length; i++) {
-
-      // highlight the groups
-
-      groups[i]
-        .classList.add("group-focus");
-      groups[i]
-        .classList.remove("group-unfocus");
-        // .classed("group-unfocus", false)
-        // .classed("group-focus", true);
-
-      gids.push(groups[i].getAttribute("gid"))
-
-      // highlight the branches peak
-
-      let bid = groups[i].getAttribute("bId")
-
-      d3.select("#peak-" + bid)
-        .classed("peak-focus", true);
-      d3.select("#xmark-" + bid)
-        .style("fill", "#F0684D");
-
-    }
-
-    // facets
-
-    document.querySelector("#phyloGroups").innerHTML = groups.length;
-    document.querySelector("#phyloTerms").innerHTML = countTerms(groups);
-    document.querySelector("#phyloBranches").innerHTML = countBranches(groups);
-    document.querySelector("#phyloGroups").classList.add("phylo-focus");
-    document.querySelector("#phyloTerms").classList.add("phylo-focus");
-    document.querySelector("#phyloBranches").classList.add("phylo-focus");
-
-    // highlight the links
-
-    for (var i = 0; i < paths.length; i++) {
-      if (gids.includes((paths[i]).getAttribute("source")) && (paths[i]).getAttribute("target")) {
-        paths[i].classList.add("path-focus");
-        paths[i].classList.remove("path-unfocus");
-      }
-    }
+    d3.select("#peak-" + bid)
+      .classed("peak-focus", true);
+    d3.select("#xmark-" + bid)
+      .style("fill", "#F0684D");
 
   }
 
-  function countTerms(groups) {
-    var terms = [];
-    for (var i = 0; i < groups.length; i++) {
-      let gid = ((groups[i].getAttribute("id")).split("group"))[1]
-      d3.selectAll(".g-" + gid).nodes().forEach(e => terms.push(e.getAttribute("fdt")))
+  // facets
+  // @WIP
+  document.querySelector("#phyloGroups").innerHTML = groups.length;
+  document.querySelector("#phyloTerms").innerHTML = countTerms(groups);
+  document.querySelector("#phyloBranches").innerHTML = countBranches(groups);
+  document.querySelector("#phyloGroups").classList.add("phylo-focus");
+  document.querySelector("#phyloTerms").classList.add("phylo-focus");
+  document.querySelector("#phyloBranches").classList.add("phylo-focus");
+
+  // highlight the links
+
+  for (var i = 0; i < paths.length; i++) {
+    if (gids.includes((paths[i]).getAttribute("source")) && (paths[i]).getAttribute("target")) {
+      paths[i].classList.add("path-focus");
+      paths[i].classList.remove("path-unfocus");
     }
-    return (Array.from(new Set(terms))).length;
   }
 
-  function countBranches(groups) {
-    var branches = [];
-    for (var i = 0; i < groups.length; i++) {
-      branches.push(groups[i].getAttribute("bId"));
-    }
-    return (Array.from(new Set(branches))).length;
+}
+/**
+ * @name countTerms
+ * @param {Array.<SVGCircleElement>} groups
+ * @unpure {Object} d3
+ * @returns {Int}
+ */
+function countTerms(groups) {
+  var terms = [];
+  for (var i = 0; i < groups.length; i++) {
+    let gid = ((groups[i].getAttribute("id")).split("group"))[1]
+    d3.selectAll(".g-" + gid).nodes().forEach(e => terms.push(e.getAttribute("fdt")))
   }
-
-  function resetView() {
-    svg.transition()
-        .duration(750)
-        .call(zoom.transform, d3.zoomIdentity);
+  return (Array.from(new Set(terms))).length;
+}
+/**
+ * @name countBranches
+ * @param {Array.<SVGCircleElement>} groups
+ * @returns {Int}
+ */
+function countBranches(groups) {
+  var branches = [];
+  for (var i = 0; i < groups.length; i++) {
+    branches.push(groups[i].getAttribute("bId"));
   }
+  return (Array.from(new Set(branches))).length;
+}
+/**
+ * @name resetView
+ * @unpure {Object} svg instanceof d3.selection
+ */
+function resetView() {
+  svg.transition()
+      .duration(750)
+      .call(zoom.transform, d3.zoomIdentity);
+}
 
-
+// @WIP
 function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
 
@@ -596,7 +740,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   var div3 = d3.select('#phyloGraph')
                .node().getBoundingClientRect();
 
-  window.svg3 = d3
+  svg3 = d3
         .select('#phyloGraph')
         .append("svg")
           .attr("width", div3.width)
@@ -768,17 +912,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
       showPeak()
   }
 
-  /* label */
-
-  // https://observablehq.com/@d3/parallel-coordinates
-
-  d3.select("#label").on("click", function(e, l) {
-    showLabel(l);
-  });
-
   /* role & dynamic */
-
-  d3.select("#heading").on("click",showHeading);
 
   var emergences = {};
   var branchByGroup = {};
@@ -852,12 +986,10 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
          .style("fill",(bid.length > 1) ? "#012840" : "#012840")
          .text((emergences[k]).label)
          .on("click",function(){
-            showLabel("header")
+            showHeading();
             termClick((emergences[k]).label,k,k,"head");
          });
   });
-
-  landingView()
 
   /* groups */
 
