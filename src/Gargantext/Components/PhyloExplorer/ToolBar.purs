@@ -8,7 +8,7 @@ import Data.Array (intercalate)
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
-import Gargantext.Components.PhyloExplorer.Draw (DisplayView(..))
+import Gargantext.Components.PhyloExplorer.Types (DisplayView(..))
 import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -18,6 +18,7 @@ type Props =
   ( resetViewCallback   :: Unit -> Effect Unit
   , displayView         :: DisplayView
   , changeViewCallback  :: DisplayView -> Effect Unit
+  , exportCallback      :: Unit -> Effect Unit
   )
 
 here :: R2.Here
@@ -31,6 +32,7 @@ component = here.component "main" cpt where
   cpt { resetViewCallback
       , displayView
       , changeViewCallback
+      , exportCallback
       } _ = do
     -- Render
     pure $
@@ -99,7 +101,7 @@ component = here.component "main" cpt where
         -- Screenshot button
         B.button
         { className: "phylo-toolbar__screenshot"
-        , callback: \_ -> pure unit
+        , callback: exportCallback
         , variant: OutlinedButtonVariant Secondary
         }
         [

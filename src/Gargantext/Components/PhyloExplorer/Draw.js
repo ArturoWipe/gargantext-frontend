@@ -6,6 +6,7 @@ exports._resetView        = resetView;
 exports._showLabel        = showLabel;
 exports._showHeading      = showHeading;
 exports._showLanding      = showLanding;
+exports._exportViz        = exportViz;
 
 
 //  (?) Global thread dependencies:
@@ -18,6 +19,541 @@ var panel                 = undefined; // <Object> instanceof d3.selection
 var svg                   = undefined; // <Object> instanceof d3.selection
 var svg3                  = undefined; // <Object> instanceof d3.selection
 var zoom                  = undefined; // <Function> see https://github.com/d3/d3-zoom#zoom
+
+
+////////////////////////////////////////////////////////////////////////////////
+///    ACTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @name groupTermsBy
+ * @param {HTMLCollection} elements
+ * @param {String} attr
+ * @returns {Array}
+ *    <Array>
+ *        <String> stringified float
+ *        <String> stringified float
+ *        <String> stringified int
+ *    <Array>
+ *        <String> stringified float
+ *        <String> stringified float
+ *        <String> stringified int
+ */
+ function groupTermsBy(elements, attr) {
+  let grouped = {},
+      curr = "";
+  for (var i = 0; i < elements.length; i++) {
+    let from = elements[i].getAttribute(attr)
+    if (curr != from) {
+      grouped[from] = [[(elements[i]).getAttribute("gx"),(elements[i]).getAttribute("gy"),(elements[i]).getAttribute("bid")]];
+      curr = from
+    } else {
+      grouped[from].push([(elements[i]).getAttribute("gx"),(elements[i]).getAttribute("gy"),(elements[i]).getAttribute("bid")]);
+    }
+  }
+  return Object.values(grouped);
+}
+/**
+ * @name showLabel
+ * @unpure {HTMLDocument} document
+ */
+ function showLabel() {
+  var ngrams = document.getElementsByClassName("ngrams");
+  var groups = document.getElementsByClassName("group-inner");
+  var headers = document.getElementsByClassName("header");
+
+  doubleClick();
+
+  d3.selectAll(".group-path")
+    .classed("path-heading", false);
+
+  Array.from(groups).forEach(function(item) {
+    item.style.fill = "#fff";
+    item.classList.remove("group-heading");
+  })
+
+  Array.from(headers).forEach(function(item) {
+    item.style.visibility = "hidden";
+  })
+
+  Array.from(ngrams).forEach(function(item) {
+    item.style.visibility = "visible";
+    item.style.fill = "#61a3a9";
+  })
+}
+/**
+ * @name showHeading
+ * @unpure {Window.<Boolean>} window.ldView
+ * @unpure {Object} d3
+ * @unpure {HTMLDocument} document
+ */
+function showHeading() {
+  var ngrams = document.getElementsByClassName("ngrams");
+  var groups = document.getElementsByClassName("group-inner");
+  var headers = document.getElementsByClassName("header");
+
+  window.ldView = true;
+
+  doubleClick();
+
+  d3.selectAll(".group-path")
+    .classed("path-heading", true);
+
+  Array.from(groups).forEach(function(item) {
+    item.style.fill = "#f5eee6";
+    item.classList.add("group-heading");
+  })
+
+  Array.from(headers).forEach(function(item) {
+    item.style.visibility = "visible";
+  })
+
+  Array.from(ngrams).forEach(function(item) {
+    item.style.visibility = "hidden";
+  })
+}
+/**
+ * @name showLanding
+ * @unpure {Window.<Boolean>} window.ldView
+ * @unpure {Object} d3
+ * @unpure {HTMLDocument} document
+ */
+function showLanding() {
+  var ngrams = document.getElementsByClassName("ngrams");
+  var groups = document.getElementsByClassName("group-inner");
+  var headers = document.getElementsByClassName("header")
+
+  window.ldView = true;
+
+  doubleClick();
+
+  d3.selectAll(".group-path")
+    .classed("path-heading", false);
+
+  Array.from(groups).forEach(function(item) {
+    item.style.fill = "#61a3a9";
+    item.classList.remove("group-heading");
+  })
+
+  Array.from(headers).forEach(function(item) {
+    item.style.visibility = "hidden"
+  })
+
+  Array.from(ngrams).forEach(function(item) {
+    item.style.fill = "#61a3a9";
+  })
+}
+/**
+ * @name doubleClick
+ * @unpure {Window.<Boolean>} window.highlighted
+ * @unpure {Object} d3
+ * @unpure {Array.<Int>} branchFocus
+ * @unpure {HTMLDocument} document
+ */
+function doubleClick() {
+  window.highlighted = false;
+  headerOut();
+  d3.selectAll(".group-inner")
+    .classed("group-unfocus",false)
+    .classed("group-focus",false);
+  d3.selectAll(".group-path")
+    .classed("path-unfocus",false)
+    .classed("path-focus",false);
+  d3.selectAll(".term-path").remove();
+  // @WIP
+  document.querySelector("#phyloPhylo").innerHTML = "phylomemy";
+  document.querySelector("#phyloPhylo").classList.remove("phylo-focus");
+  document.querySelector("#phyloGroups").innerHTML = window.nbGroups;
+  document.querySelector("#phyloTerms").innerHTML = window.nbTerms;
+  document.querySelector("#phyloBranches").innerHTML = window.nbBranches;
+  document.querySelector("#phyloGroups").classList.remove("phylo-focus");
+  document.querySelector("#phyloTerms").classList.remove("phylo-focus");
+  document.querySelector("#phyloBranches").classList.remove("phylo-focus");
+  d3.selectAll(".peak").classed("peak-focus",false);
+  d3.selectAll(".peak").classed("peak-focus-source",false);
+  d3.selectAll(".x-mark").style("fill","#4A5C70");
+  branchFocus = [];
+}
+/**
+ * @name headerOut
+ * @unpure {Object} d3
+ */
+function headerOut() {
+  d3.selectAll(".header").nodes().forEach(function(header){
+    header.style["font-size"] = header.getAttribute("mem-size") + "px";
+    header.style["opacity"] = header.getAttribute("mem-opac");
+  })
+}
+/**
+ * @name termClick
+ * @param {String} txt
+ * @param {String} idx stringified int
+ * @param {Int} nodeId
+ * @param {String} typeNode "group|head|search"
+ * @unpure {Object} d3
+ * @unpure {HTMLDocument} document
+ * @unpure {Array.<Int>} branchFocus
+ * @unpure {Object} panel instanceof d3.selection
+ */
+ function termClick (txt,idx,nodeId,typeNode) {
+  // remove old focus
+  initPath()
+
+  // catch the last transformations
+  if (typeNode == "group") {
+    var transform = d3.select("#group" + nodeId).node().getAttribute("transform");
+  } else if (typeNode == "head") {
+    var transform = d3.select("#head" + nodeId).node().getAttribute("transform");
+  } else {
+    var transform = (d3.selectAll(".header").nodes())[0].getAttribute("transform");
+  }
+
+  // focus
+
+  document.querySelector("#phyloPhylo").innerHTML = txt;
+  document.querySelector("#phyloPhylo").classList.add("phylo-focus");
+  document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
+
+  // highlight the groups
+
+  var terms = document.getElementsByClassName("fdt-" + idx),
+      periods = groupTermsBy(terms,"from");
+
+  var groups  = [];
+
+  for (var i = 0; i < terms.length; i++) {
+    groups.push(d3.select("#group" + (terms[i]).getAttribute("gid")));
+    branchFocus.push((terms[i]).getAttribute("bid"));
+  }
+
+  highlightGroups(groups.map(g => g.node()));
+  drawWordCloud(groups.map(g => g.node()));
+
+  // highlight the cross branches links
+
+  var bids  = [];
+
+  for (var i = 0; i < periods.length; i++) {
+    if (i != periods.length - 1) {
+      for (var j = 0; j < periods[i].length; j++) {
+        bids.push(periods[i][j][2])
+        var x1 = periods[i][j][0],
+            y1 = periods[i][j][1];
+        for (var k = 0; k < periods[i + 1].length; k++) {
+          var x2 = periods[i + 1][k][0],
+              y2 = periods[i + 1][k][1];
+          if ((periods[i][j][2] != periods[i + 1][k][2]) && (!bids.includes(periods[i + 1][k][2]))) {
+            // draw the links between branches
+            panel
+              .append("path")
+              .attr("class","term-path")
+              .attr("d", function(d) {
+                return "M" + x1 + "," + y1
+                  + "C" + x2 + "," + y1
+                  + " " + x2 + "," + y2
+                  + " " + x2 + "," + y2;
+              })
+              .attr("transform",transform)
+              .style("stroke-opacity", 0.4)
+              .lower();
+          }
+          bids.push(periods[i + 1][k][2])
+        }
+      }
+    }
+  }
+
+  d3.selectAll(".path-unfocus").lower();
+}
+/**
+ * @name initPath
+ * @unpure {Window.<Boolean>} window.highlighted
+ * @unpure {Window.<Boolean>} window.ldView
+ * @unpure {Object} d3
+ * @unpure {Array.<Int>} branchFocus
+ */
+ function initPath () {
+  window.highlighted = true;
+  window.ldView = false;
+  let groups = d3.selectAll(".group-inner");
+  (groups.nodes()).map(function(g){
+    if (!g.classList.contains("source-focus")) {
+      g.classList.add("group-unfocus");
+      g.classList.remove("group-focus");
+    }
+  })
+  d3.selectAll(".group-path")
+    .classed("path-unfocus",true)
+    .classed("path-focus",false);
+  d3.selectAll(".term-path").remove();
+  d3.selectAll(".peak").classed("peak-focus",false);
+  d3.selectAll(".peak").classed("peak-focus-source",false);
+  d3.selectAll(".x-mark").style("fill","#4A5C70");
+  branchFocus = [];
+}
+/**
+ * @name highlightGroups
+ * @param {Array.<SVGCircleElement>} groups
+ * @unpure {Window.<Boolean>} window.highlighted
+ * @unpure {HTMLDocument} document
+ * @unpure {Object} d3
+ */
+ function highlightGroups (groups) {
+
+  window.ldView = false;
+
+  // console.log(groups)
+
+  let paths = document.getElementsByClassName("group-path"),
+      gids  = [];
+
+  for (var i = 0; i < groups.length; i++) {
+
+    // highlight the groups
+
+    groups[i]
+      .classList.add("group-focus");
+    groups[i]
+      .classList.remove("group-unfocus");
+      // .classed("group-unfocus", false)
+      // .classed("group-focus", true);
+
+    gids.push(groups[i].getAttribute("gid"))
+
+    // highlight the branches peak
+
+    let bid = groups[i].getAttribute("bId")
+
+    d3.select("#peak-" + bid)
+      .classed("peak-focus", true);
+    d3.select("#xmark-" + bid)
+      .style("fill", "#F0684D");
+
+  }
+
+  // facets
+  // @WIP
+  document.querySelector("#phyloGroups").innerHTML = groups.length;
+  document.querySelector("#phyloTerms").innerHTML = countTerms(groups);
+  document.querySelector("#phyloBranches").innerHTML = countBranches(groups);
+  document.querySelector("#phyloGroups").classList.add("phylo-focus");
+  document.querySelector("#phyloTerms").classList.add("phylo-focus");
+  document.querySelector("#phyloBranches").classList.add("phylo-focus");
+
+  // highlight the links
+
+  for (var i = 0; i < paths.length; i++) {
+    if (gids.includes((paths[i]).getAttribute("source")) && (paths[i]).getAttribute("target")) {
+      paths[i].classList.add("path-focus");
+      paths[i].classList.remove("path-unfocus");
+    }
+  }
+}
+/**
+ * @name countTerms
+ * @param {Array.<SVGCircleElement>} groups
+ * @unpure {Object} d3
+ * @returns {Int}
+ */
+ function countTerms(groups) {
+  var terms = [];
+  for (var i = 0; i < groups.length; i++) {
+    let gid = ((groups[i].getAttribute("id")).split("group"))[1]
+    d3.selectAll(".g-" + gid).nodes().forEach(e => terms.push(e.getAttribute("fdt")))
+  }
+  return (Array.from(new Set(terms))).length;
+}
+/**
+ * @name countBranches
+ * @param {Array.<SVGCircleElement>} groups
+ * @returns {Int}
+ */
+function countBranches(groups) {
+  var branches = [];
+  for (var i = 0; i < groups.length; i++) {
+    branches.push(groups[i].getAttribute("bId"));
+  }
+  return (Array.from(new Set(branches))).length;
+}
+/**
+ * @name resetView
+ * @unpure {Object} svg instanceof d3.selection
+ */
+function resetView() {
+  svg.transition()
+      .duration(750)
+      .call(zoom.transform, d3.zoomIdentity);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///    WORD CLOUD
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @name drawWordCloud
+ * @param {Array.<SVGCircleElement>} groups
+ * @unpure {Object} d3
+ * @unpure {Object} svg3 instanceof d3.selection
+ */
+ function drawWordCloud (groups) {
+  let labels = {},
+      count  = 0;
+
+  d3.selectAll(".word-cloud").remove();
+
+  groups.forEach(function(g){
+    let gid = (g.getAttribute("id")).replace("group","");
+    let terms = d3.selectAll(".term").filter(".g-" + gid).nodes();
+    terms.forEach(function(t){
+      count ++;
+      if (labels[t.getAttribute("fdt")] == undefined) {
+        labels[t.getAttribute("fdt")] = {"freq" : 1, "label" : t.getAttribute("label")}
+      } else {
+        labels[t.getAttribute("fdt")].freq = labels[t.getAttribute("fdt")].freq + 1
+      }
+    })
+  });
+
+  labels = (Object.values(labels)).map(function(l){
+    return {"freq":(l.freq / count),"label":l.label};
+  }).sort(function(l1,l2){
+    return l2.freq - l1.freq;
+  })
+
+  let y = 20
+  let opacity = d3.scaleLinear().domain([Math.log((labels[labels.length - 1]).freq),Math.log((labels[0]).freq)]).range([0.5,1]);
+
+  labels.forEach(function(l){
+    y = y + 12;
+    svg3.append("text")
+        .attr("class","word-cloud")
+        .attr("x", 10)
+        .attr("y", y)
+        .style("opacity", opacity(Math.log(l.freq)))
+        .text(l.label);
+  })
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///    EXPORTS
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @name exportViz
+ */
+ function exportViz() {
+  var time = new Date();
+
+  serialize(svg.node(),"phylomemy-" + Date.parse(time.toString())  + ".svg")
+}
+/**
+ * @name serialize
+ * @param {SVGSVGElement} graph
+ * @param {String} name
+ * @unpure {Window} window
+ * @unpure {HTMLDocument} document
+ */
+function serialize(graph,name) {
+  const xmlns = "http://www.w3.org/2000/xmlns/";
+  const xlinkns = "http://www.w3.org/1999/xlink";
+  const svgns = "http://www.w3.org/2000/svg";
+
+  graph = graph.cloneNode(true);
+  const fragment = window.location.href + "#";
+  const walker = document.createTreeWalker(graph, NodeFilter.SHOW_ELEMENT, null, false);
+  while (walker.nextNode()) {
+    for (const attr of walker.currentNode.attributes) {
+      if (attr.value.includes(fragment)) {
+        attr.value = attr.value.replace(fragment, "#");
+      }
+    }
+  }
+  graph.setAttributeNS(xmlns, "xmlns", svgns);
+  graph.setAttributeNS(xmlns, "xmlns:xlink", xlinkns);
+
+  var cssStyleText = getCSSStyles( graph );
+  appendCSS( cssStyleText, graph );
+
+  const serializer = new window.XMLSerializer;
+  const string = serializer.serializeToString(graph);
+  var svgBlob = new Blob([string], {type: "image/svg+xml"});
+  var svgUrl = URL.createObjectURL(svgBlob);
+  var downloadLink = document.createElement("a");
+  downloadLink.href = svgUrl;
+  downloadLink.download = name;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+}
+/**
+ * @name getCSSStyles
+ * @param {SVGSVGElement} parentElement
+ * @unpure {HTMLDocument} document
+ * @returns {String}
+ */
+function getCSSStyles( parentElement ) {
+  var selectorTextArr = [];
+  var contains = function (str,arr) {
+    return arr.indexOf( str ) === -1 ? false : true;
+  }
+
+  // Add Parent element Id and Classes to the list
+  selectorTextArr.push( '#'+parentElement.id );
+  for (var c = 0; c < parentElement.classList.length; c++)
+      if ( !contains('.'+parentElement.classList[c], selectorTextArr) )
+        selectorTextArr.push( '.'+parentElement.classList[c] );
+
+  // Add Children element Ids and Classes to the list
+  var nodes = parentElement.getElementsByTagName("*");
+  for (var i = 0; i < nodes.length; i++) {
+    var id = nodes[i].id;
+    if ( !contains('#'+id, selectorTextArr) )
+      selectorTextArr.push( '#'+id );
+
+    var classes = nodes[i].classList;
+    for (var c = 0; c < classes.length; c++)
+      if ( !contains('.'+classes[c], selectorTextArr) )
+        selectorTextArr.push( '.'+classes[c] );
+  }
+
+  // Extract CSS Rules
+  var extractedCSSText = "";
+  for (var i = 0; i < document.styleSheets.length; i++) {
+    var s = document.styleSheets[i];
+
+    try {
+        if(!s.cssRules) continue;
+    } catch( e ) {
+          if(e.name !== 'SecurityError') throw e; // for Firefox
+          continue;
+        }
+
+    var cssRules = s.cssRules;
+    for (var r = 0; r < cssRules.length; r++) {
+      if ( contains( cssRules[r].selectorText, selectorTextArr ) )
+        extractedCSSText += cssRules[r].cssText;
+    }
+  }
+
+  return extractedCSSText;
+}
+/**
+ * @name appendCSS
+ * @param {String} cssText
+ * @param {SVGSVGElement} element
+ * @unpure {HTMLDocument} document
+ */
+function appendCSS( cssText, element ) {
+  var styleElement = document.createElement("style");
+  styleElement.setAttribute("type","text/css");
+  styleElement.innerHTML = cssText;
+  var refNode = element.hasChildNodes() ? element.children[0] : null;
+  element.insertBefore( styleElement, refNode );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///    DRAW
+////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @name toXLabels
@@ -227,413 +763,15 @@ function setYDomain(labels) {
 
   return [inf,sup];
 }
-/**
- * @name groupTermsBy
- * @param {HTMLCollection} elements
- * @param {String} attr
- * @returns {Array}
- *    <Array>
- *        <String> stringified float
- *        <String> stringified float
- *        <String> stringified int
- *    <Array>
- *        <String> stringified float
- *        <String> stringified float
- *        <String> stringified int
- */
-function groupTermsBy(elements, attr) {
-  let grouped = {},
-      curr = "";
-  for (var i = 0; i < elements.length; i++) {
-    let from = elements[i].getAttribute(attr)
-    if (curr != from) {
-      grouped[from] = [[(elements[i]).getAttribute("gx"),(elements[i]).getAttribute("gy"),(elements[i]).getAttribute("bid")]];
-      curr = from
-    } else {
-      grouped[from].push([(elements[i]).getAttribute("gx"),(elements[i]).getAttribute("gy"),(elements[i]).getAttribute("bid")]);
-    }
-  }
-  return Object.values(grouped);
-}
-/**
- * @name drawWordCloud
- * @param {Array.<SVGCircleElement>} groups
- * @unpure {Object} d3
- * @unpure {Object} svg3 instanceof d3.selection
- */
-function drawWordCloud (groups) {
-  let labels = {},
-      count  = 0;
 
-  d3.selectAll(".word-cloud").remove();
+////////////////////////////////////////////////////////////////////////////////
+///   @WIP
+////////////////////////////////////////////////////////////////////////////////
 
-  groups.forEach(function(g){
-    let gid = (g.getAttribute("id")).replace("group","");
-    let terms = d3.selectAll(".term").filter(".g-" + gid).nodes();
-    terms.forEach(function(t){
-      count ++;
-      if (labels[t.getAttribute("fdt")] == undefined) {
-        labels[t.getAttribute("fdt")] = {"freq" : 1, "label" : t.getAttribute("label")}
-      } else {
-        labels[t.getAttribute("fdt")].freq = labels[t.getAttribute("fdt")].freq + 1
-      }
-    })
-  });
-
-  labels = (Object.values(labels)).map(function(l){
-    return {"freq":(l.freq / count),"label":l.label};
-  }).sort(function(l1,l2){
-    return l2.freq - l1.freq;
-  })
-
-  let y = 20
-  let opacity = d3.scaleLinear().domain([Math.log((labels[labels.length - 1]).freq),Math.log((labels[0]).freq)]).range([0.5,1]);
-
-  labels.forEach(function(l){
-    y = y + 12;
-    svg3.append("text")
-        .attr("class","word-cloud")
-        .attr("x", 10)
-        .attr("y", y)
-        .style("opacity", opacity(Math.log(l.freq)))
-        .text(l.label);
-  })
-}
-/**
- * @name showLabel
- * @unpure {HTMLDocument} document
- */
-function showLabel() {
-  var ngrams = document.getElementsByClassName("ngrams");
-  var groups = document.getElementsByClassName("group-inner");
-  var headers = document.getElementsByClassName("header");
-
-  doubleClick();
-
-  Array.from(groups).forEach(function(item) {
-    item.style.fill = "#fff";
-  })
-
-  Array.from(ngrams).forEach(function(item) {
-    item.style.visibility = "visible"
-  })
-
-  Array.from(headers).forEach(function(item) {
-    item.style.visibility = "hidden";
-  })
-}
-/**
- * @name showHeading
- * @unpure {Window.<Boolean>} window.ldView
- * @unpure {Object} d3
- * @unpure {HTMLDocument} document
- */
-function showHeading() {
-  var ngrams = document.getElementsByClassName("ngrams");
-  var groups = document.getElementsByClassName("group-inner");
-  var headers = document.getElementsByClassName("header");
-
-  window.ldView = true;
-
-  doubleClick();
-
-  d3.selectAll(".group-path")
-    .classed("path-heading", true);
-
-  Array.from(groups).forEach(function(item) {
-    item.style.fill = "#f5eee6";
-    item.classList.add("group-heading");
-  })
-
-  Array.from(ngrams).forEach(function(item) {
-    item.style.visibility = "hidden";
-  })
-
-  Array.from(headers).forEach(function(item) {
-    item.style.visibility = "visible";
-  })
-}
-/**
- * @name showLanding
- * @unpure {Window.<Boolean>} window.ldView
- * @unpure {Object} d3
- * @unpure {HTMLDocument} document
- */
-function showLanding() {
-  var ngrams = document.getElementsByClassName("ngrams");
-  var groups = document.getElementsByClassName("group-inner");
-  var headers = document.getElementsByClassName("header")
-
-  window.ldView = true;
-
-  doubleClick();
-
-  d3.selectAll(".group-path")
-    .classed("path-heading", false);
-
-  Array.from(ngrams).forEach(function(item) {
-    item.style.fill = "#61a3a9";
-  })
-
-  Array.from(groups).forEach(function(item) {
-    item.style.fill = "#61a3a9";
-    item.classList.remove("group-heading");
-  })
-
-  Array.from(headers).forEach(function(item) {
-    item.style.visibility = "hidden"
-  })
-}
-/**
- * @name doubleClick
- * @unpure {Window.<Boolean>} window.highlighted
- * @unpure {Object} d3
- * @unpure {Array.<Int>} branchFocus
- * @unpure {HTMLDocument} document
- */
-function doubleClick() {
-  window.highlighted = false;
-  headerOut();
-  d3.selectAll(".group-inner")
-    .classed("group-unfocus",false)
-    .classed("group-focus",false);
-  d3.selectAll(".group-path")
-    .classed("path-unfocus",false)
-    .classed("path-focus",false);
-  d3.selectAll(".term-path").remove();
-  // @WIP
-  document.querySelector("#phyloPhylo").innerHTML = "phylomemy";
-  document.querySelector("#phyloPhylo").classList.remove("phylo-focus");
-  document.querySelector("#phyloGroups").innerHTML = window.nbGroups;
-  document.querySelector("#phyloTerms").innerHTML = window.nbTerms;
-  document.querySelector("#phyloBranches").innerHTML = window.nbBranches;
-  document.querySelector("#phyloGroups").classList.remove("phylo-focus");
-  document.querySelector("#phyloTerms").classList.remove("phylo-focus");
-  document.querySelector("#phyloBranches").classList.remove("phylo-focus");
-  d3.selectAll(".peak").classed("peak-focus",false);
-  d3.selectAll(".peak").classed("peak-focus-source",false);
-  d3.selectAll(".x-mark").style("fill","#4A5C70");
-  branchFocus = [];
-}
-/**
- * @name headerOut
- * @unpure {Object} d3
- */
-function headerOut() {
-  d3.selectAll(".header").nodes().forEach(function(header){
-    header.style["font-size"] = header.getAttribute("mem-size") + "px";
-    header.style["opacity"] = header.getAttribute("mem-opac");
-  })
-}
-/**
- * @name termClick
- * @param {String} txt
- * @param {String} idx stringified int
- * @param {Int} nodeId
- * @param {String} typeNode "group|head|search"
- * @unpure {Object} d3
- * @unpure {HTMLDocument} document
- * @unpure {Array.<Int>} branchFocus
- * @unpure {Object} panel instanceof d3.selection
- */
-function termClick (txt,idx,nodeId,typeNode) {
-  // remove old focus
-  initPath()
-
-  // catch the last transformations
-  if (typeNode == "group") {
-    var transform = d3.select("#group" + nodeId).node().getAttribute("transform");
-  } else if (typeNode == "head") {
-    var transform = d3.select("#head" + nodeId).node().getAttribute("transform");
-  } else {
-    var transform = (d3.selectAll(".header").nodes())[0].getAttribute("transform");
-  }
-
-  // focus
-
-  document.querySelector("#phyloPhylo").innerHTML = txt;
-  document.querySelector("#phyloPhylo").classList.add("phylo-focus");
-  document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
-
-  // highlight the groups
-
-  var terms = document.getElementsByClassName("fdt-" + idx),
-      periods = groupTermsBy(terms,"from");
-
-  var groups  = [];
-
-  for (var i = 0; i < terms.length; i++) {
-    groups.push(d3.select("#group" + (terms[i]).getAttribute("gid")));
-    branchFocus.push((terms[i]).getAttribute("bid"));
-  }
-
-  highlightGroups(groups.map(g => g.node()));
-  drawWordCloud(groups.map(g => g.node()));
-
-  // highlight the cross branches links
-
-  var bids  = [];
-
-  for (var i = 0; i < periods.length; i++) {
-    if (i != periods.length - 1) {
-      for (var j = 0; j < periods[i].length; j++) {
-        bids.push(periods[i][j][2])
-        var x1 = periods[i][j][0],
-            y1 = periods[i][j][1];
-        for (var k = 0; k < periods[i + 1].length; k++) {
-          var x2 = periods[i + 1][k][0],
-              y2 = periods[i + 1][k][1];
-          if ((periods[i][j][2] != periods[i + 1][k][2]) && (!bids.includes(periods[i + 1][k][2]))) {
-            // draw the links between branches
-            panel
-              .append("path")
-              .attr("class","term-path")
-              .attr("d", function(d) {
-                return "M" + x1 + "," + y1
-                  + "C" + x2 + "," + y1
-                  + " " + x2 + "," + y2
-                  + " " + x2 + "," + y2;
-              })
-              .attr("transform",transform)
-              .style("stroke-opacity", 0.4)
-              .lower();
-          }
-          bids.push(periods[i + 1][k][2])
-        }
-      }
-    }
-  }
-
-  d3.selectAll(".path-unfocus").lower();
-}
-/**
- * @name initPath
- * @unpure {Window.<Boolean>} window.highlighted
- * @unpure {Window.<Boolean>} window.ldView
- * @unpure {Object} d3
- * @unpure {Array.<Int>} branchFocus
- */
-function initPath () {
-  window.highlighted = true;
-  window.ldView = false;
-  let groups = d3.selectAll(".group-inner");
-  (groups.nodes()).map(function(g){
-    if (!g.classList.contains("source-focus")) {
-      g.classList.add("group-unfocus");
-      g.classList.remove("group-focus");
-    }
-  })
-  d3.selectAll(".group-path")
-    .classed("path-unfocus",true)
-    .classed("path-focus",false);
-  d3.selectAll(".term-path").remove();
-  d3.selectAll(".peak").classed("peak-focus",false);
-  d3.selectAll(".peak").classed("peak-focus-source",false);
-  d3.selectAll(".x-mark").style("fill","#4A5C70");
-  branchFocus = [];
-}
-/**
- * @name highlightGroups
- * @param {Array.<SVGCircleElement>} groups
- * @unpure {Window.<Boolean>} window.highlighted
- * @unpure {HTMLDocument} document
- * @unpure {Object} d3
- */
-function highlightGroups (groups) {
-
-  window.ldView = false;
-
-  // console.log(groups)
-
-  let paths = document.getElementsByClassName("group-path"),
-      gids  = [];
-
-  for (var i = 0; i < groups.length; i++) {
-
-    // highlight the groups
-
-    groups[i]
-      .classList.add("group-focus");
-    groups[i]
-      .classList.remove("group-unfocus");
-      // .classed("group-unfocus", false)
-      // .classed("group-focus", true);
-
-    gids.push(groups[i].getAttribute("gid"))
-
-    // highlight the branches peak
-
-    let bid = groups[i].getAttribute("bId")
-
-    d3.select("#peak-" + bid)
-      .classed("peak-focus", true);
-    d3.select("#xmark-" + bid)
-      .style("fill", "#F0684D");
-
-  }
-
-  // facets
-  // @WIP
-  document.querySelector("#phyloGroups").innerHTML = groups.length;
-  document.querySelector("#phyloTerms").innerHTML = countTerms(groups);
-  document.querySelector("#phyloBranches").innerHTML = countBranches(groups);
-  document.querySelector("#phyloGroups").classList.add("phylo-focus");
-  document.querySelector("#phyloTerms").classList.add("phylo-focus");
-  document.querySelector("#phyloBranches").classList.add("phylo-focus");
-
-  // highlight the links
-
-  for (var i = 0; i < paths.length; i++) {
-    if (gids.includes((paths[i]).getAttribute("source")) && (paths[i]).getAttribute("target")) {
-      paths[i].classList.add("path-focus");
-      paths[i].classList.remove("path-unfocus");
-    }
-  }
-
-}
-/**
- * @name countTerms
- * @param {Array.<SVGCircleElement>} groups
- * @unpure {Object} d3
- * @returns {Int}
- */
-function countTerms(groups) {
-  var terms = [];
-  for (var i = 0; i < groups.length; i++) {
-    let gid = ((groups[i].getAttribute("id")).split("group"))[1]
-    d3.selectAll(".g-" + gid).nodes().forEach(e => terms.push(e.getAttribute("fdt")))
-  }
-  return (Array.from(new Set(terms))).length;
-}
-/**
- * @name countBranches
- * @param {Array.<SVGCircleElement>} groups
- * @returns {Int}
- */
-function countBranches(groups) {
-  var branches = [];
-  for (var i = 0; i < groups.length; i++) {
-    branches.push(groups[i].getAttribute("bId"));
-  }
-  return (Array.from(new Set(branches))).length;
-}
-/**
- * @name resetView
- * @unpure {Object} svg instanceof d3.selection
- */
-function resetView() {
-  svg.transition()
-      .duration(750)
-      .call(zoom.transform, d3.zoomIdentity);
-}
-
-// @WIP
 function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
 
   /* ** draw the isoline ** */
-
-  d3.select('#phyloIsoLine').style("background","#EBE4DD");
 
   var div0 = getIsolineDOMElement(),
         m0 = {t:5,r:5,b:5,l:5},
@@ -1140,6 +1278,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
       }
   }
 
+  // @WIP
   d3.selectAll(".header").raise();
 
 
@@ -1260,7 +1399,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
   function branchOver(bId) {
       // headers
-      if (d3.select("#heading").classed("headed")) {
+      if (window.displayView === "headingMode") {
         d3.selectAll(".header").nodes().forEach(function(header){
           if (header.getAttribute("bid") == bId) {
             header.style["font-size"] = "10px";
@@ -1333,107 +1472,5 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   //     // d3.select("#y-label-" + from).node().setAttribute("class","y-label");
   // }
 
-  /* export */
-
-  d3.select("#export").on("click",exportViz);
-
-  function exportViz() {
-
-
-const xmlns = "http://www.w3.org/2000/xmlns/";
-const xlinkns = "http://www.w3.org/1999/xlink";
-const svgns = "http://www.w3.org/2000/svg";
-
-var time = new Date();
-
-serialize(svg.node(),"phylomemy-" + Date.parse(time.toString())  + ".svg")
-function serialize(graph,name) {
-  graph = graph.cloneNode(true);
-  const fragment = window.location.href + "#";
-  const walker = document.createTreeWalker(graph, NodeFilter.SHOW_ELEMENT, null, false);
-  while (walker.nextNode()) {
-    for (const attr of walker.currentNode.attributes) {
-      if (attr.value.includes(fragment)) {
-        attr.value = attr.value.replace(fragment, "#");
-      }
-    }
-  }
-  graph.setAttributeNS(xmlns, "xmlns", svgns);
-  graph.setAttributeNS(xmlns, "xmlns:xlink", xlinkns);
-
-  var cssStyleText = getCSSStyles( graph );
-  appendCSS( cssStyleText, graph );
-
-  const serializer = new window.XMLSerializer;
-  const string = serializer.serializeToString(graph);
-  var svgBlob = new Blob([string], {type: "image/svg+xml"});
-  var svgUrl = URL.createObjectURL(svgBlob);
-  var downloadLink = document.createElement("a");
-  downloadLink.href = svgUrl;
-  downloadLink.download = name;
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-};
-
-
-function getCSSStyles( parentElement ) {
-  var selectorTextArr = [];
-
-  // Add Parent element Id and Classes to the list
-  selectorTextArr.push( '#'+parentElement.id );
-  for (var c = 0; c < parentElement.classList.length; c++)
-      if ( !contains('.'+parentElement.classList[c], selectorTextArr) )
-        selectorTextArr.push( '.'+parentElement.classList[c] );
-
-  // Add Children element Ids and Classes to the list
-  var nodes = parentElement.getElementsByTagName("*");
-  for (var i = 0; i < nodes.length; i++) {
-    var id = nodes[i].id;
-    if ( !contains('#'+id, selectorTextArr) )
-      selectorTextArr.push( '#'+id );
-
-    var classes = nodes[i].classList;
-    for (var c = 0; c < classes.length; c++)
-      if ( !contains('.'+classes[c], selectorTextArr) )
-        selectorTextArr.push( '.'+classes[c] );
-  }
-
-  // Extract CSS Rules
-  var extractedCSSText = "";
-  for (var i = 0; i < document.styleSheets.length; i++) {
-    var s = document.styleSheets[i];
-
-    try {
-        if(!s.cssRules) continue;
-    } catch( e ) {
-          if(e.name !== 'SecurityError') throw e; // for Firefox
-          continue;
-        }
-
-    var cssRules = s.cssRules;
-    for (var r = 0; r < cssRules.length; r++) {
-      if ( contains( cssRules[r].selectorText, selectorTextArr ) )
-        extractedCSSText += cssRules[r].cssText;
-    }
-  }
-
-
-  return extractedCSSText;
-
-  function contains(str,arr) {
-    return arr.indexOf( str ) === -1 ? false : true;
-  }
-
-}
-
-function appendCSS( cssText, element ) {
-  var styleElement = document.createElement("style");
-  styleElement.setAttribute("type","text/css");
-  styleElement.innerHTML = cssText;
-  var refNode = element.hasChildNodes() ? element.children[0] : null;
-  element.insertBefore( styleElement, refNode );
-}
-}
 
 }

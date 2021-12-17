@@ -4,7 +4,8 @@ module Gargantext.Components.PhyloExplorer.Draw
   , autocompleteSearch, autocompleteSubmit
   , setGlobalDependencies, setGlobalD3Reference
   , resetView
-  , changeDisplayView, DisplayView(..)
+  , changeDisplayView
+  , exportViz
   ) where
 
 import Gargantext.Prelude
@@ -13,13 +14,12 @@ import DOM.Simple (Window)
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.FoldableWithIndex (forWithIndex_)
-import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.String as String
 import Effect (Effect)
 import Effect.Uncurried (EffectFn1, EffectFn4, EffectFn7, runEffectFn1, runEffectFn4, runEffectFn7)
 import FFI.Simple ((..), (.=), (.?))
-import Gargantext.Components.PhyloExplorer.Types (AncestorLink, Branch, BranchLink, Term(..), Group(..), Link, Period, PhyloDataSet(..))
+import Gargantext.Components.PhyloExplorer.Types (AncestorLink, Branch, BranchLink, DisplayView(..), Group(..), Link, Period, PhyloDataSet(..), Term(..))
 import Gargantext.Utils (getter)
 import Gargantext.Utils.Reactix ((~~))
 import Gargantext.Utils.Reactix as R2
@@ -89,6 +89,12 @@ foreign import _showLanding :: Effect Unit
 
 showLanding :: Effect Unit
 showLanding = _showLanding
+
+
+foreign import _exportViz :: Effect Unit
+
+exportViz :: Effect Unit
+exportViz = _exportViz
 
 -----------------------------------------------------------
 
@@ -261,15 +267,6 @@ findTermByPrefix terms prefix =
   in
     Array.find (fn needle) terms
 
------------------------------------------------------------
-
-data DisplayView
-  = LabelMode
-  | HeadingMode
-  | LandingMode
-
-derive instance Generic DisplayView _
-derive instance Eq DisplayView
 
 changeDisplayView :: DisplayView -> Effect Unit
 changeDisplayView = case _ of

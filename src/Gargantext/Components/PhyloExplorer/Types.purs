@@ -6,6 +6,7 @@ module Gargantext.Components.PhyloExplorer.Types
   , Term(..)
   , Source(..)
   , sortSources
+  , DisplayView(..)
   ) where
 
 import Gargantext.Prelude
@@ -19,6 +20,7 @@ import Data.Newtype (class Newtype)
 import Data.Number as Number
 import Data.Show.Generic (genericShow)
 import Data.String as String
+import Data.String.Extra (camelCase)
 import Data.Tuple as Tuple
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.PhyloExplorer.JSON (PhyloJSONSet(..), RawEdge(..), RawObject(..))
@@ -410,3 +412,15 @@ stringedArrayToArray_
   =   stringedArrayToArray
   >>> map parseFloat
   >>> map parseInt'
+
+-----------------------------------------------------------
+
+data DisplayView
+  = LabelMode
+  | HeadingMode
+  | LandingMode
+
+derive instance Generic DisplayView _
+derive instance Eq DisplayView
+instance Show DisplayView where
+  show = camelCase <<< genericShow

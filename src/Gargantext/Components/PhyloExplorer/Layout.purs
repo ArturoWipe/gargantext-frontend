@@ -6,12 +6,12 @@ import Gargantext.Prelude
 
 import DOM.Simple (window)
 import Data.Tuple.Nested ((/\))
-import FFI.Simple ((..))
+import FFI.Simple ((..), (.=))
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.PhyloExplorer.Draw (DisplayView(..), autocompleteSearch, autocompleteSubmit, changeDisplayView, drawPhylo, highlightSource, resetView, setGlobalD3Reference, setGlobalDependencies)
+import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, changeDisplayView, drawPhylo, exportViz, highlightSource, resetView, setGlobalD3Reference, setGlobalDependencies)
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
-import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources)
+import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..))
 import Gargantext.Types (NodeID)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
@@ -71,6 +71,12 @@ layoutCpt = here.component "layout" cpt where
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
 
+    -- Effects
+    -- @WIP (as some actions are checked by the JS resources via DOMElement
+    --      UI attribute, for now we create a temporary reference)
+    R.useEffect1' displayView $
+      pure $ (window .= "displayView") (show displayView)
+
     -- Behaviors
     toggleToolBar <- pure $ const $ T.modify_ not isToolBarDisplayedBox
 
@@ -106,6 +112,7 @@ layoutCpt = here.component "layout" cpt where
         R2.if' (isToolBarDisplayed) $
           toolBar
           { resetViewCallback: const resetView
+          , exportCallback: const exportViz
           , displayView
           , changeViewCallback
           }
@@ -113,7 +120,7 @@ layoutCpt = here.component "layout" cpt where
       ,
         -- LEGACY GRID
         H.div
-        { className: "phylo-grid" }
+        {}
         [
           H.div
           { id: "phyloToolBar"
@@ -143,56 +150,7 @@ layoutCpt = here.component "layout" cpt where
           , className: "phylo-isoline"
           }
           []
-        ,
-          H.div
-          { id: "phyloIsolineInfo"
-          , className: "phylo-isoline-info"
-          }
-          [
-            H.div
-            { className: "btn-group" }
-            [
-              H.button
-              { id: "reset"
-              , className: "button reset"
-              }
-              [
-                H.i
-                { className: "fa fa-arrows-alt" }
-                []
-              ]
-            ,
-              H.button
-              { id: "label"
-              , className: "button label"
-              }
-              [
-                H.i
-                { className: "fa fa-dot-circle-o" }
-                []
-              ]
-            ,
-              H.button
-              { id: "heading"
-              , className: "button heading"
-              }
-              [
-                H.i
-                { className: "fa fa-sort-alpha-asc" }
-                []
-              ]
-            ,
-              H.button
-              { id: "export"
-              , className: "button export"
-              }
-              [
-                H.i
-                { className: "fas fa-camera" }
-                []
-              ]
-            ]
-          ]
+
         ,
           H.div
           { id: "phyloScape"

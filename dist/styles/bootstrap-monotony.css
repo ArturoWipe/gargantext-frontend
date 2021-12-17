@@ -11498,260 +11498,6 @@ select.form-control {
   font-weight: 700;
   src: url("../fonts/phylo/Inter-Bold.woff2") format("woff2"), url("../fonts/phylo/Inter-Bold.woff") format("woff");
 }
-/* grid */
-.phylo-grid {
-  font-family: "Inter-Regular";
-  font-size: 16px;
-  display: grid;
-  grid-template-columns: repeat(15, 1fr);
-  grid-template-rows: 2% 7% 7% auto 1%;
-  grid-gap: 10px;
-  height: 100vh;
-  color: #0d1824;
-}
-
-/* ---- row 1 ---- */
-.phylo-title {
-  grid-row: 1;
-  grid-column: 1/2;
-  align-items: center;
-  text-align: right;
-  margin-top: 0.5px;
-}
-
-.phylo-folder {
-  grid-row: 1;
-  grid-column: 2/16;
-  align-items: center;
-}
-
-/* -------------------- */
-.phylo-corpus {
-  grid-row: 2/3;
-  grid-column: 1/2;
-  /*background : #3E75B3;*/
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: right;
-}
-
-.phylo-phylo {
-  grid-row: 3/4;
-  grid-column: 1/2;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: right;
-}
-
-.phylo-corpus-info {
-  grid-row: 2/3;
-  grid-column: 2/4;
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.phylo-phylo-info {
-  grid-row: 3/4;
-  grid-column: 2/4;
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.phylo-how {
-  grid-row: 2/4;
-  grid-column: 1/2;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: right;
-}
-
-.phylo-isoline {
-  grid-row: 2/4;
-  grid-column: 3/15;
-  /*background: rgba(223,216,200,0.25);  */
-}
-
-/* -------------------- */
-.phylo-scape {
-  grid-row: 4;
-  grid-column: 1/15;
-  /*background: #FFCC73;*/
-}
-
-.phylo-timeline {
-  grid-row: 4;
-  grid-column: 1/2;
-}
-
-.phylo-graph {
-  grid-row: 4;
-  grid-column: 15/16;
-  /*background: #FFCC73;*/
-}
-
-/* classes */
-/* ---------- icons ---------- */
-a {
-  color: inherit;
-  cursor: pointer;
-}
-
-.how {
-  cursor: pointer;
-  position: relative;
-}
-
-.tooltip {
-  font-family: "Inter-Regular";
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-}
-
-i.how span {
-  position: absolute;
-  width: 300px;
-  color: #FFFFFF;
-  background: #0d1824;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-  visibility: hidden;
-  border-radius: 6px;
-}
-
-i.how span:after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 100%;
-  margin-top: -8px;
-  width: 0;
-  height: 0;
-  border-right: 8px solid #0d1824;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-}
-
-i.how:hover span {
-  visibility: visible;
-  left: 100%;
-  top: 50%;
-  margin-top: -15px;
-  margin-left: 15px;
-  z-index: 999;
-}
-
-.switch > .far + .fa,
-.switch:hover > .far {
-  display: none;
-}
-
-.switch:hover > .far + .fa {
-  display: inherit;
-  color: #0d1824;
-}
-
-/* ---------- fonts ---------- */
-.font-bold {
-  font-family: "Inter-Bold";
-  text-transform: uppercase;
-}
-
-.font-small {
-  color: #0d1824;
-  font-size: 12px;
-}
-
-.header {
-  /*font-weight: bold;*/
-  /*text-transform: uppercase;*/
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.header:hover {
-  font-weight: bold;
-}
-
-/* ---------- input ---------- */
-.button {
-  background-color: white;
-  border: 1.5px solid #0d1824;
-  cursor: pointer;
-}
-
-.button:hover {
-  background-color: #0d1824;
-  color: white;
-}
-
-.btn-group button {
-  margin-top: 1px;
-  margin-bottom: 1px;
-  display: block;
-  width: 40px;
-}
-
-.draw {
-  display: none;
-}
-
-.phylo-focus {
-  fill: #f8381f;
-  color: #f8381f;
-}
-
-.reset {
-  visibility: hidden;
-}
-
-.label {
-  visibility: hidden;
-}
-
-.heading {
-  visibility: hidden;
-}
-
-.export {
-  visibility: hidden;
-}
-
-.headed {
-  background-color: #0d1824;
-  color: white;
-}
-
-.labeled {
-  background-color: #0d1824;
-  color: white;
-}
-
-.input-file {
-  display: inline-block;
-  cursor: pointer;
-}
-
-.input-file:hover {
-  border-bottom: 1.5px solid #0d1824;
-}
-
-.input-name {
-  font-style: italic;
-  opacity: 0.7;
-  font-size: 14px;
-  padding-left: 6px;
-  padding-right: 6px;
-}
-
 /* ---------- axis ---------- */
 .x-axis path {
   stroke: #EBE4DD;
@@ -11978,18 +11724,11 @@ i.how:hover span {
   font-size: 12px;
 }
 
-.loading {
-  visibility: hidden;
-}
-
-.phylo-name {
-  visibility: hidden;
-  text-transform: capitalize;
-  font-weight: bold;
-}
-
 .phylo {
+  font-family: "Inter-Regular";
   position: relative;
+  width: 100%;
+  height: 100vh;
 }
 
 .phylo__spinner {
@@ -11999,6 +11738,11 @@ i.how:hover span {
   width: 100px;
   top: calc( 50% - 50px );
   left: calc( 50% - 50px );
+}
+
+#phyloIsoLine {
+  background-color: #EBE4DD;
+  height: 128px;
 }
 
 .phylo-topbar {
@@ -12067,7 +11811,7 @@ i.how:hover span {
 }
 
 .right-handed .phylo-toolbar__reset, .right-handed .phylo-toolbar__node, .right-handed .phylo-toolbar__screenshot {
-  margin-right: 4px;
+  margin-right: 16px;
 }
 
 .left-handed .phylo-toolbar {
@@ -12075,7 +11819,7 @@ i.how:hover span {
 }
 
 .left-handed .phylo-toolbar__reset, .left-handed .phylo-toolbar__node, .left-handed .phylo-toolbar__screenshot {
-  margin-left: 4px;
+  margin-left: 16px;
 }
 
 /*# sourceMappingURL=bootstrap-monotony.css.map */
