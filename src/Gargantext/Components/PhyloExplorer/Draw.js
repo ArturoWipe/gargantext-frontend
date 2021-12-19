@@ -483,55 +483,289 @@ function resetView() {
       .duration(750)
       .call(zoom.transform, d3.zoomIdentity);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-///    WORD CLOUD
-////////////////////////////////////////////////////////////////////////////////
-
 /**
- * @name drawWordCloud
- * @param {Array.<SVGCircleElement>} groups
+ * @name peakClick
+ * @param {Object} b <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @param {Object} coordinates
+ *    <Float> x
+ *    <Float> y
+ *    <Float> w
+ *    <Float> h
  * @unpure {Object} d3
- * @unpure {Object} svg3 instanceof d3.selection
+ * @unpure {Function} zoom
  */
- function drawWordCloud (groups) {
-  let labels = {},
-      count  = 0;
+ function peakClick (b, coordinates) {
+  initPath()
+  let groups = d3.selectAll(".group-inner").filter(".branch-" + b.bId).nodes()
+  branchFocus.push(b.bId);
+  /* word cloud */
 
-  d3.selectAll(".word-cloud").remove();
+  drawWordCloud(groups);
+  highlightGroups(groups);
+  /* rescale */
+  let tx = (groups[0]).getAttribute("cx")
+  svg.transition()
+      .duration(750)
+      .call(zoom.transform, d3.zoomIdentity.translate(((coordinates.x + coordinates.w) / 2) - tx, 0).scale(1));
 
-  groups.forEach(function(g){
-    let gid = (g.getAttribute("id")).replace("group","");
-    let terms = d3.selectAll(".term").filter(".g-" + gid).nodes();
-    terms.forEach(function(t){
-      count ++;
-      if (labels[t.getAttribute("fdt")] == undefined) {
-        labels[t.getAttribute("fdt")] = {"freq" : 1, "label" : t.getAttribute("label")}
+  d3.selectAll(".path-unfocus").lower();
+}
+/**
+ * @name peakOver
+ * @param {Object} b <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @param {Int} i
+ * @unpure {Object} d3
+ * @unpure {Object} label
+ * @unpure {Function<Int>} yScale0 see https://github.com/d3/d3-scale#_continuous
+ * @unpure {Function<Int>} xScale0 see https://github.com/d3/d3-scale#_continuous
+ */
+function peakOver (b,i) {
+  d3.select("#peak-" + i).classed("peak-focus",false);
+  d3.select("#peak-" + i).classed("peak-over",true);
+  label.text(b.label.replace(/"/g,''))
+       .style("visibility", "visible")
+       .style("top", yScale0(b.y) + "px")
+       .style("left",xScale0(b.x1) + "px");
+  branchOver(b.bId);
+}
+/**
+ * @name peakOut
+ * @param {Object} b <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @param {Int} i
+ * @unpure {Object} d3
+ * @unpure {Array} branchFocus
+ */
+function peakOut (b,i) {
+  d3.select("#peak-" + i).classed("peak-over",false);
+  if (branchFocus.includes("" + b.bId)) {
+    d3.select("#peak-" + i).classed("peak-focus",true);
+  }
+  branchOut();
+}
+/**
+ * @name showPeak
+ * @param {Object}
+ *    <Float> x
+ *    <Float> y
+ *    <Float> w
+ *    <Float> h
+ * @unpure {Object} d3
+ */
+function showPeak(scapeCoordinates) {
+  var isoLineCoordinates = getIsoLineCoordinates();
+
+  d3
+    .selectAll(".peak")
+    .style(
+      "fill"
+    , function(peak,i) {
+        var isVisible = d3
+          .selectAll(".branch-" + i)
+          .nodes()
+          .map(function(g){
+            var x = g.getBoundingClientRect().x,
+                y = g.getBoundingClientRect().y;
+
+            var xLower = x >= isoLineCoordinates.x;
+            var xUpper = x <= (
+              isoLineCoordinates.x +
+              isoLineCoordinates.w
+            );
+
+            var yLower = y >= (
+              isoLineCoordinates.y +
+              scapeCoordinates.y
+            );
+            var yUpper = y <= (
+              isoLineCoordinates.y +
+              scapeCoordinates.y +
+              isoLineCoordinates.h
+            );
+
+            return xLower && xUpper && yLower && yUpper;
+          })
+          .reduce((mem,cur) => {return mem || cur;})
+
+        if (isVisible) {
+            d3.select("#peak-shadow" + i).attr("visibility","visible");
+            return "#0d1824";
+        } else {
+            d3.select("#peak-shadow" + i).attr("visibility","hidden");
+            return "#A9A9A9";
+        }
+    }
+  );
+}
+/**
+ * @name branchOver
+ * @param {Int} bId
+ * @unpure {Window.<String>} window.displayView
+ * @unpure {Object} d3
+ */
+function branchOver(bId) {
+  // headers
+  if (window.displayView === "headingMode") {
+    d3.selectAll(".header").nodes().forEach(function(header){
+      if (header.getAttribute("bid") == bId) {
+        header.style["font-size"] = "10px";
+        header.style["opacity"] = 1;
       } else {
-        labels[t.getAttribute("fdt")].freq = labels[t.getAttribute("fdt")].freq + 1
+        header.style["opacity"] = 0.3;
       }
     })
-  });
-
-  labels = (Object.values(labels)).map(function(l){
-    return {"freq":(l.freq / count),"label":l.label};
-  }).sort(function(l1,l2){
-    return l2.freq - l1.freq;
-  })
-
-  let y = 20
-  let opacity = d3.scaleLinear().domain([Math.log((labels[labels.length - 1]).freq),Math.log((labels[0]).freq)]).range([0.5,1]);
-
-  labels.forEach(function(l){
-    y = y + 12;
-    svg3.append("text")
-        .attr("class","word-cloud")
-        .attr("x", 10)
-        .attr("y", y)
-        .style("opacity", opacity(Math.log(l.freq)))
-        .text(l.label);
-  })
+  }
+  // branches
+  d3.select("#xmark-"  + bId).style("fill","#f3be54");
+  d3.select("#hover-" + bId).style("visibility","visible");
 }
+/**
+ * @name branchOut
+ * @param {Int} bId
+ * @unpure {Object} d3
+ * @unpure {Array} branchFocus
+ */
+function branchOut(bId) {
+  d3.selectAll(".peak-label").style("visibility","hidden");
+  d3.selectAll(".branch-hover").style("visibility","hidden");
+  d3.selectAll(".x-mark").style("fill","#4A5C70");
+  for (var i = 0; i < branchFocus.length; i++) {
+    d3.select("#xmark-" + branchFocus[i]).style("fill","#F24C3D");
+  }
+  headerOut();
+}
+/**
+ * @name tickClick
+ * @param {*} tick
+ * @unpure {Object} d3
+ * @unpure {Array<Int>} branchFocus
+ */
+ function tickClick(tick) {
+  console.log(Object.prototype.toString.call(tick), tick)
+  initPath()
+  let bid = tick.getAttribute("bId"),
+      groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes();
+
+  // draw the word cloud
+
+  branchFocus.push(bid);
+  drawWordCloud(groups);
+
+  // highlight the groups
+
+  highlightGroups(groups);
+  d3.selectAll(".path-unfocus").lower();
+}
+/**
+ * @name tickOver
+ * @param {*} tick
+ * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @unpure {Object} d3
+ */
+function tickOver(tick, branches) {
+  var ego = tick.getAttribute("bId"),
+      branch = branches.find(b => b.bId == ego);
+  if (d3.select("#peak-" + ego).node().style.visibility != "hidden") {
+      branchOver(ego);
+      peakOver(branch,ego);
+  }
+}
+/**
+ * @name tickOut
+ * @param {*} tick
+ * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
+ */
+function tickOut(tick, branches) {
+  var ego = tick.getAttribute("bId"),
+      branch = branches.find(b => b.bId == ego);
+  branchOut();
+  peakOut(branch,ego)
+}
+/**
+ * @name onZoom
+ * @param {Event} event
+ * @param {Object} scapeCoordinates
+ *    <Float> x
+ *    <Float> y
+ *    <Float> w
+ *    <Float> h
+ * @param {Function<Int>} xScale see https://github.com/d3/d3-scale#_continuous
+ * @param {Function<Int>} yScale see https://github.com/d3/d3-scale#_continuous
+ * @param {Array<Object>} labels
+ *    <Float> x
+ *    <String> label
+ *    <Float> inf
+ *    <Float> sup
+ *    <Int> bId
+ * @param {Array<Object>} labels
+ *    <Date> from
+ *    <Int> label
+ *    <Date> to
+ *    <Float> y
+ * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @param {Object} xAxis instanceof d3.selection
+ * @param {Object} yAxis instanceof d3.selection
+ * @unpure {Object} panel
+ */
+ function onZoom(event, scapeCoordinates, xScale, yScale, xLabels, yLabels, branches, xAxis, yAxis) {
+  var zoomX = event.transform.rescaleX(xScale),
+      zoomY = event.transform.rescaleY(yScale),
+      zoomXLabels = xLabels
+        .filter(
+          function(b) {
+            var lower = zoomX(b.x) >= scapeCoordinates.x;
+            var upper = zoomX(b.x) <= (
+              scapeCoordinates.x +
+              scapeCoordinates.w
+            );
+
+            return lower && upper;
+          }
+        , zoomYLabels = yLabels
+        )
+        .filter(
+          function(p) {
+            var lower = zoomY(p.y) >= scapeCoordinates.y;
+            var upper = zoomY(p.y) <= (
+              scapeCoordinates.y +
+              scapeCoordinates.h
+            );
+
+            return lower && upper;
+          }
+        );
+
+  setAxisX(zoomX,zoomXLabels, branches, xAxis);
+
+  setAxisY(zoomY,zoomYLabels, yAxis);
+
+  panel.selectAll("circle").attr("transform", event.transform);
+  panel.selectAll("text").attr("transform", event.transform);
+  panel.selectAll("path").attr("transform", event.transform);
+  panel.selectAll(".branch-hover").attr("transform", event.transform);
+  panel.selectAll(".y-highlight").attr("transform", event.transform);
+  panel.selectAll(".ngrams").attr("transform", event.transform);
+  panel.selectAll(".term-path").attr("transform", event.transform);
+  panel.selectAll(".emergence").attr("transform", event.transform);
+  panel.selectAll(".header").attr("transform", event.transform);
+
+  showPeak(scapeCoordinates);
+}
+
+// function groupOver() {
+//     var from = this.getAttribute("from");
+//     d3.select("#y-highlight-" + from).style("visibility","visible");
+//     // d3.select("#y-mark-year-inner-" + from).node().setAttribute("class","y-mark-year-inner-highlight");
+//     // d3.select("#y-mark-year-outer-" + from).node().setAttribute("class","y-mark-year-outer-highlight");
+//     // d3.select("#y-label-" + from).node().setAttribute("class","y-label-bold");
+// }
+
+// function groupOut() {
+//     var from = this.getAttribute("from");
+//     d3.select("#y-highlight-" + from).style("visibility","hidden");
+//     // d3.select("#y-mark-year-inner-" + from).node().setAttribute("class","y-mark-year-inner");
+//     // d3.select("#y-mark-year-outer-" + from).node().setAttribute("class","y-mark-year-outer");
+//     // d3.select("#y-label-" + from).node().setAttribute("class","y-label");
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///    EXPORTS
@@ -636,9 +870,449 @@ function getCSSStyles( parentElement ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-///    DRAW
+///    WORD CLOUD
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @name drawWordCloud
+ * @param {Array.<SVGCircleElement>} groups
+ * @unpure {Object} d3
+ * @unpure {Object} svg3 instanceof d3.selection
+ */
+ function drawWordCloud (groups) {
+  let labels = {},
+      count  = 0;
+
+  d3.selectAll(".word-cloud").remove();
+
+  groups.forEach(function(g){
+    let gid = (g.getAttribute("id")).replace("group","");
+    let terms = d3.selectAll(".term").filter(".g-" + gid).nodes();
+    terms.forEach(function(t){
+      count ++;
+      if (labels[t.getAttribute("fdt")] == undefined) {
+        labels[t.getAttribute("fdt")] = {"freq" : 1, "label" : t.getAttribute("label")}
+      } else {
+        labels[t.getAttribute("fdt")].freq = labels[t.getAttribute("fdt")].freq + 1
+      }
+    })
+  });
+
+  labels = (Object.values(labels)).map(function(l){
+    return {"freq":(l.freq / count),"label":l.label};
+  }).sort(function(l1,l2){
+    return l2.freq - l1.freq;
+  })
+
+  let y = 20
+  let opacity = d3.scaleLinear().domain([Math.log((labels[labels.length - 1]).freq),Math.log((labels[0]).freq)]).range([0.5,1]);
+
+  labels.forEach(function(l){
+    y = y + 12;
+    svg3.append("text")
+        .attr("class","word-cloud")
+        .attr("x", 10)
+        .attr("y", y)
+        .style("opacity", opacity(Math.log(l.freq)))
+        .text(l.label);
+  })
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///    ISO LINE
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @name drawIsoLine
+ * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @unpure {Object} d3
+ * @unpure {Object} label
+ */
+ function drawIsoLine(branches) {
+  var coordinates = getIsoLineCoordinates();
+
+  var svg = d3
+    .select('#phyloIsoLine')
+    .append("svg")
+      .attr("viewBox", coordinatesToArray(coordinates))
+    .append("g");
+
+  xScale0 = d3
+    .scaleLinear()
+    .domain([
+      0,
+      Math.max( ...branches.map(b => b.x1) )
+    ])
+    .range([
+      coordinates.x,
+      coordinates.x + coordinates.w
+    ]);
+
+  yScale0 = d3
+    .scaleLinear()
+    .domain( d3.extent(branches, b => b.y) )
+    .nice()
+    .range([
+      coordinates.y,
+      coordinates.y + coordinates.h
+    ]);
+
+  var density = d3
+    .contourDensity()
+    .x(function(b) {
+      return xScale0(b.x1);
+    })
+    .y(function(b) {
+      return yScale0(b.y);
+    })
+    .size([
+      coordinates.w,
+      coordinates.h
+    ])
+    .thresholds(
+      Math.round(branches.length / 2)
+    )
+    (branches)
+
+  /* shadows and lights */
+
+  svg
+    .append("g")
+     .selectAll("circle")
+     .data(branches)
+     .enter()
+     .append("circle")
+       .attr("cx", b => xScale0(b.x1))
+       .attr("cy", b => yScale0(b.y))
+       .attr("r","55")
+       .attr("id",b => "peak-shadow" + b.bId)
+       .attr("visibility","visible")
+       .style("fill","#f5eee6");
+
+  svg
+    .selectAll("path")
+    .data(density)
+    .enter()
+    .append("path")
+      .attr("d", d3.geoPath())
+      .attr("fill", "none")
+      .attr("stroke", "#74B5FF")
+      .attr("stroke-width", (d, i) => i % 2 ? 0.25 : 1)
+      .attr("stroke-linejoin", "round");
+
+  label =
+    d3
+      .select("#phyloIsoLine")
+      .append("div")
+        .attr("class","peak-label");
+
+  svg
+    .append("g")
+    .selectAll("text")
+    .data(branches)
+    .enter()
+    .append("text")
+      .attr("x", b => xScale0(b.x1))
+      .attr("y", b => yScale0(b.y) + 4)
+      .attr("class","peak")
+      .attr("id",b => "peak-" + b.bId)
+      .style("fill","#0d1824")
+      .attr("visibility","visible")
+      .text("▲")
+    .on("mouseover", function(e, b) {
+      peakOver(b, b.bId);
+    })
+    .on("mouseout", function(e, b) {
+      peakOut(b, b.bId);
+    })
+    .on("click", function(e, b) {
+      peakClick(b, coordinates);
+    });
+}
+/**
+ * @name getIsoLineSelection
+ * @unpure {Object} d3
+ * @returns {Object} instanceof d3.selection
+ */
+ function getIsoLineSelection() {
+  return d3.select('#phyloIsoLine');
+}
+/**
+ * @name getIsoLineCoordinates
+ * @returns {Object}
+ *    <Float> x
+ *    <Float> y
+ *    <Float> w
+ *    <Float> h
+ */
+function getIsoLineCoordinates() {
+  var el = getIsoLineSelection()
+    .node()
+    .getBoundingClientRect();
+
+  return {
+    x: 0,
+    y: 0,
+    w: el.width,
+    h: el.height
+  };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///    PHYLO
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @name drawPhylo
+ * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @param {Array} periods of <Gargantext.Components.PhyloExplorer.Types.Period>
+ * @param {Array} groups of <Gargantext.Components.PhyloExplorer.Types.Group>
+ * @param {Array} links of <Gargantext.Components.PhyloExplorer.Types.Link>
+ * @param {Array} aLinks of <Gargantext.Components.PhyloExplorer.Types.AncestorLink>
+ * @param {Array} bLinks of <Gargantext.Components.PhyloExplorer.Types.BranchLink>
+ * @param {Array<Number>} frame
+ * @unpure {Window.<Boolean>} window.weighted
+ * @unpure {Object} d3
+ * @unpure {Object} svg instanceof d3.selection
+ * @unpure {Object} svg3 instanceof d3.selection
+ * @unpure {Object} panel instanceof d3.selection
+ * @unpure {Function} zoom see https://github.com/d3/d3-zoom#zoom
+ */
+function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
+
+  drawIsoLine(branches);
+
+  /* *** draw the phylo *** */
+
+  var elLeftColumn = d3
+    .select('.phylo-grid__blueprint__left')
+    .node()
+    .getBoundingClientRect();
+
+  var elCenterColumn = d3
+    .select('.phylo-grid__blueprint__center')
+    .node()
+    .getBoundingClientRect();
+
+  var elScapeContent = d3
+    .select('.phylo-grid__content__scape')
+    .node()
+    .getBoundingClientRect();
+
+  var elGraphContent = d3
+    .select('.phylo-grid__content__graph')
+    .node()
+    .getBoundingClientRect();
+
+  var centerColumnCoordinates = {
+    x: elLeftColumn.width,
+    y: 0,
+    w: elCenterColumn.width,
+    h: elCenterColumn.height
+  };
+
+  var scapeCoordinates = {
+    x: 0,
+    y: 0,
+    w: elLeftColumn.width + elCenterColumn.width,
+    h: elCenterColumn.height
+  };
+
+  var graphCoordinates = {
+    x: 0,
+    y: 0,
+    w: elGraphContent.width,
+    h: elGraphContent.height
+  };
+
+  svg = d3
+    .select('.phylo-grid__content__scape')
+    .append("svg")
+      .attr("viewBox", coordinatesToArray(scapeCoordinates));
+
+
+  /* *** draw the graph *** */
+
+  svg3 = d3
+    .select('.phylo-grid__content__graph')
+    .append("svg")
+      .attr("viewBox", coordinatesToArray(graphCoordinates))
+    .append("g");
+
+
+  /* labels */
+
+  var firstDate = Math.min(...groups.map(g => (g.from).getFullYear()))
+
+  var yLabels = (periods.map(p => ({y:p.y,from:p.from,to:p.to,label:(p.from).getFullYear()}))).filter(p => p.label >= firstDate);
+  var xLabels = toXLabels(branches,groups,frame[2]);
+
+  /* weight */
+
+  if (window.weighted == true) {
+    // var wInf = Math.min(...groups.map(g => g.weight))
+    var wSup = Math.max(...groups.map(g => g.weight))
+    var wScale = d3.scaleLog().domain([1,wSup]).range([3,10])
+
+  }
+
+
+  /* scales */
+
+  var xScale = d3
+    .scaleLinear()
+    .domain([
+      0,
+      frame[2]
+    ])
+    .range([
+      centerColumnCoordinates.x,
+      centerColumnCoordinates.x + centerColumnCoordinates.w
+    ]);
+
+  var yScale = d3
+    .scaleTime()
+    .domain( setYDomain(yLabels) )
+    .range([
+      centerColumnCoordinates.y,
+      centerColumnCoordinates.y + centerColumnCoordinates.h
+    ]);
+
+  /* panel and& mask */
+
+  // var mask = svg
+  //   .append("defs")
+  //   .append("svg:clipPath")
+  //     .attr("id","mask")
+  //   .append("svg:rect")
+  //     .attr("viewBox", coordinatesToArray(isoLineCoordinates));
+
+  panel = svg.append("g").attr("clip-path", "url(#mask)").attr("id","panel")
+
+  /* highlight */
+  xLabels.forEach(b =>
+      panel.append("rect")
+              .attr("class","branch-hover")
+              .attr("x", xScale(b.inf))
+              .attr("y", -10000)
+              .attr("width", xScale(b.sup) - xScale(b.inf))
+              .attr("height", 20000)
+              .attr("id","hover-" + b.bId)
+              .style("visibility","hidden"))
+
+  yLabels.forEach(l =>
+      panel.append("line")
+           .attr("class","y-highlight")
+           .attr("id","y-highlight-" + l.label)
+           .attr("x1", -10000)
+           .attr("y1", yScale(l.from))
+           .attr("x2", 10000)
+           .attr("y2", yScale(l.from))
+           .style("visibility","hidden"))
+
+  /* links */
+
+  var linkGen = d3.linkVertical();
+  var groupLinks = links.map(l => ({source: findGroup(groups, l.from, xScale, yScale), target: findGroup(groups, l.to, xScale, yScale),from: l.from, to: l.to, label: l.label}));
+
+  var groupAncestors = aLinks.map(l => ({source: findGroup(groups, l.from, xScale, yScale), target: findGroup(groups, l.to, xScale, yScale),from: l.from, to: l.to, label: l.label}));
+
+  panel
+    .selectAll("path")
+    .data(groupLinks.concat(groupAncestors))
+    .join("path")
+    .attr("d", linkGen)
+    .attr("fill", "none")
+    .attr("stroke","#0d1824")
+    .attr("class", "group-path")
+    .attr("source",d => d.from)
+    .attr("target",d => d.to)
+    .attr("label", d => d.label)
+    // .on("click", function(){
+    //   // console.log(this)
+    // })
+
+  // var colors = ["#F0684D","#aa8c58","#74b5ff","#0d1824"];
+
+  /* groups */
+
+  groups.forEach(g => setGroup(g, xScale, yScale, wScale));
+
+  /* axis */
+
+  var xAxis = svg
+    .append("g")
+      .attr("class","x-axis")
+      .attr("transform", "translate(0," + centerColumnCoordinates.y + ")");
+
+  var yAxis = svg
+    .append("g")
+      .attr("class","y-axis")
+      .attr("transform", "translate(" + centerColumnCoordinates.x + ",0)");
+
+  setAxisX(xScale,xLabels, branches, xAxis);
+  setAxisY(yScale,yLabels, yAxis);
+
+  /* zoom */
+
+  var debouncedOnZoom = debounce(
+    onZoom
+    , 50
+  );
+
+  zoom = d3
+    .zoom()
+    .scaleExtent([
+      1,
+      50
+    ])
+    .extent([
+      [ scapeCoordinates.x, scapeCoordinates.y ],
+      [ scapeCoordinates.w, scapeCoordinates.h ]
+    ])
+    .on("zoom", function(e) {
+      debouncedOnZoom(
+        e,
+        scapeCoordinates,
+        xScale,
+        yScale,
+        xLabels,
+        yLabels,
+        branches,
+        xAxis,
+        yAxis
+      );
+    });
+
+  svg.call(zoom).on("dblclick.zoom",null).on("dblclick",doubleClick);
+
+
+  /* role & dynamic */
+
+  var emergences = getEmergences(groups, xScale, yScale);
+  var branchByGroup = getBranchByGroup(groups);
+
+  var keys = Object.keys(emergences);
+  var freqs = (keys.map(k => window.freq[k])).filter(f => f != null);
+
+  // var fontScale = d3.scaleLinear().domain([0,Math.max(...freqs)]).range([2,10]);
+  var fontScale = d3.scaleLinear().domain([0,Math.sqrt(Math.max(...freqs))]).range([2,20]);
+  var opacityScale = d3.scaleLinear().domain([0,1/Math.sqrt(Math.max(...freqs))]).range([0.1,1]);
+
+  keys.forEach(function(k){
+    addEmergenceLabels(
+      k,
+      emergences,
+      branchByGroup,
+      fontScale,
+      opacityScale
+    );
+  });
+
+  /* groups */
+
+  d3.selectAll(".header").raise();
+}
 /**
  * @name toXLabels
  * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
@@ -858,291 +1532,6 @@ function coordinatesToArray(coordinates) {
   ];
 }
 /**
- * @name getIsoLineSelection
- * @unpure {Object} d3
- * @returns {Object} instanceof d3.selection
- */
-function getIsoLineSelection() {
-  return d3.select('#phyloIsoLine');
-}
-/**
- * @name getIsoLineCoordinates
- * @returns {Object}
- *    <Float> x
- *    <Float> y
- *    <Float> w
- *    <Float> h
- */
-function getIsoLineCoordinates() {
-  var el = getIsoLineSelection()
-    .node()
-    .getBoundingClientRect();
-
-  return {
-    x: 0,
-    y: 0,
-    w: el.width,
-    h: el.height
-  };
-}
-/**
- * @name drawIsoLine
- * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
- * @unpure {Object} d3
- * @unpure {Object} label
- */
-function drawIsoLine(branches) {
-  var coordinates = getIsoLineCoordinates();
-
-  var svg = d3
-    .select('#phyloIsoLine')
-    .append("svg")
-      .attr("viewBox", coordinatesToArray(coordinates))
-    .append("g");
-
-  xScale0 = d3
-    .scaleLinear()
-    .domain([
-      0,
-      Math.max( ...branches.map(b => b.x1) )
-    ])
-    .range([
-      coordinates.x,
-      coordinates.x + coordinates.w
-    ]);
-
-  yScale0 = d3
-    .scaleLinear()
-    .domain( d3.extent(branches, b => b.y) )
-    .nice()
-    .range([
-      coordinates.y,
-      coordinates.y + coordinates.h
-    ]);
-
-  var density = d3
-    .contourDensity()
-    .x(function(b) {
-      return xScale0(b.x1);
-    })
-    .y(function(b) {
-      return yScale0(b.y);
-    })
-    .size([
-      coordinates.w,
-      coordinates.h
-    ])
-    .thresholds(
-      Math.round(branches.length / 2)
-    )
-    (branches)
-
-  /* shadows and lights */
-
-  svg
-    .append("g")
-     .selectAll("circle")
-     .data(branches)
-     .enter()
-     .append("circle")
-       .attr("cx", b => xScale0(b.x1))
-       .attr("cy", b => yScale0(b.y))
-       .attr("r","55")
-       .attr("id",b => "peak-shadow" + b.bId)
-       .attr("visibility","visible")
-       .style("fill","#f5eee6");
-
-  svg
-    .selectAll("path")
-    .data(density)
-    .enter()
-    .append("path")
-      .attr("d", d3.geoPath())
-      .attr("fill", "none")
-      .attr("stroke", "#74B5FF")
-      .attr("stroke-width", (d, i) => i % 2 ? 0.25 : 1)
-      .attr("stroke-linejoin", "round");
-
-  label =
-    d3
-      .select("#phyloIsoLine")
-      .append("div")
-        .attr("class","peak-label");
-
-  svg
-    .append("g")
-    .selectAll("text")
-    .data(branches)
-    .enter()
-    .append("text")
-      .attr("x", b => xScale0(b.x1))
-      .attr("y", b => yScale0(b.y) + 4)
-      .attr("class","peak")
-      .attr("id",b => "peak-" + b.bId)
-      .style("fill","#0d1824")
-      .attr("visibility","visible")
-      .text("▲")
-    .on("mouseover", function(e, b) {
-      peakOver(b, b.bId);
-    })
-    .on("mouseout", function(e, b) {
-      peakOut(b, b.bId);
-    })
-    .on("click", function(e, b) {
-      peakClick(b, coordinates);
-    });
-}
-/**
- * @name peakClick
- * @param {Object} b <Gargantext.Components.PhyloExplorer.Types.Branch>
- * @param {Object} coordinates
- *    <Float> x
- *    <Float> y
- *    <Float> w
- *    <Float> h
- * @unpure {Object} d3
- * @unpure {Function} zoom
- */
-function peakClick (b, coordinates) {
-  initPath()
-  let groups = d3.selectAll(".group-inner").filter(".branch-" + b.bId).nodes()
-  branchFocus.push(b.bId);
-  /* word cloud */
-
-  drawWordCloud(groups);
-  highlightGroups(groups);
-  /* rescale */
-  let tx = (groups[0]).getAttribute("cx")
-  svg.transition()
-      .duration(750)
-      .call(zoom.transform, d3.zoomIdentity.translate(((coordinates.x + coordinates.w) / 2) - tx, 0).scale(1));
-
-  d3.selectAll(".path-unfocus").lower();
-}
-/**
- * @name peakOver
- * @param {Object} b <Gargantext.Components.PhyloExplorer.Types.Branch>
- * @param {Int} i
- * @unpure {Object} d3
- * @unpure {Object} label
- * @unpure {Function<Int>} yScale0 see https://github.com/d3/d3-scale#_continuous
- * @unpure {Function<Int>} xScale0 see https://github.com/d3/d3-scale#_continuous
- */
-function peakOver (b,i) {
-  d3.select("#peak-" + i).classed("peak-focus",false);
-  d3.select("#peak-" + i).classed("peak-over",true);
-  label.text(b.label.replace(/"/g,''))
-       .style("visibility", "visible")
-       .style("top", yScale0(b.y) + "px")
-       .style("left",xScale0(b.x1) + "px");
-  branchOver(b.bId);
-}
-/**
- * @name peakOut
- * @param {Object} b <Gargantext.Components.PhyloExplorer.Types.Branch>
- * @param {Int} i
- * @unpure {Object} d3
- * @unpure {Array} branchFocus
- */
-function peakOut (b,i) {
-  d3.select("#peak-" + i).classed("peak-over",false);
-  if (branchFocus.includes("" + b.bId)) {
-    d3.select("#peak-" + i).classed("peak-focus",true);
-  }
-  branchOut();
-}
-/**
- * @name showPeak
- * @param {Object}
- *    <Float> x
- *    <Float> y
- *    <Float> w
- *    <Float> h
- * @unpure {Object} d3
- */
-function showPeak(scapeCoordinates) {
-  var isoLineCoordinates = getIsoLineCoordinates();
-
-  d3
-    .selectAll(".peak")
-    .style(
-      "fill"
-    , function(peak,i) {
-        var isVisible = d3
-          .selectAll(".branch-" + i)
-          .nodes()
-          .map(function(g){
-            var x = g.getBoundingClientRect().x,
-                y = g.getBoundingClientRect().y;
-
-            var xLower = x >= isoLineCoordinates.x;
-            var xUpper = x <= (
-              isoLineCoordinates.x +
-              isoLineCoordinates.w
-            );
-
-            var yLower = y >= (
-              isoLineCoordinates.y +
-              scapeCoordinates.y
-            );
-            var yUpper = y <= (
-              isoLineCoordinates.y +
-              scapeCoordinates.y +
-              isoLineCoordinates.h
-            );
-
-            return xLower && xUpper && yLower && yUpper;
-          })
-          .reduce((mem,cur) => {return mem || cur;})
-
-        if (isVisible) {
-            d3.select("#peak-shadow" + i).attr("visibility","visible");
-            return "#0d1824";
-        } else {
-            d3.select("#peak-shadow" + i).attr("visibility","hidden");
-            return "#A9A9A9";
-        }
-    }
-  );
-}
-/**
- * @name branchOver
- * @param {Int} bId
- * @unpure {Window.<String>} window.displayView
- * @unpure {Object} d3
- */
-function branchOver(bId) {
-  // headers
-  if (window.displayView === "headingMode") {
-    d3.selectAll(".header").nodes().forEach(function(header){
-      if (header.getAttribute("bid") == bId) {
-        header.style["font-size"] = "10px";
-        header.style["opacity"] = 1;
-      } else {
-        header.style["opacity"] = 0.3;
-      }
-    })
-  }
-  // branches
-  d3.select("#xmark-"  + bId).style("fill","#f3be54");
-  d3.select("#hover-" + bId).style("visibility","visible");
-}
-/**
- * @name branchOut
- * @param {Int} bId
- * @unpure {Object} d3
- * @unpure {Array} branchFocus
- */
-function branchOut(bId) {
-  d3.selectAll(".peak-label").style("visibility","hidden");
-  d3.selectAll(".branch-hover").style("visibility","hidden");
-  d3.selectAll(".x-mark").style("fill","#4A5C70");
-  for (var i = 0; i < branchFocus.length; i++) {
-    d3.select("#xmark-" + branchFocus[i]).style("fill","#F24C3D");
-  }
-  headerOut();
-}
-/**
  * @name textWidth
  * @param {String} text
  * @returns {CanvasRenderingContext2D}
@@ -1252,39 +1641,19 @@ function mergeLists(l1,l2,l3) {
   return merged;
 }
 /**
- * @name setAxisY
- * @param {Function<Int>} scale see https://github.com/d3/d3-scale#_continuous
- * @param {*} labels
- * @unpure {Object} d3
- */
-function setAxisY(scale,labels) {
-  // @WIP
-  console.log(Object.prototype.toString.call(labels), labels)
-  yAxis.call(d3.axisLeft(scale)
-                  .tickFormat(function(d){
-                      if (d3.timeYear(d) < d) {
-                          // '%B'
-                          return d3.timeFormat('%d %B')(d);
-                      } else {
-                          return d3.timeFormat('%Y')(d);
-                      }
-                  })
-                  .tickSizeOuter(0));
-  yAxis.selectAll(".tick line").remove();
-  yAxis.selectAll(".tick circle").remove();
-  yAxis.selectAll(".tick")
-       .call(addMarkY)
-  yAxis.selectAll(".tick text")
-       .call(setMarkYLabel)
-}
-/**
  * @name setAxisX
  * @param {Function<Int>} scale see https://github.com/d3/d3-scale#_continuous
- * @param {*} labels
+ * @param {Array<Object>} labels
+ *    <Float> x
+ *    <String> label
+ *    <Float> inf
+ *    <Float> sup
+ *    <Int> bId
  * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @param {Object} xAxis instanceof d3.selection
  * @unpure {Object} d3
  */
-function setAxisX(scale, labels, branches) {
+function setAxisX(scale, labels, branches, xAxis) {
   xAxis.call(d3.axisTop(scale)
                   .tickValues(labels.map(l => l.x))
                   .tickFormat((l, i) => labels[i].label)
@@ -1306,51 +1675,33 @@ function setAxisX(scale, labels, branches) {
        .call(addMarkX, labels.map(l => scale(l.sup) - scale(l.inf)),labels.map(l => l.bId));
 }
 /**
- * @name tickClick
- * @param {*} tick
- * @unpure {Object} d3
- * @unpure {Array<Int>} branchFocus
- */
-function tickClick(tick) {
-  console.log(Object.prototype.toString.call(tick), tick)
-  initPath()
-  let bid = tick.getAttribute("bId"),
-      groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes();
-
-  // draw the word cloud
-
-  branchFocus.push(bid);
-  drawWordCloud(groups);
-
-  // highlight the groups
-
-  highlightGroups(groups);
-  d3.selectAll(".path-unfocus").lower();
-}
-/**
- * @name tickOver
- * @param {*} tick
- * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
+ * @name setAxisY
+ * @param {Function<Int>} scale see https://github.com/d3/d3-scale#_continuous
+ * @param {Array<Object>} labels
+ *    <Date> from
+ *    <Int> label
+ *    <Date> to
+ *    <Float> y
+ * @param {Object} yAxis instanceof d3.selection
  * @unpure {Object} d3
  */
-function tickOver(tick, branches) {
-  var ego = tick.getAttribute("bId"),
-      branch = branches.find(b => b.bId == ego);
-  if (d3.select("#peak-" + ego).node().style.visibility != "hidden") {
-      branchOver(ego);
-      peakOver(branch,ego);
-  }
-}
-/**
- * @name tickOut
- * @param {*} tick
- * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
- */
-function tickOut(tick, branches) {
-  var ego = tick.getAttribute("bId"),
-      branch = branches.find(b => b.bId == ego);
-  branchOut();
-  peakOut(branch,ego)
+ function setAxisY(scale,labels, yAxis) {
+  yAxis.call(d3.axisLeft(scale)
+                  .tickFormat(function(d){
+                      if (d3.timeYear(d) < d) {
+                          // '%B'
+                          return d3.timeFormat('%d %B')(d);
+                      } else {
+                          return d3.timeFormat('%Y')(d);
+                      }
+                  })
+                  .tickSizeOuter(0));
+  yAxis.selectAll(".tick line").remove();
+  yAxis.selectAll(".tick circle").remove();
+  yAxis.selectAll(".tick")
+       .call(addMarkY)
+  yAxis.selectAll(".tick text")
+       .call(setMarkYLabel)
 }
 /**
  * @name setGroupClass
@@ -1463,284 +1814,14 @@ function setGroup(g, xScale, yScale, wScale) {
   }
 }
 /**
- * @name onZoom
- * @param {Event} event
- * @param {Object} scapeCoordinates
- *    <Float> x
- *    <Float> y
- *    <Float> w
- *    <Float> h
- * @unpure {Object} panel
+ * @name getBranchByGroup
+ * @param {Array} groups of <Gargantext.Components.PhyloExplorer.Types.Group>
+ * @returns {Array<Array<Int>>}
  */
-function onZoom(event, scapeCoordinates) {
-  var zoomX = event.transform.rescaleX(xScale),
-      zoomY = event.transform.rescaleY(yScale),
-      zoomXLabels = xLabels
-        .filter(
-          function(b) {
-            var lower = zoomX(b.x) >= scapeCoordinates.x;
-            var upper = zoomX(b.x) <= (
-              scapeCoordinates.x +
-              scapeCoordinates.w
-            );
-
-            return lower && upper;
-          }
-        , zoomYLabels = yLabels
-        )
-        .filter(
-          function(p) {
-            var lower = zoomY(p.y) >= scapeCoordinates.y;
-            var upper = zoomY(p.y) <= (
-              scapeCoordinates.y +
-              scapeCoordinates.h
-            );
-
-            return lower && upper;
-          }
-        );
-
-  setAxisX(zoomX,zoomXLabels, branches);
-
-  setAxisY(zoomY,zoomYLabels);
-
-  panel.selectAll("circle").attr("transform", event.transform);
-  panel.selectAll("text").attr("transform", event.transform);
-  panel.selectAll("path").attr("transform", event.transform);
-  panel.selectAll(".branch-hover").attr("transform", event.transform);
-  panel.selectAll(".y-highlight").attr("transform", event.transform);
-  panel.selectAll(".ngrams").attr("transform", event.transform);
-  panel.selectAll(".term-path").attr("transform", event.transform);
-  panel.selectAll(".emergence").attr("transform", event.transform);
-  panel.selectAll(".header").attr("transform", event.transform);
-
-  showPeak(scapeCoordinates);
-}
-
-// function groupOver() {
-//     var from = this.getAttribute("from");
-//     d3.select("#y-highlight-" + from).style("visibility","visible");
-//     // d3.select("#y-mark-year-inner-" + from).node().setAttribute("class","y-mark-year-inner-highlight");
-//     // d3.select("#y-mark-year-outer-" + from).node().setAttribute("class","y-mark-year-outer-highlight");
-//     // d3.select("#y-label-" + from).node().setAttribute("class","y-label-bold");
-// }
-
-// function groupOut() {
-//     var from = this.getAttribute("from");
-//     d3.select("#y-highlight-" + from).style("visibility","hidden");
-//     // d3.select("#y-mark-year-inner-" + from).node().setAttribute("class","y-mark-year-inner");
-//     // d3.select("#y-mark-year-outer-" + from).node().setAttribute("class","y-mark-year-outer");
-//     // d3.select("#y-label-" + from).node().setAttribute("class","y-label");
-// }
-
-////////////////////////////////////////////////////////////////////////////////
-///   @WIP
-////////////////////////////////////////////////////////////////////////////////
-
-function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
-
-  drawIsoLine(branches);
-
-  /* *** draw the phylo *** */
-
-  var elLeftColumn = d3
-    .select('.phylo-grid__blueprint__left')
-    .node()
-    .getBoundingClientRect();
-
-  var elCenterColumn = d3
-    .select('.phylo-grid__blueprint__center')
-    .node()
-    .getBoundingClientRect();
-
-  var elScapeContent = d3
-    .select('.phylo-grid__content__scape')
-    .node()
-    .getBoundingClientRect();
-
-  var elGraphContent = d3
-    .select('.phylo-grid__content__graph')
-    .node()
-    .getBoundingClientRect();
-
-  var centerColumnCoordinates = {
-    x: elLeftColumn.width,
-    y: 0,
-    w: elCenterColumn.width,
-    h: elCenterColumn.height
-  };
-
-  var scapeCoordinates = {
-    x: 0,
-    y: 0,
-    w: elLeftColumn.width + elCenterColumn.width,
-    h: elCenterColumn.height
-  };
-
-  var graphCoordinates = {
-    x: 0,
-    y: 0,
-    w: elGraphContent.width,
-    h: elGraphContent.height
-  };
-
-  svg = d3
-    .select('.phylo-grid__content__scape')
-    .append("svg")
-      .attr("viewBox", coordinatesToArray(scapeCoordinates));
-
-
-  /* *** draw the graph *** */
-
-  svg3 = d3
-    .select('.phylo-grid__content__graph')
-    .append("svg")
-      .attr("viewBox", coordinatesToArray(graphCoordinates))
-    .append("g");
-
-
-  /* labels */
-
-  var firstDate = Math.min(...groups.map(g => (g.from).getFullYear()))
-
-  var yLabels = (periods.map(p => ({y:p.y,from:p.from,to:p.to,label:(p.from).getFullYear()}))).filter(p => p.label >= firstDate);
-  var xLabels = toXLabels(branches,groups,frame[2]);
-
-  /* weight */
-
-  if (window.weighted == true) {
-    var wInf = Math.min(...groups.map(g => g.weight))
-    var wSup = Math.max(...groups.map(g => g.weight))
-    var wScale = d3.scaleLog().domain([1,wSup]).range([3,10])
-
-  }
-
-
-  /* scales */
-
-  var xScale = d3
-    .scaleLinear()
-    .domain([
-      0,
-      frame[2]
-    ])
-    .range([
-      centerColumnCoordinates.x,
-      centerColumnCoordinates.x + centerColumnCoordinates.w
-    ]);
-
-  var yScale = d3
-    .scaleTime()
-    .domain( setYDomain(yLabels) )
-    .range([
-      centerColumnCoordinates.y,
-      centerColumnCoordinates.y + centerColumnCoordinates.h
-    ]);
-
-  /* panel and& mask */
-
-  // var mask = svg
-  //   .append("defs")
-  //   .append("svg:clipPath")
-  //     .attr("id","mask")
-  //   .append("svg:rect")
-  //     .attr("viewBox", coordinatesToArray(isoLineCoordinates));
-
-  panel = svg.append("g").attr("clip-path", "url(#mask)").attr("id","panel")
-
-  /* highlight */
-  xLabels.forEach(b =>
-      panel.append("rect")
-              .attr("class","branch-hover")
-              .attr("x", xScale(b.inf))
-              .attr("y", -10000)
-              .attr("width", xScale(b.sup) - xScale(b.inf))
-              .attr("height", 20000)
-              .attr("id","hover-" + b.bId)
-              .style("visibility","hidden"))
-
-  yLabels.forEach(l =>
-      panel.append("line")
-           .attr("class","y-highlight")
-           .attr("id","y-highlight-" + l.label)
-           .attr("x1", -10000)
-           .attr("y1", yScale(l.from))
-           .attr("x2", 10000)
-           .attr("y2", yScale(l.from))
-           .style("visibility","hidden"))
-
-  /* links */
-
-  var linkGen = d3.linkVertical();
-  var groupLinks = links.map(l => ({source: findGroup(groups, l.from, xScale, yScale), target: findGroup(groups, l.to, xScale, yScale),from: l.from, to: l.to, label: l.label}));
-
-  var groupAncestors = aLinks.map(l => ({source: findGroup(groups, l.from, xScale, yScale), target: findGroup(groups, l.to, xScale, yScale),from: l.from, to: l.to, label: l.label}));
-
-  panel
-    .selectAll("path")
-    .data(groupLinks.concat(groupAncestors))
-    .join("path")
-    .attr("d", linkGen)
-    .attr("fill", "none")
-    .attr("stroke","#0d1824")
-    .attr("class", "group-path")
-    .attr("source",d => d.from)
-    .attr("target",d => d.to)
-    .attr("label", d => d.label)
-    // .on("click", function(){
-    //   // console.log(this)
-    // })
-
-  var colors = ["#F0684D","#aa8c58","#74b5ff","#0d1824"];
-
-  /* groups */
-
-  groups.forEach(g => setGroup(g, xScale, yScale, wScale));
-
-  /* axis */
-
-  var xAxis = svg
-    .append("g")
-      .attr("class","x-axis")
-      .attr("transform", "translate(0," + centerColumnCoordinates.y + ")");
-
-  var yAxis = svg
-    .append("g")
-      .attr("class","y-axis")
-      .attr("transform", "translate(" + centerColumnCoordinates.x + ",0)");
-
-  setAxisX(xScale,xLabels, branches);
-  setAxisY(yScale,yLabels);
-
-  /* zoom */
-
-  var debouncedOnZoom = debounce(
-    onZoom
-    , 50
-  );
-
-  zoom = d3
-    .zoom()
-    .scaleExtent([
-      1,
-      50
-    ])
-    .extent([
-      [ scapeCoordinates.x, scapeCoordinates.y ],
-      [ scapeCoordinates.w, scapeCoordinates.h ]
-    ])
-    .on("zoom", function(e) {
-      debouncedOnZoom(e, scapeCoordinates);
-    });
-
-  svg.call(zoom).on("dblclick.zoom",null).on("dblclick",doubleClick);
-
-
-  /* role & dynamic */
-
-  var emergences = {};
+function getBranchByGroup(groups) {
   var branchByGroup = {};
-  groups.forEach(function(g){
+
+  groups.forEach(function(g) {
     // is a term in many branches ?
     for (var i = 0; i < (g.foundation).length; i++) {
       var fdt = (g.foundation)[i];
@@ -1750,6 +1831,26 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
         branchByGroup[fdt] = [g.bId];
       }
     }
+  });
+
+  return branchByGroup;
+}
+/**
+ * @name getEmergences
+ * @param {Array} groups of <Gargantext.Components.PhyloExplorer.Types.Group>
+ * @param {Function<Int>} xScale see https://github.com/d3/d3-scale#_continuous
+ * @param {Function<Int>} yScale see https://github.com/d3/d3-scale#_continuous
+ * @returns {Object}
+ *      <Int> => <Object>
+ *          <Int> bId
+ *          <String> label
+ *          <Array<Float>> x
+ *          <Array<Float>> y
+ */
+function getEmergences(groups, xScale, yScale) {
+  var emergences = {};
+
+  groups.forEach(function(g) {
     // is emerging ?
     if ((g.role).includes(0)) {
       for (var i = 0; i < (g.role).length; i++) {
@@ -1759,53 +1860,58 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
             (emergences[gf].x).push(xScale(g.x));
             (emergences[gf].y).push(yScale(g.to));
           } else {
-             emergences[gf] = {"label":g.label[i],"x":[xScale(g.x)],"y":[yScale(g.to)],"bid":g.bId}
+            emergences[gf] = {"label":g.label[i],"x":[xScale(g.x)],"y":[yScale(g.to)],"bid":g.bId}
           }
         }
       }
     }
   });
 
-  var keys = Object.keys(emergences);
-  var freqs = (keys.map(k => window.freq[k])).filter(f => f != null);
+  return emergences;
+}
+/**
+ * @name addEmergenceLabels
+ * @param {String} k
+ * @param {Object} emergences
+ *      <Int> => <Object>
+ *          <Int> bId
+ *          <String> label
+ *          <Array<Float>> x
+ *          <Array<Float>> y
+ * @param {Array<Array<Int>>} branchByGroup
+ * @param {Function<Int>} fontScale see https://github.com/d3/d3-scale#_continuous
+ * @param {Function<Int>} opacityScale see https://github.com/d3/d3-scale#_continuous
+ * @unpure {Window.<Array<Int>>} window.freq
+ * @unpure {Object} panel instanceof d3.selection
+ */
+function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScale){
+  let x = ((emergences[k]).x).reduce(arraySum) / ((emergences[k]).x).length;
+  let y = ((emergences[k]).y).reduce(arraySum) / ((emergences[k]).y).length;
+  let bid = Array.from(new Set(branchByGroup[k]));
+  var freq = 0;
+  // console.log(k)
 
-  // var fontScale = d3.scaleLinear().domain([0,Math.max(...freqs)]).range([2,10]);
-  var fontScale = d3.scaleLinear().domain([0,Math.sqrt(Math.max(...freqs))]).range([2,20]);
-  var opacityScale = d3.scaleLinear().domain([0,1/Math.sqrt(Math.max(...freqs))]).range([0.1,1]);
-
-  keys.forEach(function(k){
-    let x = ((emergences[k]).x).reduce(arraySum) / ((emergences[k]).x).length;
-    let y = ((emergences[k]).y).reduce(arraySum) / ((emergences[k]).y).length;
-    let bid = Array.from(new Set(branchByGroup[k]));
-    var freq = 0;
-    // console.log(k)
-
-    if (k in window.freq) {
-      freq = window.freq[k];
-    }
-    panel.append("text")
-         .attr("x",x + (rdm() * Math.random() * 10))
-         .attr("y",y + (rdm() * Math.random() * 10))
-         .attr("fdt",k)
-         .attr("id","head" + k)
-         .attr("mem-size", fontScale(Math.sqrt(freq)))
-         .attr("mem-opac", opacityScale(Math.sqrt(freq)))
-         .attr("bid",(emergences[k]).bid)
-         .style("font-size", fontScale(Math.sqrt(freq)) + "px")
-         .style("opacity", opacityScale(1/Math.sqrt(freq)))
-         .attr("class","header")
-         .style("visibility","hidden")
-         .style("text-anchor", "middle")
-         // .style("fill",(bid.length > 1) ? "#012840" : "#CC382F")
-         .style("fill",(bid.length > 1) ? "#012840" : "#012840")
-         .text((emergences[k]).label)
-         .on("click",function(){
-            showHeading();
-            termClick((emergences[k]).label,k,k,"head");
-         });
-  });
-
-  /* groups */
-
-  d3.selectAll(".header").raise();
+  if (k in window.freq) {
+    freq = window.freq[k];
+  }
+  panel.append("text")
+       .attr("x",x + (rdm() * Math.random() * 10))
+       .attr("y",y + (rdm() * Math.random() * 10))
+       .attr("fdt",k)
+       .attr("id","head" + k)
+       .attr("mem-size", fontScale(Math.sqrt(freq)))
+       .attr("mem-opac", opacityScale(Math.sqrt(freq)))
+       .attr("bid",(emergences[k]).bid)
+       .style("font-size", fontScale(Math.sqrt(freq)) + "px")
+       .style("opacity", opacityScale(1/Math.sqrt(freq)))
+       .attr("class","header")
+       .style("visibility","hidden")
+       .style("text-anchor", "middle")
+       // .style("fill",(bid.length > 1) ? "#012840" : "#CC382F")
+       .style("fill",(bid.length > 1) ? "#012840" : "#012840")
+       .text((emergences[k]).label)
+       .on("click",function(){
+          showHeading();
+          termClick((emergences[k]).label,k,k,"head");
+       });
 }

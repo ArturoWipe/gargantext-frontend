@@ -123,7 +123,7 @@ setGlobalDependencies w (PhyloDataSet o)
     _ <- pure $ (w .= "timeScale") o.timeScale
     _ <- pure $ (w .= "weighted") o.weighted
 
-    (freq :: Array Int)         <- pure $ w .. "freq"
+    (freq :: Array Int)   <- pure $ w .. "freq"
     (terms :: Array Term) <- pure $ w .. "terms"
 
     for_ o.groups \(Group g) -> do
