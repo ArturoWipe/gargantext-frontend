@@ -301,6 +301,61 @@ $topbar-input-width: 304px;
 
 ////////////////////////////////////////////////////////////////
 
+//@WIP: handling height, remove Ids'?
+$graph-height: 500px;
+$left-column-width: 10%;
+$center-column-width: 80%;
+$right-column-width: 10%;
+
+.phylo-isoline-wrapper {
+  padding-left: $left-column-width;
+  padding-right: $right-column-width;
+}
+
+.phylo-grid {
+  position: relative;
+
+  &__content {
+    display: flex;
+    height: $graph-height;
+    position: relative;
+  }
+
+  &__blueprint {
+    @include fit-positions();
+
+    display: flex;
+    height: $graph-height;
+    position: absolute;
+    visibility: hidden;
+
+    &__left {
+      width: $left-column-width;
+      height: inherit;
+    }
+    &__center {
+      width: $center-column-width;
+      height: inherit;
+    }
+    &__right {
+      width: $right-column-width;
+      height: inherit;
+    }
+  }
+
+  &__content {
+
+    &__scape {
+      width: calc( #{ $left-column-width } + #{ $center-column-width });
+    }
+    &__graph {
+      width: $right-column-width;
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////
+
 .phylo-topbar {
   $margin: space-x(0.5);
   $toolbar-button-width: 128px;

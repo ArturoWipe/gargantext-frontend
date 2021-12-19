@@ -11788,6 +11788,55 @@ select.form-control {
   height: 128px;
 }
 
+.phylo-isoline-wrapper {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+.phylo-grid {
+  position: relative;
+}
+
+.phylo-grid__content {
+  display: flex;
+  height: 500px;
+  position: relative;
+}
+
+.phylo-grid__blueprint {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  height: 500px;
+  position: absolute;
+  visibility: hidden;
+}
+
+.phylo-grid__blueprint__left {
+  width: 10%;
+  height: inherit;
+}
+
+.phylo-grid__blueprint__center {
+  width: 80%;
+  height: inherit;
+}
+
+.phylo-grid__blueprint__right {
+  width: 10%;
+  height: inherit;
+}
+
+.phylo-grid__content__scape {
+  width: calc( 10% + 80%);
+}
+
+.phylo-grid__content__graph {
+  width: 10%;
+}
+
 .phylo-topbar {
   padding: 0 8px;
   height: 100%;

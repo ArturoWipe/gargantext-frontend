@@ -118,7 +118,7 @@ layoutCpt = here.component "layout" cpt where
           }
 
       ,
-        -- LEGACY GRID
+        -- LEGACY
         H.div
         {}
         [
@@ -146,29 +146,46 @@ layoutCpt = here.component "layout" cpt where
           ]
         ,
           H.div
-          { id: "phyloIsoLine"
-          , className: "phylo-isoline"
-          }
-          []
-
+          { className: "phylo-isoline-wrapper"}
+          [
+            H.div
+            { id: "phyloIsoLine"
+            , className: "phylo-isoline"
+            }
+            []
+          ]
         ,
           H.div
-          { id: "phyloScape"
-          , className: "phylo-scape"
-          }
-          []
-        ,
-          H.div
-          { id: "phyloTimeline"
-          , className: "phylo-timeline"
-          }
-          []
-        ,
-          H.div
-          { id: "phyloGraph"
-          , className: "phylo-graph"
-          }
-          []
+          { className: "phylo-grid" }
+          [
+            H.div
+            { className: "phylo-grid__blueprint" }
+            [
+              H.div
+              { className: "phylo-grid__blueprint__left" }
+              []
+            ,
+              H.div
+              { className: "phylo-grid__blueprint__center" }
+              []
+            ,
+              H.div
+              { className: "phylo-grid__blueprint__right"}
+              []
+            ]
+          ,
+            H.div
+            { className: "phylo-grid__content" }
+            [
+              H.div
+              { className: "phylo-grid__content__scape" }
+              []
+            ,
+              H.div
+              { className: "phylo-grid__content__graph" }
+              []
+            ]
+          ]
         ]
       ]
 
