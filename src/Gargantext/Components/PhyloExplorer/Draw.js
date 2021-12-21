@@ -1465,29 +1465,61 @@ function toXLabels(branches, groups, xMax) {
  * @param {Object} ticks instanceof d3.selection
  * @param {Array} arr <Array>
  *    <Float>
- *    <Int>
+ *    <Float>
  */
 function xOverFlow(ticks,arr) {
+  var average = arr.reduce((a,b) => a + b[0], 0) / arr.length;
+  var delta = 2;
+
   ticks.each(function(t,i){
-      var text = d3.select(this),
-         chars = d3.select(this).text().split('').reverse(),
-            nb = chars.length,
-             y = text.attr("y"),
-            dy = parseFloat(text.attr("dy")),
-          line = [],
-         tspan = text.attr("bId",arr[i][1]).text(null).append("tspan").attr("x", 0).attr("y", -14).attr("dy", dy + "em").attr("bId","");
+    var text = d3.select(this),
+       chars = d3.select(this).text().split('').reverse(),
+          nb = chars.length,
+           y = text.attr("y"),
+          dy = parseFloat(text.attr("dy")),
+        line = [],
+       tspan = text.attr("bId",arr[i][1]).text(null).append("tspan").attr("x", 0).attr("y", -14).attr("dy", dy + "em").attr("bId","");
 
-      while ((char = chars.pop()) && (tspan.node().getComputedTextLength() < (arr[i][0] - 2))) {
-          line.push(char);
-          tspan.text(line.join(''));
+    var str = chars.reverse().join('');
+    var idx;
+    var buffer = '';
+    var node = tspan.node();
+    var limit = arr[i][0] - delta;
+
+    if (limit > average) {
+      idx = nb;
+
+      while (idx > 2) {
+        buffer = str.slice(0, idx)
+        tspan.text( buffer );
+        if (node.getComputedTextLength() < limit) {
+          break;
+        }
+        idx = Math.floor(idx / 2)
       }
+    }
 
-      if (line.length != nb) {
-          line.slice(-3)
-          tspan.text(line.join('') + '...')
+    if (limit <= average) {
+      idx = 2;
+
+      while (idx <= nb) {
+        buffer = str.slice(0, idx);
+        tspan.text( buffer );
+        if (str === "vaccine comparator  bnt162b2") {
+          console.log( buffer, node.getComputedTextLength(), limit, node.getComputedTextLength() < limit)
+        }
+        if (node.getComputedTextLength() > limit) {
+          break;
+        }
+        idx = Math.ceil(idx * 1.5);
       }
+    }
 
-  })
+    if (buffer.length !== nb) {
+      buffer = buffer.slice(0, -1);
+      tspan.text( buffer + '…');
+    }
+  });
 }
 /**
  * @name addMarkX
