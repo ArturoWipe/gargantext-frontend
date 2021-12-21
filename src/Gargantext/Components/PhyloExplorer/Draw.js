@@ -1146,29 +1146,26 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
     .range(yRange);
 
   /* mask */
-// @WIP
-  // svg
-  //   .append("defs")
-  //   .append("svg:clipPath")
-  //     .attr("id","mask")
-  //   .append("svg:rect")
-  //     .attr("width", centerColumnCoordinates.w)
-  //     .attr("height", centerColumnCoordinates.h)
-  //     .attr("x", centerColumnCoordinates.x)
-  //     .attr("y", centerColumnCoordinates.y);
+
+  svg
+    .append("defs")
+    .append("svg:clipPath")
+      .attr("id","mask")
+    .append("svg:rect")
+      .attr("width", centerColumnCoordinates.w)
+      .attr("height", centerColumnCoordinates.h)
+      .attr("x", centerColumnCoordinates.x)
+      .attr("y", centerColumnCoordinates.y);
 
   /* panel */
-// @WIP
-  // panel = svg.append("g").attr("clip-path", "url(#mask)").attr("id","panel")
 
-  var centerBox = coordinatesToBox(centerColumnCoordinates);
-  panel = svg.append("svg")
-    .attr("width", centerColumnCoordinates.w)
-    .attr("height", centerColumnCoordinates.h)
-    .attr("x", centerColumnCoordinates.x)
-    .attr("y", centerColumnCoordinates.y);
+  panel = svg
+    .append("g")
+    .attr("id", "panel")
+    .attr("clip-path", "url(#mask)")
 
   /* highlight */
+
   xLabels.forEach(b =>
       panel.append("rect")
               .attr("class","branch-hover")
@@ -1190,6 +1187,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
            .style("visibility","hidden"))
 
   /* links */
+
 
   var linkGen = d3.linkVertical();
   var groupLinks = links.map(l => ({source: findGroup(groups, l.from, xScale, yScale), target: findGroup(groups, l.to, xScale, yScale),from: l.from, to: l.to, label: l.label}));
@@ -1255,7 +1253,9 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
         yLabels,
         branches,
         xAxis,
-        yAxis
+        yAxis,
+        xScale,
+        yScale
       );
     });
 
@@ -1505,9 +1505,6 @@ function xOverFlow(ticks,arr) {
       while (idx <= nb) {
         buffer = str.slice(0, idx);
         tspan.text( buffer );
-        if (str === "vaccine comparator  bnt162b2") {
-          console.log( buffer, node.getComputedTextLength(), limit, node.getComputedTextLength() < limit)
-        }
         if (node.getComputedTextLength() > limit) {
           break;
         }
