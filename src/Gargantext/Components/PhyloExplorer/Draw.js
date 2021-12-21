@@ -8,6 +8,12 @@ exports._showHeading      = showHeading;
 exports._showLanding      = showLanding;
 exports._exportViz        = exportViz;
 
+var ISO_LINE_DOM_QUERY      = '#phyloIsoLine';
+var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
+var CENTER_COLUMN_DOM_QUERY = '.phylo-grid__blueprint__center';
+var SCAPE_DOM_QUERY         = '.phylo-grid__content__scape';
+var GRAPH_DOM_QUERY         = '.phylo-grid__content__graph';
+
 
 //  (?) Global thread dependencies:
 //    * d3 <Object> (main D3 proxy))
@@ -543,16 +549,28 @@ function peakOut (b,i) {
   branchOut();
 }
 /**
+ * @WIP optimize coordinates variables instanciation
  * @name showPeak
- * @param {Object}
- *    <Float> x
- *    <Float> y
- *    <Float> w
- *    <Float> h
  * @unpure {Object} d3
  */
-function showPeak(scapeCoordinates) {
-  var isoLineCoordinates = getIsoLineCoordinates();
+function showPeak() {
+  var centerColumnCoordinates = getCenterColumnCoordinates();
+  // (?) need a position relative to the viewport instead of fixed coordinates
+  //     see https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+  var centerColumn = d3
+    .select(CENTER_COLUMN_DOM_QUERY)
+    .node()
+    .getBoundingClientRect();
+
+  var xBounds = [
+    centerColumn.left,
+    centerColumn.left + centerColumn.width
+  ];
+
+  var yBounds = [
+    centerColumn.top,
+    centerColumn.top + centerColumn.height
+  ];
 
   d3
     .selectAll(".peak")
@@ -563,24 +581,25 @@ function showPeak(scapeCoordinates) {
           .selectAll(".branch-" + i)
           .nodes()
           .map(function(g){
-            var x = g.getBoundingClientRect().x,
-                y = g.getBoundingClientRect().y;
+            var rect = g.getBoundingClientRect();
 
-            var xLower = x >= isoLineCoordinates.x;
-            var xUpper = x <= (
-              isoLineCoordinates.x +
-              isoLineCoordinates.w
-            );
+            var x = rect.x,
+                y = rect.y;
+            // Adjustment values empirically managing intersection
+            var dx =
+                   + centerColumnCoordinates.l
+                   - centerColumnCoordinates.r
+                   - rect.width
+            var dy =
+                   + centerColumnCoordinates.t
+                   - centerColumnCoordinates.b
+                   - rect.height
+            // Enclosure + Intersection
+            var xLower = x >= (xBounds[0] + dx);
+            var xUpper = x <=  xBounds[1];
 
-            var yLower = y >= (
-              isoLineCoordinates.y +
-              scapeCoordinates.y
-            );
-            var yUpper = y <= (
-              isoLineCoordinates.y +
-              scapeCoordinates.y +
-              isoLineCoordinates.h
-            );
+            var yLower = y >= (yBounds[0] + dy);
+            var yUpper = y <=  yBounds[1];
 
             return xLower && xUpper && yLower && yUpper;
           })
@@ -635,12 +654,11 @@ function branchOut(bId) {
 }
 /**
  * @name tickClick
- * @param {*} tick
+ * @param {Element} tick
  * @unpure {Object} d3
  * @unpure {Array<Int>} branchFocus
  */
  function tickClick(tick) {
-  console.log(Object.prototype.toString.call(tick), tick)
   initPath()
   let bid = tick.getAttribute("bId"),
       groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes();
@@ -657,7 +675,7 @@ function branchOut(bId) {
 }
 /**
  * @name tickOver
- * @param {*} tick
+ * @param {Element} tick
  * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
  * @unpure {Object} d3
  */
@@ -671,7 +689,7 @@ function tickOver(tick, branches) {
 }
 /**
  * @name tickOut
- * @param {*} tick
+ * @param {Element} tick
  * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
  */
 function tickOut(tick, branches) {
@@ -683,20 +701,15 @@ function tickOut(tick, branches) {
 /**
  * @name onZoom
  * @param {Event} event
- * @param {Object} scapeCoordinates
- *    <Float> x
- *    <Float> y
- *    <Float> w
- *    <Float> h
  * @param {Function<Int>} xScale see https://github.com/d3/d3-scale#_continuous
  * @param {Function<Int>} yScale see https://github.com/d3/d3-scale#_continuous
- * @param {Array<Object>} labels
+ * @param {Array<Object>} xLabels
  *    <Float> x
  *    <String> label
  *    <Float> inf
  *    <Float> sup
  *    <Int> bId
- * @param {Array<Object>} labels
+ * @param {Array<Object>} yLabels
  *    <Date> from
  *    <Int> label
  *    <Date> to
@@ -706,37 +719,31 @@ function tickOut(tick, branches) {
  * @param {Object} yAxis instanceof d3.selection
  * @unpure {Object} panel
  */
- function onZoom(event, scapeCoordinates, xScale, yScale, xLabels, yLabels, branches, xAxis, yAxis) {
+ function onZoom(event, coordinates, xScale, yScale, xLabels, yLabels, branches, xAxis, yAxis) {
+  var xBounds = coordinatesToXRange(coordinates);
+  var yBounds = coordinatesToYRange(coordinates);
+
   var zoomX = event.transform.rescaleX(xScale),
       zoomY = event.transform.rescaleY(yScale),
-      zoomXLabels = xLabels
-        .filter(
-          function(b) {
-            var lower = zoomX(b.x) >= scapeCoordinates.x;
-            var upper = zoomX(b.x) <= (
-              scapeCoordinates.x +
-              scapeCoordinates.w
-            );
+      zoomXLabels = xLabels.filter(
+        function(b) {
+          var lower = zoomX(b.x) >= xBounds[0];
+          var upper = zoomX(b.x) <= xBounds[1];
 
-            return lower && upper;
-          }
-        , zoomYLabels = yLabels
-        )
-        .filter(
-          function(p) {
-            var lower = zoomY(p.y) >= scapeCoordinates.y;
-            var upper = zoomY(p.y) <= (
-              scapeCoordinates.y +
-              scapeCoordinates.h
-            );
+          return lower && upper;
+        }
+      )
+      zoomYLabels = yLabels.filter(
+        function(p) {
+          var lower = zoomY(p.y) >= yBounds[0];
+          var upper = zoomY(p.y) <= yBounds[1];
 
-            return lower && upper;
-          }
-        );
+          return lower && upper;
+        }
+      );
 
-  setAxisX(zoomX,zoomXLabels, branches, xAxis);
-
-  setAxisY(zoomY,zoomYLabels, yAxis);
+  setAxisX(zoomX, zoomXLabels, branches, xAxis);
+  setAxisY(zoomY, zoomYLabels, yAxis);
 
   panel.selectAll("circle").attr("transform", event.transform);
   panel.selectAll("text").attr("transform", event.transform);
@@ -748,7 +755,7 @@ function tickOut(tick, branches) {
   panel.selectAll(".emergence").attr("transform", event.transform);
   panel.selectAll(".header").attr("transform", event.transform);
 
-  showPeak(scapeCoordinates);
+  showPeak();
 }
 
 // function groupOver() {
@@ -934,8 +941,11 @@ function getCSSStyles( parentElement ) {
   var svg = d3
     .select('#phyloIsoLine')
     .append("svg")
-      .attr("viewBox", coordinatesToArray(coordinates))
+      .attr("viewBox", coordinatesToBox(coordinates))
     .append("g");
+
+  var xRange = coordinatesToXRange(coordinates);
+  var yRange = coordinatesToYRange(coordinates);
 
   xScale0 = d3
     .scaleLinear()
@@ -943,19 +953,13 @@ function getCSSStyles( parentElement ) {
       0,
       Math.max( ...branches.map(b => b.x1) )
     ])
-    .range([
-      coordinates.x,
-      coordinates.x + coordinates.w
-    ]);
+    .range(xRange);
 
   yScale0 = d3
     .scaleLinear()
     .domain( d3.extent(branches, b => b.y) )
     .nice()
-    .range([
-      coordinates.y,
-      coordinates.y + coordinates.h
-    ]);
+    .range(yRange);
 
   var density = d3
     .contourDensity()
@@ -1030,31 +1034,33 @@ function getCSSStyles( parentElement ) {
     });
 }
 /**
- * @name getIsoLineSelection
- * @unpure {Object} d3
- * @returns {Object} instanceof d3.selection
- */
- function getIsoLineSelection() {
-  return d3.select('#phyloIsoLine');
-}
-/**
  * @name getIsoLineCoordinates
+ * @unpure {Object} d3
  * @returns {Object}
  *    <Float> x
  *    <Float> y
  *    <Float> w
  *    <Float> h
+ *    <Float> t
+ *    <Float> r
+ *    <Float> b
+ *    <Float> l
  */
 function getIsoLineCoordinates() {
-  var el = getIsoLineSelection()
-    .node()
-    .getBoundingClientRect();
+  var el = d3
+  .select(ISO_LINE_DOM_QUERY)
+  .node()
+  .getBoundingClientRect();
 
   return {
     x: 0,
     y: 0,
     w: el.width,
-    h: el.height
+    h: el.height,
+    t: 8,
+    r: 12,
+    b: 8,
+    l: 12
   };
 }
 
@@ -1084,51 +1090,15 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
   /* *** draw the phylo *** */
 
-  var elLeftColumn = d3
-    .select('.phylo-grid__blueprint__left')
-    .node()
-    .getBoundingClientRect();
+  var centerColumnCoordinates = getCenterColumnCoordinates();
 
-  var elCenterColumn = d3
-    .select('.phylo-grid__blueprint__center')
-    .node()
-    .getBoundingClientRect();
-
-  var elScapeContent = d3
-    .select('.phylo-grid__content__scape')
-    .node()
-    .getBoundingClientRect();
-
-  var elGraphContent = d3
-    .select('.phylo-grid__content__graph')
-    .node()
-    .getBoundingClientRect();
-
-  var centerColumnCoordinates = {
-    x: elLeftColumn.width,
-    y: 0,
-    w: elCenterColumn.width,
-    h: elCenterColumn.height
-  };
-
-  var scapeCoordinates = {
-    x: 0,
-    y: 0,
-    w: elLeftColumn.width + elCenterColumn.width,
-    h: elCenterColumn.height
-  };
-
-  var graphCoordinates = {
-    x: 0,
-    y: 0,
-    w: elGraphContent.width,
-    h: elGraphContent.height
-  };
+  var scapeCoordinates = getScapeCoordinates();
+  var graphCoordinates = getGraphCoordinates();
 
   svg = d3
     .select('.phylo-grid__content__scape')
     .append("svg")
-      .attr("viewBox", coordinatesToArray(scapeCoordinates));
+      .attr("viewBox", coordinatesToBox(scapeCoordinates));
 
 
   /* *** draw the graph *** */
@@ -1136,7 +1106,8 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   svg3 = d3
     .select('.phylo-grid__content__graph')
     .append("svg")
-      .attr("viewBox", coordinatesToArray(graphCoordinates))
+      .attr("width", graphCoordinates.w)
+      .attr("height", graphCoordinates.h)
     .append("g");
 
 
@@ -1158,6 +1129,8 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
 
   /* scales */
+  var xRange = coordinatesToXRange(centerColumnCoordinates);
+  var yRange = coordinatesToYRange(centerColumnCoordinates);
 
   var xScale = d3
     .scaleLinear()
@@ -1165,29 +1138,35 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
       0,
       frame[2]
     ])
-    .range([
-      centerColumnCoordinates.x,
-      centerColumnCoordinates.x + centerColumnCoordinates.w
-    ]);
+    .range(xRange);
 
   var yScale = d3
     .scaleTime()
     .domain( setYDomain(yLabels) )
-    .range([
-      centerColumnCoordinates.y,
-      centerColumnCoordinates.y + centerColumnCoordinates.h
-    ]);
+    .range(yRange);
 
-  /* panel and& mask */
-
-  // var mask = svg
+  /* mask */
+// @WIP
+  // svg
   //   .append("defs")
   //   .append("svg:clipPath")
   //     .attr("id","mask")
   //   .append("svg:rect")
-  //     .attr("viewBox", coordinatesToArray(isoLineCoordinates));
+  //     .attr("width", centerColumnCoordinates.w)
+  //     .attr("height", centerColumnCoordinates.h)
+  //     .attr("x", centerColumnCoordinates.x)
+  //     .attr("y", centerColumnCoordinates.y);
 
-  panel = svg.append("g").attr("clip-path", "url(#mask)").attr("id","panel")
+  /* panel */
+// @WIP
+  // panel = svg.append("g").attr("clip-path", "url(#mask)").attr("id","panel")
+
+  var centerBox = coordinatesToBox(centerColumnCoordinates);
+  panel = svg.append("svg")
+    .attr("width", centerColumnCoordinates.w)
+    .attr("height", centerColumnCoordinates.h)
+    .attr("x", centerColumnCoordinates.x)
+    .attr("y", centerColumnCoordinates.y);
 
   /* highlight */
   xLabels.forEach(b =>
@@ -1243,7 +1222,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   var xAxis = svg
     .append("g")
       .attr("class","x-axis")
-      .attr("transform", "translate(0," + centerColumnCoordinates.y + ")");
+      .attr("transform", "translate(0," + centerColumnCoordinates.t + ")");
 
   var yAxis = svg
     .append("g")
@@ -1266,14 +1245,10 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
       1,
       50
     ])
-    .extent([
-      [ scapeCoordinates.x, scapeCoordinates.y ],
-      [ scapeCoordinates.w, scapeCoordinates.h ]
-    ])
     .on("zoom", function(e) {
       debouncedOnZoom(
         e,
-        scapeCoordinates,
+        centerColumnCoordinates,
         xScale,
         yScale,
         xLabels,
@@ -1312,6 +1287,127 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   /* groups */
 
   d3.selectAll(".header").raise();
+}
+/**
+ * @name getLeftColumnCoordinates
+ * @unpure {Object} d3
+ * @returns {Object}
+ *    <Float> x
+ *    <Float> y
+ *    <Float> w
+ *    <Float> h
+ *    <Float> t
+ *    <Float> r
+ *    <Float> b
+ *    <Float> l
+ */
+function getLeftColumnCoordinates() {
+  var el = d3
+    .select(LEFT_COLUMN_DOM_QUERY)
+    .node()
+    .getBoundingClientRect();
+
+  return {
+    x: 0,
+    y: 0,
+    w: el.width,
+    h: el.height,
+    t: 16,
+    r: 0,
+    b: 0,
+    l: 0
+  };
+}
+/**
+ * @name getCenterColumnCoordinates
+ * @unpure {Object} d3
+ * @returns {Object}
+ *    <Float> x
+ *    <Float> y
+ *    <Float> w
+ *    <Float> h
+ *    <Float> t
+ *    <Float> r
+ *    <Float> b
+ *    <Float> l
+ */
+ function getCenterColumnCoordinates() {
+  var leftColumn     = getLeftColumnCoordinates();
+  var elCenterColumn = d3
+    .select(CENTER_COLUMN_DOM_QUERY)
+    .node()
+    .getBoundingClientRect();
+
+  return {
+    x: leftColumn.x + leftColumn.w,
+    y: 32,
+    w: elCenterColumn.width,
+    h: elCenterColumn.height,
+    t: 32,
+    r: 8,
+    b: 0,
+    l: 8
+  };
+}
+/**
+ * @name getScapeColumnCoordinates
+ * @unpure {Object} d3
+ * @returns {Object}
+ *    <Float> x
+ *    <Float> y
+ *    <Float> w
+ *    <Float> h
+ *    <Float> t
+ *    <Float> r
+ *    <Float> b
+ *    <Float> l
+ */
+ function getScapeCoordinates() {
+  var el = d3
+    .select(SCAPE_DOM_QUERY)
+    .node()
+    .getBoundingClientRect();
+
+  return {
+    x: 0,
+    y: 0,
+    w: el.width,
+    h: el.height,
+    t: 0,
+    r: 0,
+    b: 0,
+    l: 0
+  };
+}
+/**
+ * @name getCenterColumnCoordinates
+ * @unpure {Object} d3
+ * @returns {Object}
+ *    <Float> x
+ *    <Float> y
+ *    <Float> w
+ *    <Float> h
+ *    <Float> t
+ *    <Float> r
+ *    <Float> b
+ *    <Float> l
+ */
+ function getGraphCoordinates() {
+  var el = d3
+    .select(GRAPH_DOM_QUERY)
+    .node()
+    .getBoundingClientRect();
+
+  return {
+    x: 0,
+    y: 0,
+    w: el.width,
+    h: el.height,
+    t: 0,
+    r: 0,
+    b: 0,
+    l: 0
+  };
 }
 /**
  * @name toXLabels
@@ -1515,21 +1611,63 @@ function findGroup (groups, id, xsc, ysc) {
   return [x,y]
 }
 /**
- * @name coordinatesToArray
+ * @name coordinatesToBox
  * @param {Object} coordinates
  *    <Float> x
  *    <Float> y
  *    <Float> w
  *    <Float> h
- * @returns {Array} [x, y, w, h]
+ * @returns {Array<Float>}
  */
-function coordinatesToArray(coordinates) {
+function coordinatesToBox(coordinates) {
   return [
     coordinates.x,
     coordinates.y,
     coordinates.w,
     coordinates.h
   ];
+}
+/**
+ * @name coordinatesToXRange
+ * @param {Object} coordinates
+ *    <Float> x
+ *    <Float> w
+ *    <Float> r
+ *    <Float> l
+ * @returns {Array<Float>}
+ */
+function coordinatesToXRange(coordinates) {
+  var lower = coordinates.x
+            + coordinates.r
+            + coordinates.l;
+
+  var upper = coordinates.x
+            - coordinates.r
+            - coordinates.l
+            + coordinates.w;
+
+  return [lower, upper];
+}
+/**
+ * @name coordinatesToYRange
+ * @param {Object} coordinates
+ *    <Float> y
+ *    <Float> h
+ *    <Float> t
+ *    <Float> b
+ * @returns {Array<Float>}
+ */
+ function coordinatesToYRange(coordinates) {
+  var lower = coordinates.y
+            + coordinates.t
+            + coordinates.b;
+
+  var upper = coordinates.y
+            - coordinates.t
+            - coordinates.b
+            + coordinates.h;
+
+  return [lower, upper];
 }
 /**
  * @name textWidth
