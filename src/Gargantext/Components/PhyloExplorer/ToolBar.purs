@@ -13,12 +13,14 @@ import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
+import Toestand as T
 
 type Props =
   ( resetViewCallback   :: Unit -> Effect Unit
   , displayView         :: DisplayView
   , changeViewCallback  :: DisplayView -> Effect Unit
   , exportCallback      :: Unit -> Effect Unit
+  , isolineBox          :: T.Box Boolean
   )
 
 here :: R2.Here
@@ -33,7 +35,11 @@ component = here.component "main" cpt where
       , displayView
       , changeViewCallback
       , exportCallback
+      , isolineBox
       } _ = do
+    -- States
+    isIsolineDisplayed <- R2.useLive' isolineBox
+
     -- Render
     pure $
 
@@ -96,6 +102,18 @@ component = here.component "main" cpt where
             B.icon
             { name: "circle" }
           ]
+        ]
+      ,
+        -- Isoline button
+        B.button
+        { className: "phylo-toolbal__isoline"
+        , callback: \_ -> T.modify_ not isolineBox
+        , variant: isIsolineDisplayed ?
+            ButtonVariant Secondary $
+            OutlinedButtonVariant Secondary
+        }
+        [
+          H.text "Iso Line data"
         ]
       ,
         -- Screenshot button

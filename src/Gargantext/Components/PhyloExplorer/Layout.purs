@@ -4,7 +4,9 @@ module Gargantext.Components.PhyloExplorer.Layout
 
 import Gargantext.Prelude
 
-import DOM.Simple (window)
+import DOM.Simple (document, querySelector, window)
+import DOM.Simple.Console (log)
+import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..), (.=))
 import Gargantext.Components.Bootstrap as B
@@ -13,7 +15,7 @@ import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..))
 import Gargantext.Types (NodeID)
-import Gargantext.Utils (nbsp)
+import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (d3)
 import Reactix as R
@@ -47,6 +49,7 @@ layoutCpt = here.component "layout" cpt where
     terms /\ termsBox <- R2.useBox' (mempty :: Array Term)
     isToolBarDisplayed /\ isToolBarDisplayedBox <- R2.useBox' false
     displayView /\ displayViewBox <- R2.useBox' defaultDisplayView
+    isIsolineDisplayed /\ isIsolineDisplayedBox <- R2.useBox' false
 
     -- Behaviors
     changeViewCallback <- pure $
@@ -70,6 +73,16 @@ layoutCpt = here.component "layout" cpt where
       T.write_ true isReadyBox
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
+
+    R.useEffect1' isIsolineDisplayed do
+      mEl <- querySelector document ".phylo-isoline"
+      case mEl of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "display") $
+            isIsolineDisplayed ? "flex" $ "none"
+
 
     -- Effects
     -- @WIP (as some actions are checked by the JS resources via DOMElement
@@ -115,225 +128,55 @@ layoutCpt = here.component "layout" cpt where
           , exportCallback: const exportViz
           , displayView
           , changeViewCallback
+          , isolineBox: isIsolineDisplayedBox
           }
 
       ,
-        -- LEGACY
+        -- Iso Line
         H.div
-        {}
+        { className: "phylo-isoline"}
         [
           H.div
-          { id: "phyloToolBar"
-          , style: { visibility: "hidden" } }
-          [
-            phyloCorpusInfo
-            { nbDocs        : o.nbDocs
-            , nbFoundations : o.nbFoundations
-            , nbPeriods     : o.nbPeriods
-            }
-          ,
-            phyloHow
-            {}
-          ,
-            phyloPhylo
-            {}
-          ,
-            phyloPhyloInfo
-            { nbTerms     : o.nbTerms
-            , nbGroups    : o.nbGroups
-            , nbBranches  : o.nbBranches
-            }
-          ]
+          { className: "phylo-isoline__bleed-space" }
+          []
         ,
           H.div
-          { className: "phylo-isoline-wrapper"}
+          { id: "phyloIsoLine"
+          , className: "phylo-isoline__content"
+          }
+          []
+        ]
+      ,
+        -- Phylo Grid
+        H.div
+        { className: "phylo-grid" }
+        [
+          H.div
+          { className: "phylo-grid__blueprint" }
           [
             H.div
-            { id: "phyloIsoLine"
-            , className: "phylo-isoline"
-            }
+            { className: "phylo-grid__blueprint__left" }
+            []
+          ,
+            H.div
+            { className: "phylo-grid__blueprint__center" }
+            []
+          ,
+            H.div
+            { className: "phylo-grid__blueprint__right"}
             []
           ]
         ,
           H.div
-          { className: "phylo-grid" }
+          { className: "phylo-grid__content" }
           [
             H.div
-            { className: "phylo-grid__blueprint" }
-            [
-              H.div
-              { className: "phylo-grid__blueprint__left" }
-              []
-            ,
-              H.div
-              { className: "phylo-grid__blueprint__center" }
-              []
-            ,
-              H.div
-              { className: "phylo-grid__blueprint__right"}
-              []
-            ]
-          ,
-            H.div
-            { className: "phylo-grid__content" }
-            [
-              H.div
-              { className: "phylo-grid__content__scape" }
-              []
-            ,
-              H.div
-              { className: "phylo-grid__content__graph" }
-              []
-            ]
-          ]
-        ]
-      ]
-
----------------------------------------------------------
-
-phyloHow :: R2.Leaf ()
-phyloHow = R2.leaf phyloHowCpt
-phyloHowCpt :: R.Component ()
-phyloHowCpt = here.component "phyloHow" cpt where
-  cpt _ _ = do
-    -- Render
-    pure $
-
-      H.div
-      { id: "phyloHow"
-      , className: "phylo-how"
-      }
-      [
-        H.a
-        { id: "phyloSearch"
-        , href: "http://maps.gargantext.org/phylo/knowledge_visualization/memiescape/documentation.html"
-        , target: "_blank"
-        }
-        [
-          H.div
-          { className: "switch" }
-          [
-            H.i
-            { className: "far fa-question-circle how" }
+            { className: "phylo-grid__content__scape" }
             []
           ,
-            H.i
-            { className: "fa fa-question-circle how" }
-            [
-              H.span
-              { className: "tooltip" }
-              [ H.text "click to see how the phylomemy was built" ]
-            ]
+            H.div
+            { className: "phylo-grid__content__graph" }
+            []
           ]
-        ]
-      ]
-
----------------------------------------------------------
-
-phyloPhylo :: R2.Leaf ()
-phyloPhylo = R2.leaf phyloPhyloCpt
-phyloPhyloCpt :: R.Component ()
-phyloPhyloCpt = here.component "phyloPhylo" cpt where
-  cpt _ _ = do
-    -- Render
-    pure $
-
-      H.div
-      { id: "phyloPhylo"
-      , className: "phylo-phylo"
-      }
-      [ H.text "phylomemy" ]
-
-
----------------------------------------------------------
-
-type PhyloCorpusInfoProps =
-  ( nbDocs        :: Int
-  , nbFoundations :: Int
-  , nbPeriods     :: Int
-  )
-
-phyloCorpusInfo :: R2.Leaf PhyloCorpusInfoProps
-phyloCorpusInfo = R2.leaf phyloCorpusInfoCpt
-phyloCorpusInfoCpt :: R.Component PhyloCorpusInfoProps
-phyloCorpusInfoCpt = here.component "phyloCorpusInfo" cpt where
-  cpt props _ = do
-    -- Render
-    pure $
-
-      H.div
-      { id: "phyloCorpusInfo"
-      , className: "phylo-corpus-info"
-      }
-      [
-        H.span
-        {}
-        [
-          H.b {} [ H.text $ show props.nbDocs ]
-        , H.text $ nbsp 1 <> "docs"
-        ]
-      ,
-        H.span
-        {}
-        [
-          H.b {} [ H.text $ show props.nbFoundations ]
-        , H.text $ nbsp 1 <> "foundations"
-        ]
-      ,
-        H.span
-        {}
-        [
-          H.b {} [ H.text $ show props.nbPeriods ]
-        , H.text $ nbsp 1 <> "periods"
-        ]
-      ]
-
-
----------------------------------------------------------
-
-type PhyloPhyloInfoProps =
-  ( nbTerms     :: Int
-  , nbGroups    :: Int
-  , nbBranches  :: Int
-  )
-
-phyloPhyloInfo :: R2.Leaf PhyloPhyloInfoProps
-phyloPhyloInfo = R2.leaf phyloPhyloInfoCpt
-phyloPhyloInfoCpt :: R.Component PhyloPhyloInfoProps
-phyloPhyloInfoCpt = here.component "phyloPhyloInfo" cpt where
-  cpt props _ = do
-    -- Render
-    pure $
-
-      H.div
-      { id: "phyloPhyloInfo"
-      , className: "phylo-phylo-info"
-      }
-      [
-        H.span
-        {}
-        [
-          H.b
-          { id: "phyloTerms" }
-          [ H.text $ show props.nbTerms ]
-        , H.text $ nbsp 1 <> "terms"
-        ]
-      ,
-        H.span
-        {}
-        [
-          H.b
-          { id: "phyloGroups" }
-          [ H.text $ show props.nbGroups ]
-        , H.text $ nbsp 1 <> "groups"
-        ]
-      ,
-        H.span
-        {}
-        [
-          H.b
-          { id: "phyloBranches" }
-          [ H.text $ show props.nbBranches ]
-        , H.text $ nbsp 1 <> "branches"
         ]
       ]

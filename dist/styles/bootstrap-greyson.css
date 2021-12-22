@@ -11491,14 +11491,22 @@ select.form-control {
   left: calc( 50% - 50px );
 }
 
-#phyloIsoLine {
-  background-color: #EBE4DD;
+.phylo-isoline {
+  display: flex;
+  position: relative;
+  width: 100%;
   height: 142px;
 }
 
-.phylo-isoline-wrapper {
-  padding-left: 10%;
-  padding-right: 10%;
+.phylo-isoline__bleed-space {
+  height: 100%;
+  width: 10%;
+}
+
+.phylo-isoline__content {
+  height: 100%;
+  background-color: #EBE4DD;
+  width: 80%;
 }
 
 .phylo-grid {

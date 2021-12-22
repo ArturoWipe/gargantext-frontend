@@ -8,7 +8,7 @@ exports._showHeading      = showHeading;
 exports._showLanding      = showLanding;
 exports._exportViz        = exportViz;
 
-var ISO_LINE_DOM_QUERY      = '#phyloIsoLine';
+var ISO_LINE_DOM_QUERY      = '.phylo-isoline__content';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
 var CENTER_COLUMN_DOM_QUERY = '.phylo-grid__blueprint__center';
 var SCAPE_DOM_QUERY         = '.phylo-grid__content__scape';
@@ -266,14 +266,14 @@ function doubleClick() {
     .classed("path-focus",false);
   d3.selectAll(".term-path").remove();
   // @WIP
-  document.querySelector("#phyloPhylo").innerHTML = "phylomemy";
-  document.querySelector("#phyloPhylo").classList.remove("phylo-focus");
-  document.querySelector("#phyloGroups").innerHTML = window.nbGroups;
-  document.querySelector("#phyloTerms").innerHTML = window.nbTerms;
-  document.querySelector("#phyloBranches").innerHTML = window.nbBranches;
-  document.querySelector("#phyloGroups").classList.remove("phylo-focus");
-  document.querySelector("#phyloTerms").classList.remove("phylo-focus");
-  document.querySelector("#phyloBranches").classList.remove("phylo-focus");
+  // document.querySelector("#phyloPhylo").innerHTML = "phylomemy";
+  // document.querySelector("#phyloPhylo").classList.remove("phylo-focus");
+  // document.querySelector("#phyloGroups").innerHTML = window.nbGroups;
+  // document.querySelector("#phyloTerms").innerHTML = window.nbTerms;
+  // document.querySelector("#phyloBranches").innerHTML = window.nbBranches;
+  // document.querySelector("#phyloGroups").classList.remove("phylo-focus");
+  // document.querySelector("#phyloTerms").classList.remove("phylo-focus");
+  // document.querySelector("#phyloBranches").classList.remove("phylo-focus");
   d3.selectAll(".peak").classed("peak-focus",false);
   d3.selectAll(".peak").classed("peak-focus-source",false);
   d3.selectAll(".x-mark").style("fill","#4A5C70");
@@ -315,9 +315,10 @@ function headerOut() {
 
   // focus
 
-  document.querySelector("#phyloPhylo").innerHTML = txt;
-  document.querySelector("#phyloPhylo").classList.add("phylo-focus");
-  document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
+  // @WIP
+  // document.querySelector("#phyloPhylo").innerHTML = txt;
+  // document.querySelector("#phyloPhylo").classList.add("phylo-focus");
+  // document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
 
   // highlight the groups
 
@@ -438,12 +439,12 @@ function headerOut() {
 
   // facets
   // @WIP
-  document.querySelector("#phyloGroups").innerHTML = groups.length;
-  document.querySelector("#phyloTerms").innerHTML = countTerms(groups);
-  document.querySelector("#phyloBranches").innerHTML = countBranches(groups);
-  document.querySelector("#phyloGroups").classList.add("phylo-focus");
-  document.querySelector("#phyloTerms").classList.add("phylo-focus");
-  document.querySelector("#phyloBranches").classList.add("phylo-focus");
+  // document.querySelector("#phyloGroups").innerHTML = groups.length;
+  // document.querySelector("#phyloTerms").innerHTML = countTerms(groups);
+  // document.querySelector("#phyloBranches").innerHTML = countBranches(groups);
+  // document.querySelector("#phyloGroups").classList.add("phylo-focus");
+  // document.querySelector("#phyloTerms").classList.add("phylo-focus");
+  // document.querySelector("#phyloBranches").classList.add("phylo-focus");
 
   // highlight the links
 
@@ -939,7 +940,7 @@ function getCSSStyles( parentElement ) {
   var coordinates = getIsoLineCoordinates();
 
   var svg = d3
-    .select('#phyloIsoLine')
+    .select(ISO_LINE_DOM_QUERY)
     .append("svg")
       .attr("viewBox", coordinatesToBox(coordinates))
     .append("g");
@@ -1006,7 +1007,7 @@ function getCSSStyles( parentElement ) {
 
   label =
     d3
-      .select("#phyloIsoLine")
+      .select(ISO_LINE_DOM_QUERY)
       .append("div")
         .attr("class","peak-label");
 

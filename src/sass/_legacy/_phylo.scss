@@ -290,26 +290,33 @@ $topbar-input-width: 304px;
   }
 }
 
-////////////////////////////////////////////////////////////////
-
-#phyloIsoLine {
-  $height: 142px;
-
-  background-color: #EBE4DD;
-  height: $height;
-}
 
 ////////////////////////////////////////////////////////////////
 
-//@WIP: handling height, remove Ids'?
+//@WIP: handling height
 $graph-height: 500px;
+$isoline-height: 142px;
+
 $left-column-width: 10%;
 $center-column-width: 80%;
 $right-column-width: 10%;
 
-.phylo-isoline-wrapper {
-  padding-left: $left-column-width;
-  padding-right: $right-column-width;
+.phylo-isoline {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: $isoline-height;
+
+  &__bleed-space {
+    height: 100%;
+    width: $left-column-width;
+  }
+
+  &__content {
+    height: 100%;
+    background-color: #EBE4DD;
+    width: $center-column-width;
+  }
 }
 
 .phylo-grid {
