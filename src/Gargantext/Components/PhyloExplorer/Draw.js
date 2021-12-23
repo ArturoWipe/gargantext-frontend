@@ -1,3 +1,5 @@
+const { memo } = require("react");
+
 exports._drawPhylo        = drawPhylo;
 exports._drawWordCloud    = drawWordCloud;
 exports._showLabel        = showLabel;
@@ -20,6 +22,11 @@ var GRAPH_DOM_QUERY         = '.phylo-grid__content__graph';
 //    * window <Window>
 //    * document <HTMLDocument>
 
+var memoTickText          = {};        // <Object> of <Int> => <TickText>
+///   <TickText> ::
+///       <Int> bId
+///       <Float> limit
+///       <String>text
 var branchFocus           = [];        // <Array> of <Int> bId
 var panel                 = undefined; // <Object> instanceof d3.selection
 var svg                   = undefined; // <Object> instanceof d3.selection
@@ -1467,6 +1474,8 @@ function toXLabels(branches, groups, xMax) {
  * @param {Array} arr <Array>
  *    <Float>
  *    <Float>
+ * @unpure {Object} memoTickText
+ *    <Int> => <TickText>
  */
 function xOverFlow(ticks,arr) {
   var average = arr.reduce((a,b) => a + b[0], 0) / arr.length;
@@ -1474,21 +1483,33 @@ function xOverFlow(ticks,arr) {
 
   ticks.each(function(t,i){
     var text = d3.select(this),
-       chars = d3.select(this).text().split('').reverse(),
-          nb = chars.length,
-           y = text.attr("y"),
+         str = d3.select(this).text(),
+       count = str.length,
+          //  y = text.attr("y"),
           dy = parseFloat(text.attr("dy")),
-        line = [],
-       tspan = text.attr("bId",arr[i][1]).text(null).append("tspan").attr("x", 0).attr("y", -14).attr("dy", dy + "em").attr("bId","");
+         bId = arr[i][1],
+       tspan = text
+          .attr("bId", bId)
+          .text(null)
+          .append("tspan")
+          .attr("x", 0)
+          .attr("y", -14)
+          .attr("dy", dy + "em");
+          // .attr("bId","");
 
-    var str = chars.reverse().join('');
     var idx;
     var buffer = '';
     var node = tspan.node();
     var limit = arr[i][0] - delta;
 
+    // Case a: Memoized pattern
+    if (bId in memoTickText && memoTickText[ bId ].limit === limit) {
+      return tspan.text( memoTickText[ bId ].text );
+    }
+
+    // Case b.1: Substractive pattern computation
     if (limit > average) {
-      idx = nb;
+      idx = count;
 
       while (idx > 2) {
         buffer = str.slice(0, idx)
@@ -1500,10 +1521,11 @@ function xOverFlow(ticks,arr) {
       }
     }
 
+    // Case b.2: Additive pattern computation
     if (limit <= average) {
       idx = 2;
 
-      while (idx <= nb) {
+      while (idx <= count) {
         buffer = str.slice(0, idx);
         tspan.text( buffer );
         if (node.getComputedTextLength() > limit) {
@@ -1513,10 +1535,18 @@ function xOverFlow(ticks,arr) {
       }
     }
 
-    if (buffer.length !== nb) {
-      buffer = buffer.slice(0, -1);
-      tspan.text( buffer + '…');
+    if (buffer.length !== count) {
+      buffer = buffer.slice(0, -1)
+             + '…';
+      tspan.text( buffer );
     }
+
+    // Store new value
+    memoTickText[ bId ] = {
+      bId: bId,
+      limit: limit,
+      text: buffer
+    };
   });
 }
 /**
