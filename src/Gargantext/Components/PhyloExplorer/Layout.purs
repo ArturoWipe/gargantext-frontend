@@ -5,7 +5,6 @@ module Gargantext.Components.PhyloExplorer.Layout
 import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector, window)
-import DOM.Simple.Console (log)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..), (.=))
@@ -14,8 +13,9 @@ import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocomplet
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..))
+import Gargantext.Hooks.UpdateEffect (useUpdateEffect1')
 import Gargantext.Types (NodeID)
-import Gargantext.Utils (nbsp, (?))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (d3)
 import Reactix as R
@@ -44,10 +44,18 @@ layoutCpt = here.component "layout" cpt where
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
     isDisplayed /\ isReadyBox <- R2.useBox' false
+
+    source  /\ sourceBox  <- R2.useBox' ""
     sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
+
     -- @WIP: move value to PhyloDataSet?
     terms /\ termsBox <- R2.useBox' (mempty :: Array Term)
-    isToolBarDisplayed /\ isToolBarDisplayedBox <- R2.useBox' false
+
+    toolBarDisplayed /\ toolBarDisplayedBox <- R2.useBox' false
+
+    search /\ searchBox <- R2.useBox' ""
+    result /\ resultBox <- R2.useBox' (Nothing :: Maybe Term)
+
     displayView /\ displayViewBox <- R2.useBox' defaultDisplayView
     isIsolineDisplayed /\ isIsolineDisplayedBox <- R2.useBox' false
 
@@ -83,15 +91,17 @@ layoutCpt = here.component "layout" cpt where
           pure $ (style .= "display") $
             isIsolineDisplayed ? "flex" $ "none"
 
-
     -- Effects
     -- @WIP (as some actions are checked by the JS resources via DOMElement
     --      UI attribute, for now we create a temporary reference)
-    R.useEffect1' displayView $
+    useUpdateEffect1' displayView do
       pure $ (window .= "displayView") (show displayView)
 
-    -- Behaviors
-    toggleToolBar <- pure $ const $ T.modify_ not isToolBarDisplayedBox
+    useUpdateEffect1' source do
+      highlightSource window source
+
+    useUpdateEffect1' search do
+      autocompleteSearch terms search >>= flip T.write_ resultBox
 
     -- Render
     pure $
@@ -111,18 +121,18 @@ layoutCpt = here.component "layout" cpt where
           [
             R2.if' (isDisplayed) $
               topBar
-              { sourceList: sources
-              , sourceCallback: highlightSource window
-              , autocompleteSearchCallback: autocompleteSearch terms
-              , autocompleteSubmitCallback: autocompleteSubmit
-              , toolBarFlag: isToolBarDisplayed
-              , toolBarCallback: toggleToolBar
+              { sources
+              , source: sourceBox
+              , toolBar: toolBarDisplayedBox
+              , result: resultBox
+              , search: searchBox
+              , submit: \_ -> autocompleteSubmit result
               }
           ]
         ]
       ,
         -- Toolbar
-        R2.if' (isToolBarDisplayed) $
+        R2.if' (toolBarDisplayed) $
           toolBar
           { resetViewCallback: const resetView
           , exportCallback: const exportViz

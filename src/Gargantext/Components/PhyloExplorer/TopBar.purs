@@ -5,25 +5,25 @@ module Gargantext.Components.PhyloExplorer.TopBar
 import Gargantext.Prelude
 
 import Data.Maybe (Maybe(..))
-import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), ComponentStatus(..), Variant(..))
 import Gargantext.Components.PhyloExplorer.Types (Term(..), Source(..))
 import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
+import Reactix (nothing)
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Toestand as T
 
 -- @WIP: * change "source" default value "" to `Maybe String`
 type Props =
-  ( sourceCallback             :: String -> Effect Unit
-  , sourceList                 :: Array Source
-  , autocompleteSearchCallback :: String -> Effect (Maybe Term)
-  , autocompleteSubmitCallback :: Maybe Term -> Effect Unit
-  , toolBarFlag                :: Boolean
-  , toolBarCallback            :: Unit -> Effect Unit
+  ( sources             :: Array (Source)
+  , source              :: T.Box (String)
+  , toolBar             :: T.Box (Boolean)
+  , result              :: T.Box (Maybe Term)
+  , search              :: T.Box (String)
+  , submit              :: Unit -> Effect Unit
   )
 
 here :: R2.Here
@@ -34,28 +34,17 @@ topBar = R2.leaf component
 
 component :: R.Component Props
 component = here.component "main" cpt where
-  cpt props _ = do
+  cpt { sources
+      , source
+      , toolBar
+      , search
+      , result
+      , submit } _ = do
     -- States
-    let defaultSource = ""
-    let defaultSearch = ""
-    let defaultResult = (Nothing :: Maybe Term)
-
-    source /\ sourceBox <- R2.useBox' defaultSource
-    search /\ searchBox <- R2.useBox' defaultSearch
-    result /\ resultBox <- R2.useBox' defaultResult
-
-    -- Behaviors
-    onSourceChange <- pure $
-          flip T.write sourceBox
-      >=> props.sourceCallback
-
-    onAutocompleteChange <- pure $
-          flip T.write searchBox
-      >=> props.autocompleteSearchCallback
-      >=> flip T.write_ resultBox
-
-    onAutocompleteSubmit <- pure $
-      const $ props.autocompleteSubmitCallback result
+    source'   <- R2.useLive' source
+    toolBar'  <- R2.useLive' toolBar
+    search'   <- R2.useLive' search
+    result'   <- R2.useLive' result
 
     -- Render
     pure $
@@ -66,20 +55,20 @@ component = here.component "main" cpt where
         -- Toolbar toggle
         B.button
         { className: "phylo-topbar__toolbar"
-        , callback: props.toolBarCallback
-        , variant: props.toolBarFlag ?
+        , callback: \_ -> T.modify_ (not) toolBar
+        , variant: toolBar' ?
             ButtonVariant Light $
             OutlinedButtonVariant Light
         }
-        [ H.text $ props.toolBarFlag ? "Hide toolbar" $ "Show toolbar" ]
+        [ H.text $ toolBar' ? "Hide toolbar" $ "Show toolbar" ]
       ,
         -- Source
         H.div
         { className: "phylo-topbar__source"}
         [
           B.formSelect
-          { value: source
-          , callback: onSourceChange
+          { value: source'
+          , callback: flip T.write_ source
           } $
           [
             H.option
@@ -93,7 +82,7 @@ component = here.component "main" cpt where
             [ H.text "unselect ✕" ]
           ]
           <>
-            flip map props.sourceList
+            flip map sources
 
               \(Source { id, label }) ->
                 H.option
@@ -110,22 +99,22 @@ component = here.component "main" cpt where
           B.formInput
           { className: "phylo-topbar__suggestion"
           , status: Idled
-          , value: case result of
+          , value: case result' of
               Nothing                     -> ""
               Just (Term { label }) -> label
-          -- (?) noop: see `onAutocompleteChange`
-          , callback: const $ pure unit
+          -- (?) noop: see `submit`
+          , callback: \_ -> nothing
           }
         ,
           B.formInput
           { className: "phylo-topbar__search"
-          , callback: onAutocompleteChange
-          , value: search
+          , callback: flip T.write_ search
+          , value: search'
           , placeholder: "Find a term"
           }
         ,
           B.button
-          { callback: onAutocompleteSubmit
+          { callback: submit
           , type: "submit"
           , className: "phylo-topbar__submit"
           }
