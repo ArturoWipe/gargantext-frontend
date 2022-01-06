@@ -26,6 +26,7 @@ import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (D3, D3Eff)
 import Graphics.D3.Selection as D3S
 import Graphics.D3.Util (ffi)
+import Toestand as T
 
 foreign import _drawPhylo :: EffectFn7
   (Array Branch)
@@ -246,11 +247,12 @@ autocompleteSearch terms query =
     else Nothing
 
 
-autocompleteSubmit :: Maybe Term -> Effect Unit
-autocompleteSubmit = case _ of
-  Nothing                          -> pure unit
+autocompleteSubmit :: T.Box DisplayView -> Maybe Term -> Effect Unit
+autocompleteSubmit displayView = case _ of
+  Nothing                    -> pure unit
   Just (Term { label, fdt }) -> do
     showLabel
+    T.write_ LabelMode displayView
     termClick label fdt 0 "search"
 
 

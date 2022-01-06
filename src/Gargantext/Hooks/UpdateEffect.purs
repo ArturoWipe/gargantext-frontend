@@ -6,7 +6,7 @@ module Gargantext.Hooks.UpdateEffect
 import Gargantext.Prelude
 
 import Effect (Effect)
-import Gargantext.Hooks.FirstMount (useFirstMount)
+import Gargantext.Hooks.FirstEffect (useFirstMount)
 import Reactix (nothing, thenNothing)
 import Reactix as R
 

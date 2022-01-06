@@ -253,6 +253,7 @@ function showLanding() {
 
   Array.from(ngrams).forEach(function(item) {
     item.style.fill = "#61a3a9";
+    item.style.visibility = "hidden";
   })
 }
 /**

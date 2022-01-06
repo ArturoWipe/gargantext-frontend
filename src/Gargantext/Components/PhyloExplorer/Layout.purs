@@ -59,11 +59,6 @@ layoutCpt = here.component "layout" cpt where
     displayView /\ displayViewBox <- R2.useBox' defaultDisplayView
     isIsolineDisplayed /\ isIsolineDisplayedBox <- R2.useBox' false
 
-    -- Behaviors
-    changeViewCallback <- pure $
-          flip T.write displayViewBox
-      >=> changeDisplayView
-
     -- Effects
     R.useEffectOnce' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
@@ -103,6 +98,14 @@ layoutCpt = here.component "layout" cpt where
     useUpdateEffect1' search do
       autocompleteSearch terms search >>= flip T.write_ resultBox
 
+    -- Behaviors
+    changeViewCallback <- pure $
+          flip T.write displayViewBox
+      >=> changeDisplayView
+
+    autocompleteSubmitCallback <- pure $ const $
+      autocompleteSubmit displayViewBox result
+
     -- Render
     pure $
 
@@ -126,7 +129,7 @@ layoutCpt = here.component "layout" cpt where
               , toolBar: toolBarDisplayedBox
               , result: resultBox
               , search: searchBox
-              , submit: \_ -> autocompleteSubmit result
+              , submit: autocompleteSubmitCallback
               }
           ]
         ]

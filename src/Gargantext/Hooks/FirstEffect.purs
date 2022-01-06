@@ -1,13 +1,27 @@
 module Gargantext.Hooks.FirstEffect
-  ( useFirstEffect, useFirstEffect'
+  ( useFirstMount
+  , useFirstEffect, useFirstEffect'
   ) where
 
 import Gargantext.Prelude
 
 import Effect (Effect)
-import Gargantext.Hooks.FirstMount (useFirstMount)
 import Reactix (nothing, thenNothing)
 import Reactix as R
+
+-- | Hook triggered on first mount event only
+useFirstMount :: R.Hooks (Boolean)
+useFirstMount = do
+  firstMount <- R.useRef true
+
+  let firstMount' = R.readRef firstMount
+
+  R.unsafeHooksEffect
+    if firstMount' == true
+    then R.setRef firstMount false
+    else nothing
+
+  pure firstMount'
 
 -- | Hook triggered on first mount only
 useFirstEffect :: Effect (Effect Unit) -> R.Hooks Unit
