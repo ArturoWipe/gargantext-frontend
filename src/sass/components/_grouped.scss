@@ -104,7 +104,33 @@
   }
 
   // icon alignement
-  .b-icon {
-    vertical-align: text-top;
+  .b-icon::before {
+    line-height: $btn-line-height;
+  }
+}
+
+
+/// Fieldset
+///-----------------------------------------------------------------------------
+
+.b-fieldset {
+  position: relative;
+  border: $card-border-width solid $card-border-color;
+  border-radius: $card-border-radius;
+  padding-left: $card-spacer-x;
+  padding-right: $card-spacer-x;
+  padding-bottom: $card-spacer-y;
+  padding-top: calc( #{ $card-spacer-y } + #{ $headings-margin-bottom } );
+
+  &__legend {
+    position: absolute;
+    top: 0;
+    font-size: $headings-font-family;
+    font-weight: $headings-font-weight;
+    color: $headings-color;
+    line-height: $headings-line-height;
+    margin: #{ - $headings-margin-bottom } 0 0;
+    padding-left: $card-spacer-x / 2;
+    padding-right: $card-spacer-x / 2;
   }
 }

@@ -13,6 +13,7 @@ import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocomplet
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..))
+import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Hooks.UpdateEffect (useUpdateEffect1')
 import Gargantext.Types (NodeID)
 import Gargantext.Utils ((?))
@@ -86,7 +87,23 @@ layoutCpt = here.component "layout" cpt where
           pure $ (style .= "display") $
             isIsolineDisplayed ? "flex" $ "none"
 
-    -- Effects
+    useFirstEffect' do
+      -- @WIP: remove inopinent <div> (see Gargantext.Components.Router)
+      mEl <- querySelector document ".main-page__main-route .container"
+      case mEl of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "display") "none"
+      -- @WIP: reset "main-page__main-route" wrapper margin
+      --       (see Gargantext.Components.Router)
+      mEl' <- querySelector document ".main-page__main-route"
+      case mEl' of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "padding") "initial"
+
     -- @WIP (as some actions are checked by the JS resources via DOMElement
     --      UI attribute, for now we create a temporary reference)
     useUpdateEffect1' displayView do

@@ -10004,8 +10004,28 @@ h3 {
   visibility: hidden;
 }
 
-.b-button .b-icon {
-  vertical-align: text-top;
+.b-button .b-icon::before {
+  line-height: 1.5;
+}
+
+.b-fieldset {
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  padding-bottom: 0.75rem;
+  padding-top: calc( 0.75rem + 0.5rem );
+}
+
+.b-fieldset__legend {
+  position: absolute;
+  top: 0;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: -0.5rem 0 0;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
 }
 
 .form-group {
@@ -11468,6 +11488,8 @@ select.form-control {
   width: 100%;
 }
 
+/* Grid constants */
+/* Topbar constants */
 /* fonts */
 @font-face {
   font-family: "Inter-Regular";
@@ -11711,7 +11733,7 @@ select.form-control {
   font-family: "Inter-Regular";
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 56px - 64px);
 }
 
 .phylo__spinner {
@@ -11743,11 +11765,13 @@ select.form-control {
 
 .phylo-grid {
   position: relative;
+  padding-top: 32px;
+  padding-bottom: 32px;
 }
 
 .phylo-grid__content {
   display: flex;
-  height: 500px;
+  height: calc(100vh - 56px - 64px);
   position: relative;
 }
 
@@ -11757,7 +11781,7 @@ select.form-control {
   bottom: 0;
   left: 0;
   display: flex;
-  height: 500px;
+  height: calc(100vh - 56px - 64px);
   position: absolute;
   visibility: hidden;
 }
@@ -11844,22 +11868,41 @@ select.form-control {
 
 .phylo-toolbar {
   display: flex;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  backdrop-filter: blur(4px);
+  background-color: rgba(255, 255, 255, 0.75);
+  padding: 20px;
+  z-index: 1;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.phylo-toolbar .b-fieldset__legend {
+  background-color: #fff;
+}
+
+.phylo-toolbar__gap {
+  width: 1.25rem;
+  display: inline-block;
 }
 
 .right-handed .phylo-toolbar {
   flex-direction: row;
 }
 
-.right-handed .phylo-toolbar__reset, .right-handed .phylo-toolbar__node, .right-handed .phylo-toolbar__screenshot {
-  margin-right: 16px;
+.right-handed .phylo-toolbar__section {
+  margin-right: 20px;
 }
 
 .left-handed .phylo-toolbar {
   flex-direction: row-reverse;
 }
 
-.left-handed .phylo-toolbar__reset, .left-handed .phylo-toolbar__node, .left-handed .phylo-toolbar__screenshot {
-  margin-left: 16px;
+.left-handed .phylo-toolbar__section {
+  margin-left: 20px;
 }
 
 /*# sourceMappingURL=bootstrap-herbie.css.map */

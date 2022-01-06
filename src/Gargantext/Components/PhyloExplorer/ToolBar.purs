@@ -9,7 +9,7 @@ import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
 import Gargantext.Components.PhyloExplorer.Types (DisplayView(..))
-import Gargantext.Utils ((?))
+import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -46,83 +46,100 @@ component = here.component "main" cpt where
       H.div
       { className: "phylo-toolbar" }
       [
-        -- Reset view button
-        B.button
-        { className: "phylo-toolbar__reset"
-        , callback: resetViewCallback
-        , variant: OutlinedButtonVariant Secondary
+        -- View settings
+        B.fieldset
+        { className: "phylo-toolbar__section"
+        , titleSlot: H.text "View settings"
         }
         [
-          H.text "Reset view"
-        ]
-      ,
-        H.div
-        { className: intercalate " "
-            [ "phylo-toolbar__node"
-            , "btn-group"
+          -- Reset view button
+          B.button
+          { callback: resetViewCallback
+          , variant: OutlinedButtonVariant Secondary
+          }
+          [
+            H.text "Reset view"
+          ]
+        ,
+          H.span
+          { className: "phylo-toolbar__gap" }
+          [ H.text "" ]
+        ,
+          -- Display view mode
+          H.div
+          { className: "btn-group"
+          , role: "group"
+          }
+          [
+            B.button
+            { title: "Show node header"
+            , callback: \_ -> changeViewCallback HeadingMode
+            , variant: OutlinedButtonVariant Secondary
+            , className: displayView == HeadingMode ?
+                "active" $
+                ""
+            }
+            [
+              B.icon
+              { name: "header" }
             ]
-        , role: "group"
-        }
-        [
-          B.button
-          { title: "Show node header"
-          , callback: \_ -> changeViewCallback HeadingMode
-          , variant: OutlinedButtonVariant Secondary
-          , className: displayView == HeadingMode ?
-              "active" $
-              ""
-          }
-          [
-            B.icon
-            { name: "header" }
-          ]
-        ,
-          B.button
-          { title: "Show node inner label"
-          , callback: \_ -> changeViewCallback LabelMode
-          , variant: OutlinedButtonVariant Secondary
-          , className: displayView == LabelMode ?
-              "active" $
-              ""
-          }
-          [
-            B.icon
-            { name: "dot-circle-o" }
-          ]
-        ,
-          B.button
-          { title: "Show default landing view"
-          , callback: \_ -> changeViewCallback LandingMode
-          , variant: OutlinedButtonVariant Secondary
-          , className: displayView == LandingMode ?
-              "active" $
-              ""
-          }
-          [
-            B.icon
-            { name: "circle" }
+          ,
+            B.button
+            { title: "Show node inner label"
+            , callback: \_ -> changeViewCallback LabelMode
+            , variant: OutlinedButtonVariant Secondary
+            , className: displayView == LabelMode ?
+                "active" $
+                ""
+            }
+            [
+              B.icon
+              { name: "dot-circle-o" }
+            ]
+          ,
+            B.button
+            { title: "Show default landing view"
+            , callback: \_ -> changeViewCallback LandingMode
+            , variant: OutlinedButtonVariant Secondary
+            , className: displayView == LandingMode ?
+                "active" $
+                ""
+            }
+            [
+              B.icon
+              { name: "circle" }
+            ]
           ]
         ]
       ,
-        -- Isoline button
-        B.button
-        { className: "phylo-toolbal__isoline"
-        , callback: \_ -> T.modify_ not isolineBox
-        , variant: isIsolineDisplayed ?
-            ButtonVariant Secondary $
-            OutlinedButtonVariant Secondary
+        -- View settings
+        B.fieldset
+        { className: "phylo-toolbar__section"
+        , titleSlot: H.text "View settings"
         }
         [
-          H.text "Iso Line data"
-        ]
-      ,
-        -- Screenshot button
-        B.button
-        { className: "phylo-toolbar__screenshot"
-        , callback: exportCallback
-        , variant: OutlinedButtonVariant Secondary
-        }
-        [
-          H.text "Take screenshot"
+          -- Isoline button
+          B.button
+          { callback: \_ -> T.modify_ not isolineBox
+          , variant: isIsolineDisplayed ?
+              ButtonVariant Secondary $
+              OutlinedButtonVariant Secondary
+          }
+          [
+            H.text "Iso Line data"
+          ]
+        ,
+          H.span
+          { className: "phylo-toolbar__gap" }
+          [ H.text "" ]
+        ,
+          -- Screenshot button
+          B.button
+          { callback: exportCallback
+          , variant: OutlinedButtonVariant Secondary
+          }
+          [
+            H.text "Take screenshot"
+          ]
         ]
       ]

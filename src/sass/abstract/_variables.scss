@@ -3,3 +3,13 @@
 
 /// Global spacing value
 $space-unit: 8px;
+
+/// Z-Index Management
+/// @link https://medium.com/alistapart/sassier-z-index-management-for-complex-layouts-4540717a9488
+$z-indexes: (
+  main: (
+  ),
+  phylo-layout: (
+    "toolbar"
+  ),
+);
