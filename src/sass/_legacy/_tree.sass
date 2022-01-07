@@ -1,5 +1,3 @@
-@use '../abstract/_members' as *
-
 $forest-layout-top-teaser-height: 24px
 $forest-layout-bottom-teaser-height: 24px // ~line-height to 1.5 (covering tree)
 $node-popop-radius: 6px
@@ -23,6 +21,13 @@ body > .tree ul > li:first-child::before
   top: 12px
 
 li
+  a
+    // color: map_get($theme-colors, 'primary')
+    color: $primary
+  a:hover
+    // color: darken( map_get($theme-colors, 'primary'), 15% )
+    color: darken($primary, 15%)
+
   .leaf
     display: flex
     flex-direction: row

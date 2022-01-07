@@ -1,8 +1,6 @@
 /** @TODO: use JS Toolkit to create individual SASS files for
 ***        existing PS components
 **/
-@use '../abstract/_members' as *;
-@use '../abstract/_variables' as *;
 @use "sass:math" as math;
 
 
@@ -114,23 +112,27 @@
 ///-----------------------------------------------------------------------------
 
 .b-fieldset {
+  $margin: space-x(2);
+
   position: relative;
   border: $card-border-width solid $card-border-color;
   border-radius: $card-border-radius;
-  padding-left: $card-spacer-x;
-  padding-right: $card-spacer-x;
-  padding-bottom: $card-spacer-y;
-  padding-top: calc( #{ $card-spacer-y } + #{ $headings-margin-bottom } );
+  padding-left: $margin;
+  padding-right: $margin;
+  padding-bottom: $margin;
+  padding-top: calc( #{ $margin } + #{ $headings-margin-bottom } );
+  background-color: inherit;
 
   &__legend {
     position: absolute;
     top: 0;
     font-size: $headings-font-family;
     font-weight: $headings-font-weight;
-    color: $headings-color;
+    color: $gray-600;
     line-height: $headings-line-height;
     margin: #{ - $headings-margin-bottom } 0 0;
-    padding-left: $card-spacer-x / 2;
-    padding-right: $card-spacer-x / 2;
+    padding-left: $margin / 2;
+    padding-right: $margin / 2;
+    background-color: inherit;
   }
 }

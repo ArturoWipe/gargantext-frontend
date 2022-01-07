@@ -1,7 +1,3 @@
-@use '../abstract/_variables' as *;
-@use '../abstract/_members' as *;
-@use '../modules/_layout' as layout;
-
 /* Grid constants */
 
 $topbar-height: 56px; // ~ unworthy empirical value (@TODO topbar height calculation)
@@ -378,7 +374,7 @@ $topbar-input-width: 304px;
   $margin: space-x(0.5);
   $toolbar-button-width: 128px;
 
-  @include layout.asideTopbar();
+  @include asideTopbar();
 
   padding-left: $margin;
   padding-right: $margin;
@@ -432,27 +428,16 @@ $topbar-input-width: 304px;
 ////////////////////////////////////////////////////////////////
 
 .phylo-toolbar {
-  $margin: space-x(2.5);
+  $section-margin: space-x(2.5);
+  $button-margin: space-x(2);
 
   display: flex;
-  position: absolute;
-  width: 100%;
-  top: 0;
-  left: 0;
-  right: 0;
-  backdrop-filter: blur(4px);
-  background-color: mix-alpha($modal-content-bg, 75%);
-  padding: space-x(2.5);
-  z-index: z-index("phylo-layout", "toolbar");
   border-bottom: 1px solid $border-color;
-
-  // fix UI issue with fielset inherit bg
-  .b-fieldset__legend {
-    background-color: $modal-content-bg;
-  }
+  padding: $section-margin;
+  background-color: $body-bg;
 
   &__gap {
-    width: $card-spacer-x;
+    width: $button-margin;
     display: inline-block;
   }
 
@@ -460,7 +445,7 @@ $topbar-input-width: 304px;
     flex-direction: row;
 
     &__section {
-      margin-right: $margin;
+      margin-right: $section-margin;
     }
   }
 
@@ -468,7 +453,7 @@ $topbar-input-width: 304px;
     flex-direction: row-reverse;
 
     &__section {
-      margin-left: $margin;
+      margin-left: $section-margin;
     }
   }
 }

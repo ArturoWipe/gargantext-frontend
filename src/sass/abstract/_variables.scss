@@ -1,6 +1,3 @@
-@import "../../../node_modules/bootstrap/scss/functions";
-@import "../../../node_modules/bootstrap/scss/variables";
-
 /// Global spacing value
 $space-unit: 8px;
 
@@ -8,8 +5,5 @@ $space-unit: 8px;
 /// @link https://medium.com/alistapart/sassier-z-index-management-for-complex-layouts-4540717a9488
 $z-indexes: (
   main: (
-  ),
-  phylo-layout: (
-    "toolbar"
   ),
 );

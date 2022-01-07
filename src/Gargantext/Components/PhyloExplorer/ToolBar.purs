@@ -4,12 +4,11 @@ module Gargantext.Components.PhyloExplorer.ToolBar
 
 import Gargantext.Prelude
 
-import Data.Array (intercalate)
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
 import Gargantext.Components.PhyloExplorer.Types (DisplayView(..))
-import Gargantext.Utils (nbsp, (?))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -112,10 +111,10 @@ component = here.component "main" cpt where
           ]
         ]
       ,
-        -- View settings
+        -- Actions
         B.fieldset
         { className: "phylo-toolbar__section"
-        , titleSlot: H.text "View settings"
+        , titleSlot: H.text "Actions"
         }
         [
           -- Isoline button

@@ -1,0 +1,33 @@
+@import '../../../node_modules/bootstrap/scss/functions';
+@import '../../../node_modules/bootstrap/scss/variables';
+@import '../../../node_modules/bootstrap/scss/mixins';
+
+// Your variable overrides
+$primary: #005a9a;
+$secondary: $blue;
+
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary
+);
+
+// Bootstrap and its default variables
+@import '../../../node_modules/bootstrap/scss/bootstrap';
+
+// Add SASS theme customizations here..
+//
+// (?) Normally "abstract" and "modules" have to be MANUALLY IMPORTED each
+//     times their content is being used
+//
+//     However, with Bootstrap non "@use" API-ready, and multiple themes
+//     management, we have to stick the old "@import"
+//
+//     It also implies that, if tomorrow, transition to "@import" to "@use" API
+//     has to be made, every manual import must be included (eg. by checking
+//     the `modules/form` file, and check where its mixin `inputError` has been
+//     being used
+@import '../_abstract';
+@import '../_modules';
+@import '../_components';
+@import '../_base';
+@import '../_legacy';

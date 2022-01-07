@@ -1,6 +1,3 @@
-@use '../abstract/_members' as *;
-@use '../abstract/_variables' as *;
-
 @mixin asideTopbar() {
   $border-color: mix-alpha($navbar-dark-hover-color, 5%);
 

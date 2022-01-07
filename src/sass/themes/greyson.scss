@@ -24,6 +24,8 @@ $enable-rounded:false;
 @import "../../../node_modules/bootstrap/scss/bootstrap";
 
 // Add SASS theme customizations here..
+@import '../_abstract';
+@import '../_modules';
 @import "../_components";
 @import "../_base";
 @import "../_legacy";
