@@ -20,6 +20,7 @@ type Props =
   , changeViewCallback  :: DisplayView -> Effect Unit
   , exportCallback      :: Unit -> Effect Unit
   , isolineBox          :: T.Box Boolean
+  , unselectCallback    :: Unit -> Effect Unit
   )
 
 here :: R2.Here
@@ -35,6 +36,7 @@ component = here.component "main" cpt where
       , changeViewCallback
       , exportCallback
       , isolineBox
+      , unselectCallback
       } _ = do
     -- States
     isIsolineDisplayed <- R2.useLive' isolineBox
@@ -126,6 +128,19 @@ component = here.component "main" cpt where
           }
           [
             H.text "Iso Line data"
+          ]
+        ,
+          H.span
+          { className: "phylo-toolbar__gap" }
+          [ H.text "" ]
+        ,
+          -- Unselect button
+          B.button
+          { callback: unselectCallback
+          , variant: OutlinedButtonVariant Secondary
+          }
+          [
+            H.text "Unselect"
           ]
         ,
           H.span

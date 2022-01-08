@@ -6,6 +6,7 @@ module Gargantext.Components.PhyloExplorer.Draw
   , resetView
   , changeDisplayView
   , exportViz
+  , doubleClick
   ) where
 
 import Gargantext.Prelude
@@ -96,6 +97,12 @@ foreign import _exportViz :: Effect Unit
 
 exportViz :: Effect Unit
 exportViz = _exportViz
+
+
+foreign import _doubleClick :: Effect Unit
+
+doubleClick :: Effect Unit
+doubleClick = _doubleClick
 
 -----------------------------------------------------------
 

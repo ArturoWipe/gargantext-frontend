@@ -9,7 +9,7 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..), (.=))
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.PhyloExplorer.Draw (autocompleteSearch, autocompleteSubmit, changeDisplayView, drawPhylo, exportViz, highlightSource, resetView, setGlobalD3Reference, setGlobalDependencies)
+import Gargantext.Components.PhyloExplorer.Draw as Draw
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..))
@@ -63,9 +63,9 @@ layoutCpt = here.component "layout" cpt where
     -- Effects
     R.useEffectOnce' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
-      setGlobalD3Reference window d3
-      setGlobalDependencies window (PhyloDataSet o)
-      drawPhylo
+      Draw.setGlobalD3Reference window d3
+      Draw.setGlobalDependencies window (PhyloDataSet o)
+      Draw.drawPhylo
         o.branches
         o.periods
         o.groups
@@ -73,7 +73,7 @@ layoutCpt = here.component "layout" cpt where
         o.ancestorLinks
         o.branchLinks
         o.bb
-      changeDisplayView displayView
+      Draw.changeDisplayView displayView
       T.write_ true isReadyBox
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
@@ -110,18 +110,18 @@ layoutCpt = here.component "layout" cpt where
       pure $ (window .= "displayView") (show displayView)
 
     useUpdateEffect1' source do
-      highlightSource window source
+      Draw.highlightSource window source
 
     useUpdateEffect1' search do
-      autocompleteSearch terms search >>= flip T.write_ resultBox
+      Draw.autocompleteSearch terms search >>= flip T.write_ resultBox
 
     -- Behaviors
     changeViewCallback <- pure $
           flip T.write displayViewBox
-      >=> changeDisplayView
+      >=> Draw.changeDisplayView
 
     autocompleteSubmitCallback <- pure $ const $
-      autocompleteSubmit displayViewBox result
+      Draw.autocompleteSubmit displayViewBox result
 
     -- Render
     pure $
@@ -154,8 +154,9 @@ layoutCpt = here.component "layout" cpt where
         -- Toolbar
         R2.if' (toolBarDisplayed) $
           toolBar
-          { resetViewCallback: const resetView
-          , exportCallback: const exportViz
+          { resetViewCallback: const Draw.resetView
+          , exportCallback: const Draw.exportViz
+          , unselectCallback: const Draw.doubleClick
           , displayView
           , changeViewCallback
           , isolineBox: isIsolineDisplayedBox

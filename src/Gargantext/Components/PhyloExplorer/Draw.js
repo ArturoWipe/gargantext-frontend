@@ -9,6 +9,7 @@ exports._showLabel        = showLabel;
 exports._showHeading      = showHeading;
 exports._showLanding      = showLanding;
 exports._exportViz        = exportViz;
+exports._doubleClick      = doubleClick;
 
 var ISO_LINE_DOM_QUERY      = '.phylo-isoline__content';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
@@ -962,7 +963,6 @@ function getCSSStyles( parentElement ) {
     .append("svg")
       .attr("width", coordinates.w)
       .attr("height", coordinates.h)
-      // .attr("viewBox", coordinatesToBox(coordinates))
     .append("g");
 
   var xRange = coordinatesToXRange(coordinates);
@@ -1121,7 +1121,6 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
     .append("svg")
       .attr("width", scapeCoordinates.w)
       .attr("height", scapeCoordinates.h)
-      // .attr("viewBox", coordinatesToBox(scapeCoordinates));
 
 
   /* *** draw the graph *** */
