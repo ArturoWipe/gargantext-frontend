@@ -166,17 +166,7 @@ layoutCpt = here.component "layout" cpt where
         -- Iso Line
         H.div
         { className: "phylo-isoline"}
-        [
-          H.div
-          { className: "phylo-isoline__bleed-space" }
-          []
-        ,
-          H.div
-          { id: "phyloIsoLine"
-          , className: "phylo-isoline__content"
-          }
-          []
-        ]
+        []
       ,
         -- (?) prefer div "margin" instead of CSS margin, it will ease
         --     some computation made on the scape and peak

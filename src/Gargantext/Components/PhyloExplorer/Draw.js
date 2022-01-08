@@ -11,7 +11,7 @@ exports._showLanding      = showLanding;
 exports._exportViz        = exportViz;
 exports._doubleClick      = doubleClick;
 
-var ISO_LINE_DOM_QUERY      = '.phylo-isoline__content';
+var ISO_LINE_DOM_QUERY      = '.phylo-isoline';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
 var CENTER_COLUMN_DOM_QUERY = '.phylo-grid__blueprint__center';
 var SCAPE_DOM_QUERY         = '.phylo-grid__content__scape';
@@ -965,7 +965,11 @@ function getCSSStyles( parentElement ) {
       .attr("height", coordinates.h)
     .append("g");
 
-  var xRange = coordinatesToXRange(coordinates);
+  var centerColumnCoordinates = getCenterColumnCoordinates();
+
+  // (?) Iso line width: full width of its div parent, will stretch the page
+  //     Iso line real content: same length and x-position as the main scape SVG
+  var xRange = coordinatesToXRange(centerColumnCoordinates);
   var yRange = coordinatesToYRange(coordinates);
 
   xScale0 = d3

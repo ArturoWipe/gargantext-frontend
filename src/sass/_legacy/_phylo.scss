@@ -309,18 +309,8 @@ $topbar-input-width: 304px;
   position: relative;
   width: 100%;
   height: $isoline-height;
-  // background-color: #EBE4DD;
+  background-color: $gray-100;
   border-bottom: 1px solid $border-color;
-
-  &__bleed-space {
-    height: 100%;
-    width: $left-column-width;
-  }
-
-  &__content {
-    height: 100%;
-    width: $center-column-width;
-  }
 }
 
 ////////////////////////////////////////////////////////////////

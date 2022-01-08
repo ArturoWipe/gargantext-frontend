@@ -11347,15 +11347,8 @@ select.form-control {
   position: relative;
   width: 100%;
   height: 142px;
+  background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
-}
-.phylo-isoline__bleed-space {
-  height: 100%;
-  width: 10%;
-}
-.phylo-isoline__content {
-  height: 100%;
-  width: 80%;
 }
 
 .phylo-margin {
