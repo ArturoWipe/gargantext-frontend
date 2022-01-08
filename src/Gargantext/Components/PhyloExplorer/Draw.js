@@ -1016,7 +1016,7 @@ function getCSSStyles( parentElement ) {
        .attr("r","55")
        .attr("id",b => "peak-shadow" + b.bId)
        .attr("visibility","visible")
-       .style("fill","#f5eee6");
+       .style("fill","#FFFFFF");
 
   svg
     .selectAll("path")
@@ -1082,9 +1082,9 @@ function getIsoLineCoordinates() {
     y: 0,
     w: el.width,
     h: el.height,
-    t: 8,
+    t: 16,
     r: 12,
-    b: 8,
+    b: 16,
     l: 12
   };
 }
