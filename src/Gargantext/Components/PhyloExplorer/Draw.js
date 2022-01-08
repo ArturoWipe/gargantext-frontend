@@ -558,22 +558,32 @@ function peakOut (b,i) {
   branchOut();
 }
 /**
- * @WIP optimize coordinates variables instanciation
  * @name showPeak
  * @unpure {Object} d3
  */
 function showPeak() {
   var centerColumnCoordinates = getCenterColumnCoordinates();
-  // (?) need a position relative to the viewport instead of fixed coordinates
-  //     see https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+
   var centerColumn = d3
     .select(CENTER_COLUMN_DOM_QUERY)
     .node()
     .getBoundingClientRect();
 
+  var xAxis = d3
+    .select(".x-axis")
+    .node()
+    .getBoundingClientRect();
+
   var xBounds = [
     centerColumn.left,
-    centerColumn.left + centerColumn.width
+    centerColumn.left
+      // (?) as we cannot rely on the created "scape" SVG width (which results
+      //     may vary on height, due to coordinate matrix ratio preserving),
+      //     we have to find the real SVG width via a trick: here we'll relying //     on the xAxis
+      + xAxis.width
+      // add to be added due to use of `xAxis.width` trim padding
+      + centerColumnCoordinates.l
+      + centerColumnCoordinates.r
   ];
 
   var yBounds = [
@@ -596,8 +606,8 @@ function showPeak() {
                 y = rect.y;
             // Adjustment values empirically managing intersection
             var dx =
-                   + centerColumnCoordinates.l
-                   - centerColumnCoordinates.r
+                  //  + centerColumnCoordinates.l
+                  //  - centerColumnCoordinates.r
                    - rect.width
             var dy =
                    + centerColumnCoordinates.t
@@ -950,7 +960,9 @@ function getCSSStyles( parentElement ) {
   var svg = d3
     .select(ISO_LINE_DOM_QUERY)
     .append("svg")
-      .attr("viewBox", coordinatesToBox(coordinates))
+      .attr("width", coordinates.w)
+      .attr("height", coordinates.h)
+      // .attr("viewBox", coordinatesToBox(coordinates))
     .append("g");
 
   var xRange = coordinatesToXRange(coordinates);
@@ -1107,7 +1119,9 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   svg = d3
     .select('.phylo-grid__content__scape')
     .append("svg")
-      .attr("viewBox", coordinatesToBox(scapeCoordinates));
+      .attr("width", scapeCoordinates.w)
+      .attr("height", scapeCoordinates.h)
+      // .attr("viewBox", coordinatesToBox(scapeCoordinates));
 
 
   /* *** draw the graph *** */

@@ -177,6 +177,12 @@ layoutCpt = here.component "layout" cpt where
           []
         ]
       ,
+        -- (?) prefer div "margin" instead of CSS margin, it will ease
+        --     some computation made on the scape and peak
+        H.div
+        { className: "phylo-margin" }
+        []
+      ,
         -- Phylo Grid
         H.div
         { className: "phylo-grid" }
@@ -209,4 +215,10 @@ layoutCpt = here.component "layout" cpt where
             []
           ]
         ]
+      ,
+        -- (?) prefer div "margin" instead of CSS margin, it will ease
+        --     some computation made on the scape and peak
+        H.div
+        { className: "phylo-margin" }
+        []
       ]

@@ -1,9 +1,9 @@
 /* Grid constants */
 
 $topbar-height: 56px; // ~ unworthy empirical value (@TODO topbar height calculation)
-$graph-container-margin: 32px;
+$graph-margin: 16px;
 
-$graph-height: calc(100vh - #{ $topbar-height } - #{ $graph-container-margin * 2 });
+$graph-height: calc(100vh - #{ $topbar-height } - #{ $graph-margin * 2 });
 
 $isoline-height: 142px;
 
@@ -309,6 +309,8 @@ $topbar-input-width: 304px;
   position: relative;
   width: 100%;
   height: $isoline-height;
+  // background-color: #EBE4DD;
+  border-bottom: 1px solid $border-color;
 
   &__bleed-space {
     height: 100%;
@@ -317,17 +319,18 @@ $topbar-input-width: 304px;
 
   &__content {
     height: 100%;
-    background-color: #EBE4DD;
     width: $center-column-width;
   }
 }
 
 ////////////////////////////////////////////////////////////////
 
+.phylo-margin {
+  height: $graph-margin;
+}
+
 .phylo-grid {
   position: relative;
-  padding-top: $graph-container-margin;
-  padding-bottom: $graph-container-margin;
 
   &__content {
     display: flex;
