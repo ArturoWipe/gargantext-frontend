@@ -175,7 +175,7 @@ function arraySum(acc, curr) {
   var groups = document.getElementsByClassName("group-inner");
   var headers = document.getElementsByClassName("header");
 
-  doubleClick();
+  window.ldView = false;
 
   d3.selectAll(".group-path")
     .classed("path-heading", false);
@@ -207,8 +207,6 @@ function showHeading() {
 
   window.ldView = true;
 
-  doubleClick();
-
   d3.selectAll(".group-path")
     .classed("path-heading", true);
 
@@ -237,8 +235,6 @@ function showLanding() {
   var headers = document.getElementsByClassName("header")
 
   window.ldView = true;
-
-  doubleClick();
 
   d3.selectAll(".group-path")
     .classed("path-heading", false);
