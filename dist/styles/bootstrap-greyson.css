@@ -9894,6 +9894,16 @@ h3 {
   background-color: #fff;
 }
 
+.nav.nav-tabs .nav-link.active {
+  font-weight: bold;
+}
+.nav.nav-tabs .nav-tabs .nav-link.active, .nav.nav-tabs .nav-tabs .nav-item.show .nav-link, .nav.nav-tabs li a {
+  color: #495057;
+}
+.nav.nav-tabs li a:hover {
+  color: #262a2d;
+}
+
 .main-topbar {
   position: sticky;
   top: 0;
@@ -10566,7 +10576,6 @@ li .leaf:hover a.settings {
   scrollbar-width: none;
   overflow-y: scroll;
   overflow-x: visible;
-  transition: border 150ms;
 }
 .forest-layout::-webkit-scrollbar {
   display: none;
@@ -10842,24 +10851,10 @@ li .leaf:hover a.settings {
 }
 
 /* */
-.body ul li {
-  color: #005a9aff;
-}
-.body ul .nav {
-  color: #005a9aff;
-}
-
 .btn-primary {
   color: white;
   background-color: #005a9aff;
   border-color: black;
-}
-
-ul .nav {
-  color: #005a9aff;
-}
-ul li {
-  color: #005a9aff;
 }
 
 .frame {
@@ -11088,6 +11083,7 @@ select.form-control {
 
 /* Grid constants */
 /* Topbar constants */
+/* Sidebar constant */
 /* fonts */
 @font-face {
   font-family: "Inter-Regular";
@@ -11328,7 +11324,6 @@ select.form-control {
 }
 
 .phylo {
-  font-family: "Inter-Regular";
   position: relative;
   width: 100%;
   height: calc(100vh - 56px - 32px);
@@ -11357,6 +11352,7 @@ select.form-control {
 
 .phylo-grid {
   position: relative;
+  font-family: "Inter-Regular";
 }
 .phylo-grid__content {
   display: flex;
@@ -11407,7 +11403,7 @@ select.form-control {
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.phylo-topbar__toolbar {
+.phylo-topbar__toolbar, .phylo-topbar__sidebar {
   width: 128px;
   margin-left: 4px;
   margin-right: 4px;
@@ -11439,6 +11435,56 @@ select.form-control {
 }
 .phylo-topbar__submit {
   display: none;
+}
+
+.phylo-sidebar {
+  position: fixed;
+  background-color: #fff;
+  width: 480px;
+  height: calc(100vh - 56px);
+  z-index: 1;
+  scrollbar-width: none;
+  overflow-y: scroll;
+  overflow-x: visible;
+}
+.phylo-sidebar::-webkit-scrollbar {
+  display: none;
+}
+.right-handed .phylo-sidebar {
+  right: 0;
+  border-left: 1px solid #dee2e6;
+}
+
+.left-handed .phylo-sidebar {
+  left: 0;
+  border-right: 1px solid #dee2e6;
+}
+
+.phylo-sidebar__menu .nav-item {
+  margin-top: 16px;
+}
+.phylo-sidebar__menu .nav-item:first-child {
+  margin-left: 16px;
+}
+.phylo-sidebar__menu .nav-item:last-child {
+  margin-right: 16px;
+}
+
+.phylo-details-tab__counter {
+  margin: 16px 20px;
+}
+.phylo-details-tab__counter__item {
+  margin-left: 16px;
+  list-style: initial;
+}
+.phylo-details-tab__counter__value {
+  font-weight: bold;
+}
+.phylo-details-tab__delimiter {
+  margin: 16px 20px;
+}
+.phylo-details-tab__link {
+  margin: 16px 20px;
 }
 
 .phylo-toolbar {

@@ -10,6 +10,7 @@ import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..), (.=))
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.PhyloExplorer.Draw as Draw
+import Gargantext.Components.PhyloExplorer.SideBar (sideBar)
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
 import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..))
@@ -58,7 +59,10 @@ layoutCpt = here.component "layout" cpt where
     result /\ resultBox <- R2.useBox' (Nothing :: Maybe Term)
 
     displayView /\ displayViewBox <- R2.useBox' defaultDisplayView
+
     isIsolineDisplayed /\ isIsolineDisplayedBox <- R2.useBox' false
+
+    sideBarDisplayed /\ sideBarDisplayedBox <- R2.useBox' false
 
     -- Effects
     R.useEffectOnce' $ do
@@ -144,12 +148,24 @@ layoutCpt = here.component "layout" cpt where
               { sources
               , source: sourceBox
               , toolBar: toolBarDisplayedBox
+              , sideBar: sideBarDisplayedBox
               , result: resultBox
               , search: searchBox
               , submit: autocompleteSubmitCallback
               }
           ]
         ]
+      ,
+        -- Sidebar
+        R2.if' (sideBarDisplayed) $
+          sideBar
+          { docCount: o.nbDocs
+          , foundationCount: o.nbFoundations
+          , periodCount: o.nbPeriods
+          , termCount: o.nbTerms
+          , groupCount: o.nbGroups
+          , branchCount: o.nbBranches
+          }
       ,
         -- Toolbar
         R2.if' (toolBarDisplayed) $
@@ -161,7 +177,6 @@ layoutCpt = here.component "layout" cpt where
           , changeViewCallback
           , isolineBox: isIsolineDisplayedBox
           }
-
       ,
         -- Iso Line
         H.div

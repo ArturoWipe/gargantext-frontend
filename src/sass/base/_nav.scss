@@ -1,0 +1,14 @@
+.nav.nav-tabs {
+
+  .nav-link.active {
+    font-weight: bold;
+  }
+
+  .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link, li a {
+    color: $gray-700
+  }
+
+  li a:hover {
+    color: darken($gray-700, 15%);
+  }
+}

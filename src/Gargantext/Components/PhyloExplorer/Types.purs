@@ -7,6 +7,7 @@ module Gargantext.Components.PhyloExplorer.Types
   , Source(..)
   , sortSources
   , DisplayView(..)
+  , TabView(..)
   ) where
 
 import Gargantext.Prelude
@@ -424,3 +425,12 @@ derive instance Generic DisplayView _
 derive instance Eq DisplayView
 instance Show DisplayView where
   show = camelCase <<< genericShow
+
+-----------------------------------------------------------
+
+data TabView
+  = DetailsTab
+  | SelectionTab
+
+derive instance Generic TabView _
+derive instance Eq TabView

@@ -21,6 +21,7 @@ type Props =
   ( sources             :: Array (Source)
   , source              :: T.Box (String)
   , toolBar             :: T.Box (Boolean)
+  , sideBar             :: T.Box (Boolean)
   , result              :: T.Box (Maybe Term)
   , search              :: T.Box (String)
   , submit              :: Unit -> Effect Unit
@@ -37,12 +38,14 @@ component = here.component "main" cpt where
   cpt { sources
       , source
       , toolBar
+      , sideBar
       , search
       , result
       , submit } _ = do
     -- States
     source'   <- R2.useLive' source
     toolBar'  <- R2.useLive' toolBar
+    sideBar'  <- R2.useLive' sideBar
     search'   <- R2.useLive' search
     result'   <- R2.useLive' result
 
@@ -61,6 +64,16 @@ component = here.component "main" cpt where
             OutlinedButtonVariant Light
         }
         [ H.text $ toolBar' ? "Hide toolbar" $ "Show toolbar" ]
+      ,
+        -- Sidebar toggle
+        B.button
+        { className: "phylo-topbar__sidebar"
+        , callback: \_ -> T.modify_ (not) sideBar
+        , variant: sideBar' ?
+            ButtonVariant Light $
+            OutlinedButtonVariant Light
+        }
+        [ H.text $ sideBar' ? "Hide sidebar" $ "Show sidebar" ]
       ,
         -- Source
         H.div

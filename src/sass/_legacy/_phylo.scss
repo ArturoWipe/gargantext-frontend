@@ -15,6 +15,12 @@ $right-column-width: 10%;
 
 $topbar-input-width: 304px;
 
+/* Sidebar constant */
+
+$sidebar-width: 480px;
+$sidebar-height: calc(100vh - #{ $topbar-height });
+$tab-margin-x: space-x(2.5);
+
 /* fonts */
 
 @font-face {
@@ -280,7 +286,6 @@ $topbar-input-width: 304px;
 ////////////////////////////////////////////////////////////////
 
 .phylo {
-  font-family: "Inter-Regular"; // @WIP
   position: relative;
 
   width: 100%;
@@ -321,6 +326,7 @@ $topbar-input-width: 304px;
 
 .phylo-grid {
   position: relative;
+  font-family: "Inter-Regular";
 
   &__content {
     display: flex;
@@ -365,7 +371,7 @@ $topbar-input-width: 304px;
 
 .phylo-topbar {
   $margin: space-x(0.5);
-  $toolbar-button-width: 128px;
+  $fixed-button-width: 136px;
 
   @include asideTopbar();
 
@@ -373,8 +379,9 @@ $topbar-input-width: 304px;
   padding-right: $margin;
   display: flex;
 
-  &__toolbar {
-    width: $toolbar-button-width;
+  &__toolbar,
+  &__sidebar {
+    width: $fixed-button-width;
     margin-left: $margin;
     margin-right: $margin;
   }
@@ -415,6 +422,71 @@ $topbar-input-width: 304px;
 
   &__submit {
     display: none;
+  }
+}
+
+////////////////////////////////////////////////////////////////
+
+.phylo-sidebar {
+  position: fixed;
+  background-color: $body-bg;
+  width: $sidebar-width;
+  height: $sidebar-height;
+  z-index: z-index("phylo-layout", "sidebar");
+
+  // avoiding ugly scrollbar
+  scrollbar-width: none;
+  overflow-y: scroll;
+  overflow-x: visible;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @include right-handed {
+    right: 0;
+    border-left: 1px solid $border-color;
+  }
+
+  @include left-handed {
+    left: 0;
+    border-right: 1px solid $border-color;
+  }
+
+  &__menu .nav-item {
+    margin-top: space-x(2);
+
+    &:first-child {
+      margin-left: space-x(2);
+    }
+
+    &:last-child {
+      margin-right: space-x(2);
+    }
+  }
+}
+
+.phylo-details-tab {
+
+  &__counter {
+    margin: space-x(2) $tab-margin-x;
+
+    &__item {
+      margin-left: space-x(2);
+      list-style: initial;
+    }
+
+    &__value {
+      font-weight: bold;
+    }
+  }
+
+  &__delimiter {
+    margin: space-x(2) $tab-margin-x;
+  }
+
+  &__link {
+    margin: space-x(2) $tab-margin-x;
   }
 }
 
