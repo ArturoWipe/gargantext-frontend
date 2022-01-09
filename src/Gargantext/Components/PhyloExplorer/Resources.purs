@@ -1,4 +1,4 @@
-module Gargantext.Components.PhyloExplorer.Draw
+module Gargantext.Components.PhyloExplorer.Resources
   ( drawPhylo
   , highlightSource
   , autocompleteSearch, autocompleteSubmit
