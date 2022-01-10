@@ -209,7 +209,9 @@ highlightSource window value =
 
     -- select the relevant ones
     case value of
-      Nothing     -> pure unit
+      Nothing     -> do
+        drawWordCloud []
+
       Just source -> do
         arr <- selectionFilter (".source-" <> source) groups
           >>= selectionNodes

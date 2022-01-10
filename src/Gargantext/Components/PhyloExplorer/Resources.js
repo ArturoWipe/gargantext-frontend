@@ -903,8 +903,9 @@ function getCSSStyles( parentElement ) {
  * @unpure {Object} svg3 instanceof d3.selection
  */
  function drawWordCloud (groups) {
-  let labels = {},
-      count  = 0;
+  let labels  = {},
+      labels2 = [],
+      count   = 0;
 
   d3.selectAll(".word-cloud").remove();
 
@@ -921,16 +922,29 @@ function getCSSStyles( parentElement ) {
     })
   });
 
-  labels = (Object.values(labels)).map(function(l){
+  labels2 = (Object.values(labels)).map(function(l){
     return {"freq":(l.freq / count),"label":l.label};
   }).sort(function(l1,l2){
     return l2.freq - l1.freq;
-  })
+  });
+
+  if (labels2.length === 0) {
+    return;
+  }
 
   let y = 20
-  let opacity = d3.scaleLinear().domain([Math.log((labels[labels.length - 1]).freq),Math.log((labels[0]).freq)]).range([0.5,1]);
+  let opacity = d3
+    .scaleLinear()
+    .domain([
+      Math.log( (labels2[labels2.length - 1]).freq ),
+      Math.log( (labels2[0]).freq )
+    ])
+    .range([
+      0.5,
+      1
+    ]);
 
-  labels.forEach(function(l){
+  labels2.forEach(function(l){
     y = y + 12;
     svg3.append("text")
         .attr("class","word-cloud")
@@ -938,7 +952,7 @@ function getCSSStyles( parentElement ) {
         .attr("y", y)
         .style("opacity", opacity(Math.log(l.freq)))
         .text(l.label);
-  })
+  });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
