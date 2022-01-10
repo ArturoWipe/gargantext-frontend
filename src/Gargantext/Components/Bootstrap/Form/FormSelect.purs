@@ -47,6 +47,10 @@ options =
 -- |  ]
 -- |  ```
 -- |
+-- |
+-- | (?) note that it handled `value` as a String, as it is the KISS solution
+-- |     here
+-- |
 -- | https://getbootstrap.com/docs/4.1/components/forms/
 formSelect :: forall r. R2.OptComponent Options Props r
 formSelect = R2.optComponent component options

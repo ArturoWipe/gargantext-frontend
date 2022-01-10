@@ -6,6 +6,7 @@ import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector, window)
 import Data.Maybe (Maybe(..))
+import Data.String (null)
 import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..), (.=))
 import Gargantext.Components.Bootstrap as B
@@ -114,7 +115,8 @@ layoutCpt = here.component "layout" cpt where
       pure $ (window .= "displayView") (show displayView)
 
     useUpdateEffect1' source do
-      RS.highlightSource window source
+      s <- pure $ null source ? Nothing $ Just source
+      RS.highlightSource window s
 
     useUpdateEffect1' search do
       RS.autocompleteSearch terms search >>= flip T.write_ resultBox
@@ -126,6 +128,12 @@ layoutCpt = here.component "layout" cpt where
 
     autocompleteSubmitCallback <- pure $ const $
       RS.autocompleteSubmit displayViewBox result
+
+    unselectCallback <- pure $ const do
+      -- unselect sourcce
+      T.write_ "" sourceBox
+      -- unselect branch/term(s)
+      RS.doubleClick
 
     -- Render
     pure $
@@ -172,7 +180,7 @@ layoutCpt = here.component "layout" cpt where
           toolBar
           { resetViewCallback: const RS.resetView
           , exportCallback: const RS.exportViz
-          , unselectCallback: const RS.doubleClick
+          , unselectCallback: unselectCallback
           , displayView
           , changeViewCallback
           , isolineBox: isIsolineDisplayedBox

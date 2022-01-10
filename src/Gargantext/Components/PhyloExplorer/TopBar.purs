@@ -85,14 +85,9 @@ component = here.component "main" cpt where
           } $
           [
             H.option
-            { disabled: true
-            , value: ""
+            { value: ""
             }
             [ H.text "Select a source" ]
-          ,
-            H.option
-            { value: "unselect" }
-            [ H.text "unselect ✕" ]
           ]
           <>
             flip map sources

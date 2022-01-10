@@ -173,7 +173,7 @@ setGlobalD3Reference window d3 = void $ pure $ (window .= "d3") d3
 
 -----------------------------------------------------------
 
-highlightSource :: Window -> String -> Effect Unit
+highlightSource :: Window -> Maybe String -> Effect Unit
 highlightSource window value =
   let
     hasHighlight = maybe false identity (window .? "highlighted")
@@ -208,15 +208,14 @@ highlightSource window value =
 
 
     -- select the relevant ones
-    if (value == "unselect")
-    then
-      pure unit
-    else do
-      arr <- selectionFilter (".source-" <> value) groups
-        >>= selectionNodes
+    case value of
+      Nothing     -> pure unit
+      Just source -> do
+        arr <- selectionFilter (".source-" <> source) groups
+          >>= selectionNodes
 
-      drawWordCloud arr
-      for_ arr selectNodeGroup
+        drawWordCloud arr
+        for_ arr selectNodeGroup
 
   where
 
