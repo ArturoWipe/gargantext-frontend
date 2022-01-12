@@ -1,22 +1,8 @@
-const { memo } = require("react");
-
-exports._drawPhylo        = drawPhylo;
-exports._drawWordCloud    = drawWordCloud;
-exports._showLabel        = showLabel;
-exports._termClick        = termClick;
-exports._resetView        = resetView;
-exports._showLabel        = showLabel;
-exports._showHeading      = showHeading;
-exports._showLanding      = showLanding;
-exports._exportViz        = exportViz;
-exports._doubleClick      = doubleClick;
-
 var ISO_LINE_DOM_QUERY      = '.phylo-isoline';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
 var CENTER_COLUMN_DOM_QUERY = '.phylo-grid__blueprint__center';
 var SCAPE_DOM_QUERY         = '.phylo-grid__content__scape';
 var GRAPH_DOM_QUERY         = '.phylo-grid__content__graph';
-
 
 //  (?) Global thread dependencies:
 //    * d3 <Object> (main D3 proxy))
@@ -36,7 +22,7 @@ var label                 = undefined; // <Object> instanceof d3.selection
 var zoom                  = undefined; // <Function> see https://github.com/d3/d3-zoom#zoom
 var xScale0               = undefined; // <Function> see https://github.com/d3/d3-scale#_continuous
 var yScale0               = undefined; // <Function> see https://github.com/d3/d3-scale#_continuous
-
+var subscribers           = {};        // <Object> dictionary for pubsub pattern
 
 ////////////////////////////////////////////////////////////////////////////////
 ///    HELPERS
@@ -133,6 +119,99 @@ function rdm() {
 function arraySum(acc, curr) {
   return acc + curr
 }
+/**
+ * (?) Use of a PubSub pattern has been empiracally implemented to provide a
+ *     behavorial interface linking PureScript and JavaScript processes
+ *
+ *     As we can see, the PubSub will be used with `drawWordCloud` JavaScript
+ *     function. However, results will be handled by PureScript processes only
+ *
+ *     One ideal solution would have been to translate this very JavaScript
+ *     module in PureScript, but due to a time-consuming issue certain parts are
+ *     still in JavaScript
+ *
+ *     For these reasons, we decided to use a PubSub with event from JavaScript
+ *     ↔ PureScript. It is a simpler version as Justin Woo made in its repo [1]
+ *     It however make an assumption that every `callback` provided from a new
+ *     subscription was provided in a PureScript `Effect` thunk
+ *
+ *
+ * @name pubsub
+ * @param {Object} subscribers of <Array> of <Object> dictionary
+ *    <String> id => <Function<*>> callback
+ * @pattern module
+ * @link https://github.com/justinwoo/call-ps-from-js [1]
+ */
+var pubsub = (function(subscribers) {
+  /**
+   * @name generateUUID
+   * @access private
+   * @returns {String}
+   */
+  function generateUUID() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+  }
+
+  return {
+    /**
+     * @name subscribe
+     * @access public
+     * @param {String} eventLabel
+     * @param {Function<*>} cbk
+     * @returns {String} subscriptionId
+     */
+    subscribe(eventLabel, cbk) {
+      var id;
+
+      if (subscribers.hasOwnProperty(eventLabel) === false) {
+        subscribers[eventLabel] = {};
+      }
+
+      id = generateUUID();
+
+      subscribers[eventLabel][id] = cbk;
+
+      return id;
+    },
+    /**
+     * @name publish
+     * @access public
+     * @param {String} eventLabel
+     * @param {*} data
+     */
+    publish(eventLabel, data) {
+      if (subscribers.hasOwnProperty(eventLabel) === false) {
+        return;
+      }
+
+      Object.keys(subscribers[eventLabel]).forEach(
+        function(subscriptionId) {
+          // assuming it came from PureScript (ie. as an `Effect`)
+          return subscribers[eventLabel][subscriptionId](data)();
+        }
+      );
+    },
+    /**
+     * @name unsubscribe
+     * @access public
+     * @param {String} eventLabel
+     * @param {String} subscriptionId
+     */
+    unsubscribe(eventLabel, subscriptionId) {
+      if (subscribers.hasOwnProperty(eventLabel) === false) {
+        return;
+      }
+
+      if (subscribers[eventLabel].hasOwnProperty(subscriptionId) === false) {
+        return;
+      }
+
+      delete subscribers[eventLabel][subscriptionId];
+    }
+  };
+})(subscribers);
 
 ////////////////////////////////////////////////////////////////////////////////
 ///    ACTIONS
@@ -901,6 +980,7 @@ function getCSSStyles( parentElement ) {
  * @param {Array.<SVGCircleElement>} groups
  * @unpure {Object} d3
  * @unpure {Object} svg3 instanceof d3.selection
+ * @unpure {Object} pubsub
  */
  function drawWordCloud (groups) {
   let labels  = {},
@@ -929,7 +1009,7 @@ function getCSSStyles( parentElement ) {
   });
 
   if (labels2.length === 0) {
-    return;
+    return pubsub.publish("foo", []);
   }
 
   let y = 20
@@ -953,6 +1033,8 @@ function getCSSStyles( parentElement ) {
         .style("opacity", opacity(Math.log(l.freq)))
         .text(l.label);
   });
+
+  pubsub.publish("foo", labels2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2141,3 +2223,21 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
           termClick((emergences[k]).label,k,k,"head");
        });
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///    EXPORTS
+////////////////////////////////////////////////////////////////////////////////
+
+exports._drawPhylo        = drawPhylo;
+exports._drawWordCloud    = drawWordCloud;
+exports._showLabel        = showLabel;
+exports._termClick        = termClick;
+exports._resetView        = resetView;
+exports._showLabel        = showLabel;
+exports._showHeading      = showHeading;
+exports._showLanding      = showLanding;
+exports._exportViz        = exportViz;
+exports._doubleClick      = doubleClick;
+exports._publish          = pubsub.publish;
+exports._subscribe        = pubsub.subscribe;
+exports._unsubscribe      = pubsub.unsubscribe;

@@ -14,7 +14,7 @@ import Gargantext.Components.PhyloExplorer.Resources as RS
 import Gargantext.Components.PhyloExplorer.SideBar (sideBar)
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
-import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..))
+import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..), SelectedTerm)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Hooks.UpdateEffect (useUpdateEffect1')
 import Gargantext.Types (NodeID)
@@ -65,8 +65,10 @@ layoutCpt = here.component "layout" cpt where
 
     sideBarDisplayed /\ sideBarDisplayedBox <- R2.useBox' false
 
+    selectedTermsBox <- T.useBox (mempty :: Array SelectedTerm)
+
     -- Effects
-    R.useEffectOnce' $ do
+    useFirstEffect' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
       RS.setGlobalD3Reference window d3
       RS.setGlobalDependencies window (PhyloDataSet o)
@@ -82,6 +84,13 @@ layoutCpt = here.component "layout" cpt where
       T.write_ true isReadyBox
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
+
+    useFirstEffect' $
+      -- Subscribe to new selected term change
+      -- (see `Gargantext.Components.PhyloExplorer.Resources` > JavaScript >
+      -- `pubsub` for detailed explanations)
+      RS.subscribe "foo" $ flip T.write_ selectedTermsBox
+
 
     R.useEffect1' isIsolineDisplayed do
       mEl <- querySelector document ".phylo-isoline"
@@ -167,12 +176,14 @@ layoutCpt = here.component "layout" cpt where
         -- Sidebar
         R2.if' (sideBarDisplayed) $
           sideBar
-          { docCount: o.nbDocs
+          { nodeId
+          , docCount: o.nbDocs
           , foundationCount: o.nbFoundations
           , periodCount: o.nbPeriods
           , termCount: o.nbTerms
           , groupCount: o.nbGroups
           , branchCount: o.nbBranches
+          , selectedTerms: selectedTermsBox
           }
       ,
         -- Toolbar

@@ -7,6 +7,7 @@ module Gargantext.Components.PhyloExplorer.Resources
   , changeDisplayView
   , exportViz
   , doubleClick
+  , subscribe, unsubscribe, publish
   ) where
 
 import Gargantext.Prelude
@@ -18,7 +19,7 @@ import Data.FoldableWithIndex (forWithIndex_)
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.String as String
 import Effect (Effect)
-import Effect.Uncurried (EffectFn1, EffectFn4, EffectFn7, runEffectFn1, runEffectFn4, runEffectFn7)
+import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn4, EffectFn7, runEffectFn1, runEffectFn2, runEffectFn4, runEffectFn7)
 import FFI.Simple ((..), (.=), (.?))
 import Gargantext.Components.PhyloExplorer.Types (AncestorLink, Branch, BranchLink, DisplayView(..), Group(..), Link, Period, PhyloDataSet(..), Term(..))
 import Gargantext.Utils (getter)
@@ -103,6 +104,36 @@ foreign import _doubleClick :: Effect Unit
 
 doubleClick :: Effect Unit
 doubleClick = _doubleClick
+
+
+foreign import _subscribe :: forall opt.
+  EffectFn2
+  String
+  (opt -> Effect Unit)
+  Unit
+
+subscribe :: forall opt. String -> (opt -> Effect Unit) -> Effect Unit
+subscribe = runEffectFn2 _subscribe
+
+
+foreign import _unsubscribe ::
+  EffectFn2
+  String
+  String
+  Unit
+
+unsubscribe :: String -> String -> Effect Unit
+unsubscribe = runEffectFn2 _unsubscribe
+
+
+foreign import _publish :: forall opt.
+  EffectFn2
+  String
+  opt
+  Unit
+
+publish :: forall opt. String -> opt -> Effect Unit
+publish = runEffectFn2 _publish
 
 -----------------------------------------------------------
 

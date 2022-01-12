@@ -3,7 +3,7 @@ module Gargantext.Components.PhyloExplorer.Types
   , parsePhyloJSONSet
   , Branch(..), Period(..), Group(..)
   , Link(..), AncestorLink(..), BranchLink(..)
-  , Term(..)
+  , Term(..), SelectedTerm(..)
   , Source(..)
   , sortSources
   , DisplayView(..)
@@ -303,6 +303,17 @@ derive instance Newtype Term _
 derive instance Generic Term _
 derive instance Eq Term
 instance Show Term where show = genericShow
+
+
+newtype SelectedTerm = SelectedTerm
+ { label :: String
+ , freq  :: Number
+ }
+
+derive instance Newtype SelectedTerm _
+derive instance Generic SelectedTerm _
+derive instance Eq SelectedTerm
+instance Show SelectedTerm where show = genericShow
 
 -----------------------------------------------------------
 

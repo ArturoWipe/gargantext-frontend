@@ -10136,11 +10136,12 @@ h3 {
   background-color: #fff;
 }
 
-.nav.nav-tabs .nav-link.active {
-  font-weight: bold;
-}
 .nav.nav-tabs .nav-tabs .nav-link.active, .nav.nav-tabs .nav-tabs .nav-item.show .nav-link, .nav.nav-tabs li a {
   color: #495057;
+}
+.nav.nav-tabs li a.nav-link.active:hover {
+  color: #495057;
+  cursor: default;
 }
 .nav.nav-tabs li a:hover {
   color: #262a2d;
