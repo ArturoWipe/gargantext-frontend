@@ -5,6 +5,7 @@ module Gargantext.Components.PhyloExplorer.SideBar
 import Gargantext.Prelude
 
 import Data.Foldable (intercalate)
+import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.PhyloExplorer.Types (SelectedTerm, TabView(..))
 import Gargantext.Types (NodeID)
@@ -12,18 +13,21 @@ import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
-import Record as Record
-import Record.Extra as RX
 import Toestand as T
 
 type Props =
   ( nodeId          :: NodeID
 
+  , docCount        :: Int
+  , foundationCount :: Int
+  , periodCount     :: Int
+  , termCount       :: Int
+  , groupCount      :: Int
+  , branchCount     :: Int
+
+  , selectionQuery  :: T.Box (Maybe String)
   , selectedTerms   :: T.Box (Array SelectedTerm)
-
-  | CountData
   )
-
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.PhyloExplorer.SideBar"
@@ -85,14 +89,21 @@ component = here.component "main" cpt where
         ]
       ,
         R2.if' (tabView == DetailsTab) $
-          detailsTab $ Record.merge
-            { key: (show props.nodeId) <> "-details" }
-            (RX.pick props :: Record CountData)
+          detailsTab
+          { key: (show props.nodeId) <> "-details"
+          , docCount: props.docCount
+          , foundationCount: props.foundationCount
+          , periodCount: props.periodCount
+          , termCount: props.termCount
+          , groupCount: props.groupCount
+          , branchCount: props.branchCount
+          }
       ,
         R2.if' (tabView == SelectionTab) $
           selectionTab
           { key: (show props.nodeId) <> "-selection"
           , selectedTerms: props.selectedTerms
+          , selectionQuery: props.selectionQuery
           }
       ]
 
@@ -101,11 +112,8 @@ component = here.component "main" cpt where
 
 type DetailsProps =
   ( key             :: String
-  | CountData
-  )
 
-type CountData =
-  ( docCount        :: Int
+  , docCount        :: Int
   , foundationCount :: Int
   , periodCount     :: Int
   , termCount       :: Int
@@ -184,6 +192,7 @@ type SelectionProps =
   ( key             :: String
 
   , selectedTerms   :: T.Box (Array SelectedTerm)
+  , selectionQuery  :: T.Box (Maybe String)
   )
 
 selectionTab :: R2.Leaf SelectionProps
@@ -193,13 +202,57 @@ selectionTabCpt :: R.Component SelectionProps
 selectionTabCpt = here.component "selectionTab" cpt where
   cpt props _ = do
     -- State
-    selectedTerms' <- R2.useLive' props.selectedTerms
+    selectedTerms'  <- R2.useLive' props.selectedTerms
+    selectionQuery' <- R2.useLive' props.selectionQuery
 
     -- Render
     pure $
 
       H.div
-      {}
+      { className: "phylo-selection-tab" }
       [
+        -- Highlighted terms
+        case selectionQuery' of
+          Nothing -> mempty
+          Just s  ->
+
+            H.div
+            { className: "phylo-selection-tab__highlight" }
+            [
+              H.h5
+              {}
+              [
+                H.text "Highlighted term"
+              ]
+            ,
+              H.ul
+              { className: "list-group" }
+              [
+                H.li
+                { className: intercalate " "
+                    [ "list-group-item"
+                    , "phylo-selection-tab__highlight__label"
+                    ]
+                }
+                [
+                  H.text s
+                ]
+              ,
+                H.li
+                { className: "list-group-item" }
+                [
+                  H.a
+                  { href: "https://en.wikipedia.org/w/index.php?search=\""
+                       <> s
+                       <> "\""
+                  , target: "_blank"
+                  }
+                  [
+                    H.text "Click here for more info"
+                  ]
+                ]
+              ]
+            ]
+      ,
         H.text $ show selectedTerms'
       ]

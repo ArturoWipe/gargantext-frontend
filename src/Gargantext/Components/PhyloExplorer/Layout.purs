@@ -10,6 +10,7 @@ import Data.String (null)
 import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..), (.=))
 import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.PhyloExplorer.Resources (PubSubEvent(..))
 import Gargantext.Components.PhyloExplorer.Resources as RS
 import Gargantext.Components.PhyloExplorer.SideBar (sideBar)
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
@@ -67,6 +68,8 @@ layoutCpt = here.component "layout" cpt where
 
     selectedTermsBox <- T.useBox (mempty :: Array SelectedTerm)
 
+    selectionQueryBox <- T.useBox (Nothing :: Maybe String)
+
     -- Effects
     useFirstEffect' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
@@ -85,11 +88,17 @@ layoutCpt = here.component "layout" cpt where
       -- @WIP: handling global variables
       T.write_ (window .. "terms") termsBox
 
-    useFirstEffect' $
+    useFirstEffect' do
       -- Subscribe to new selected term change
       -- (see `Gargantext.Components.PhyloExplorer.Resources` > JavaScript >
       -- `pubsub` for detailed explanations)
-      RS.subscribe "foo" $ flip T.write_ selectedTermsBox
+      RS.subscribe (show SelectedTermsEvent) $ flip T.write_ selectedTermsBox
+      -- Subscrive to new selection query change
+      -- (idem)
+      RS.subscribe (show SelectionQueryEvent) $ case _ of
+        res
+          | true == null res -> T.write_ Nothing selectionQueryBox
+          | otherwise        -> T.write_ (Just res) selectionQueryBox
 
 
     R.useEffect1' isIsolineDisplayed do
@@ -184,6 +193,7 @@ layoutCpt = here.component "layout" cpt where
           , groupCount: o.nbGroups
           , branchCount: o.nbBranches
           , selectedTerms: selectedTermsBox
+          , selectionQuery: selectionQueryBox
           }
       ,
         -- Toolbar

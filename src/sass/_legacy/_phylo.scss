@@ -21,54 +21,62 @@ $sidebar-width: 480px;
 $sidebar-height: calc(100vh - #{ $topbar-height });
 $tab-margin-x: space-x(2.5);
 
-/* fonts */
+/* Colors */
 
-@font-face {
-  font-family: 'Inter-Regular';
-  font-style:  normal;
-  font-weight: 400;
-  src: url("../fonts/phylo/Inter-Regular.woff2") format("woff2"),
-       url("../fonts/phylo/Inter-Regular.woff") format("woff");
-}
+$graph-background-color: #FFFFFF;
+$graph-layout-line-color: #EBE4DD;
+$graph-text-color: #0D1824;
+$graph-heading-color: #B5B5B5;
 
-@font-face {
-  font-family: 'Inter-Bold';
-  font-style:  normal;
-  font-weight: 700;
-  src: url("../fonts/phylo/Inter-Bold.woff2") format("woff2"),
-       url("../fonts/phylo/Inter-Bold.woff") format("woff");
-}
+$visible-peak: #0D1824;
+$hidden-peak: #A9A9A9;
 
+$mark-default: #4A5C70;
+$mark-hover: #F3BE54;
+$mark-focus: #F24C3D;
+$mark-unfocus: #FFECEC;
+
+$group-unfocus: #A9A9A9;
+
+$isoline-stroke-color: #74B5FF;
+
+$fill-default-color: #61A3A9;
+$fill-idle-color: #F5EEE6;
+
+$emergence-color: #012840;
+$decreasing-color: #11638F;
 
 /* ---------- axis ---------- */
 
+// @WIP check if all classes are actually being used
+
 .x-axis path {
-  stroke: #EBE4DD;
+  stroke: $graph-layout-line-color;
   stroke-width: 1.5px;
 }
 
 .y-axis path {
-  stroke: #EBE4DD;
+  stroke:$graph-layout-line-color;
   stroke-width: 1.5px;
 }
 
 .y-highlight {
-  stroke: #f3be54;
+  stroke: $mark-hover;
   stroke-width: 1.5px;
 }
 
 .x-mark {
-  fill: #4A5C70;
+  fill: $mark-default;
   stroke-width: 1px;
-  stroke: #fff;
+  stroke: $graph-background-color;
 }
 
 .x-mark-over {
-  fill: #f3be54;
+  fill: $mark-hover;
 }
 
 .x-mark-focus {
-  fill: #f8381f;
+  fill: $mark-focus;
 }
 
 .tick text {
@@ -92,60 +100,73 @@ $tab-margin-x: space-x(2.5);
 }
 
 .y-mark-year-inner {
-  fill: #4A5C70;
+  fill: $mark-default;
 }
 
 .y-mark-year-inner-highlight {
-  fill: #f3be54;
+  fill: $mark-hover;
 }
 
 .y-mark-year-outer {
-  fill: #fff;
-  stroke: #4A5C70;
+  fill: $graph-background-color;
+  stroke: $mark-default;
   stroke-width: 1px;
 }
 
 .y-mark-year-outer-highlight {
-  fill: #fff;
-  stroke: #f3be54;
+  fill: $graph-background-color;
+  stroke: $mark-hover;
   stroke-width: 3px;
 }
 
 .y-mark-month {
-  fill: #4A5C70;
+  fill: $mark-default;
 }
+
+/* ---------- header ---------- */
+
+.header {
+  fill: $emergence-color;
+  cursor: pointer;
+}
+
+.header-wrapper {
+  fill: $graph-background-color;
+  filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.1))
+}
+
 
 /* ---------- group ---------- */
 
 .group-outer {
   stroke-width: 0.8px;
-  stroke: #fff;
-  fill: #fff;
+  stroke: $graph-background-color;
+  fill: $graph-background-color;
 }
 
 .group-inner {
   stroke-width: 0.8px;
-  stroke: #0d1824;
-  fill: #0d1824;
+  stroke: $graph-text-color;
+  fill: $graph-text-color;
   /*cursor: pointer;*/
   z-index: 10;
 }
 
 .group-heading {
-  fill: #fff;
-  stroke: #B5B5B5;
+  fill: $graph-background-color;
+  stroke: $graph-heading-color;
 }
 
 .group-focus {
-  stroke: #f8381f;
+  stroke: $mark-focus;
 }
 
 .source-focus {
-  stroke: #67a9cf;
+  stroke: $fill-default-color;
 }
 
 .group-unfocus {
-  stroke: #A9A9A9;
+  stroke: $group-unfocus;
 }
 
 .group-path {
@@ -164,7 +185,7 @@ $tab-margin-x: space-x(2.5);
 
 .term:hover {
   font-weight: bold;
-  fill: #f8381f;
+  fill: $mark-focus;
 }
 
 // .term-unfocus {
@@ -177,7 +198,7 @@ $tab-margin-x: space-x(2.5);
 
 .term-path {
   fill: none;
-  stroke: #F0684D;
+  stroke: $mark-focus;
   stroke-width: 1.5px;
 }
 
@@ -185,32 +206,32 @@ $tab-margin-x: space-x(2.5);
   /*text-decoration: underline #F0684D;*/
   /*fill:#5AA350;*/
   /*fill: #5AA350;*/
-  fill: #F8381F;
+  fill: $mark-focus;
 }
 
 .decreasing {
   /*text-decoration: underline #74B5FF;*/
-  fill: #11638F;
+  fill: $decreasing-color;
 }
 
 .path-focus {
   fill: none;
-  stroke: #F0684D;
+  stroke: $mark-focus;
   stroke-width: 1.5px;
 }
 
 .path-unfocus {
-  stroke: #A9A9A9;
+  stroke: $group-unfocus;
 }
 
 .path-heading {
-  stroke: #B5B5B5;
+  stroke: $graph-heading-color;
 }
 
 /* ---------- phylo ---------- */
 
 .branch-hover {
-  fill: #f3be54;
+  fill: $mark-hover;
   opacity: 0.5;
 }
 
@@ -231,7 +252,7 @@ $tab-margin-x: space-x(2.5);
 /* isoline */
 
 .peak {
-  stroke: white;
+  stroke: $graph-background-color;
   stroke-width: 1px;
   font-family: "Inter-Regular";
   font-size: 14px;
@@ -243,20 +264,20 @@ $tab-margin-x: space-x(2.5);
   font-size: 18px;
   stroke-width: 2px;
   cursor: pointer;
-  stroke: #f3be54;
+  stroke: $mark-hover;
   z-index: 100;
 }
 
 .peak-focus {
   font-size: 18px;
   stroke-width: 2px;
-  stroke: #F0684D;
+  stroke: $mark-focus;
 }
 
 .peak-focus-source {
   font-size: 18px;
   stroke-width: 2px;
-  stroke: #67a9cf;
+  stroke: $isoline-stroke-color;
 }
 
 
@@ -266,12 +287,12 @@ $tab-margin-x: space-x(2.5);
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
-  color: #FFFFFF;
+  color: $graph-background-color;
   border-radius: 3px;
   border-style: solid;
   border-width: 2px;
-  border-color: white;
-  background: #0d1824;
+  border-color: $graph-background-color;
+  background: $visible-peak;
   padding: 5px;
   z-index: 10;
   position: absolute;
@@ -487,6 +508,18 @@ $tab-margin-x: space-x(2.5);
 
   &__link {
     margin: space-x(2) $tab-margin-x;
+  }
+}
+
+.phylo-selection-tab {
+
+  &__highlight {
+    margin: space-x(2) $tab-margin-x;
+
+    &__label {
+      color: $orange;
+      font-weight: bold;
+    }
   }
 }
 

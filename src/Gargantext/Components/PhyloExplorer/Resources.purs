@@ -1,5 +1,6 @@
 module Gargantext.Components.PhyloExplorer.Resources
-  ( drawPhylo
+  ( PubSubEvent(..)
+  , drawPhylo
   , highlightSource
   , autocompleteSearch, autocompleteSubmit
   , setGlobalDependencies, setGlobalD3Reference
@@ -16,6 +17,7 @@ import DOM.Simple (Window)
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.FoldableWithIndex (forWithIndex_)
+import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.String as String
 import Effect (Effect)
@@ -29,6 +31,7 @@ import Graphics.D3.Base (D3, D3Eff)
 import Graphics.D3.Selection as D3S
 import Graphics.D3.Util (ffi)
 import Toestand as T
+
 
 foreign import _drawPhylo :: EffectFn7
   (Array Branch)
@@ -134,6 +137,22 @@ foreign import _publish :: forall opt.
 
 publish :: forall opt. String -> opt -> Effect Unit
 publish = runEffectFn2 _publish
+
+-----------------------------------------------------------
+
+foreign import _selectedTermsEvent  :: String
+foreign import _selectionQueryEvent :: String
+
+data PubSubEvent
+  = SelectedTermsEvent
+  | SelectionQueryEvent
+
+derive instance Generic PubSubEvent _
+derive instance Eq PubSubEvent
+instance Show PubSubEvent where
+  show = case _ of
+    SelectedTermsEvent  -> _selectedTermsEvent
+    SelectionQueryEvent -> _selectionQueryEvent
 
 -----------------------------------------------------------
 

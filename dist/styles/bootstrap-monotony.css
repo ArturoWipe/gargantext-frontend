@@ -10154,6 +10154,23 @@ h3 {
   color: #262a2d;
 }
 
+/* fonts */
+@font-face {
+  font-family: "Inter-Regular";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/phylo/Inter-Regular.woff2") format("woff2"), url("../fonts/phylo/Inter-Regular.woff") format("woff");
+}
+@font-face {
+  font-family: "Inter-Bold";
+  font-style: normal;
+  font-weight: 700;
+  src: url("../fonts/phylo/Inter-Bold.woff2") format("woff2"), url("../fonts/phylo/Inter-Bold.woff") format("woff");
+}
+h4, h5, h6 {
+  font-weight: bold;
+}
+
 .main-topbar {
   position: sticky;
   top: 0;
@@ -11334,19 +11351,7 @@ select.form-control {
 /* Grid constants */
 /* Topbar constants */
 /* Sidebar constant */
-/* fonts */
-@font-face {
-  font-family: "Inter-Regular";
-  font-style: normal;
-  font-weight: 400;
-  src: url("../fonts/phylo/Inter-Regular.woff2") format("woff2"), url("../fonts/phylo/Inter-Regular.woff") format("woff");
-}
-@font-face {
-  font-family: "Inter-Bold";
-  font-style: normal;
-  font-weight: 700;
-  src: url("../fonts/phylo/Inter-Bold.woff2") format("woff2"), url("../fonts/phylo/Inter-Bold.woff") format("woff");
-}
+/* Colors */
 /* ---------- axis ---------- */
 .x-axis path {
   stroke: #EBE4DD;
@@ -11359,22 +11364,22 @@ select.form-control {
 }
 
 .y-highlight {
-  stroke: #f3be54;
+  stroke: #F3BE54;
   stroke-width: 1.5px;
 }
 
 .x-mark {
   fill: #4A5C70;
   stroke-width: 1px;
-  stroke: #fff;
+  stroke: #FFFFFF;
 }
 
 .x-mark-over {
-  fill: #f3be54;
+  fill: #F3BE54;
 }
 
 .x-mark-focus {
-  fill: #f8381f;
+  fill: #F24C3D;
 }
 
 .tick text {
@@ -11402,18 +11407,18 @@ select.form-control {
 }
 
 .y-mark-year-inner-highlight {
-  fill: #f3be54;
+  fill: #F3BE54;
 }
 
 .y-mark-year-outer {
-  fill: #fff;
+  fill: #FFFFFF;
   stroke: #4A5C70;
   stroke-width: 1px;
 }
 
 .y-mark-year-outer-highlight {
-  fill: #fff;
-  stroke: #f3be54;
+  fill: #FFFFFF;
+  stroke: #F3BE54;
   stroke-width: 3px;
 }
 
@@ -11421,32 +11426,43 @@ select.form-control {
   fill: #4A5C70;
 }
 
+/* ---------- header ---------- */
+.header {
+  fill: #012840;
+  cursor: pointer;
+}
+
+.header-wrapper {
+  fill: #FFFFFF;
+  filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.1));
+}
+
 /* ---------- group ---------- */
 .group-outer {
   stroke-width: 0.8px;
-  stroke: #fff;
-  fill: #fff;
+  stroke: #FFFFFF;
+  fill: #FFFFFF;
 }
 
 .group-inner {
   stroke-width: 0.8px;
-  stroke: #0d1824;
-  fill: #0d1824;
+  stroke: #0D1824;
+  fill: #0D1824;
   /*cursor: pointer;*/
   z-index: 10;
 }
 
 .group-heading {
-  fill: #fff;
+  fill: #FFFFFF;
   stroke: #B5B5B5;
 }
 
 .group-focus {
-  stroke: #f8381f;
+  stroke: #F24C3D;
 }
 
 .source-focus {
-  stroke: #67a9cf;
+  stroke: #61A3A9;
 }
 
 .group-unfocus {
@@ -11468,12 +11484,12 @@ select.form-control {
 
 .term:hover {
   font-weight: bold;
-  fill: #f8381f;
+  fill: #F24C3D;
 }
 
 .term-path {
   fill: none;
-  stroke: #F0684D;
+  stroke: #F24C3D;
   stroke-width: 1.5px;
 }
 
@@ -11481,7 +11497,7 @@ select.form-control {
   /*text-decoration: underline #F0684D;*/
   /*fill:#5AA350;*/
   /*fill: #5AA350;*/
-  fill: #F8381F;
+  fill: #F24C3D;
 }
 
 .decreasing {
@@ -11491,7 +11507,7 @@ select.form-control {
 
 .path-focus {
   fill: none;
-  stroke: #F0684D;
+  stroke: #F24C3D;
   stroke-width: 1.5px;
 }
 
@@ -11505,7 +11521,7 @@ select.form-control {
 
 /* ---------- phylo ---------- */
 .branch-hover {
-  fill: #f3be54;
+  fill: #F3BE54;
   opacity: 0.5;
 }
 
@@ -11522,7 +11538,7 @@ select.form-control {
 
 /* isoline */
 .peak {
-  stroke: white;
+  stroke: #FFFFFF;
   stroke-width: 1px;
   font-family: "Inter-Regular";
   font-size: 14px;
@@ -11534,20 +11550,20 @@ select.form-control {
   font-size: 18px;
   stroke-width: 2px;
   cursor: pointer;
-  stroke: #f3be54;
+  stroke: #F3BE54;
   z-index: 100;
 }
 
 .peak-focus {
   font-size: 18px;
   stroke-width: 2px;
-  stroke: #F0684D;
+  stroke: #F24C3D;
 }
 
 .peak-focus-source {
   font-size: 18px;
   stroke-width: 2px;
-  stroke: #67a9cf;
+  stroke: #74B5FF;
 }
 
 .peak-label {
@@ -11560,8 +11576,8 @@ select.form-control {
   border-radius: 3px;
   border-style: solid;
   border-width: 2px;
-  border-color: white;
-  background: #0d1824;
+  border-color: #FFFFFF;
+  background: #0D1824;
   padding: 5px;
   z-index: 10;
   position: absolute;
@@ -11735,6 +11751,14 @@ select.form-control {
 }
 .phylo-details-tab__link {
   margin: 16px 20px;
+}
+
+.phylo-selection-tab__highlight {
+  margin: 16px 20px;
+}
+.phylo-selection-tab__highlight__label {
+  color: #fd7e14;
+  font-weight: bold;
 }
 
 .phylo-toolbar {

@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////
+///    FIELDS
+////////////////////////////////////////////////////////////////////////////////
+
+var SELECTED_TERMS_EVENT    = 'selected_terms_event';
+var SELECTION_QUERY_EVENT   = 'selection_query_event';
+
 var ISO_LINE_DOM_QUERY      = '.phylo-isoline';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
 var CENTER_COLUMN_DOM_QUERY = '.phylo-grid__blueprint__center';
@@ -123,8 +130,10 @@ function arraySum(acc, curr) {
  * (?) Use of a PubSub pattern has been empiracally implemented to provide a
  *     behavorial interface linking PureScript and JavaScript processes
  *
- *     As we can see, the PubSub will be used with `drawWordCloud` JavaScript
- *     function. However, results will be handled by PureScript processes only
+ *     The PubSub will be used for bridge communication with functions (such
+ *     as `drawWordCloud`, `termClick`, etc.) that can both perform as:
+ *        -              JavaScript → PureScript
+ *        - PureScript → JavaScript → PureScript
  *
  *     One ideal solution would have been to translate this very JavaScript
  *     module in PureScript, but due to a time-consuming issue certain parts are
@@ -270,7 +279,7 @@ var pubsub = (function(subscribers) {
 
   Array.from(ngrams).forEach(function(item) {
     item.style.visibility = "visible";
-    item.style.fill = "#61a3a9";
+    item.style.fill = '#0d1824';
   })
 }
 /**
@@ -349,19 +358,12 @@ function doubleClick() {
     .classed("path-unfocus",false)
     .classed("path-focus",false);
   d3.selectAll(".term-path").remove();
-  // @WIP
-  // document.querySelector("#phyloPhylo").innerHTML = "phylomemy";
-  // document.querySelector("#phyloPhylo").classList.remove("phylo-focus");
-  // document.querySelector("#phyloGroups").innerHTML = window.nbGroups;
-  // document.querySelector("#phyloTerms").innerHTML = window.nbTerms;
-  // document.querySelector("#phyloBranches").innerHTML = window.nbBranches;
-  // document.querySelector("#phyloGroups").classList.remove("phylo-focus");
-  // document.querySelector("#phyloTerms").classList.remove("phylo-focus");
-  // document.querySelector("#phyloBranches").classList.remove("phylo-focus");
   d3.selectAll(".peak").classed("peak-focus",false);
   d3.selectAll(".peak").classed("peak-focus-source",false);
   d3.selectAll(".x-mark").style("fill","#4A5C70");
   branchFocus = [];
+  pubsub.publish(SELECTION_QUERY_EVENT, '');
+  pubsub.publish(SELECTED_TERMS_EVENT, []);
 }
 /**
  * @name headerOut
@@ -399,10 +401,7 @@ function headerOut() {
 
   // focus
 
-  // @WIP
-  // document.querySelector("#phyloPhylo").innerHTML = txt;
-  // document.querySelector("#phyloPhylo").classList.add("phylo-focus");
-  // document.querySelector("#phyloSearch").setAttribute("href",'https://en.wikipedia.org/w/index.php?search="' + txt + '"')
+  pubsub.publish(SELECTION_QUERY_EVENT, txt);
 
   // highlight the groups
 
@@ -840,6 +839,11 @@ function tickOut(tick, branches) {
   setAxisX(zoomX, zoomXLabels, branches, xAxis);
   setAxisY(zoomY, zoomYLabels, yAxis);
 
+  // as header wrappers are bound to a "mouseover" event,
+  // removing them before the transformation will prevent unwanted UI artefact
+  // regarding their size and position
+  panel.selectAll(".header-wrapper").remove();
+
   panel.selectAll("circle").attr("transform", event.transform);
   panel.selectAll("text").attr("transform", event.transform);
   panel.selectAll("path").attr("transform", event.transform);
@@ -983,9 +987,9 @@ function getCSSStyles( parentElement ) {
  * @unpure {Object} pubsub
  */
  function drawWordCloud (groups) {
-  let labels  = {},
-      labels2 = [],
-      count   = 0;
+  let col   = {},
+      arr   = [],
+      count = 0;
 
   d3.selectAll(".word-cloud").remove();
 
@@ -994,21 +998,21 @@ function getCSSStyles( parentElement ) {
     let terms = d3.selectAll(".term").filter(".g-" + gid).nodes();
     terms.forEach(function(t){
       count ++;
-      if (labels[t.getAttribute("fdt")] == undefined) {
-        labels[t.getAttribute("fdt")] = {"freq" : 1, "label" : t.getAttribute("label")}
+      if (col[t.getAttribute("fdt")] == undefined) {
+        col[t.getAttribute("fdt")] = {"freq" : 1, "label" : t.getAttribute("label")}
       } else {
-        labels[t.getAttribute("fdt")].freq = labels[t.getAttribute("fdt")].freq + 1
+        col[t.getAttribute("fdt")].freq = col[t.getAttribute("fdt")].freq + 1
       }
     })
   });
 
-  labels2 = (Object.values(labels)).map(function(l){
+  arr = (Object.values(col)).map(function(l){
     return {"freq":(l.freq / count),"label":l.label};
   }).sort(function(l1,l2){
     return l2.freq - l1.freq;
   });
 
-  if (labels2.length === 0) {
+  if (arr.length === 0) {
     return pubsub.publish("foo", []);
   }
 
@@ -1016,25 +1020,25 @@ function getCSSStyles( parentElement ) {
   let opacity = d3
     .scaleLinear()
     .domain([
-      Math.log( (labels2[labels2.length - 1]).freq ),
-      Math.log( (labels2[0]).freq )
+      Math.log( (arr[ arr.length - 1 ]).freq ),
+      Math.log( (arr[ 0 ]).freq )
     ])
     .range([
       0.5,
       1
     ]);
 
-  labels2.forEach(function(l){
+  arr.forEach(function(l){
     y = y + 12;
     svg3.append("text")
         .attr("class","word-cloud")
         .attr("x", 10)
         .attr("y", y)
-        .style("opacity", opacity(Math.log(l.freq)))
+        .style("opacity", opacity( Math.log(l.freq) ))
         .text(l.label);
   });
 
-  pubsub.publish("foo", labels2);
+  pubsub.publish(SELECTED_TERMS_EVENT, arr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2216,8 +2220,46 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
        .style("visibility","hidden")
        .style("text-anchor", "middle")
        // .style("fill",(bid.length > 1) ? "#012840" : "#CC382F")
-       .style("fill",(bid.length > 1) ? "#012840" : "#012840")
        .text((emergences[k]).label)
+       .on("mouseover", function() {
+        var bbox = this.getBoundingClientRect()
+        var paddingX = 12;
+        var paddingY = 4;
+        var centerColumnCoordinates = getCenterColumnCoordinates();
+        // (?) empirical values determine the header wrapper position
+        //     no clear indication why we have to multiply by 2 the offsets
+        var x
+          =
+          + bbox.x
+          - paddingX
+          - centerColumnCoordinates.b
+          - (centerColumnCoordinates.x * 2);
+
+        var y
+          =
+          + bbox.y
+          - paddingY
+          - centerColumnCoordinates.r
+          - (centerColumnCoordinates.y * 2);
+        // adding the header wrapper (as last append child, it will be on zIndex
+        // front position)
+        panel
+          .append("rect", "text")
+          .attr("x", x)
+          .attr("y", y)
+          .attr("width", bbox.width + (paddingX * 2))
+          .attr("height", bbox.height + (paddingY * 2))
+          .attr("class", "header-wrapper")
+          .attr("id", "header-wrapper--" + this.id)
+        // little tweak to update the header text in zIndex front position
+        this.parentNode.appendChild(this);
+       })
+       .on("mouseout", function() {
+        // removing header wrapper created on "mouseover" event
+        d3
+          .select("#header-wrapper--" + this.id)
+          .remove();
+       })
        .on("click",function(){
           showHeading();
           termClick((emergences[k]).label,k,k,"head");
@@ -2227,6 +2269,9 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
 ////////////////////////////////////////////////////////////////////////////////
 ///    EXPORTS
 ////////////////////////////////////////////////////////////////////////////////
+
+exports._selectedTermsEvent  = SELECTED_TERMS_EVENT;
+exports._selectionQueryEvent = SELECTION_QUERY_EVENT;
 
 exports._drawPhylo        = drawPhylo;
 exports._drawWordCloud    = drawWordCloud;
