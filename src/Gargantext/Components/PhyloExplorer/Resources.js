@@ -2,6 +2,8 @@
 ///    FIELDS
 ////////////////////////////////////////////////////////////////////////////////
 
+const { padding } = require("aes-js");
+
 var SELECTED_TERMS_EVENT    = 'selected_terms_event';
 var SELECTION_QUERY_EVENT   = 'selection_query_event';
 
@@ -839,11 +841,6 @@ function tickOut(tick, branches) {
   setAxisX(zoomX, zoomXLabels, branches, xAxis);
   setAxisY(zoomY, zoomYLabels, yAxis);
 
-  // as header wrappers are bound to a "mouseover" event,
-  // removing them before the transformation will prevent unwanted UI artefact
-  // regarding their size and position
-  panel.selectAll(".header-wrapper").remove();
-
   panel.selectAll("circle").attr("transform", event.transform);
   panel.selectAll("text").attr("transform", event.transform);
   panel.selectAll("path").attr("transform", event.transform);
@@ -853,6 +850,7 @@ function tickOut(tick, branches) {
   panel.selectAll(".term-path").attr("transform", event.transform);
   panel.selectAll(".emergence").attr("transform", event.transform);
   panel.selectAll(".header").attr("transform", event.transform);
+  panel.selectAll(".header-wrapper").attr("transform", event.transform);
 
   showPeak();
 }
@@ -2199,71 +2197,98 @@ function getEmergences(groups, xScale, yScale) {
 function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScale){
   let x = ((emergences[k]).x).reduce(arraySum) / ((emergences[k]).x).length;
   let y = ((emergences[k]).y).reduce(arraySum) / ((emergences[k]).y).length;
-  let bid = Array.from(new Set(branchByGroup[k]));
   var freq = 0;
-  // console.log(k)
 
   if (k in window.freq) {
     freq = window.freq[k];
   }
-  panel.append("text")
-       .attr("x",x + (rdm() * Math.random() * 10))
-       .attr("y",y + (rdm() * Math.random() * 10))
-       .attr("fdt",k)
-       .attr("id","head" + k)
-       .attr("mem-size", fontScale(Math.sqrt(freq)))
-       .attr("mem-opac", opacityScale(Math.sqrt(freq)))
-       .attr("bid",(emergences[k]).bid)
-       .style("font-size", fontScale(Math.sqrt(freq)) + "px")
-       .style("opacity", opacityScale(1/Math.sqrt(freq)))
-       .attr("class","header")
-       .style("visibility","hidden")
-       .style("text-anchor", "middle")
-       // .style("fill",(bid.length > 1) ? "#012840" : "#CC382F")
-       .text((emergences[k]).label)
-       .on("mouseover", function() {
-        var bbox = this.getBoundingClientRect()
-        var paddingX = 12;
-        var paddingY = 4;
-        var centerColumnCoordinates = getCenterColumnCoordinates();
-        // (?) empirical values determine the header wrapper position
-        //     no clear indication why we have to multiply by 2 the offsets
-        var x
-          =
-          + bbox.x
-          - paddingX
-          - centerColumnCoordinates.b
-          - (centerColumnCoordinates.x * 2);
 
-        var y
-          =
-          + bbox.y
-          - paddingY
-          - centerColumnCoordinates.r
-          - (centerColumnCoordinates.y * 2);
-        // adding the header wrapper (as last append child, it will be on zIndex
-        // front position)
-        panel
-          .append("rect", "text")
-          .attr("x", x)
-          .attr("y", y)
-          .attr("width", bbox.width + (paddingX * 2))
-          .attr("height", bbox.height + (paddingY * 2))
-          .attr("class", "header-wrapper")
-          .attr("id", "header-wrapper--" + this.id)
-        // little tweak to update the header text in zIndex front position
-        this.parentNode.appendChild(this);
-       })
-       .on("mouseout", function() {
-        // removing header wrapper created on "mouseover" event
-        d3
-          .select("#header-wrapper--" + this.id)
-          .remove();
-       })
-       .on("click",function(){
-          showHeading();
-          termClick((emergences[k]).label,k,k,"head");
-       });
+  var xr = x + (rdm() * Math.random() * 10);
+  var yr = y + (rdm() * Math.random() * 10);
+
+  // add header label text
+  panel
+    .append("text")
+    .attr("x", xr)
+    .attr("y", yr)
+    .attr("fdt",k)
+    .attr("id","head" + k)
+    .attr("mem-size", fontScale(Math.sqrt(freq)))
+    .attr("mem-opac", opacityScale(Math.sqrt(freq)))
+    .attr("bid",(emergences[k]).bid)
+    .style("font-size", fontScale(Math.sqrt(freq)) + "px")
+    .style("opacity", opacityScale(1/Math.sqrt(freq)))
+    .attr("class","header")
+    .style("text-anchor", "middle")
+    // .style("fill",(bid.length > 1) ? "#012840" : "#CC382F")
+    .text((emergences[k]).label)
+    .on("mouseover", function() {
+      var wrapper = d3.select("#wrapper-" + this.id);
+      // show header wrapper
+      wrapper.classed("header-wrapper--hover", true);
+      // little tweak to put elements into the foreground (~zIndex top)
+      panel.node().appendChild( wrapper.node() );
+      panel.node().appendChild( this );
+    })
+    .on("mouseout", function() {
+      // hide header wrapper
+      d3
+        .select("#wrapper-" + this.id)
+        .classed("header-wrapper--hover", false);
+    })
+    .on("click",function(){
+      showHeading();
+      termClick((emergences[k]).label,k,k,"head");
+    });
+
+
+  // add header wrapper surrounding text
+  // (based on its text width and height)
+  var bbox = d3
+    .select("#head" + k)
+    .node()
+    .getBoundingClientRect();
+
+  var paddingX = (bbox.width * 0.25 + 4) / 2;
+  var paddingYt = bbox.height * 0.025 + 1;
+  var paddingYb = bbox.height * 0.25 + 2;
+  // (?) position and size are directly based on the text content ones, with
+  //     additions of:
+  //        - static padding value
+  //        - proportional padding value (due to text size differences)
+  //
+  // (?) "x" position need to be divide by 2, due to the "text-anchor: middle"
+  var w3
+    =
+    + bbox.width
+    + (paddingX * 2)
+
+  var h3
+    =
+    + bbox.height
+    + paddingYt
+    + paddingYb
+
+  var x3
+    =
+    + xr
+    - (bbox.width / 2)
+    - paddingX
+
+  var y3
+    =
+    + yr
+    - bbox.height
+    - paddingYt
+
+  panel
+    .append("rect", "text")
+    .attr("x", x3)
+    .attr("y", y3)
+    .attr("width", w3)
+    .attr("height", h3)
+    .attr("class", "header-wrapper")
+    .attr("id", "wrapper-head" + k)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
