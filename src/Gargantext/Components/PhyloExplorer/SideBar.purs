@@ -4,10 +4,11 @@ module Gargantext.Components.PhyloExplorer.SideBar
 
 import Gargantext.Prelude
 
+import Data.Array (null)
 import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple.Nested ((/\))
-import Gargantext.Components.PhyloExplorer.Types (SelectedTerm, TabView(..))
+import Gargantext.Components.PhyloExplorer.Types (SelectedTerm(..), TabView(..))
 import Gargantext.Types (NodeID)
 import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
@@ -214,45 +215,84 @@ selectionTabCpt = here.component "selectionTab" cpt where
         -- Highlighted terms
         case selectionQuery' of
           Nothing -> mempty
-          Just s  ->
-
-            H.div
-            { className: "phylo-selection-tab__highlight" }
+          Just s  -> R.fragment
             [
-              H.h5
-              {}
+              H.div
+              { className: "phylo-selection-tab__highlight" }
               [
-                H.text "Highlighted term"
-              ]
-            ,
-              H.ul
-              { className: "list-group" }
-              [
-                H.li
-                { className: intercalate " "
-                    [ "list-group-item"
-                    , "phylo-selection-tab__highlight__label"
-                    ]
-                }
+                H.h5
+                {}
                 [
-                  H.text s
+                  H.text "Highlighted term"
                 ]
               ,
-                H.li
-                { className: "list-group-item" }
+                H.ul
+                { className: "list-group" }
                 [
-                  H.a
-                  { href: "https://en.wikipedia.org/w/index.php?search=\""
-                       <> s
-                       <> "\""
-                  , target: "_blank"
-                  }
+                  H.li
+                  { className: "list-group-item" }
                   [
-                    H.text "Click here for more info"
+                    H.span
+                    { className: "badge badge-info" }
+                    [
+                      H.text s
+                    ]
+                  ]
+                ,
+                  H.li
+                  { className: "list-group-item" }
+                  [
+                    H.a
+                    { href: "https://en.wikipedia.org/w/index.php?search=\""
+                        <> s
+                        <> "\""
+                    , target: "_blank"
+                    }
+                    [
+                      H.text "Click here for more info"
+                    ]
                   ]
                 ]
               ]
+            ,
+              H.hr
+              { className: "phylo-selection-tab__delimiter" }
             ]
       ,
-        H.text $ show selectedTerms'
+        -- Selected terms
+        R2.if' (not null selectedTerms') $
+
+          H.div
+          { className: "phylo-selection-tab__selection" }
+          [
+            H.h5
+            {}
+            [
+              H.text "Selected terms"
+            ]
+          ,
+            H.ul
+            { className: "list-group" }
+            [
+              H.li
+              { className: "list-group-item" }
+              [
+                H.ul
+                {} $
+                flip map selectedTerms' \(SelectedTerm { label, freq }) ->
+
+                  H.li
+                  {}
+                  [
+                    H.a
+                    { href: "#"
+                    , className: "badge badge-light"
+                    }
+                    [
+                      H.text $ label <> show freq
+                    ]
+                  ]
+              ]
+            ]
+          ]
       ]

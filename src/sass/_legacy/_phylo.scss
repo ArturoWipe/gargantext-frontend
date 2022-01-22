@@ -521,10 +521,17 @@ $decreasing-color: #11638F;
   &__highlight {
     margin: space-x(2) $tab-margin-x;
 
-    &__label {
-      color: $orange;
-      font-weight: bold;
+    .badge {
+      font-size: inherit;
     }
+  }
+
+  &__delimiter {
+    margin: space-x(2) $tab-margin-x;
+  }
+
+  &__selection {
+    margin: space-x(2) $tab-margin-x;
   }
 }
 

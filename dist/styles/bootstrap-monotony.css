@@ -11760,9 +11760,14 @@ select.form-control {
 .phylo-selection-tab__highlight {
   margin: 16px 20px;
 }
-.phylo-selection-tab__highlight__label {
-  color: #fd7e14;
-  font-weight: bold;
+.phylo-selection-tab__highlight .badge {
+  font-size: inherit;
+}
+.phylo-selection-tab__delimiter {
+  margin: 16px 20px;
+}
+.phylo-selection-tab__selection {
+  margin: 16px 20px;
 }
 
 .phylo-toolbar {
