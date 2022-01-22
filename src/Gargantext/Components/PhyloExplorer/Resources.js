@@ -6,6 +6,7 @@ const { padding } = require("aes-js");
 
 var SELECTED_TERMS_EVENT    = 'selected_terms_event';
 var SELECTION_QUERY_EVENT   = 'selection_query_event';
+var DISPLAY_VIEW_EVENT      = 'display_view_event';
 
 var ISO_LINE_DOM_QUERY      = '.phylo-isoline';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
@@ -2237,8 +2238,14 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
         .classed("header-wrapper--hover", false);
     })
     .on("click",function(){
-      showHeading();
+      showLabel();
       termClick((emergences[k]).label,k,k,"head");
+      pubsub.publish(DISPLAY_VIEW_EVENT, "labelMode");
+      // remove wrapper header (preventing little issue where wrapper is still
+      // displayed because "mouseout" event has been disrupted by "click" event)
+      d3
+        .select("#wrapper-" + this.id)
+        .classed("header-wrapper--hover", false);
     });
 
 
@@ -2297,6 +2304,7 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
 
 exports._selectedTermsEvent  = SELECTED_TERMS_EVENT;
 exports._selectionQueryEvent = SELECTION_QUERY_EVENT;
+exports._displayViewEvent    = DISPLAY_VIEW_EVENT;
 
 exports._drawPhylo        = drawPhylo;
 exports._drawWordCloud    = drawWordCloud;

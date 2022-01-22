@@ -437,6 +437,13 @@ derive instance Eq DisplayView
 instance Show DisplayView where
   show = camelCase <<< genericShow
 
+instance Read DisplayView where
+  read :: String -> Maybe DisplayView
+  read "labelMode"   = Just LabelMode
+  read "headingMode" = Just HeadingMode
+  read "landingMode" = Just LandingMode
+  read _             = Nothing
+
 -----------------------------------------------------------
 
 data TabView

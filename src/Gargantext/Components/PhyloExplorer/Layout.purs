@@ -93,13 +93,17 @@ layoutCpt = here.component "layout" cpt where
       -- (see `Gargantext.Components.PhyloExplorer.Resources` > JavaScript >
       -- `pubsub` for detailed explanations)
       RS.subscribe (show SelectedTermsEvent) $ flip T.write_ selectedTermsBox
-      -- Subscrive to new selection query change
+      -- Subscribe to new selection query change
       -- (idem)
       RS.subscribe (show SelectionQueryEvent) $ case _ of
         res
           | true == null res -> T.write_ Nothing selectionQueryBox
           | otherwise        -> T.write_ (Just res) selectionQueryBox
-
+      -- Subscribe to JavaScript change for display view
+      -- (idem)
+      RS.subscribe (show DisplayViewEvent) $ read >>> case _ of
+        Nothing  -> pure unit
+        Just res -> T.write_ res displayViewBox
 
     R.useEffect1' isIsolineDisplayed do
       mEl <- querySelector document ".phylo-isoline"
