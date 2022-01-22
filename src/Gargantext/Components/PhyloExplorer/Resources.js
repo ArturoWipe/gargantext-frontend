@@ -12,7 +12,6 @@ var ISO_LINE_DOM_QUERY      = '.phylo-isoline';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
 var CENTER_COLUMN_DOM_QUERY = '.phylo-grid__blueprint__center';
 var SCAPE_DOM_QUERY         = '.phylo-grid__content__scape';
-var GRAPH_DOM_QUERY         = '.phylo-grid__content__graph';
 
 //  (?) Global thread dependencies:
 //    * d3 <Object> (main D3 proxy))
@@ -27,7 +26,6 @@ var memoTickText          = {};        // <Object> of <Int> => <TickText>
 var branchFocus           = [];        // <Array> of <Int> bId
 var panel                 = undefined; // <Object> instanceof d3.selection
 var svg                   = undefined; // <Object> instanceof d3.selection
-var svg3                  = undefined; // <Object> instanceof d3.selection
 var label                 = undefined; // <Object> instanceof d3.selection
 var zoom                  = undefined; // <Function> see https://github.com/d3/d3-zoom#zoom
 var xScale0               = undefined; // <Function> see https://github.com/d3/d3-scale#_continuous
@@ -982,7 +980,6 @@ function getCSSStyles( parentElement ) {
  * @name drawWordCloud
  * @param {Array.<SVGCircleElement>} groups
  * @unpure {Object} d3
- * @unpure {Object} svg3 instanceof d3.selection
  * @unpure {Object} pubsub
  */
  function drawWordCloud (groups) {
@@ -1015,27 +1012,29 @@ function getCSSStyles( parentElement ) {
     return pubsub.publish("foo", []);
   }
 
-  let y = 20
-  let opacity = d3
-    .scaleLinear()
-    .domain([
-      Math.log( (arr[ arr.length - 1 ]).freq ),
-      Math.log( (arr[ 0 ]).freq )
-    ])
-    .range([
-      0.5,
-      1
-    ]);
+  // @WIP
 
-  arr.forEach(function(l){
-    y = y + 12;
-    svg3.append("text")
-        .attr("class","word-cloud")
-        .attr("x", 10)
-        .attr("y", y)
-        .style("opacity", opacity( Math.log(l.freq) ))
-        .text(l.label);
-  });
+  // let y = 20
+  // let opacity = d3
+  //   .scaleLinear()
+  //   .domain([
+  //     Math.log( (arr[ arr.length - 1 ]).freq ),
+  //     Math.log( (arr[ 0 ]).freq )
+  //   ])
+  //   .range([
+  //     0.5,
+  //     1
+  //   ]);
+
+  // arr.forEach(function(l){
+  //   y = y + 12;
+  //   svg3.append("text")
+  //       .attr("class","word-cloud")
+  //       .attr("x", 10)
+  //       .attr("y", y)
+  //       .style("opacity", opacity( Math.log(l.freq) ))
+  //       .text(l.label);
+  // });
 
   pubsub.publish(SELECTED_TERMS_EVENT, arr);
 }
@@ -1200,7 +1199,6 @@ function getIsoLineCoordinates() {
  * @unpure {Window.<Boolean>} window.weighted
  * @unpure {Object} d3
  * @unpure {Object} svg instanceof d3.selection
- * @unpure {Object} svg3 instanceof d3.selection
  * @unpure {Object} panel instanceof d3.selection
  * @unpure {Function} zoom see https://github.com/d3/d3-zoom#zoom
  */
@@ -1213,24 +1211,12 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   var centerColumnCoordinates = getCenterColumnCoordinates();
 
   var scapeCoordinates = getScapeCoordinates();
-  var graphCoordinates = getGraphCoordinates();
 
   svg = d3
     .select('.phylo-grid__content__scape')
     .append("svg")
       .attr("width", scapeCoordinates.w)
       .attr("height", scapeCoordinates.h)
-
-
-  /* *** draw the graph *** */
-
-  svg3 = d3
-    .select('.phylo-grid__content__graph')
-    .append("svg")
-      .attr("width", graphCoordinates.w)
-      .attr("height", graphCoordinates.h)
-    .append("g");
-
 
   /* labels */
 
@@ -1486,36 +1472,6 @@ function getLeftColumnCoordinates() {
  function getScapeCoordinates() {
   var el = d3
     .select(SCAPE_DOM_QUERY)
-    .node()
-    .getBoundingClientRect();
-
-  return {
-    x: 0,
-    y: 0,
-    w: el.width,
-    h: el.height,
-    t: 0,
-    r: 0,
-    b: 0,
-    l: 0
-  };
-}
-/**
- * @name getCenterColumnCoordinates
- * @unpure {Object} d3
- * @returns {Object}
- *    <Float> x
- *    <Float> y
- *    <Float> w
- *    <Float> h
- *    <Float> t
- *    <Float> r
- *    <Float> b
- *    <Float> l
- */
- function getGraphCoordinates() {
-  var el = d3
-    .select(GRAPH_DOM_QUERY)
     .node()
     .getBoundingClientRect();
 

@@ -8,8 +8,8 @@ $graph-height: calc(100vh - #{ $topbar-height } - #{ $graph-margin * 2 });
 $isoline-height: 158px;
 
 $left-column-width: 10%;
-$center-column-width: 80%;
-$right-column-width: 10%;
+$center-column-width: 89%;
+$right-column-width: 1%;
 
 /* Topbar constants */
 
@@ -386,9 +386,6 @@ $decreasing-color: #11638F;
 
     &__scape {
       width: calc( #{ $left-column-width } + #{ $center-column-width });
-    }
-    &__graph {
-      width: $right-column-width;
     }
   }
 }

@@ -11687,18 +11687,15 @@ select.form-control {
   height: inherit;
 }
 .phylo-grid__blueprint__center {
-  width: 80%;
+  width: 89%;
   height: inherit;
 }
 .phylo-grid__blueprint__right {
-  width: 10%;
+  width: 1%;
   height: inherit;
 }
 .phylo-grid__content__scape {
-  width: calc( 10% + 80%);
-}
-.phylo-grid__content__graph {
-  width: 10%;
+  width: calc( 10% + 89%);
 }
 
 .phylo-topbar {

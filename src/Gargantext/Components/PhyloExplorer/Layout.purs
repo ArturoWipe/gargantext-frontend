@@ -248,10 +248,6 @@ layoutCpt = here.component "layout" cpt where
             H.div
             { className: "phylo-grid__content__scape" }
             []
-          ,
-            H.div
-            { className: "phylo-grid__content__graph" }
-            []
           ]
         ]
       ,
