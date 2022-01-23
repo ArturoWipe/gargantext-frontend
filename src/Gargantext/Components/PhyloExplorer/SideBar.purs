@@ -4,11 +4,14 @@ module Gargantext.Components.PhyloExplorer.SideBar
 
 import Gargantext.Prelude
 
-import Data.Array (null)
+import Data.Array (length, mapWithIndex, null)
 import Data.Foldable (intercalate)
-import Data.Maybe (Maybe(..), isJust)
+import Data.Int (ceil)
+import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
-import Gargantext.Components.PhyloExplorer.Types (SelectedTerm(..), TabView(..))
+import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
+import Gargantext.Components.PhyloExplorer.Types (SelectedTerm(..), SelectionCount(..), TabView(..))
 import Gargantext.Types (NodeID)
 import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
@@ -17,17 +20,18 @@ import Reactix.DOM.HTML as H
 import Toestand as T
 
 type Props =
-  ( nodeId          :: NodeID
+  ( nodeId                :: NodeID
 
-  , docCount        :: Int
-  , foundationCount :: Int
-  , periodCount     :: Int
-  , termCount       :: Int
-  , groupCount      :: Int
-  , branchCount     :: Int
+  , docCount              :: Int
+  , foundationCount       :: Int
+  , periodCount           :: Int
+  , termCount             :: Int
+  , groupCount            :: Int
+  , branchCount           :: Int
 
-  , selectionQuery  :: T.Box (Maybe String)
-  , selectedTerms   :: T.Box (Array SelectedTerm)
+  , highlightedTerm       :: T.Box (Maybe String)
+  , selectedTerms         :: T.Box (Array SelectedTerm)
+  , selectionCount        :: T.Box (Maybe SelectionCount)
   )
 
 here :: R2.Here
@@ -104,7 +108,8 @@ component = here.component "main" cpt where
           selectionTab
           { key: (show props.nodeId) <> "-selection"
           , selectedTerms: props.selectedTerms
-          , selectionQuery: props.selectionQuery
+          , highlightedTerm: props.highlightedTerm
+          , selectionCount: props.selectionCount
           }
       ]
 
@@ -193,7 +198,8 @@ type SelectionProps =
   ( key             :: String
 
   , selectedTerms   :: T.Box (Array SelectedTerm)
-  , selectionQuery  :: T.Box (Maybe String)
+  , highlightedTerm :: T.Box (Maybe String)
+  , selectionCount  :: T.Box (Maybe SelectionCount)
   )
 
 selectionTab :: R2.Leaf SelectionProps
@@ -204,7 +210,25 @@ selectionTabCpt = here.component "selectionTab" cpt where
   cpt props _ = do
     -- State
     selectedTerms'  <- R2.useLive' props.selectedTerms
-    selectionQuery' <- R2.useLive' props.selectionQuery
+    highlightedTerm' <- R2.useLive' props.highlightedTerm
+    selectionCount' <- R2.useLive' props.selectionCount
+
+    showMore /\ showMoreBox <- R2.useBox' false
+
+    let
+      termCount = length selectedTerms'
+
+      maxTruncateResult = 5
+
+      truncateResults
+         = (termCount > maxTruncateResult)
+        && (not showMore)
+
+    -- Effects
+
+    R.useEffect1' selectedTerms' $
+      -- reset "show more" button to hidding mode on selected terms change
+      T.write_ false showMoreBox
 
     -- Render
     pure $
@@ -213,7 +237,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
       { className: "phylo-selection-tab" }
       [
         -- Highlighted terms
-        case selectionQuery' of
+        case highlightedTerm' of
           Nothing -> mempty
           Just s  -> R.fragment
             [
@@ -233,7 +257,11 @@ selectionTabCpt = here.component "selectionTab" cpt where
                   { className: "list-group-item" }
                   [
                     H.span
-                    { className: "badge badge-info" }
+                    { className: intercalate " "
+                        [ "phylo-selection-tab__highlight__badge"
+                        , "badge badge-info"
+                        ]
+                    }
                     [
                       H.text s
                     ]
@@ -259,7 +287,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
               { className: "phylo-selection-tab__delimiter" }
             ]
       ,
-        -- Selected terms
+        -- Selection Results
         R2.if' (not null selectedTerms') $
 
           H.div
@@ -268,31 +296,106 @@ selectionTabCpt = here.component "selectionTab" cpt where
             H.h5
             {}
             [
-              H.text "Selected terms"
+              H.text "Selection results"
             ]
           ,
             H.ul
             { className: "list-group" }
             [
+              -- Selection count
+              case selectionCount' of
+                Nothing                     -> mempty
+                Just (SelectionCount count) ->
+
+                  H.li
+                  { className: "list-group-item" }
+                  [
+                    H.ul
+                    { className: "phylo-selection-tab__counter" }
+                    [
+                      detailsCount' count.termCount "terms" true
+                    ,
+                      detailsCount' count.groupCount "groups" false
+                    ,
+                      detailsCount' count.branchCount "branches" false
+                    ]
+                  ]
+            ,
+              -- Term word cloud
               H.li
               { className: "list-group-item" }
               [
                 H.ul
                 {} $
-                flip map selectedTerms' \(SelectedTerm { label, freq }) ->
+                flip mapWithIndex selectedTerms'
+                  \index (SelectedTerm { label, ratio }) ->
 
-                  H.li
-                  {}
+                    R2.if'
+                    (
+                      truncateResults == false
+                    || index < maxTruncateResult
+                    ) $
+                      H.li
+                      { className: "phylo-selection-tab__selection__item"}
+                      [
+                        H.a
+                        { className: "badge badge-light"
+                        -- adjust font size according to term frequency
+                        , style:
+                            { fontSize: termFontSize ratio
+                            , lineHeight: termFontSize ratio
+                            }
+                        }
+                        [
+                          H.text label
+                        ]
+                      ]
+              ,
+                R2.if' (truncateResults) $
+                  B.button
+                  { variant: ButtonVariant Light
+                  , callback: \_ -> T.modify_ not showMoreBox
+                  , block: true
+                  , className: "phylo-selection-tab__selection__show-more"
+                  }
                   [
-                    H.a
-                    { href: "#"
-                    , className: "badge badge-light"
-                    }
-                    [
-                      H.text $ label <> show freq
-                    ]
+                    H.text "Show more"
                   ]
               ]
             ]
           ]
       ]
+
+termFontSize :: Number -> String
+termFontSize
+    = (_ * 12.0)
+  >>> (_ + 11.0)
+  >>> ceil
+  >>> show
+  >>> (_ <> "px")
+
+detailsCount' :: Int -> String -> Boolean -> R.Element
+detailsCount' value label weighty =
+  H.li
+  { className: "phylo-selection-tab__counter__item" }
+  [
+    H.span
+    { className: intercalate " "
+        [ "phylo-selection-tab__counter__value"
+        , weighty ? "font-weight-bold" $ ""
+        ]
+    }
+    [
+      H.text $ show value
+    ]
+  ,
+    H.span
+    { className: intercalate " "
+        [ "phylo-selection-tab__counter__label"
+        , weighty ? "font-weight-bold" $ ""
+        ]
+    }
+    [
+      H.text $ nbsp 1 <> label
+    ]
+  ]

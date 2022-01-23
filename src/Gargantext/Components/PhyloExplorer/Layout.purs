@@ -5,6 +5,7 @@ module Gargantext.Components.PhyloExplorer.Layout
 import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector, window)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.String (null)
 import Data.Tuple.Nested ((/\))
@@ -15,7 +16,7 @@ import Gargantext.Components.PhyloExplorer.Resources as RS
 import Gargantext.Components.PhyloExplorer.SideBar (sideBar)
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
-import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..), SelectedTerm)
+import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..), SelectedTerm, SelectionCount)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Hooks.UpdateEffect (useUpdateEffect1')
 import Gargantext.Types (NodeID)
@@ -24,6 +25,7 @@ import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (d3)
 import Reactix as R
 import Reactix.DOM.HTML as H
+import Simple.JSON as JSON
 import Toestand as T
 
 here :: R2.Here
@@ -68,7 +70,9 @@ layoutCpt = here.component "layout" cpt where
 
     selectedTermsBox <- T.useBox (mempty :: Array SelectedTerm)
 
-    selectionQueryBox <- T.useBox (Nothing :: Maybe String)
+    highlightedTermBox <- T.useBox (Nothing :: Maybe String)
+
+    selectionCountBox <- T.useBox (Nothing :: Maybe SelectionCount)
 
     -- Effects
     useFirstEffect' $ do
@@ -97,13 +101,20 @@ layoutCpt = here.component "layout" cpt where
       -- (idem)
       RS.subscribe (show SelectionQueryEvent) $ case _ of
         res
-          | true == null res -> T.write_ Nothing selectionQueryBox
-          | otherwise        -> T.write_ (Just res) selectionQueryBox
+          | true == null res -> T.write_ Nothing highlightedTermBox
+          | otherwise        -> T.write_ (Just res) highlightedTermBox
       -- Subscribe to JavaScript change for display view
       -- (idem)
       RS.subscribe (show DisplayViewEvent) $ read >>> case _ of
         Nothing  -> pure unit
         Just res -> T.write_ res displayViewBox
+      -- Subscribe to new selection count data change
+      -- (idem)
+      RS.subscribe (show SelectionCountEvent) $ JSON.readJSON >>> case _ of
+        Left _ ->
+          T.write_ Nothing selectionCountBox
+        Right (res :: SelectionCount) ->
+          T.write_ (Just res) selectionCountBox
 
     R.useEffect1' isIsolineDisplayed do
       mEl <- querySelector document ".phylo-isoline"
@@ -197,7 +208,8 @@ layoutCpt = here.component "layout" cpt where
           , groupCount: o.nbGroups
           , branchCount: o.nbBranches
           , selectedTerms: selectedTermsBox
-          , selectionQuery: selectionQueryBox
+          , highlightedTerm: highlightedTermBox
+          , selectionCount: selectionCountBox
           }
       ,
         -- Toolbar

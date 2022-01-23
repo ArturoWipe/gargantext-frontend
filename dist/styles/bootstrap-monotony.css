@@ -11757,14 +11757,30 @@ select.form-control {
 .phylo-selection-tab__highlight {
   margin: 16px 20px;
 }
-.phylo-selection-tab__highlight .badge {
-  font-size: inherit;
+.phylo-selection-tab__highlight__badge {
+  font-size: 1rem;
 }
 .phylo-selection-tab__delimiter {
   margin: 16px 20px;
 }
 .phylo-selection-tab__selection {
   margin: 16px 20px;
+}
+.phylo-selection-tab__selection__item {
+  line-height: initial;
+}
+.phylo-selection-tab__selection__item:not(:last-child) {
+  margin-bottom: 6px;
+}
+.phylo-selection-tab__selection__show-more {
+  margin-top: 16px;
+}
+.phylo-selection-tab__counter__item {
+  margin-left: 16px;
+  list-style: initial;
+}
+.phylo-selection-tab__counter__value {
+  color: #515151;
 }
 
 .phylo-toolbar {

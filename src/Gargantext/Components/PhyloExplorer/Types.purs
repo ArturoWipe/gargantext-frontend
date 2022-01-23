@@ -8,6 +8,7 @@ module Gargantext.Components.PhyloExplorer.Types
   , sortSources
   , DisplayView(..)
   , TabView(..)
+  , SelectionCount(..)
   ) where
 
 import Gargantext.Prelude
@@ -25,6 +26,7 @@ import Data.String.Extra (camelCase)
 import Data.Tuple as Tuple
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.PhyloExplorer.JSON (PhyloJSONSet(..), RawEdge(..), RawObject(..))
+import Simple.JSON as JSON
 
 
 -- @WIP PureScript Date or stick to JavaScript foreign?
@@ -308,9 +310,9 @@ instance Show Term where show = genericShow
 newtype SelectedTerm = SelectedTerm
  { label :: String
  , freq  :: Number
+ , ratio :: Number
  }
 
-derive instance Newtype SelectedTerm _
 derive instance Generic SelectedTerm _
 derive instance Eq SelectedTerm
 instance Show SelectedTerm where show = genericShow
@@ -452,3 +454,15 @@ data TabView
 
 derive instance Generic TabView _
 derive instance Eq TabView
+
+-----------------------------------------------------------
+
+newtype SelectionCount = SelectionCount
+ { groupCount   :: Int
+ , branchCount  :: Int
+ , termCount    :: Int
+ }
+
+derive instance Generic SelectionCount _
+derive instance Eq SelectionCount
+derive newtype instance JSON.ReadForeign SelectionCount

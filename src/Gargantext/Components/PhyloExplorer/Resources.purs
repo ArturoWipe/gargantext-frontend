@@ -143,11 +143,13 @@ publish = runEffectFn2 _publish
 foreign import _selectedTermsEvent  :: String
 foreign import _selectionQueryEvent :: String
 foreign import _displayViewEvent    :: String
+foreign import _selectionCountEvent :: String
 
 data PubSubEvent
   = SelectedTermsEvent
   | SelectionQueryEvent
   | DisplayViewEvent
+  | SelectionCountEvent
 
 derive instance Generic PubSubEvent _
 derive instance Eq PubSubEvent
@@ -156,6 +158,7 @@ instance Show PubSubEvent where
     SelectedTermsEvent  -> _selectedTermsEvent
     SelectionQueryEvent -> _selectionQueryEvent
     DisplayViewEvent    -> _displayViewEvent
+    SelectionCountEvent -> _selectionCountEvent
 
 -----------------------------------------------------------
 

@@ -31,3 +31,15 @@ $theme-colors: (
 @import '../_components';
 @import '../_base';
 @import '../_legacy';
+
+// Custom rules according to the theme
+
+// Rectify "secondary" button tonal contrast
+.btn-secondary,
+.btn-secondary:hover,
+.btn-outline-secondary:not(:disabled):not(.disabled):hover,
+.btn-outline-secondary:not(:disabled):not(.disabled):active,
+.btn-outline-secondary:not(:disabled):not(.disabled).active,
+.show > .btn-outline-secondary.dropdown-toggle {
+  color: $white;
+}

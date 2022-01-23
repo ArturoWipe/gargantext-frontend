@@ -490,9 +490,11 @@ $decreasing-color: #11638F;
 }
 
 .phylo-details-tab {
+  $margin-x: $tab-margin-x;
+  $margin-y: space-x(2);
 
   &__counter {
-    margin: space-x(2) $tab-margin-x;
+    margin: $margin-y $tab-margin-x;
 
     &__item {
       margin-left: space-x(2);
@@ -505,30 +507,57 @@ $decreasing-color: #11638F;
   }
 
   &__delimiter {
-    margin: space-x(2) $tab-margin-x;
+    margin: $margin-y $tab-margin-x;
   }
 
   &__link {
-    margin: space-x(2) $tab-margin-x;
+    margin: $margin-y $tab-margin-x;
   }
 }
 
 .phylo-selection-tab {
+  $margin-x: $tab-margin-x;
+  $margin-y: space-x(2);
 
   &__highlight {
-    margin: space-x(2) $tab-margin-x;
+    margin: $margin-y $tab-margin-x;
 
-    .badge {
-      font-size: inherit;
+    &__badge {
+      font-size: $font-size-base;
     }
   }
 
   &__delimiter {
-    margin: space-x(2) $tab-margin-x;
+    margin: $margin-y $tab-margin-x;
   }
 
   &__selection {
-    margin: space-x(2) $tab-margin-x;
+    margin: $margin-y $tab-margin-x;
+
+    &__item {
+      // remove "_reboot.scss" line height
+      line-height: initial;
+
+      &:not(:last-child) {
+        margin-bottom: space-x(0.75);
+      }
+    }
+
+    &__show-more {
+      margin-top: $margin-y;
+    }
+  }
+
+  &__counter {
+
+    &__item {
+      margin-left: space-x(2);
+      list-style: initial;
+    }
+
+    &__value {
+      color: $info;
+    }
   }
 }
 

@@ -2,11 +2,10 @@
 ///    FIELDS
 ////////////////////////////////////////////////////////////////////////////////
 
-const { padding } = require("aes-js");
-
 var SELECTED_TERMS_EVENT    = 'selected_terms_event';
 var SELECTION_QUERY_EVENT   = 'selection_query_event';
 var DISPLAY_VIEW_EVENT      = 'display_view_event';
+var SELECTION_COUNT_EVENT   = 'selection_count_event';
 
 var ISO_LINE_DOM_QUERY      = '.phylo-isoline';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
@@ -348,6 +347,7 @@ function showLanding() {
  * @unpure {Object} d3
  * @unpure {Array.<Int>} branchFocus
  * @unpure {HTMLDocument} document
+ * @unpure {Object} pubsub
  */
 function doubleClick() {
   window.highlighted = false;
@@ -386,6 +386,7 @@ function headerOut() {
  * @unpure {HTMLDocument} document
  * @unpure {Array.<Int>} branchFocus
  * @unpure {Object} panel instanceof d3.selection
+ * @unpure {Object} pubsub
  */
  function termClick (txt,idx,nodeId,typeNode) {
   // remove old focus
@@ -487,6 +488,7 @@ function headerOut() {
  * @unpure {Window.<Boolean>} window.highlighted
  * @unpure {HTMLDocument} document
  * @unpure {Object} d3
+ * @unpure {Object} pubsub
  */
  function highlightGroups (groups) {
 
@@ -522,13 +524,17 @@ function headerOut() {
   }
 
   // facets
-  // @WIP
-  // document.querySelector("#phyloGroups").innerHTML = groups.length;
-  // document.querySelector("#phyloTerms").innerHTML = countTerms(groups);
-  // document.querySelector("#phyloBranches").innerHTML = countBranches(groups);
-  // document.querySelector("#phyloGroups").classList.add("phylo-focus");
-  // document.querySelector("#phyloTerms").classList.add("phylo-focus");
-  // document.querySelector("#phyloBranches").classList.add("phylo-focus");
+
+  var count = {
+    groupCount: groups.length,
+    termCount: countTerms(groups),
+    branchCount: countBranches(groups)
+  }
+
+  pubsub.publish(
+    SELECTION_COUNT_EVENT,
+    JSON.stringify( count )
+  );
 
   // highlight the links
 
@@ -752,9 +758,11 @@ function branchOut(bId) {
  * @param {Element} tick
  * @unpure {Object} d3
  * @unpure {Array<Int>} branchFocus
+ * @unpure {Object} pubsub
  */
  function tickClick(tick) {
   initPath()
+  pubsub.publish(SELECTION_QUERY_EVENT, "");
   let bid = tick.getAttribute("bId"),
       groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes();
 
@@ -1009,32 +1017,23 @@ function getCSSStyles( parentElement ) {
   });
 
   if (arr.length === 0) {
-    return pubsub.publish("foo", []);
+    return pubsub.publish(SELECTED_TERMS_EVENT, []);
   }
 
-  // @WIP
+  var scaler = d3
+    .scaleLinear()
+    .domain([
+      Math.log( (arr[ arr.length - 1 ]).freq ),
+      Math.log( (arr[ 0 ]).freq )
+    ])
+    .range([
+      0,
+      1
+    ]);
 
-  // let y = 20
-  // let opacity = d3
-  //   .scaleLinear()
-  //   .domain([
-  //     Math.log( (arr[ arr.length - 1 ]).freq ),
-  //     Math.log( (arr[ 0 ]).freq )
-  //   ])
-  //   .range([
-  //     0.5,
-  //     1
-  //   ]);
-
-  // arr.forEach(function(l){
-  //   y = y + 12;
-  //   svg3.append("text")
-  //       .attr("class","word-cloud")
-  //       .attr("x", 10)
-  //       .attr("y", y)
-  //       .style("opacity", opacity( Math.log(l.freq) ))
-  //       .text(l.label);
-  // });
+  arr.forEach(function(item, idx) {
+    arr[idx].ratio = scaler( Math.log(item.freq) );
+  });
 
   pubsub.publish(SELECTED_TERMS_EVENT, arr);
 }
@@ -2150,6 +2149,7 @@ function getEmergences(groups, xScale, yScale) {
  * @param {Function<Int>} opacityScale see https://github.com/d3/d3-scale#_continuous
  * @unpure {Window.<Array<Int>>} window.freq
  * @unpure {Object} panel instanceof d3.selection
+ * @unpure {Object} pubsub
  */
 function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScale){
   let x = ((emergences[k]).x).reduce(arraySum) / ((emergences[k]).x).length;
@@ -2261,6 +2261,7 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
 exports._selectedTermsEvent  = SELECTED_TERMS_EVENT;
 exports._selectionQueryEvent = SELECTION_QUERY_EVENT;
 exports._displayViewEvent    = DISPLAY_VIEW_EVENT;
+exports._selectionCountEvent = SELECTION_COUNT_EVENT;
 
 exports._drawPhylo        = drawPhylo;
 exports._drawWordCloud    = drawWordCloud;
