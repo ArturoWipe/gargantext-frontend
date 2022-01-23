@@ -116,12 +116,16 @@ parseBranches
     parse (BranchToNode o) = Just $ Branch
       { bId   : parseInt o.bId
       , gvid  : o._gvid
-      , label : o.label
+      , label : parseLabel o.label
       , x1    : o.branch_x
       , x2    : Tuple.fst $ parsePos o.pos
       , y     : o.branch_y
       }
     parse _                = Nothing
+
+    parseLabel :: String -> String
+    parseLabel =
+      String.replaceAll (String.Pattern "\"") (String.Replacement "")
 
 -----------------------------------------------------------
 

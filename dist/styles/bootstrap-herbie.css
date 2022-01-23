@@ -11742,6 +11742,8 @@ select.form-control {
 }
 .phylo-selection-tab__highlight__badge {
   font-size: 1rem;
+  white-space: normal;
+  word-break: break-word;
 }
 .phylo-selection-tab__delimiter {
   margin: 16px 20px;
@@ -11750,6 +11752,8 @@ select.form-control {
   margin: 16px 20px;
 }
 .phylo-selection-tab__selection__item {
+  white-space: normal;
+  word-break: break-word;
   line-height: initial;
 }
 .phylo-selection-tab__selection__item:not(:last-child) {

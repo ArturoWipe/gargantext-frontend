@@ -140,25 +140,28 @@ publish = runEffectFn2 _publish
 
 -----------------------------------------------------------
 
-foreign import _selectedTermsEvent  :: String
-foreign import _selectionQueryEvent :: String
-foreign import _displayViewEvent    :: String
-foreign import _selectionCountEvent :: String
+foreign import _selectedTermsEvent      :: String
+foreign import _highlightedTermEvent    :: String
+foreign import _highlightedBranchEvent  :: String
+foreign import _displayViewEvent        :: String
+foreign import _selectionCountEvent     :: String
 
 data PubSubEvent
   = SelectedTermsEvent
-  | SelectionQueryEvent
-  | DisplayViewEvent
   | SelectionCountEvent
+  | HighlightedTermEvent
+  | HighlightedBranchEvent
+  | DisplayViewEvent
 
 derive instance Generic PubSubEvent _
 derive instance Eq PubSubEvent
 instance Show PubSubEvent where
   show = case _ of
-    SelectedTermsEvent  -> _selectedTermsEvent
-    SelectionQueryEvent -> _selectionQueryEvent
-    DisplayViewEvent    -> _displayViewEvent
-    SelectionCountEvent -> _selectionCountEvent
+    SelectedTermsEvent      -> _selectedTermsEvent
+    SelectionCountEvent     -> _selectionCountEvent
+    HighlightedTermEvent    -> _highlightedTermEvent
+    HighlightedBranchEvent  -> _highlightedBranchEvent
+    DisplayViewEvent        -> _displayViewEvent
 
 -----------------------------------------------------------
 

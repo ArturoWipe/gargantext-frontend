@@ -524,6 +524,8 @@ $decreasing-color: #11638F;
 
     &__badge {
       font-size: $font-size-base;
+      white-space: normal;
+      word-break: break-word;
     }
   }
 
@@ -535,6 +537,8 @@ $decreasing-color: #11638F;
     margin: $margin-y $tab-margin-x;
 
     &__item {
+      white-space: normal;
+      word-break: break-word;
       // remove "_reboot.scss" line height
       line-height: initial;
 

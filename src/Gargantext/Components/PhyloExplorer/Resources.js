@@ -2,10 +2,11 @@
 ///    FIELDS
 ////////////////////////////////////////////////////////////////////////////////
 
-var SELECTED_TERMS_EVENT    = 'selected_terms_event';
-var SELECTION_QUERY_EVENT   = 'selection_query_event';
-var DISPLAY_VIEW_EVENT      = 'display_view_event';
-var SELECTION_COUNT_EVENT   = 'selection_count_event';
+var SELECTED_TERMS_EVENT      = 'selected_terms_event';
+var HIGHLIGHTED_TERM_EVENT    = 'highlighted_term_event';
+var HIGHLIGHTED_BRANCH_EVENT  = 'highlighted_branch_event';
+var DISPLAY_VIEW_EVENT        = 'display_view_event';
+var SELECTION_COUNT_EVENT     = 'selection_count_event';
 
 var ISO_LINE_DOM_QUERY      = '.phylo-isoline';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
@@ -363,7 +364,8 @@ function doubleClick() {
   d3.selectAll(".peak").classed("peak-focus-source",false);
   d3.selectAll(".x-mark").style("fill","#4A5C70");
   branchFocus = [];
-  pubsub.publish(SELECTION_QUERY_EVENT, '');
+  pubsub.publish(HIGHLIGHTED_TERM_EVENT, '');
+  pubsub.publish(HIGHLIGHTED_BRANCH_EVENT, '');
   pubsub.publish(SELECTED_TERMS_EVENT, []);
 }
 /**
@@ -403,7 +405,8 @@ function headerOut() {
 
   // focus
 
-  pubsub.publish(SELECTION_QUERY_EVENT, txt);
+  pubsub.publish(HIGHLIGHTED_BRANCH_EVENT, '');
+  pubsub.publish(HIGHLIGHTED_TERM_EVENT, txt);
 
   // highlight the groups
 
@@ -591,9 +594,13 @@ function resetView() {
  * @unpure {Object} d3
  * @unpure {Function} zoom
  */
- function peakClick (b, coordinates) {
+function peakClick (b, coordinates) {
+  let groups = d3.selectAll(".group-inner").filter(".branch-" + b.bId).nodes();
+
   initPath()
-  let groups = d3.selectAll(".group-inner").filter(".branch-" + b.bId).nodes()
+  pubsub.publish(HIGHLIGHTED_TERM_EVENT, '');
+  pubsub.publish(HIGHLIGHTED_BRANCH_EVENT, b.label);
+
   branchFocus.push(b.bId);
   /* word cloud */
 
@@ -755,16 +762,22 @@ function branchOut(bId) {
 }
 /**
  * @name tickClick
+ * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
  * @param {Element} tick
  * @unpure {Object} d3
  * @unpure {Array<Int>} branchFocus
  * @unpure {Object} pubsub
  */
- function tickClick(tick) {
+ function tickClick(branches, tick) {
+  let bid = parseInt(tick.getAttribute("bId"), 10),
+      groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes()
+      branch = branches.find(function(item) {
+        return item.bId === bid;
+      });
+
   initPath()
-  pubsub.publish(SELECTION_QUERY_EVENT, "");
-  let bid = tick.getAttribute("bId"),
-      groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes();
+  pubsub.publish(HIGHLIGHTED_TERM_EVENT, '');
+  pubsub.publish(HIGHLIGHTED_BRANCH_EVENT, branch.label);
 
   // draw the word cloud
 
@@ -1930,7 +1943,7 @@ function setAxisX(scale, labels, branches, xAxis) {
           tickOver(this, branches);
         })
        .on("click", function() {
-         tickClick(this);
+         tickClick(branches, this);
        })
        .on("mouseout" , function() {
           tickOut(this, branches);
@@ -2258,10 +2271,11 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
 ///    EXPORTS
 ////////////////////////////////////////////////////////////////////////////////
 
-exports._selectedTermsEvent  = SELECTED_TERMS_EVENT;
-exports._selectionQueryEvent = SELECTION_QUERY_EVENT;
-exports._displayViewEvent    = DISPLAY_VIEW_EVENT;
-exports._selectionCountEvent = SELECTION_COUNT_EVENT;
+exports._selectedTermsEvent     = SELECTED_TERMS_EVENT;
+exports._highlightedTermEvent   = HIGHLIGHTED_TERM_EVENT;
+exports._highlightedBranchEvent = HIGHLIGHTED_BRANCH_EVENT;
+exports._displayViewEvent       = DISPLAY_VIEW_EVENT;
+exports._selectionCountEvent    = SELECTION_COUNT_EVENT;
 
 exports._drawPhylo        = drawPhylo;
 exports._drawWordCloud    = drawWordCloud;

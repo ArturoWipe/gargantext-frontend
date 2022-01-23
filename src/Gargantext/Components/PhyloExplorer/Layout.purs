@@ -72,6 +72,8 @@ layoutCpt = here.component "layout" cpt where
 
     highlightedTermBox <- T.useBox (Nothing :: Maybe String)
 
+    highlightedBranchBox <- T.useBox (Nothing :: Maybe String)
+
     selectionCountBox <- T.useBox (Nothing :: Maybe SelectionCount)
 
     -- Effects
@@ -93,23 +95,24 @@ layoutCpt = here.component "layout" cpt where
       T.write_ (window .. "terms") termsBox
 
     useFirstEffect' do
-      -- Subscribe to new selected term change
       -- (see `Gargantext.Components.PhyloExplorer.Resources` > JavaScript >
       -- `pubsub` for detailed explanations)
       RS.subscribe (show SelectedTermsEvent) $ flip T.write_ selectedTermsBox
-      -- Subscribe to new selection query change
-      -- (idem)
-      RS.subscribe (show SelectionQueryEvent) $ case _ of
+
+      RS.subscribe (show HighlightedTermEvent) $ case _ of
         res
           | true == null res -> T.write_ Nothing highlightedTermBox
           | otherwise        -> T.write_ (Just res) highlightedTermBox
-      -- Subscribe to JavaScript change for display view
-      -- (idem)
+
+      RS.subscribe (show HighlightedBranchEvent) $ case _ of
+        res
+          | true == null res -> T.write_ Nothing highlightedBranchBox
+          | otherwise        -> T.write_ (Just res) highlightedBranchBox
+
       RS.subscribe (show DisplayViewEvent) $ read >>> case _ of
         Nothing  -> pure unit
         Just res -> T.write_ res displayViewBox
-      -- Subscribe to new selection count data change
-      -- (idem)
+
       RS.subscribe (show SelectionCountEvent) $ JSON.readJSON >>> case _ of
         Left _ ->
           T.write_ Nothing selectionCountBox
@@ -209,6 +212,7 @@ layoutCpt = here.component "layout" cpt where
           , branchCount: o.nbBranches
           , selectedTerms: selectedTermsBox
           , highlightedTerm: highlightedTermBox
+          , highlightedBranch: highlightedBranchBox
           , selectionCount: selectionCountBox
           }
       ,

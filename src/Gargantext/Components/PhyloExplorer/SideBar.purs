@@ -30,6 +30,7 @@ type Props =
   , branchCount           :: Int
 
   , highlightedTerm       :: T.Box (Maybe String)
+  , highlightedBranch     :: T.Box (Maybe String)
   , selectedTerms         :: T.Box (Array SelectedTerm)
   , selectionCount        :: T.Box (Maybe SelectionCount)
   )
@@ -109,6 +110,7 @@ component = here.component "main" cpt where
           { key: (show props.nodeId) <> "-selection"
           , selectedTerms: props.selectedTerms
           , highlightedTerm: props.highlightedTerm
+          , highlightedBranch: props.highlightedBranch
           , selectionCount: props.selectionCount
           }
       ]
@@ -195,11 +197,12 @@ detailsCount value label =
 ------------------------------------------------------
 
 type SelectionProps =
-  ( key             :: String
+  ( key               :: String
 
-  , selectedTerms   :: T.Box (Array SelectedTerm)
-  , highlightedTerm :: T.Box (Maybe String)
-  , selectionCount  :: T.Box (Maybe SelectionCount)
+  , selectedTerms     :: T.Box (Array SelectedTerm)
+  , highlightedTerm   :: T.Box (Maybe String)
+  , highlightedBranch :: T.Box (Maybe String)
+  , selectionCount    :: T.Box (Maybe SelectionCount)
   )
 
 selectionTab :: R2.Leaf SelectionProps
@@ -209,9 +212,10 @@ selectionTabCpt :: R.Component SelectionProps
 selectionTabCpt = here.component "selectionTab" cpt where
   cpt props _ = do
     -- State
-    selectedTerms'  <- R2.useLive' props.selectedTerms
-    highlightedTerm' <- R2.useLive' props.highlightedTerm
-    selectionCount' <- R2.useLive' props.selectionCount
+    selectedTerms'      <- R2.useLive' props.selectedTerms
+    highlightedTerm'    <- R2.useLive' props.highlightedTerm
+    highlightedBranch'  <- R2.useLive' props.highlightedBranch
+    selectionCount'     <- R2.useLive' props.selectionCount
 
     showMore /\ showMoreBox <- R2.useBox' false
 
@@ -236,7 +240,41 @@ selectionTabCpt = here.component "selectionTab" cpt where
       H.div
       { className: "phylo-selection-tab" }
       [
-        -- Highlighted terms
+        -- Highlighted branch
+        case highlightedBranch' of
+          Nothing -> mempty
+          Just s  -> R.fragment
+            [
+              H.div
+              { className: "phylo-selection-tab__highlight" }
+              [
+                H.h5
+                {}
+                [
+                  H.text "Highlighted branch"
+                ]
+              ,
+                H.ul
+                { className: "list-group" }
+                [
+                  H.li
+                  { className: "list-group-item" }
+                  [
+                    H.span
+                    { className: intercalate " "
+                        [ "phylo-selection-tab__highlight__badge"
+                        , "badge badge-info"
+                        ]
+                    }
+                    [
+                      H.text s
+                    ]
+                  ]
+                ]
+              ]
+            ]
+      ,
+        -- Highlighted term
         case highlightedTerm' of
           Nothing -> mempty
           Just s  -> R.fragment
