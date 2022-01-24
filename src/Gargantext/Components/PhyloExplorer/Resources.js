@@ -1353,7 +1353,7 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
   var debouncedOnZoom = debounce(
     onZoom
-    , 50
+    , 25
   );
 
   zoom = d3
