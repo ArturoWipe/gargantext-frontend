@@ -1,3 +1,5 @@
+'use strict';
+
 ////////////////////////////////////////////////////////////////////////////////
 ///    FIELDS
 ////////////////////////////////////////////////////////////////////////////////
@@ -770,7 +772,7 @@ function branchOut(bId) {
  */
  function tickClick(branches, tick) {
   let bid = parseInt(tick.getAttribute("bId"), 10),
-      groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes()
+      groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes(),
       branch = branches.find(function(item) {
         return item.bId === bid;
       });
@@ -848,7 +850,7 @@ function tickOut(tick, branches) {
 
           return lower && upper;
         }
-      )
+      ),
       zoomYLabels = yLabels.filter(
         function(p) {
           var lower = zoomY(p.y) >= yBounds[0];
@@ -1745,9 +1747,9 @@ function setYDomain(labels) {
  *    <Float>
  */
 function findGroup (groups, id, xsc, ysc) {
-  var group = groups.find(g => g.gId == id),
-      x = xsc(group.x);
-      y = ysc(group.to);
+  var group = groups.find(g => g.gId == id);
+  var x = xsc(group.x);
+  var y = ysc(group.to);
 
   return [x,y]
 }
@@ -2045,7 +2047,7 @@ function setGroup(g, xScale, yScale, wScale) {
   var lineHeight = 12,
       targetWidth = Math.sqrt(textWidth(g.label.join('').trim()) * radius),
       lines = toLines(g.label,g.foundation,g.role,targetWidth),
-      textRadius = toTextRadius(lines,lineHeight)
+      textRadius = toTextRadius(lines,lineHeight),
       textRatio = (radius - 0.5) / textRadius;
 
   for (let i = 0; i < lines.length; i++) {
@@ -2053,7 +2055,7 @@ function setGroup(g, xScale, yScale, wScale) {
     let words  = lines[i].text,
         fdt    = lines[i].fdt,
         roles  = lines[i].role,
-        terms  = mergeLists(words,fdt,roles)
+        terms  = mergeLists(words,fdt,roles),
         toSpan = (acc, w) => acc + "<tspan fdt=" + w[1]
                                  + " class='term fdt-" + w[1] + " " + "g-" + g.gId + findRole(w[2]) + "'"
                                  + " gy=" + yScale(g.to)
