@@ -329,6 +329,24 @@ $decreasing-color: #11638F;
     top: calc( 50% - #{ $size / 2 } );
     left: calc( 50% - #{ $size / 2 } );
   }
+
+  &__sidebar {
+    position: fixed;
+    width: $sidebar-width;
+    height: $sidebar-height;
+    z-index: z-index('phylo-layout', 'sidebar');
+
+    @include right-handed {
+      right: 0;
+      border-left: 1px solid $border-color;
+    }
+
+    @include left-handed {
+      left: 0;
+      border-right: 1px solid $border-color;
+    }
+
+  }
 }
 
 
@@ -452,11 +470,8 @@ $decreasing-color: #11638F;
 .phylo-sidebar {
   $teaser-height: 16px;
 
-  position: fixed;
   background-color: $body-bg;
-  width: $sidebar-width;
-  height: $sidebar-height;
-  z-index: z-index("phylo-layout", "sidebar");
+  height: 100%;
 
   // avoiding ugly scrollbar
   scrollbar-width: none;
@@ -465,16 +480,6 @@ $decreasing-color: #11638F;
 
   &::-webkit-scrollbar {
     display: none;
-  }
-
-  @include right-handed {
-    right: 0;
-    border-left: 1px solid $border-color;
-  }
-
-  @include left-handed {
-    left: 0;
-    border-right: 1px solid $border-color;
   }
 
   // adjust nav menu gutter (@TODO: generic?)

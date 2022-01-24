@@ -5,6 +5,7 @@ module Gargantext.Components.PhyloExplorer.Layout
 import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector, window)
+import DOM.Simple.Console (log)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.String (null)
@@ -175,7 +176,6 @@ layoutCpt = here.component "layout" cpt where
           RS.autocompleteSearch terms
       >=> RS.autocompleteSubmit displayViewBox
 
-
     -- Render
     pure $
 
@@ -206,7 +206,13 @@ layoutCpt = here.component "layout" cpt where
         ]
       ,
         -- Sidebar
-        R2.if' (sideBarDisplayed) $
+        H.div
+        { className: "phylo__sidebar"
+        -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
+        -- @link https://github.com/facebook/react/issues/12039
+        , style: { display: sideBarDisplayed ? "block" $ "none" }
+        }
+        [
           sideBar
           { nodeId
           , docCount: o.nbDocs
@@ -221,6 +227,7 @@ layoutCpt = here.component "layout" cpt where
           , selectionCount: selectionCountBox
           , selectTermCallback
           }
+        ]
       ,
         -- Toolbar
         R2.if' (toolBarDisplayed) $

@@ -398,7 +398,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
                             , lineHeight: termFontSize ratio
                             }
                         , on:
-                          { click: selectTermCallback label
+                          { click: \_ -> selectTermCallback label
                           }
                         }
                         [
