@@ -5,7 +5,6 @@ module Gargantext.Components.PhyloExplorer.Layout
 import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector, window)
-import DOM.Simple.Console (log)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.String (null)
@@ -50,32 +49,48 @@ layoutCpt = here.component "layout" cpt where
 
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
-    isDisplayed /\ isReadyBox <- R2.useBox' false
+    isDisplayed /\ isReadyBox <-
+      R2.useBox' false
 
-    source  /\ sourceBox  <- R2.useBox' ""
-    sources /\ sourcesBox <- R2.useBox' (mempty :: Array Source)
+    source  /\ sourceBox  <-
+      R2.useBox' ""
+
+    sources /\ sourcesBox <-
+      R2.useBox' (mempty :: Array Source)
 
     -- @WIP: move value to PhyloDataSet?
-    terms /\ termsBox <- R2.useBox' (mempty :: Array Term)
+    terms /\ termsBox <-
+      R2.useBox' (mempty :: Array Term)
 
-    toolBarDisplayed /\ toolBarDisplayedBox <- R2.useBox' false
+    toolBarDisplayed /\ toolBarDisplayedBox <-
+      R2.useBox' false
 
-    search /\ searchBox <- R2.useBox' ""
-    result /\ resultBox <- R2.useBox' (Nothing :: Maybe Term)
+    search /\ searchBox <-
+      R2.useBox' ""
 
-    displayView /\ displayViewBox <- R2.useBox' defaultDisplayView
+    result /\ resultBox <-
+      R2.useBox' (Nothing :: Maybe Term)
 
-    isIsolineDisplayed /\ isIsolineDisplayedBox <- R2.useBox' false
+    displayView /\ displayViewBox <-
+      R2.useBox' defaultDisplayView
 
-    sideBarDisplayed /\ sideBarDisplayedBox <- R2.useBox' false
+    isIsolineDisplayed /\ isIsolineDisplayedBox <-
+      R2.useBox' false
 
-    selectedTermsBox <- T.useBox (mempty :: Array SelectedTerm)
+    sideBarDisplayed /\ sideBarDisplayedBox <-
+      R2.useBox' false
 
-    highlightedTermBox <- T.useBox (Nothing :: Maybe String)
+    selectedTerms /\ selectedTermsBox <-
+      R2.useBox' (mempty :: Array SelectedTerm)
 
-    highlightedBranchBox <- T.useBox (Nothing :: Maybe String)
+    highlightedTerm /\ highlightedTermBox <-
+      R2.useBox' (Nothing :: Maybe String)
 
-    selectionCountBox <- T.useBox (Nothing :: Maybe SelectionCount)
+    highlightedBranch /\ highlightedBranchBox <-
+      R2.useBox' (Nothing :: Maybe String)
+
+    selectionCount /\ selectionCountBox <-
+      R2.useBox' (Nothing :: Maybe SelectionCount)
 
     -- Effects
     useFirstEffect' $ do
@@ -221,10 +236,10 @@ layoutCpt = here.component "layout" cpt where
           , termCount: o.nbTerms
           , groupCount: o.nbGroups
           , branchCount: o.nbBranches
-          , selectedTerms: selectedTermsBox
-          , highlightedTerm: highlightedTermBox
-          , highlightedBranch: highlightedBranchBox
-          , selectionCount: selectionCountBox
+          , selectedTerms
+          , highlightedTerm
+          , highlightedBranch
+          , selectionCount
           , selectTermCallback
           }
         ]

@@ -30,10 +30,10 @@ type Props =
   , groupCount            :: Int
   , branchCount           :: Int
 
-  , highlightedTerm       :: T.Box (Maybe String)
-  , highlightedBranch     :: T.Box (Maybe String)
-  , selectedTerms         :: T.Box (Array SelectedTerm)
-  , selectionCount        :: T.Box (Maybe SelectionCount)
+  , highlightedTerm       :: Maybe String
+  , highlightedBranch     :: Maybe String
+  , selectedTerms         :: Array SelectedTerm
+  , selectionCount        :: Maybe SelectionCount
   , selectTermCallback    :: String -> Effect Unit
   )
 
@@ -214,10 +214,10 @@ detailsCount value label =
 type SelectionProps =
   ( key                 :: String
 
-  , selectedTerms       :: T.Box (Array SelectedTerm)
-  , highlightedTerm     :: T.Box (Maybe String)
-  , highlightedBranch   :: T.Box (Maybe String)
-  , selectionCount      :: T.Box (Maybe SelectionCount)
+  , selectedTerms       :: Array SelectedTerm
+  , highlightedTerm     :: Maybe String
+  , highlightedBranch   :: Maybe String
+  , selectionCount      :: Maybe SelectionCount
   , selectTermCallback  :: String -> Effect Unit
   )
 
@@ -226,18 +226,17 @@ selectionTab = R2.leaf selectionTabCpt
 
 selectionTabCpt :: R.Component SelectionProps
 selectionTabCpt = here.component "selectionTab" cpt where
-  cpt props@{ selectTermCallback
-            } _ = do
+  cpt { selectTermCallback
+      , selectedTerms
+      , highlightedTerm
+      , highlightedBranch
+      , selectionCount
+      } _ = do
     -- State
-    selectedTerms'      <- R2.useLive' props.selectedTerms
-    highlightedTerm'    <- R2.useLive' props.highlightedTerm
-    highlightedBranch'  <- R2.useLive' props.highlightedBranch
-    selectionCount'     <- R2.useLive' props.selectionCount
-
     showMore /\ showMoreBox <- R2.useBox' false
 
     let
-      termCount = length selectedTerms'
+      termCount = length selectedTerms
 
       maxTruncateResult = 5
 
@@ -247,7 +246,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
 
     -- Effects
 
-    R.useEffect1' selectedTerms' $
+    R.useEffect1' selectedTerms $
       -- reset "show more" button to hidding mode on selected terms change
       T.write_ false showMoreBox
 
@@ -258,7 +257,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
       { className: "phylo-selection-tab" }
       [
         -- Highlighted branch
-        case highlightedBranch' of
+        case highlightedBranch of
           Nothing -> mempty
           Just s  -> R.fragment
             [
@@ -292,7 +291,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
             ]
       ,
         -- Highlighted term
-        case highlightedTerm' of
+        case highlightedTerm of
           Nothing -> mempty
           Just s  -> R.fragment
             [
@@ -340,7 +339,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
             ]
       ,
         -- Selection Results
-        R2.if' (not null selectedTerms') $
+        R2.if' (not null selectedTerms) $
 
           H.div
           { className: "phylo-selection-tab__selection" }
@@ -355,7 +354,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
             { className: "list-group" }
             [
               -- Selection count
-              case selectionCount' of
+              case selectionCount of
                 Nothing                     -> mempty
                 Just (SelectionCount count) ->
 
@@ -379,7 +378,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
               [
                 H.ul
                 {} $
-                flip mapWithIndex selectedTerms'
+                flip mapWithIndex selectedTerms
                   \index (SelectedTerm { label, ratio }) ->
 
                     R2.if'
@@ -421,7 +420,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
           ]
       ,
         -- No result
-        R2.if' (null selectedTerms') $
+        R2.if' (null selectedTerms) $
 
           B.caveat
           { className: "phylo-selection-tab__nil" }
