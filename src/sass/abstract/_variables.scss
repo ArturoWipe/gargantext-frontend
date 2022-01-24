@@ -6,7 +6,13 @@ $space-unit: 8px;
 $z-indexes: (
   main: (
   ),
+  forest-layout: (
+    "teaser",
+  ),
   phylo-layout: (
-    "sidebar"
+    "sidebar",
+  ),
+  phylo-sidebar: (
+    "teaser",
   ),
 );

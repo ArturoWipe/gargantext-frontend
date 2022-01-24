@@ -10091,41 +10091,6 @@ h3 {
   font-family: ForkAwesome, Nunito;
 }
 
-.right-handed .forest-layout {
-  border-right: 2px solid #dee2e6;
-}
-
-.left-handed .forest-layout {
-  border-left: 2px solid #dee2e6;
-}
-
-.forest-layout-bottom-teaser {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
-}
-
-.forest-layout-top-teaser {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
-}
-
-.main-page__horizontal-tiles {
-  border-top: 2px solid #dee2e6;
-}
-.main-page__horizontal-tiles .tile-block:not(:first-child) {
-  border-left: 2px solid #dee2e6;
-}
-
-.main-page__vertical-tiles {
-  border-left: 2px solid #dee2e6;
-}
-.main-page__vertical-tiles .tile-block:not(:first-child) {
-  border-top: 2px solid #dee2e6;
-}
-
-.tile-menu__popover {
-  border-radius: 0.25rem;
-  background-color: #fff;
-}
-
 .nav.nav-tabs .nav-tabs .nav-link.active, .nav.nav-tabs .nav-tabs .nav-item.show .nav-link, .nav.nav-tabs li a {
   color: #495057;
 }
@@ -10830,6 +10795,13 @@ li .leaf:hover a.settings {
 .forest-layout::-webkit-scrollbar {
   display: none;
 }
+.right-handed .forest-layout {
+  border-right: 2px solid #dee2e6;
+}
+
+.left-handed .forest-layout {
+  border-left: 2px solid #dee2e6;
+}
 
 .forest-layout-action {
   display: flex;
@@ -10859,35 +10831,23 @@ li .leaf:hover a.settings {
 }
 
 .forest-layout-bottom-teaser {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
   z-index: 1;
   pointer-events: none;
-  position: fixed;
+  position: sticky;
   bottom: 0;
   height: 24px;
-  width: calc(16.6666666667% - 1px);
-}
-.right-handed .forest-layout-bottom-teaser {
-  left: 0;
-}
-
-.left-handed .forest-layout-bottom-teaser {
-  right: 0;
+  width: 100%;
 }
 
 .forest-layout-top-teaser {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
   z-index: 1;
   pointer-events: none;
   position: sticky;
   top: 0;
   height: 24px;
-  width: calc(100% - 1px);
-}
-.right-handed .forest-layout-top-teaser {
-  left: 0;
-}
-
-.left-handed .forest-layout-top-teaser {
-  right: 0;
+  width: 100%;
 }
 
 .forest-layout-content > ul.tree {
@@ -10913,6 +10873,25 @@ li .leaf:hover a.settings {
 }
 .ids-selector .tree .children .leaf input {
   margin: 0.1em;
+}
+
+.main-page__horizontal-tiles {
+  border-top: 2px solid #dee2e6;
+}
+.main-page__horizontal-tiles .tile-block:not(:first-child) {
+  border-left: 2px solid #dee2e6;
+}
+
+.main-page__vertical-tiles {
+  border-left: 2px solid #dee2e6;
+}
+.main-page__vertical-tiles .tile-block:not(:first-child) {
+  border-top: 2px solid #dee2e6;
+}
+
+.tile-menu__popover {
+  border-radius: 0.25rem;
+  background-color: #fff;
 }
 
 .code-editor .editor .code-area {
@@ -11709,14 +11688,29 @@ select.form-control {
   border-right: 1px solid #dee2e6;
 }
 
-.phylo-sidebar__menu .nav-item {
-  margin-top: 16px;
-}
 .phylo-sidebar__menu .nav-item:first-child {
   margin-left: 16px;
 }
 .phylo-sidebar__menu .nav-item:last-child {
   margin-right: 16px;
+}
+.phylo-sidebar__top-teaser {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  top: 0;
+  height: 16px;
+  width: 100%;
+}
+.phylo-sidebar__bottom-teaser {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 16px;
+  width: 100%;
 }
 
 .phylo-details-tab__counter {
@@ -11748,7 +11742,7 @@ select.form-control {
   margin: 16px 20px;
 }
 .phylo-selection-tab__selection {
-  margin: 16px 20px;
+  margin: 16px 20px 0;
 }
 .phylo-selection-tab__selection__item {
   white-space: normal;

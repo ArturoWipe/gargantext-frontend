@@ -395,7 +395,7 @@ $decreasing-color: #11638F;
   $margin: space-x(0.5);
   $fixed-button-width: 136px;
 
-  @include asideTopbar();
+  @include aside-topbar();
 
   padding-left: $margin;
   padding-right: $margin;
@@ -450,6 +450,8 @@ $decreasing-color: #11638F;
 ////////////////////////////////////////////////////////////////
 
 .phylo-sidebar {
+  $teaser-height: 16px;
+
   position: fixed;
   background-color: $body-bg;
   width: $sidebar-width;
@@ -475,8 +477,8 @@ $decreasing-color: #11638F;
     border-right: 1px solid $border-color;
   }
 
+  // adjust nav menu gutter (@TODO: generic?)
   &__menu .nav-item {
-    margin-top: space-x(2);
 
     &:first-child {
       margin-left: space-x(2);
@@ -485,6 +487,31 @@ $decreasing-color: #11638F;
     &:last-child {
       margin-right: space-x(2);
     }
+  }
+
+  // UX best pratice: when a lengthy column is overflowy hidden
+  // (with a scroll), a teaser UI element shows to the user that a scroll
+  // is possible
+  &__top-teaser {
+    @include top-teaser;
+
+    z-index: z-index('phylo-sidebar', 'teaser');
+    pointer-events: none;
+    position: sticky;
+    top: 0;
+    height: $teaser-height;
+    width: 100%;
+  }
+
+  &__bottom-teaser {
+    @include bottom-teaser;
+
+    z-index: z-index('phylo-sidebar', 'teaser');
+    pointer-events: none;
+    position: sticky;
+    bottom: 0;
+    height: $teaser-height;
+    width: 100%;
   }
 }
 
@@ -533,7 +560,7 @@ $decreasing-color: #11638F;
   }
 
   &__selection {
-    margin: $margin-y $margin-x;
+    margin: $margin-y $margin-x 0;
 
     &__item {
       white-space: normal;

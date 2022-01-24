@@ -53,6 +53,11 @@ component = here.component "main" cpt where
       H.div
       { className: "phylo-sidebar" }
       [
+        -- Teasers
+        H.div
+        { className: "phylo-sidebar__top-teaser" }
+        []
+      ,
         -- Menu
         H.ul
         { className: intercalate " "
@@ -94,6 +99,7 @@ component = here.component "main" cpt where
           ]
         ]
       ,
+        -- Details tab
         R2.if' (tabView == DetailsTab) $
           detailsTab
           { key: (show props.nodeId) <> "-details"
@@ -105,6 +111,7 @@ component = here.component "main" cpt where
           , branchCount: props.branchCount
           }
       ,
+        -- Selection tab
         R2.if' (tabView == SelectionTab) $
           selectionTab
           { key: (show props.nodeId) <> "-selection"
@@ -113,6 +120,11 @@ component = here.component "main" cpt where
           , highlightedBranch: props.highlightedBranch
           , selectionCount: props.selectionCount
           }
+      ,
+        -- Teaser
+        H.div
+        { className: "phylo-sidebar__bottom-teaser" }
+        []
       ]
 
 
