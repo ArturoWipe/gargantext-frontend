@@ -2,9 +2,11 @@
 @import '../../../node_modules/bootstrap/scss/variables';
 @import '../../../node_modules/bootstrap/scss/mixins';
 
-// Your variable overrides
-//------------------------
 
+// Theme variable overrides
+//-------------------------
+
+// Colors
 $primary: #005a9a;
 $secondary: $blue;
 
@@ -16,11 +18,14 @@ $theme-colors: (
 // Add more shades to gray
 $gray-150: #FAFAFA;
 
-// Bootstrap and its default variables
+
+// (importing Bootstrap)
 @import '../../../node_modules/bootstrap/scss/bootstrap';
 
-// Add SASS theme customizations here..
-//
+
+// Project variables
+//------------------
+
 // (?) Normally "abstract" and "modules" have to be MANUALLY IMPORTED each
 //     times their content is being used
 //
@@ -37,8 +42,9 @@ $gray-150: #FAFAFA;
 @import '../_base';
 @import '../_legacy';
 
-// Custom rules according to the theme
-//------------------------------------
+
+// Custom rules specific to the theme
+//-----------------------------------
 
 // Rectify "secondary" button tonal contrast
 .btn-secondary,
