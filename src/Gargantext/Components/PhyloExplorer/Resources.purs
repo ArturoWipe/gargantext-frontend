@@ -165,8 +165,8 @@ instance Show PubSubEvent where
 
 -----------------------------------------------------------
 
--- @WIP: "Graphics.D3.Selection" lack of "filter" function
--- @WIP: "Graphics.D3.Selection" lack of "nodes" function
+-- @XXX: "Graphics.D3.Selection" lack of "filter" function
+-- @XXX: "Graphics.D3.Selection" lack of "nodes" function
 selectionFilter :: forall d. String -> D3S.Selection d -> D3Eff (D3S.Selection D3S.Void)
 selectionFilter = ffi ["query", "selection", ""] "selection.filter(query)"
 

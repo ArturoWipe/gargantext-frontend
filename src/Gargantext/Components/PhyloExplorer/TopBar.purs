@@ -16,7 +16,6 @@ import Reactix as R
 import Reactix.DOM.HTML as H
 import Toestand as T
 
--- @WIP: * change "source" default value "" to `Maybe String`
 type Props =
   ( sources             :: Array (Source)
   , source              :: T.Box (String)

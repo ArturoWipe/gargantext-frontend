@@ -29,7 +29,7 @@ import Gargantext.Components.PhyloExplorer.JSON (PhyloJSONSet(..), RawEdge(..), 
 import Simple.JSON as JSON
 
 
--- @WIP PureScript Date or stick to JavaScript foreign?
+-- (?) PureScript Date or stick to JavaScript foreign?
 foreign import yearToDate       :: String -> Date.Date
 foreign import stringToDate     :: String -> Date.Date
 foreign import utcStringToDate  :: String -> Date.Date
@@ -69,7 +69,7 @@ parsePhyloJSONSet (PhyloJSONSet o) = PhyloDataSet
   , links
   , name          : o.name
   , nbBranches    : parseInt o.phyloBranches
-  -- @WIP remotely stringify as a Double instead of an Int (?)
+  -- (!) remotely stringify as a Double instead of an Int (reason?)
   , nbDocs        : (parseFloat >>> parseInt') o.phyloDocs
   , nbFoundations : parseInt o.phyloFoundations
   , nbGroups      : parseInt o.phyloGroups
@@ -157,7 +157,7 @@ parsePeriods epoch
 
 newtype Group = Group
   { bId           :: Int
-  , foundation    :: Array Int -- @WIP: Array String ???
+  , foundation    :: Array Int -- (?) Array String ???
   , from          :: Date.Date
   , gId           :: Int
   , label         :: Array String
@@ -202,7 +202,7 @@ parseGroups epoch
 newtype Link = Link
   { from    :: Int
   , lId     :: Int
-  , label   :: String -- @WIP: undefined in Mèmiescape v2, still needed?
+  , label   :: String -- (!) undefined in Mèmiescape v2, still needed?
   , to      :: Int
   }
 
@@ -217,8 +217,8 @@ parseLinks
   >>> Array.catMaybes
 
   where
-    -- @WIP: necessary?
-    --       bc. GroupToGroup as 1-1 relation with "edgeType=link"
+    -- (?): necessary?
+    --      bc. GroupToGroup as 1-1 relation with "edgeType=link"
     filter :: RawEdge -> Boolean
     filter (GroupToGroup o) = o.edgeType == "link"
     filter _                = false
@@ -237,7 +237,7 @@ parseLinks
 newtype AncestorLink = AncestorLink
   { from    :: Int
   , lId     :: Int
-  , label   :: String -- @WIP: undefined in Mèmiescape v2, still needed?
+  , label   :: String -- (?) undefined in Mèmiescape v2, still needed?
   , to      :: Int
   }
 
@@ -252,8 +252,8 @@ parseAncestorLinks
   >>> Array.catMaybes
 
   where
-    -- @WIP: necessary?
-    --       bc. GroupToAncestor as 1-1 relation with "edgeType=ancestorLink"
+    -- (?) necessary?
+    --     bc. GroupToAncestor as 1-1 relation with "edgeType=ancestorLink"
     filter :: RawEdge -> Boolean
     filter (GroupToAncestor o) = o.edgeType == "ancestorLink"
     filter _                   = false
@@ -285,8 +285,8 @@ parseBranchLinks
   >>> Array.catMaybes
 
   where
-    -- @WIP: necessary?
-    --       bc. BranchToGroup as 1-1 relation with "edgeType=branchLink"
+    -- (?) necessary?
+    --     bc. BranchToGroup as 1-1 relation with "edgeType=branchLink"
     filter :: RawEdge -> Boolean
     filter (BranchToGroup o) = o.edgeType == "branchLink"
     filter _                 = false
@@ -340,9 +340,9 @@ parseSources
   >>> String.split (String.Pattern ",")
   >>> Array.filter (\s -> not eq 0 $ String.length s)
 
--- @WIP: as some "Draw.js" business's methods still use `source` as an unsorted
---       `Array String`, we have to dissociate the parsing and sorting
---       computation (hence this second method to use for sorting purposes)
+-- (?) `Resources.js` business's methods still use `source` as an unsorted
+--      `Array String`, we have to dissociate the parsing and sorting
+--      computation (hence this second method to use for sorting purposes)
 sortSources :: Array String -> Array Source
 sortSources
   =   Array.mapWithIndex setSource
@@ -389,7 +389,7 @@ parsePos
       Just s  -> parseFloat s
 
 
--- @WIP: why taking last value? use `any`?
+-- (?) why taking last value? use `any`?
 getGlobalWeightedValue :: Array Group -> Boolean
 getGlobalWeightedValue
   =   Array.last

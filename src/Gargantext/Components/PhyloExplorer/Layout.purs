@@ -58,7 +58,6 @@ layoutCpt = here.component "layout" cpt where
     sources /\ sourcesBox <-
       R2.useBox' (mempty :: Array Source)
 
-    -- @WIP: move value to PhyloDataSet?
     terms /\ termsBox <-
       R2.useBox' (mempty :: Array Term)
 
@@ -107,7 +106,8 @@ layoutCpt = here.component "layout" cpt where
         o.bb
       RS.changeDisplayView displayView
       T.write_ true isReadyBox
-      -- @WIP: handling global variables
+      -- @XXX: handling global variables
+      --       (see `Resources.js` how they are being used)
       T.write_ (window .. "terms") termsBox
 
     useFirstEffect' do
@@ -161,8 +161,8 @@ layoutCpt = here.component "layout" cpt where
           style <- pure $ (el .. "style")
           pure $ (style .= "padding") "initial"
 
-    -- @WIP (as some actions are checked by the JS resources via DOMElement
-    --      UI attribute, for now we create a temporary reference)
+    -- @XXX: handling global variables
+    --       (see `Resources.js` how they are being used)
     useUpdateEffect1' displayView do
       pure $ (window .= "displayView") (show displayView)
 

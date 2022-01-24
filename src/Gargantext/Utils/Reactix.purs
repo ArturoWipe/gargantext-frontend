@@ -522,7 +522,7 @@ applyTo_ src name args =
 
 infixl 4 applyTo_ as ~~
 
--- @WIP: DOM.Simple lack of "ClassList" module
+-- @XXX: DOM.Simple lack of "ClassList" module
 addClass :: forall el. el -> Array String -> Effect Unit
 addClass el args = pure $ (el .. "classList") ~~ "add" $ args
 
