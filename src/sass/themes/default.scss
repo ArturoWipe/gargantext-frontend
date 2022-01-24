@@ -3,6 +3,8 @@
 @import '../../../node_modules/bootstrap/scss/mixins';
 
 // Your variable overrides
+//------------------------
+
 $primary: #005a9a;
 $secondary: $blue;
 
@@ -10,6 +12,9 @@ $theme-colors: (
   "primary": $primary,
   "secondary": $secondary
 );
+
+// Add more shades to gray
+$gray-150: #FAFAFA;
 
 // Bootstrap and its default variables
 @import '../../../node_modules/bootstrap/scss/bootstrap';
@@ -33,6 +38,7 @@ $theme-colors: (
 @import '../_legacy';
 
 // Custom rules according to the theme
+//------------------------------------
 
 // Rectify "secondary" button tonal contrast
 .btn-secondary,
@@ -42,4 +48,10 @@ $theme-colors: (
 .btn-outline-secondary:not(:disabled):not(.disabled).active,
 .show > .btn-outline-secondary.dropdown-toggle {
   color: $white;
+}
+
+// Alter <b-alert> light variant for better contrast
+.alert.alert-light {
+  border-color: $gray-150;
+  color: $gray-600;
 }

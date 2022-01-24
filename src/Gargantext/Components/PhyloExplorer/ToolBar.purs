@@ -73,7 +73,7 @@ component = here.component "main" cpt where
           }
           [
             B.button
-            { title: "Show node header"
+            { title: "Show emergence label only"
             , callback: \_ -> changeViewCallback HeadingMode
             , variant: OutlinedButtonVariant Secondary
             , className: displayView == HeadingMode ?
@@ -86,7 +86,7 @@ component = here.component "main" cpt where
             ]
           ,
             B.button
-            { title: "Show node inner label"
+            { title: "Show node inner labels"
             , callback: \_ -> changeViewCallback LabelMode
             , variant: OutlinedButtonVariant Secondary
             , className: displayView == LabelMode ?

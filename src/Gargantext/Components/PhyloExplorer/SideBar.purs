@@ -402,12 +402,21 @@ selectionTabCpt = here.component "selectionTab" cpt where
               ]
             ]
           ]
+      ,
+        -- No result
+        R2.if' (null selectedTerms') $
+
+          B.caveat
+          { className: "phylo-selection-tab__nil" }
+          [
+            H.text "No selection has been made"
+          ]
       ]
 
 termFontSize :: Number -> String
 termFontSize
-    = (_ * 12.0)
-  >>> (_ + 11.0)
+    = (_ * 10.0)
+  >>> (_ + 14.0)
   >>> ceil
   >>> show
   >>> (_ <> "px")

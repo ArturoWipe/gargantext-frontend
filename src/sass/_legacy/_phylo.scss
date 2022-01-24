@@ -494,7 +494,7 @@ $decreasing-color: #11638F;
   $margin-y: space-x(2);
 
   &__counter {
-    margin: $margin-y $tab-margin-x;
+    margin: $margin-y $margin-x;
 
     &__item {
       margin-left: space-x(2);
@@ -507,11 +507,11 @@ $decreasing-color: #11638F;
   }
 
   &__delimiter {
-    margin: $margin-y $tab-margin-x;
+    margin: $margin-y $margin-x;
   }
 
   &__link {
-    margin: $margin-y $tab-margin-x;
+    margin: $margin-y $margin-x;
   }
 }
 
@@ -520,7 +520,7 @@ $decreasing-color: #11638F;
   $margin-y: space-x(2);
 
   &__highlight {
-    margin: $margin-y $tab-margin-x;
+    margin: $margin-y $margin-x;
 
     &__badge {
       font-size: $font-size-base;
@@ -530,11 +530,11 @@ $decreasing-color: #11638F;
   }
 
   &__delimiter {
-    margin: $margin-y $tab-margin-x;
+    margin: $margin-y $margin-x;
   }
 
   &__selection {
-    margin: $margin-y $tab-margin-x;
+    margin: $margin-y $margin-x;
 
     &__item {
       white-space: normal;
@@ -562,6 +562,10 @@ $decreasing-color: #11638F;
     &__value {
       color: $info;
     }
+  }
+
+  &__nil {
+    margin: $margin-y $margin-x
   }
 }
 

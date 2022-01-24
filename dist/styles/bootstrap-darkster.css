@@ -11829,6 +11829,9 @@ select.form-control {
 .phylo-selection-tab__counter__value {
   color: #0F81C7;
 }
+.phylo-selection-tab__nil {
+  margin: 16px 20px;
+}
 
 .phylo-toolbar {
   display: flex;

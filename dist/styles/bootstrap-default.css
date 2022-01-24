@@ -11779,6 +11779,9 @@ select.form-control {
 .phylo-selection-tab__counter__value {
   color: #17a2b8;
 }
+.phylo-selection-tab__nil {
+  margin: 16px 20px;
+}
 
 .phylo-toolbar {
   display: flex;
@@ -11811,6 +11814,11 @@ select.form-control {
 .btn-outline-secondary:not(:disabled):not(.disabled).active,
 .show > .btn-outline-secondary.dropdown-toggle {
   color: #fff;
+}
+
+.alert.alert-light {
+  border-color: #FAFAFA;
+  color: #6c757d;
 }
 
 /*# sourceMappingURL=bootstrap-default.css.map */
