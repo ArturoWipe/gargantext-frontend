@@ -171,6 +171,11 @@ layoutCpt = here.component "layout" cpt where
       -- unselect branch/term(s)
       RS.doubleClick
 
+    selectTermCallback <- pure $
+          RS.autocompleteSearch terms
+      >=> RS.autocompleteSubmit displayViewBox
+
+
     -- Render
     pure $
 
@@ -214,6 +219,7 @@ layoutCpt = here.component "layout" cpt where
           , highlightedTerm: highlightedTermBox
           , highlightedBranch: highlightedBranchBox
           , selectionCount: selectionCountBox
+          , selectTermCallback
           }
       ,
         -- Toolbar

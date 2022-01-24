@@ -9,6 +9,7 @@ import Data.Foldable (intercalate)
 import Data.Int (ceil)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
+import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
 import Gargantext.Components.PhyloExplorer.Types (SelectedTerm(..), SelectionCount(..), TabView(..))
@@ -33,6 +34,7 @@ type Props =
   , highlightedBranch     :: T.Box (Maybe String)
   , selectedTerms         :: T.Box (Array SelectedTerm)
   , selectionCount        :: T.Box (Maybe SelectionCount)
+  , selectTermCallback    :: String -> Effect Unit
   )
 
 here :: R2.Here
@@ -119,6 +121,7 @@ component = here.component "main" cpt where
           , highlightedTerm: props.highlightedTerm
           , highlightedBranch: props.highlightedBranch
           , selectionCount: props.selectionCount
+          , selectTermCallback: props.selectTermCallback
           }
       ,
         -- Teaser
@@ -209,12 +212,13 @@ detailsCount value label =
 ------------------------------------------------------
 
 type SelectionProps =
-  ( key               :: String
+  ( key                 :: String
 
-  , selectedTerms     :: T.Box (Array SelectedTerm)
-  , highlightedTerm   :: T.Box (Maybe String)
-  , highlightedBranch :: T.Box (Maybe String)
-  , selectionCount    :: T.Box (Maybe SelectionCount)
+  , selectedTerms       :: T.Box (Array SelectedTerm)
+  , highlightedTerm     :: T.Box (Maybe String)
+  , highlightedBranch   :: T.Box (Maybe String)
+  , selectionCount      :: T.Box (Maybe SelectionCount)
+  , selectTermCallback  :: String -> Effect Unit
   )
 
 selectionTab :: R2.Leaf SelectionProps
@@ -222,7 +226,8 @@ selectionTab = R2.leaf selectionTabCpt
 
 selectionTabCpt :: R.Component SelectionProps
 selectionTabCpt = here.component "selectionTab" cpt where
-  cpt props _ = do
+  cpt props@{ selectTermCallback
+            } _ = do
     -- State
     selectedTerms'      <- R2.useLive' props.selectedTerms
     highlightedTerm'    <- R2.useLive' props.highlightedTerm
@@ -395,6 +400,9 @@ selectionTabCpt = here.component "selectionTab" cpt where
                             { fontSize: termFontSize ratio
                             , lineHeight: termFontSize ratio
                             }
+                        , on:
+                          { click: selectTermCallback label
+                          }
                         }
                         [
                           H.text label
