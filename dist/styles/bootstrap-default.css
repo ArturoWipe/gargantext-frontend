@@ -11748,9 +11748,6 @@ select.form-control {
   white-space: normal;
   word-break: break-word;
 }
-.phylo-selection-tab__delimiter {
-  margin: 16px 20px;
-}
 .phylo-selection-tab__selection {
   margin: 16px 20px 0;
 }

@@ -265,7 +265,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
               H.div
               { className: "phylo-selection-tab__highlight" }
               [
-                H.h5
+                H.h6
                 {}
                 [
                   H.text "Highlighted branch"
@@ -299,7 +299,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
               H.div
               { className: "phylo-selection-tab__highlight" }
               [
-                H.h5
+                H.h6
                 {}
                 [
                   H.text "Highlighted term"
@@ -337,9 +337,6 @@ selectionTabCpt = here.component "selectionTab" cpt where
                   ]
                 ]
               ]
-            ,
-              H.hr
-              { className: "phylo-selection-tab__delimiter" }
             ]
       ,
         -- Selection Results
@@ -348,7 +345,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
           H.div
           { className: "phylo-selection-tab__selection" }
           [
-            H.h5
+            H.h6
             {}
             [
               H.text "Selection results"
