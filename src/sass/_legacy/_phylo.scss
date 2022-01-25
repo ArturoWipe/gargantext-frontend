@@ -345,6 +345,7 @@ $decreasing-color: #11638F;
   height: $isoline-height;
   background-color: $gray-100;
   border-bottom: 1px solid $border-color;
+  user-select: none;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -356,6 +357,7 @@ $decreasing-color: #11638F;
 .phylo-grid {
   position: relative;
   font-family: "Inter-Regular";
+  user-select: none;
 
   &__content {
     display: flex;

@@ -6,6 +6,7 @@ import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector, window)
 import Data.Either (Either(..))
+import Data.Int as Int
 import Data.Maybe (Maybe(..))
 import Data.String (null)
 import Data.Tuple.Nested ((/\))
@@ -16,11 +17,11 @@ import Gargantext.Components.PhyloExplorer.Resources as RS
 import Gargantext.Components.PhyloExplorer.SideBar (sideBar)
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
-import Gargantext.Components.PhyloExplorer.Types (Term, PhyloDataSet(..), Source, sortSources, DisplayView(..), SelectedTerm, SelectionCount)
+import Gargantext.Components.PhyloExplorer.Types (DisplayView(..), PhyloDataSet(..), ExtractedTerm, ExtractedCount, Source, Term, sortSources)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Hooks.UpdateEffect (useUpdateEffect1')
 import Gargantext.Types (NodeID)
-import Gargantext.Utils ((?))
+import Gargantext.Utils (getter, (?))
 import Gargantext.Utils.Reactix as R2
 import Graphics.D3.Base (d3)
 import Reactix as R
@@ -43,7 +44,9 @@ layoutCpt = here.component "layout" cpt where
   cpt { phyloDataSet: (PhyloDataSet o)
       , nodeId
       } _ = do
-    -- States
+  -- States
+  ---------
+
     let defaultDisplayView = HeadingMode
     let topBarPortalKey = "portal-topbar::" <> show nodeId
 
@@ -79,19 +82,71 @@ layoutCpt = here.component "layout" cpt where
     sideBarDisplayed /\ sideBarDisplayedBox <-
       R2.useBox' false
 
-    selectedTerms /\ selectedTermsBox <-
-      R2.useBox' (mempty :: Array SelectedTerm)
+    extractedTerms /\ extractedTermsBox <-
+      R2.useBox' (mempty :: Array ExtractedTerm)
 
-    highlightedTerm /\ highlightedTermBox <-
+    selectedTerm /\ selectedTermBox <-
       R2.useBox' (Nothing :: Maybe String)
 
-    highlightedBranch /\ highlightedBranchBox <-
+    selectedBranch /\ selectedBranchBox <-
       R2.useBox' (Nothing :: Maybe String)
 
-    selectionCount /\ selectionCountBox <-
-      R2.useBox' (Nothing :: Maybe SelectionCount)
+    selectedSource /\ selectedSourceBox <-
+      R2.useBox' (Nothing :: Maybe String)
 
-    -- Effects
+    extractedCount /\ extractedCountBox <-
+      R2.useBox' (Nothing :: Maybe ExtractedCount)
+
+  -- Behaviors
+  ------------
+
+    -- (!) do not rely on the JavaScript `Resources.js:resetSelection`,
+    --     as it will lead to potential circular computations
+    resetSelection <- pure $ const do
+      T.write_ Nothing selectedBranchBox
+      T.write_ Nothing selectedTermBox
+      T.write_ ""      sourceBox
+      T.write_ Nothing selectedSourceBox
+      T.write_ Nothing extractedCountBox
+      T.write_ mempty  extractedTermsBox
+
+      void $ pure $ (window .= "branchFocus") []
+
+    changeViewCallback <- pure $
+          flip T.write displayViewBox
+      >=> RS.changeDisplayView
+
+    sourceCallback <- pure \id -> do
+      -- (!) upcoming value from a `B.formSelect`, so simple <String> format
+      let mSource = RS.findSourceById sources =<< Int.fromString id
+      let mLabel  = pure <<< getter _.label =<< mSource
+
+      resetSelection unit
+      T.write_ id sourceBox
+      T.write_ mLabel selectedSourceBox
+      RS.selectSource window mSource
+
+    searchCallback <- pure $
+          flip T.write searchBox
+      >=> RS.autocompleteSearch terms
+      >=> flip T.write_ resultBox
+
+    resultCallback <- pure $ const $
+          resetSelection unit
+       *> RS.autocompleteSubmit displayViewBox result
+
+    unselectCallback <- pure $ const $
+          resetSelection unit
+       *> RS.doubleClick
+
+    selectTermCallback <- pure $ \s -> do
+      resetSelection unit
+      mTerm <- RS.autocompleteSearch terms s
+      RS.autocompleteSubmit displayViewBox mTerm
+
+  -- Effects
+  ----------
+
     useFirstEffect' $ do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
       RS.setGlobalD3Reference window d3
@@ -110,30 +165,32 @@ layoutCpt = here.component "layout" cpt where
       --             (see `Resources.js` how they are being used)
       T.write_ (window .. "terms") termsBox
 
+    -- (see `Gargantext.Components.PhyloExplorer.Resources` > JavaScript >
+    -- `pubsub` for detailed explanations)
     useFirstEffect' do
-      -- (see `Gargantext.Components.PhyloExplorer.Resources` > JavaScript >
-      -- `pubsub` for detailed explanations)
-      RS.subscribe (show SelectedTermsEvent) $ flip T.write_ selectedTermsBox
+      RS.subscribe (show ExtractedTermsEvent) $ flip T.write_ extractedTermsBox
 
-      RS.subscribe (show HighlightedTermEvent) $ case _ of
+      RS.subscribe (show SelectedTermEvent) $ case _ of
         res
-          | true == null res -> T.write_ Nothing highlightedTermBox
-          | otherwise        -> T.write_ (Just res) highlightedTermBox
+          | true == null res -> T.write_ Nothing selectedTermBox
+          | otherwise        -> T.write_ (Just res) selectedTermBox
 
-      RS.subscribe (show HighlightedBranchEvent) $ case _ of
+      RS.subscribe (show SelectedBranchEvent) $ case _ of
         res
-          | true == null res -> T.write_ Nothing highlightedBranchBox
-          | otherwise        -> T.write_ (Just res) highlightedBranchBox
+          | true == null res -> T.write_ Nothing selectedBranchBox
+          | otherwise        -> T.write_ (Just res) selectedBranchBox
+
+      RS.subscribe (show SelectedSourceEvent) $ sourceCallback
 
       RS.subscribe (show DisplayViewEvent) $ read >>> case _ of
         Nothing  -> pure unit
         Just res -> T.write_ res displayViewBox
 
-      RS.subscribe (show SelectionCountEvent) $ JSON.readJSON >>> case _ of
+      RS.subscribe (show ExtractedCountEvent) $ JSON.readJSON >>> case _ of
         Left _ ->
-          T.write_ Nothing selectionCountBox
-        Right (res :: SelectionCount) ->
-          T.write_ (Just res) selectionCountBox
+          T.write_ Nothing extractedCountBox
+        Right (res :: ExtractedCount) ->
+          T.write_ (Just res) extractedCountBox
 
     R.useEffect1' isIsolineDisplayed do
       mEl <- querySelector document ".phylo-isoline"
@@ -166,32 +223,9 @@ layoutCpt = here.component "layout" cpt where
     useUpdateEffect1' displayView do
       pure $ (window .= "displayView") (show displayView)
 
-    useUpdateEffect1' source do
-      s <- pure $ null source ? Nothing $ Just source
-      RS.highlightSource window s
+  -- Render
+  ---------
 
-    useUpdateEffect1' search do
-      RS.autocompleteSearch terms search >>= flip T.write_ resultBox
-
-    -- Behaviors
-    changeViewCallback <- pure $
-          flip T.write displayViewBox
-      >=> RS.changeDisplayView
-
-    autocompleteSubmitCallback <- pure $ const $
-      RS.autocompleteSubmit displayViewBox result
-
-    unselectCallback <- pure $ const do
-      -- unselect sourcce
-      T.write_ "" sourceBox
-      -- unselect branch/term(s)
-      RS.doubleClick
-
-    selectTermCallback <- pure $
-          RS.autocompleteSearch terms
-      >=> RS.autocompleteSubmit displayViewBox
-
-    -- Render
     pure $
 
       H.div
@@ -210,12 +244,14 @@ layoutCpt = here.component "layout" cpt where
             R2.if' (isDisplayed) $
               topBar
               { sources
-              , source: sourceBox
+              , source
+              , sourceCallback
+              , search
+              , searchCallback
+              , result
+              , resultCallback
               , toolBar: toolBarDisplayedBox
               , sideBar: sideBarDisplayedBox
-              , result: resultBox
-              , search: searchBox
-              , submit: autocompleteSubmitCallback
               }
           ]
         ]
@@ -236,10 +272,11 @@ layoutCpt = here.component "layout" cpt where
           , termCount: o.nbTerms
           , groupCount: o.nbGroups
           , branchCount: o.nbBranches
-          , selectedTerms
-          , highlightedTerm
-          , highlightedBranch
-          , selectionCount
+          , extractedTerms
+          , extractedCount
+          , selectedTerm
+          , selectedBranch
+          , selectedSource
           , selectTermCallback
           }
         ]

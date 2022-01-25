@@ -18,12 +18,16 @@ import Toestand as T
 
 type Props =
   ( sources             :: Array (Source)
-  , source              :: T.Box (String)
+  , source              :: String
+  , sourceCallback      :: String -> Effect Unit
+
+  , search              :: String
+  , searchCallback      :: String -> Effect Unit
+  , result              :: Maybe Term
+  , resultCallback      :: Maybe Term -> Effect Unit
+
   , toolBar             :: T.Box (Boolean)
   , sideBar             :: T.Box (Boolean)
-  , result              :: T.Box (Maybe Term)
-  , search              :: T.Box (String)
-  , submit              :: Unit -> Effect Unit
   )
 
 here :: R2.Here
@@ -36,17 +40,17 @@ component :: R.Component Props
 component = here.component "main" cpt where
   cpt { sources
       , source
+      , sourceCallback
       , toolBar
       , sideBar
       , search
+      , searchCallback
       , result
-      , submit } _ = do
+      , resultCallback
+      } _ = do
     -- States
-    source'   <- R2.useLive' source
     toolBar'  <- R2.useLive' toolBar
     sideBar'  <- R2.useLive' sideBar
-    search'   <- R2.useLive' search
-    result'   <- R2.useLive' result
 
     -- Render
     pure $
@@ -79,12 +83,13 @@ component = here.component "main" cpt where
         { className: "phylo-topbar__source"}
         [
           B.formSelect
-          { value: source'
-          , callback: flip T.write_ source
+          { value: source
+          , callback: sourceCallback
           } $
           [
             H.option
             { value: ""
+            , disabled: true
             }
             [ H.text "Select a source" ]
           ]
@@ -98,7 +103,7 @@ component = here.component "main" cpt where
 
         ]
       ,
-        -- Search
+        -- Search (wrapped in its form for the "enter" keyboard event submit)
         H.form
         { className: "phylo-topbar__autocomplete"
         }
@@ -106,22 +111,22 @@ component = here.component "main" cpt where
           B.formInput
           { className: "phylo-topbar__suggestion"
           , status: Idled
-          , value: case result' of
-              Nothing                     -> ""
+          , value: case result of
+              Nothing               -> ""
               Just (Term { label }) -> label
-          -- (?) noop: see `submit`
-          , callback: \_ -> nothing
+          -- (?) noop: see below button
+          , callback: const nothing
           }
         ,
           B.formInput
           { className: "phylo-topbar__search"
-          , callback: flip T.write_ search
-          , value: search'
+          , value: search
+          , callback: searchCallback
           , placeholder: "Find a term"
           }
         ,
           B.button
-          { callback: submit
+          { callback: \_ -> resultCallback result
           , type: "submit"
           , className: "phylo-topbar__submit"
           }

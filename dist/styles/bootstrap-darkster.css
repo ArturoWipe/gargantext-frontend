@@ -11597,6 +11597,7 @@ select.form-control {
   height: 158px;
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
+  user-select: none;
 }
 
 .phylo-margin {
@@ -11606,6 +11607,7 @@ select.form-control {
 .phylo-grid {
   position: relative;
   font-family: "Inter-Regular";
+  user-select: none;
 }
 .phylo-grid__content {
   display: flex;

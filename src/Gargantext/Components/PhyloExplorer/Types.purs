@@ -3,12 +3,13 @@ module Gargantext.Components.PhyloExplorer.Types
   , parsePhyloJSONSet
   , Branch(..), Period(..), Group(..)
   , Link(..), AncestorLink(..), BranchLink(..)
-  , Term(..), SelectedTerm(..)
+  , Term(..)
   , Source(..)
   , sortSources
   , DisplayView(..)
   , TabView(..)
-  , SelectionCount(..)
+  , ExtractedTerm(..)
+  , ExtractedCount(..)
   ) where
 
 import Gargantext.Prelude
@@ -312,16 +313,17 @@ derive instance Generic Term _
 derive instance Eq Term
 instance Show Term where show = genericShow
 
+-----------------------------------------------------------
 
-newtype SelectedTerm = SelectedTerm
+newtype ExtractedTerm = ExtractedTerm
  { label :: String
  , freq  :: Number
  , ratio :: Number
  }
 
-derive instance Generic SelectedTerm _
-derive instance Eq SelectedTerm
-instance Show SelectedTerm where show = genericShow
+derive instance Generic ExtractedTerm _
+derive instance Eq ExtractedTerm
+instance Show ExtractedTerm where show = genericShow
 
 -----------------------------------------------------------
 
@@ -330,6 +332,7 @@ newtype Source = Source
   , id    :: Int
   }
 
+derive instance Newtype Source _
 derive instance Generic Source _
 derive instance Eq Source
 instance Show Source where show = genericShow
@@ -463,12 +466,12 @@ derive instance Eq TabView
 
 -----------------------------------------------------------
 
-newtype SelectionCount = SelectionCount
+newtype ExtractedCount = ExtractedCount
  { groupCount   :: Int
  , branchCount  :: Int
  , termCount    :: Int
  }
 
-derive instance Generic SelectionCount _
-derive instance Eq SelectionCount
-derive newtype instance JSON.ReadForeign SelectionCount
+derive instance Generic ExtractedCount _
+derive instance Eq ExtractedCount
+derive newtype instance JSON.ReadForeign ExtractedCount

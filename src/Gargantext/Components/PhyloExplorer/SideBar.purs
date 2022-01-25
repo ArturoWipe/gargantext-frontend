@@ -7,12 +7,12 @@ import Gargantext.Prelude
 import Data.Array (length, mapWithIndex, null)
 import Data.Foldable (intercalate)
 import Data.Int (ceil)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
-import Gargantext.Components.PhyloExplorer.Types (SelectedTerm(..), SelectionCount(..), TabView(..))
+import Gargantext.Components.PhyloExplorer.Types (ExtractedTerm(..), ExtractedCount(..), TabView(..))
 import Gargantext.Types (NodeID)
 import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
@@ -30,10 +30,11 @@ type Props =
   , groupCount            :: Int
   , branchCount           :: Int
 
-  , highlightedTerm       :: Maybe String
-  , highlightedBranch     :: Maybe String
-  , selectedTerms         :: Array SelectedTerm
-  , selectionCount        :: Maybe SelectionCount
+  , selectedTerm          :: Maybe String
+  , selectedBranch        :: Maybe String
+  , selectedSource        :: Maybe String
+  , extractedTerms        :: Array ExtractedTerm
+  , extractedCount        :: Maybe ExtractedCount
   , selectTermCallback    :: String -> Effect Unit
   )
 
@@ -117,10 +118,11 @@ component = here.component "main" cpt where
         R2.if' (tabView == SelectionTab) $
           selectionTab
           { key: (show props.nodeId) <> "-selection"
-          , selectedTerms: props.selectedTerms
-          , highlightedTerm: props.highlightedTerm
-          , highlightedBranch: props.highlightedBranch
-          , selectionCount: props.selectionCount
+          , extractedTerms: props.extractedTerms
+          , extractedCount: props.extractedCount
+          , selectedTerm: props.selectedTerm
+          , selectedBranch: props.selectedBranch
+          , selectedSource: props.selectedSource
           , selectTermCallback: props.selectTermCallback
           }
       ,
@@ -214,10 +216,11 @@ detailsCount value label =
 type SelectionProps =
   ( key                 :: String
 
-  , selectedTerms       :: Array SelectedTerm
-  , highlightedTerm     :: Maybe String
-  , highlightedBranch   :: Maybe String
-  , selectionCount      :: Maybe SelectionCount
+  , extractedTerms      :: Array ExtractedTerm
+  , extractedCount      :: Maybe ExtractedCount
+  , selectedTerm        :: Maybe String
+  , selectedBranch      :: Maybe String
+  , selectedSource      :: Maybe String
   , selectTermCallback  :: String -> Effect Unit
   )
 
@@ -227,37 +230,58 @@ selectionTab = R2.leaf selectionTabCpt
 selectionTabCpt :: R.Component SelectionProps
 selectionTabCpt = here.component "selectionTab" cpt where
   cpt { selectTermCallback
-      , selectedTerms
-      , highlightedTerm
-      , highlightedBranch
-      , selectionCount
+      , extractedTerms
+      , extractedCount
+      , selectedTerm
+      , selectedBranch
+      , selectedSource
       } _ = do
-    -- State
+
+  -- State
+  --------
+
     showMore /\ showMoreBox <- R2.useBox' false
 
     let
-      termCount = length selectedTerms
+      haveSelection
+         = isJust selectedTerm
+        || isJust selectedBranch
+        || isJust selectedSource
+
+      termCount = length extractedTerms
 
       maxTruncateResult = 5
 
       truncateResults
-         = (termCount > maxTruncateResult)
-        && (not showMore)
+         = termCount > maxTruncateResult
+        && not showMore
 
-    -- Effects
+  -- Effects
+  ----------
 
-    R.useEffect1' selectedTerms $
-      -- reset "show more" button to hidding mode on selected terms change
+    -- reset "show more" button to hidding mode on selected terms change
+    R.useEffect1' extractedTerms $
       T.write_ false showMoreBox
 
-    -- Render
+  -- Render
+  ---------
+
     pure $
 
       H.div
       { className: "phylo-selection-tab" }
       [
-        -- Highlighted branch
-        case highlightedBranch of
+        -- No result
+        R2.if' (not haveSelection) $
+
+          B.caveat
+          { className: "phylo-selection-tab__nil" }
+          [
+            H.text "No selection has been made"
+          ]
+      ,
+        -- Selected source
+        case selectedSource of
           Nothing -> mempty
           Just s  -> R.fragment
             [
@@ -267,7 +291,7 @@ selectionTabCpt = here.component "selectionTab" cpt where
                 H.h6
                 {}
                 [
-                  H.text "Highlighted branch"
+                  H.text "Selected source"
                 ]
               ,
                 H.ul
@@ -290,8 +314,8 @@ selectionTabCpt = here.component "selectionTab" cpt where
               ]
             ]
       ,
-        -- Highlighted term
-        case highlightedTerm of
+        -- Selected branch
+        case selectedBranch of
           Nothing -> mempty
           Just s  -> R.fragment
             [
@@ -301,7 +325,41 @@ selectionTabCpt = here.component "selectionTab" cpt where
                 H.h6
                 {}
                 [
-                  H.text "Highlighted term"
+                  H.text "Selected branch"
+                ]
+              ,
+                H.ul
+                { className: "list-group" }
+                [
+                  H.li
+                  { className: "list-group-item" }
+                  [
+                    H.span
+                    { className: intercalate " "
+                        [ "phylo-selection-tab__highlight__badge"
+                        , "badge badge-info"
+                        ]
+                    }
+                    [
+                      H.text s
+                    ]
+                  ]
+                ]
+              ]
+            ]
+      ,
+        -- Selected term
+        case selectedTerm of
+          Nothing -> mempty
+          Just s  -> R.fragment
+            [
+              H.div
+              { className: "phylo-selection-tab__highlight" }
+              [
+                H.h6
+                {}
+                [
+                  H.text "Selected term"
                 ]
               ,
                 H.ul
@@ -338,8 +396,8 @@ selectionTabCpt = here.component "selectionTab" cpt where
               ]
             ]
       ,
-        -- Selection Results
-        R2.if' (not null selectedTerms) $
+        -- No extracted result
+        R2.if' (haveSelection && null extractedTerms) $
 
           H.div
           { className: "phylo-selection-tab__selection" }
@@ -347,16 +405,35 @@ selectionTabCpt = here.component "selectionTab" cpt where
             H.h6
             {}
             [
-              H.text "Selection results"
+              H.text "Extracted result"
+            ]
+          ,
+            B.caveat
+            {}
+            [
+              H.text "No result found for your selection"
+            ]
+          ]
+      ,
+        -- Extracted Results
+        R2.if' (not null extractedTerms) $
+
+          H.div
+          { className: "phylo-selection-tab__selection" }
+          [
+            H.h6
+            {}
+            [
+              H.text "Extracted result"
             ]
           ,
             H.ul
             { className: "list-group" }
             [
-              -- Selection count
-              case selectionCount of
+              -- Extracted count
+              case extractedCount of
                 Nothing                     -> mempty
-                Just (SelectionCount count) ->
+                Just (ExtractedCount count) ->
 
                   H.li
                   { className: "list-group-item" }
@@ -378,8 +455,8 @@ selectionTabCpt = here.component "selectionTab" cpt where
               [
                 H.ul
                 {} $
-                flip mapWithIndex selectedTerms
-                  \index (SelectedTerm { label, ratio }) ->
+                flip mapWithIndex extractedTerms
+                  \index (ExtractedTerm { label, ratio }) ->
 
                     R2.if'
                     (
@@ -417,15 +494,6 @@ selectionTabCpt = here.component "selectionTab" cpt where
                   ]
               ]
             ]
-          ]
-      ,
-        -- No result
-        R2.if' (null selectedTerms) $
-
-          B.caveat
-          { className: "phylo-selection-tab__nil" }
-          [
-            H.text "No selection has been made"
           ]
       ]
 

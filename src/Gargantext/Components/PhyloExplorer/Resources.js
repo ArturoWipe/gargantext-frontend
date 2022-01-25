@@ -4,11 +4,12 @@
 ///    FIELDS
 ////////////////////////////////////////////////////////////////////////////////
 
-var SELECTED_TERMS_EVENT      = 'selected_terms_event';
-var HIGHLIGHTED_TERM_EVENT    = 'highlighted_term_event';
-var HIGHLIGHTED_BRANCH_EVENT  = 'highlighted_branch_event';
+var EXTRACTED_TERMS_EVENT     = 'extracted_terms_event';
+var EXTRACTED_COUNT_EVENT     = 'extracted_count_event';
+var SELECTED_TERM_EVENT       = 'selected_term_event';
+var SELECTED_BRANCH_EVENT     = 'selected_branch_event';
+var SELECTED_SOURCE_EVENT     = 'selected_source_event';
 var DISPLAY_VIEW_EVENT        = 'display_view_event';
-var SELECTION_COUNT_EVENT     = 'selection_count_event';
 
 var ISO_LINE_DOM_QUERY      = '.phylo-isoline';
 var LEFT_COLUMN_DOM_QUERY   = '.phylo-grid__blueprint__left';
@@ -17,7 +18,7 @@ var SCAPE_DOM_QUERY         = '.phylo-grid__content__scape';
 
 //  (?) Global thread dependencies:
 //    * d3 <Object> (main D3 proxy))
-//    * window <Window>
+//    * window <Window> (cf. below function signature for window uses)
 //    * document <HTMLDocument>
 
 var memoTickText          = {};        // <Object> of <Int> => <TickText>
@@ -25,7 +26,6 @@ var memoTickText          = {};        // <Object> of <Int> => <TickText>
 ///       <Int> bId
 ///       <Float> limit
 ///       <String>text
-var branchFocus           = [];        // <Array> of <Int> bId
 var panel                 = undefined; // <Object> instanceof d3.selection
 var svg                   = undefined; // <Object> instanceof d3.selection
 var label                 = undefined; // <Object> instanceof d3.selection
@@ -53,7 +53,7 @@ function contains(str,arr) {
  * @param {Int} days
  * @returns {Date}
  */
- function addDays(date, days) {
+function addDays(date, days) {
   var result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
@@ -75,7 +75,7 @@ function removeDays(date, days) {
  * @param {Element} element
  * @unpure {HTMLDocument} document
  */
- function appendCSS( cssText, element ) {
+function appendCSS( cssText, element ) {
   var styleElement = document.createElement("style");
   styleElement.setAttribute("type","text/css");
   styleElement.innerHTML = cssText;
@@ -243,7 +243,7 @@ var pubsub = (function(subscribers) {
  *        <String> stringified float
  *        <String> stringified int
  */
- function groupTermsBy(elements, attr) {
+function groupTermsBy(elements, attr) {
   let grouped = {},
       curr = "";
   for (var i = 0; i < elements.length; i++) {
@@ -261,7 +261,7 @@ var pubsub = (function(subscribers) {
  * @name showLabel
  * @unpure {HTMLDocument} document
  */
- function showLabel() {
+function showLabel() {
   var ngrams = document.getElementsByClassName("ngrams");
   var groups = document.getElementsByClassName("group-inner");
   var headers = document.getElementsByClassName("header");
@@ -345,11 +345,22 @@ function showLanding() {
   })
 }
 /**
+ * @name resetSelection
+ * @unpure {Window.Array.<Int>} window.branchFocus
+ * @unpure {Object} pubsub
+ */
+function resetSelection() {
+  window.branchFocus = [];
+  pubsub.publish(SELECTED_TERM_EVENT, '');
+  pubsub.publish(SELECTED_BRANCH_EVENT, '');
+  pubsub.publish(SELECTED_SOURCE_EVENT, '');
+  pubsub.publish(EXTRACTED_TERMS_EVENT, []);
+  pubsub.publish(EXTRACTED_COUNT_EVENT, '');
+}
+/**
  * @name doubleClick
  * @unpure {Window.<Boolean>} window.highlighted
  * @unpure {Object} d3
- * @unpure {Array.<Int>} branchFocus
- * @unpure {HTMLDocument} document
  * @unpure {Object} pubsub
  */
 function doubleClick() {
@@ -365,10 +376,7 @@ function doubleClick() {
   d3.selectAll(".peak").classed("peak-focus",false);
   d3.selectAll(".peak").classed("peak-focus-source",false);
   d3.selectAll(".x-mark").style("fill","#4A5C70");
-  branchFocus = [];
-  pubsub.publish(HIGHLIGHTED_TERM_EVENT, '');
-  pubsub.publish(HIGHLIGHTED_BRANCH_EVENT, '');
-  pubsub.publish(SELECTED_TERMS_EVENT, []);
+  resetSelection();
 }
 /**
  * @name headerOut
@@ -388,13 +396,14 @@ function headerOut() {
  * @param {String} typeNode "group|head|search"
  * @unpure {Object} d3
  * @unpure {HTMLDocument} document
- * @unpure {Array.<Int>} branchFocus
+ * @unpure {Window.Array.<Int>} window.branchFocus
  * @unpure {Object} panel instanceof d3.selection
  * @unpure {Object} pubsub
  */
- function termClick (txt,idx,nodeId,typeNode) {
+function termClick (txt,idx,nodeId,typeNode) {
   // remove old focus
   initPath()
+  resetSelection();
 
   // catch the last transformations
   if (typeNode == "group") {
@@ -407,8 +416,7 @@ function headerOut() {
 
   // focus
 
-  pubsub.publish(HIGHLIGHTED_BRANCH_EVENT, '');
-  pubsub.publish(HIGHLIGHTED_TERM_EVENT, txt);
+  pubsub.publish(SELECTED_TERM_EVENT, txt);
 
   // highlight the groups
 
@@ -419,7 +427,9 @@ function headerOut() {
 
   for (var i = 0; i < terms.length; i++) {
     groups.push(d3.select("#group" + (terms[i]).getAttribute("gid")));
-    branchFocus.push((terms[i]).getAttribute("bid"));
+    window.branchFocus.push(
+      parseInt( (terms[i]).getAttribute("bid"), 10 )
+    );
   }
 
   highlightGroups(groups.map(g => g.node()));
@@ -463,14 +473,9 @@ function headerOut() {
 }
 /**
  * @name initPath
- * @unpure {Window.<Boolean>} window.highlighted
- * @unpure {Window.<Boolean>} window.ldView
  * @unpure {Object} d3
- * @unpure {Array.<Int>} branchFocus
  */
- function initPath () {
-  window.highlighted = true;
-  window.ldView = false;
+function initPath () {
   let groups = d3.selectAll(".group-inner");
   (groups.nodes()).map(function(g){
     if (!g.classList.contains("source-focus")) {
@@ -485,21 +490,15 @@ function headerOut() {
   d3.selectAll(".peak").classed("peak-focus",false);
   d3.selectAll(".peak").classed("peak-focus-source",false);
   d3.selectAll(".x-mark").style("fill","#4A5C70");
-  branchFocus = [];
 }
 /**
  * @name highlightGroups
- * @param {Array.<SVGCircleElement>} groups
- * @unpure {Window.<Boolean>} window.highlighted
+ * @param {Array.<Element>} groups
  * @unpure {HTMLDocument} document
  * @unpure {Object} d3
  * @unpure {Object} pubsub
  */
- function highlightGroups (groups) {
-
-  window.ldView = false;
-
-  // console.log(groups)
+function highlightGroups(groups) {
 
   let paths = document.getElementsByClassName("group-path"),
       gids  = [];
@@ -534,10 +533,10 @@ function headerOut() {
     groupCount: groups.length,
     termCount: countTerms(groups),
     branchCount: countBranches(groups)
-  }
+  };
 
   pubsub.publish(
-    SELECTION_COUNT_EVENT,
+    EXTRACTED_COUNT_EVENT,
     JSON.stringify( count )
   );
 
@@ -556,7 +555,7 @@ function headerOut() {
  * @unpure {Object} d3
  * @returns {Int}
  */
- function countTerms(groups) {
+function countTerms(groups) {
   var terms = [];
   for (var i = 0; i < groups.length; i++) {
     let gid = ((groups[i].getAttribute("id")).split("group"))[1]
@@ -595,19 +594,20 @@ function resetView() {
  *    <Float> h
  * @unpure {Object} d3
  * @unpure {Function} zoom
+ * @unpure {Window.Array.<Int>} window.branchFocus
  */
 function peakClick (b, coordinates) {
   let groups = d3.selectAll(".group-inner").filter(".branch-" + b.bId).nodes();
 
-  initPath()
-  pubsub.publish(HIGHLIGHTED_TERM_EVENT, '');
-  pubsub.publish(HIGHLIGHTED_BRANCH_EVENT, b.label);
+  initPath();
+  resetSelection();
 
-  branchFocus.push(b.bId);
-  /* word cloud */
+  pubsub.publish(SELECTED_BRANCH_EVENT, b.label);
+  window.branchFocus.push( parseInt(b.bId, 10) );
 
   drawWordCloud(groups);
   highlightGroups(groups);
+
   /* rescale */
   let tx = (groups[0]).getAttribute("cx")
   svg.transition()
@@ -639,11 +639,11 @@ function peakOver (b,i) {
  * @param {Object} b <Gargantext.Components.PhyloExplorer.Types.Branch>
  * @param {Int} i
  * @unpure {Object} d3
- * @unpure {Array} branchFocus
+ * @unpure {Window.Array<Int>} window.branchFocus
  */
 function peakOut (b,i) {
   d3.select("#peak-" + i).classed("peak-over",false);
-  if (branchFocus.includes("" + b.bId)) {
+  if (window.branchFocus.includes(b.bId)) {
     d3.select("#peak-" + i).classed("peak-focus",true);
   }
   branchOut();
@@ -751,14 +751,14 @@ function branchOver(bId) {
  * @name branchOut
  * @param {Int} bId
  * @unpure {Object} d3
- * @unpure {Array} branchFocus
+ * @unpure {Window.Array<Int>} window.branchFocus
  */
-function branchOut(bId) {
+function branchOut() {
   d3.selectAll(".peak-label").style("visibility","hidden");
   d3.selectAll(".branch-hover").style("visibility","hidden");
   d3.selectAll(".x-mark").style("fill","#4A5C70");
-  for (var i = 0; i < branchFocus.length; i++) {
-    d3.select("#xmark-" + branchFocus[i]).style("fill","#F24C3D");
+  for (var i = 0; i < window.branchFocus.length; i++) {
+    d3.select("#xmark-" + window.branchFocus[i]).style("fill","#F24C3D");
   }
   headerOut();
 }
@@ -767,26 +767,23 @@ function branchOut(bId) {
  * @param {Array} branches of <Gargantext.Components.PhyloExplorer.Types.Branch>
  * @param {Element} tick
  * @unpure {Object} d3
- * @unpure {Array<Int>} branchFocus
+ * @unpure {Window.Array<Int>} window.branchFocus
  * @unpure {Object} pubsub
  */
- function tickClick(branches, tick) {
+function tickClick(branches, tick) {
   let bid = parseInt(tick.getAttribute("bId"), 10),
       groups = d3.selectAll(".group-inner").filter(".branch-" + bid).nodes(),
       branch = branches.find(function(item) {
         return item.bId === bid;
       });
 
-  initPath()
-  pubsub.publish(HIGHLIGHTED_TERM_EVENT, '');
-  pubsub.publish(HIGHLIGHTED_BRANCH_EVENT, branch.label);
+  initPath();
+  resetSelection();
 
-  // draw the word cloud
+  pubsub.publish(SELECTED_BRANCH_EVENT, branch.label);
+  window.branchFocus.push(bid);
 
-  branchFocus.push(bid);
   drawWordCloud(groups);
-
-  // highlight the groups
 
   highlightGroups(groups);
   d3.selectAll(".path-unfocus").lower();
@@ -900,7 +897,7 @@ function onZoom(event, coordinates, xScale, yScale, xLabels, yLabels, branches, 
 /**
  * @name exportViz
  */
- function exportViz() {
+function exportViz() {
   var time = new Date();
 
   serialize(svg.node(),"phylomemy-" + Date.parse(time.toString())  + ".svg")
@@ -1005,7 +1002,7 @@ function getCSSStyles( parentElement ) {
  * @unpure {Object} d3
  * @unpure {Object} pubsub
  */
- function drawWordCloud (groups) {
+function drawWordCloud (groups) {
   let col   = {},
       arr   = [],
       count = 0;
@@ -1030,7 +1027,7 @@ function getCSSStyles( parentElement ) {
   });
 
   if (arr.length === 0) {
-    return pubsub.publish(SELECTED_TERMS_EVENT, []);
+    return;
   }
 
   var scaler = d3
@@ -1048,7 +1045,7 @@ function getCSSStyles( parentElement ) {
     arr[idx].ratio = scaler( Math.log(item.freq) );
   });
 
-  pubsub.publish(SELECTED_TERMS_EVENT, arr);
+  pubsub.publish(EXTRACTED_TERMS_EVENT, arr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1061,7 +1058,7 @@ function getCSSStyles( parentElement ) {
  * @unpure {Object} d3
  * @unpure {Object} label
  */
- function drawIsoLine(branches) {
+function drawIsoLine(branches) {
   var coordinates = getIsoLineCoordinates();
 
   var svg = d3
@@ -1462,7 +1459,7 @@ function getLeftColumnCoordinates() {
  *    <Float> b
  *    <Float> l
  */
- function getCenterColumnCoordinates() {
+function getCenterColumnCoordinates() {
   var leftColumn     = getLeftColumnCoordinates();
   var elCenterColumn = d3
     .select(CENTER_COLUMN_DOM_QUERY)
@@ -1493,7 +1490,7 @@ function getLeftColumnCoordinates() {
  *    <Float> b
  *    <Float> l
  */
- function getScapeCoordinates() {
+function getScapeCoordinates() {
   var el = d3
     .select(SCAPE_DOM_QUERY)
     .node()
@@ -1648,7 +1645,7 @@ function xOverFlow(ticks,arr) {
  * @param {Array} ws <Float>
  * @param {Array} ids <Int>
  * @unpure {Object} d3
- * @unpure {Array.<Number>} branchFocus
+ * @unpure {Window.Array.<Int>} window.branchFocus
  */
 function addMarkX(ticks,ws,ids) {
   ticks.each(function(t,i){
@@ -1661,7 +1658,7 @@ function addMarkX(ticks,ws,ids) {
         .attr("class","x-mark")
         .attr("id", "xmark-" + ids[i])
 
-      if (branchFocus.includes("" + ids[i])) {
+      if (window.branchFocus.includes(ids[i])) {
         d3.select("#xmark-" + ids[i]).style("fill","#F0684D");
       }
   })
@@ -1810,7 +1807,7 @@ function coordinatesToXRange(coordinates) {
  *    <Float> b
  * @returns {Array<Float>}
  */
- function coordinatesToYRange(coordinates) {
+function coordinatesToYRange(coordinates) {
   var lower = coordinates.y
             + coordinates.t
             + coordinates.b;
@@ -1976,7 +1973,7 @@ function setAxisX(scale, labels, branches, xAxis) {
  * @param {Object} yAxis instanceof d3.selection
  * @unpure {Object} d3
  */
- function setAxisY(scale,labels, yAxis) {
+function setAxisY(scale,labels, yAxis) {
   yAxis.call(d3.axisLeft(scale)
                   .tickFormat(function(d){
                       if (d3.timeYear(d) < d) {
@@ -2283,11 +2280,12 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
 ///    EXPORTS
 ////////////////////////////////////////////////////////////////////////////////
 
-exports._selectedTermsEvent     = SELECTED_TERMS_EVENT;
-exports._highlightedTermEvent   = HIGHLIGHTED_TERM_EVENT;
-exports._highlightedBranchEvent = HIGHLIGHTED_BRANCH_EVENT;
+exports._extractedTermsEvent    = EXTRACTED_TERMS_EVENT;
+exports._extractedCountEvent    = EXTRACTED_COUNT_EVENT;
+exports._selectedTermEvent      = SELECTED_TERM_EVENT;
+exports._selectedBranchEvent    = SELECTED_BRANCH_EVENT;
+exports._selectedSourceEvent    = SELECTED_SOURCE_EVENT;
 exports._displayViewEvent       = DISPLAY_VIEW_EVENT;
-exports._selectionCountEvent    = SELECTION_COUNT_EVENT;
 
 exports._drawPhylo        = drawPhylo;
 exports._drawWordCloud    = drawWordCloud;
@@ -2299,6 +2297,9 @@ exports._showHeading      = showHeading;
 exports._showLanding      = showLanding;
 exports._exportViz        = exportViz;
 exports._doubleClick      = doubleClick;
+exports._highlightGroups  = highlightGroups;
+exports._initPath         = initPath;
+
 exports._publish          = pubsub.publish;
 exports._subscribe        = pubsub.subscribe;
 exports._unsubscribe      = pubsub.unsubscribe;

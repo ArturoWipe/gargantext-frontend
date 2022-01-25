@@ -1,7 +1,8 @@
 module Gargantext.Components.PhyloExplorer.Resources
   ( PubSubEvent(..)
   , drawPhylo
-  , highlightSource
+  , selectSource
+  , findSourceById
   , autocompleteSearch, autocompleteSubmit
   , setGlobalDependencies, setGlobalD3Reference
   , resetView
@@ -13,17 +14,18 @@ module Gargantext.Components.PhyloExplorer.Resources
 
 import Gargantext.Prelude
 
-import DOM.Simple (Window)
+import DOM.Simple (Element, Window)
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.FoldableWithIndex (forWithIndex_)
 import Data.Generic.Rep (class Generic)
+import Data.Int (fromString)
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.String as String
 import Effect (Effect)
 import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn4, EffectFn7, runEffectFn1, runEffectFn2, runEffectFn4, runEffectFn7)
 import FFI.Simple ((..), (.=), (.?))
-import Gargantext.Components.PhyloExplorer.Types (AncestorLink, Branch, BranchLink, DisplayView(..), Group(..), Link, Period, PhyloDataSet(..), Term(..))
+import Gargantext.Components.PhyloExplorer.Types (AncestorLink, Branch, BranchLink, DisplayView(..), Group(..), Link, Period, PhyloDataSet(..), Source(..), Term(..))
 import Gargantext.Utils (getter)
 import Gargantext.Utils.Reactix ((~~))
 import Gargantext.Utils.Reactix as R2
@@ -109,6 +111,22 @@ doubleClick :: Effect Unit
 doubleClick = _doubleClick
 
 
+foreign import _highlightGroups ::
+  EffectFn1
+  (Array Element)
+  Unit
+
+highlightGroups :: Array Element -> Effect Unit
+highlightGroups = runEffectFn1 _highlightGroups
+
+
+foreign import _initPath :: Effect Unit
+
+initPath :: Effect Unit
+initPath = _initPath
+
+-----------------------------------------------------------
+
 foreign import _subscribe :: forall opt.
   EffectFn2
   String
@@ -140,38 +158,48 @@ publish = runEffectFn2 _publish
 
 -----------------------------------------------------------
 
-foreign import _selectedTermsEvent      :: String
-foreign import _highlightedTermEvent    :: String
-foreign import _highlightedBranchEvent  :: String
+foreign import _extractedTermsEvent     :: String
+foreign import _extractedCountEvent     :: String
+foreign import _selectedTermEvent       :: String
+foreign import _selectedBranchEvent     :: String
+foreign import _selectedSourceEvent     :: String
 foreign import _displayViewEvent        :: String
-foreign import _selectionCountEvent     :: String
 
 data PubSubEvent
-  = SelectedTermsEvent
-  | SelectionCountEvent
-  | HighlightedTermEvent
-  | HighlightedBranchEvent
+  = ExtractedTermsEvent
+  | ExtractedCountEvent
+  | SelectedTermEvent
+  | SelectedBranchEvent
+  | SelectedSourceEvent
   | DisplayViewEvent
 
 derive instance Generic PubSubEvent _
 derive instance Eq PubSubEvent
 instance Show PubSubEvent where
   show = case _ of
-    SelectedTermsEvent      -> _selectedTermsEvent
-    SelectionCountEvent     -> _selectionCountEvent
-    HighlightedTermEvent    -> _highlightedTermEvent
-    HighlightedBranchEvent  -> _highlightedBranchEvent
+    ExtractedTermsEvent     -> _extractedTermsEvent
+    ExtractedCountEvent     -> _extractedCountEvent
+    SelectedTermEvent       -> _selectedTermEvent
+    SelectedBranchEvent     -> _selectedBranchEvent
+    SelectedSourceEvent     -> _selectedSourceEvent
     DisplayViewEvent        -> _displayViewEvent
 
 -----------------------------------------------------------
 
 -- @XXX: "Graphics.D3.Selection" lack of "filter" function
--- @XXX: "Graphics.D3.Selection" lack of "nodes" function
+-- https://github.com/d3/d3-selection#selection_filter
 selectionFilter :: forall d. String -> D3S.Selection d -> D3Eff (D3S.Selection D3S.Void)
 selectionFilter = ffi ["query", "selection", ""] "selection.filter(query)"
 
-selectionNodes :: forall d el. D3S.Selection d -> D3Eff (Array el)
+-- @XXX: "Graphics.D3.Selection" lack of "nodes" function
+-- https://github.com/d3/d3-selection#selection_nodes
+selectionNodes :: forall d. D3S.Selection d -> D3Eff (Array Element)
 selectionNodes = ffi ["selection", ""] "selection.nodes()"
+
+-- @XXX: "Graphics.D3.Selection" lack of "node" function
+-- https://github.com/d3/d3-selection#selection_node
+-- selectionNode :: forall d. D3S.Selection d -> D3Eff (Nullable Element)
+-- selectionNode = ffi ["selection", ""] "selection.node()"
 
 -----------------------------------------------------------
 
@@ -189,6 +217,7 @@ setGlobalDependencies w (PhyloDataSet o)
     _ <- pure $ (w .= "terms") []
     _ <- pure $ (w .= "timeScale") o.timeScale
     _ <- pure $ (w .= "weighted") o.weighted
+    _ <- pure $ (w .= "branchFocus") []
 
     (freq :: Array Int)   <- pure $ w .. "freq"
     (terms :: Array Term) <- pure $ w .. "terms"
@@ -232,8 +261,17 @@ setGlobalD3Reference window d3 = void $ pure $ (window .= "d3") d3
 
 -----------------------------------------------------------
 
-highlightSource :: Window -> Maybe String -> Effect Unit
-highlightSource window value =
+-- (?) This function precedes its JavaScript pendant (see `selectSource_`)
+--     It was transformed from JavaScript to PureScript to mesure the difficulty
+--     of translating one business to another
+--
+--     Conlusion is that it is:
+--        a) more time-consuming, due to PureScript way of writing
+--        b) raise unanticipated issue and warning, for example here we could
+--           not have been able to transpose some JavaScript part (due to the
+--           design of the JavaScript `Resource.js` file: purity issue mostly)
+selectSource :: Window -> Maybe Source -> Effect Unit
+selectSource window source =
   let
     hasHighlight = maybe false identity (window .? "highlighted")
     hasLdView    = maybe false identity (window .? "ldView")
@@ -267,27 +305,30 @@ highlightSource window value =
 
 
     -- select the relevant ones
-    case value of
+    case source of
       Nothing     -> do
         drawWordCloud []
 
-      Just source -> do
-        arr <- selectionFilter (".source-" <> source) groups
+      Just (Source { id }) -> do
+        arr <- selectionFilter (".source-" <> show id) groups
           >>= selectionNodes
 
         drawWordCloud arr
-        for_ arr selectNodeGroup
+        for_ arr selectPeak
+        initPath
+        for_ arr $ focusBranch window
+        highlightGroups arr
 
   where
 
-    fill :: forall el. String -> el -> Effect Unit
+    fill :: String -> Element -> Effect Unit
     fill hex el = do
       style <- pure $ (el .. "style")
       pure $ (style .= "fill") hex
 
 
-    selectNodeGroup :: forall el. el -> Effect Unit
-    selectNodeGroup el = do
+    selectPeak :: Element -> Effect Unit
+    selectPeak el = do
       R2.removeClass el [ "group-unfocus" ]
       R2.addClass el [ "source-focus" ]
       fill "#a6bddb" el
@@ -297,6 +338,24 @@ highlightSource window value =
       void $
             D3S.rootSelect ("#peak-" <> bid)
         >>= D3S.classed "peak-focus-source" true
+
+    focusBranch :: Window -> Element -> Effect Unit
+    focusBranch w el = do
+      (branchFocus :: Array Int) <- pure $ w .. "branchFocus"
+
+      bid <- pure $ (el ~~ "getAttribute") [ "bId" ]
+
+      case fromString bid of
+        Nothing -> pure unit
+        Just i  -> pure $ (branchFocus ~~ "push") [ i ]
+
+
+findSourceById :: Array Source -> Int -> Maybe Source
+findSourceById list value = Array.find (fn) list
+
+  where
+
+    fn (Source { id }) = eq value id
 
 
 autocompleteSearch ::
