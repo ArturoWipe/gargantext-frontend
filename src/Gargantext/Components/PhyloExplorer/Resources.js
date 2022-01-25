@@ -837,7 +837,7 @@ function tickOut(tick, branches) {
  * @param {Object} yAxis instanceof d3.selection
  * @unpure {Object} panel
  */
- function onZoom(event, coordinates, xScale, yScale, xLabels, yLabels, branches, xAxis, yAxis) {
+function onZoom(event, coordinates, xScale, yScale, xLabels, yLabels, branches, xAxis, yAxis) {
   var xBounds = coordinatesToXRange(coordinates);
   var yBounds = coordinatesToYRange(coordinates);
 
@@ -1351,9 +1351,21 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
 
   /* zoom */
 
+  // (!) Debouncing the whole "zoom" + "drag and drop" computation
+  //
+  //     Some browser engine are not yet optimized for managing this kind of
+  //     heavy computations (especially with no treshold debounce, which can
+  //     lead to performance worsen by a factor of 10)
+  //     Google engine is also prone to change leading to various effects on
+  //     heavy SVG or heavy SVG computation
+  //
+  //     Hence the act of debouncing. 20ms seems a sweet spot:
+  //      - empirically does not treshold a lot of computation, minimising
+  //        potential heavy job freezing ("doherty treshold" UX law)
+  //      - imperceptible buffer job ("aesthetic-usability effect" UX law)
   var debouncedOnZoom = debounce(
-    onZoom
-    , 25
+    onZoom,
+    20
   );
 
   zoom = d3
