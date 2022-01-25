@@ -77,8 +77,8 @@ data RawObject
     , lbl             :: String
     , penwidth        :: String
     , role            :: String
-    -- (?) not in API; but present in certain data (eg. "Knowledge
-    --     visualisation")
+    -- @NOTE #219: not in API; but present in certain data (eg. "Knowledge
+    --             visualisation")
     , seaLvl          :: Maybe String
     , source          :: String
     , strFrom         :: Maybe String

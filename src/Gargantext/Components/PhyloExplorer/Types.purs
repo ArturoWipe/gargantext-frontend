@@ -29,7 +29,7 @@ import Gargantext.Components.PhyloExplorer.JSON (PhyloJSONSet(..), RawEdge(..), 
 import Simple.JSON as JSON
 
 
--- (?) PureScript Date or stick to JavaScript foreign?
+-- @NOTE #219: PureScript Date or stick to JavaScript foreign?
 foreign import yearToDate       :: String -> Date.Date
 foreign import stringToDate     :: String -> Date.Date
 foreign import utcStringToDate  :: String -> Date.Date
@@ -69,7 +69,7 @@ parsePhyloJSONSet (PhyloJSONSet o) = PhyloDataSet
   , links
   , name          : o.name
   , nbBranches    : parseInt o.phyloBranches
-  -- (!) remotely stringify as a Double instead of an Int (reason?)
+  -- @NOTE #219: remotely stringify as a Double instead of an Int (reason?)
   , nbDocs        : (parseFloat >>> parseInt') o.phyloDocs
   , nbFoundations : parseInt o.phyloFoundations
   , nbGroups      : parseInt o.phyloGroups
@@ -157,7 +157,7 @@ parsePeriods epoch
 
 newtype Group = Group
   { bId           :: Int
-  , foundation    :: Array Int -- (?) Array String ???
+  , foundation    :: Array Int -- @NOTE #219: Array String ???
   , from          :: Date.Date
   , gId           :: Int
   , label         :: Array String
@@ -202,7 +202,7 @@ parseGroups epoch
 newtype Link = Link
   { from    :: Int
   , lId     :: Int
-  , label   :: String -- (!) undefined in Mèmiescape v2, still needed?
+  , label   :: String -- @NOTE #219: undefined in Mèmiescape v2, still needed?
   , to      :: Int
   }
 
@@ -217,8 +217,8 @@ parseLinks
   >>> Array.catMaybes
 
   where
-    -- (?): necessary?
-    --      bc. GroupToGroup as 1-1 relation with "edgeType=link"
+    -- @NOTE #219: necessary?
+    --             bc. GroupToGroup as 1-1 relation with "edgeType=link"
     filter :: RawEdge -> Boolean
     filter (GroupToGroup o) = o.edgeType == "link"
     filter _                = false
@@ -237,7 +237,7 @@ parseLinks
 newtype AncestorLink = AncestorLink
   { from    :: Int
   , lId     :: Int
-  , label   :: String -- (?) undefined in Mèmiescape v2, still needed?
+  , label   :: String -- @NOTE #219: undefined in Mèmiescape v2, still needed?
   , to      :: Int
   }
 
@@ -252,8 +252,9 @@ parseAncestorLinks
   >>> Array.catMaybes
 
   where
-    -- (?) necessary?
-    --     bc. GroupToAncestor as 1-1 relation with "edgeType=ancestorLink"
+    -- @NOTE #219: necessary?
+    --             bc. GroupToAncestor as 1-1 relation
+    --             with "edgeType=ancestorLink"
     filter :: RawEdge -> Boolean
     filter (GroupToAncestor o) = o.edgeType == "ancestorLink"
     filter _                   = false
@@ -285,8 +286,9 @@ parseBranchLinks
   >>> Array.catMaybes
 
   where
-    -- (?) necessary?
-    --     bc. BranchToGroup as 1-1 relation with "edgeType=branchLink"
+    -- @NOTE #219: necessary?
+    --             bc. BranchToGroup as 1-1 relation
+    --             with "edgeType=branchLink"
     filter :: RawEdge -> Boolean
     filter (BranchToGroup o) = o.edgeType == "branchLink"
     filter _                 = false
@@ -340,7 +342,7 @@ parseSources
   >>> String.split (String.Pattern ",")
   >>> Array.filter (\s -> not eq 0 $ String.length s)
 
--- (?) `Resources.js` business's methods still use `source` as an unsorted
+-- @WIP `Resources.js` business's methods still use `source` as an unsorted
 --      `Array String`, we have to dissociate the parsing and sorting
 --      computation (hence this second method to use for sorting purposes)
 sortSources :: Array String -> Array Source
@@ -389,7 +391,7 @@ parsePos
       Just s  -> parseFloat s
 
 
--- (?) why taking last value? use `any`?
+-- @NOTE #219: why taking last value? use `any`?
 getGlobalWeightedValue :: Array Group -> Boolean
 getGlobalWeightedValue
   =   Array.last

@@ -106,8 +106,8 @@ layoutCpt = here.component "layout" cpt where
         o.bb
       RS.changeDisplayView displayView
       T.write_ true isReadyBox
-      -- @XXX: handling global variables
-      --       (see `Resources.js` how they are being used)
+      -- @NOTE #219: handling global variables
+      --             (see `Resources.js` how they are being used)
       T.write_ (window .. "terms") termsBox
 
     useFirstEffect' do
@@ -161,8 +161,8 @@ layoutCpt = here.component "layout" cpt where
           style <- pure $ (el .. "style")
           pure $ (style .= "padding") "initial"
 
-    -- @XXX: handling global variables
-    --       (see `Resources.js` how they are being used)
+    -- @NOTE #219: handling global variables
+    --             (see `Resources.js` how they are being used)
     useUpdateEffect1' displayView do
       pure $ (window .= "displayView") (show displayView)
 
