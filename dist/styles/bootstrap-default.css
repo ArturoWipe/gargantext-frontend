@@ -11324,195 +11324,152 @@ select.form-control {
 /* Topbar constants */
 /* Sidebar constant */
 /* Colors */
-/* ---------- axis ---------- */
-.x-axis path {
+.phylo {
+  /* ---------- axis ---------- */
+  /* ---------- header ---------- */
+  /* ---------- group ---------- */
+  /* ---------- labels ---------- */
+  /* ---------- phylo ---------- */
+  /* isoline */
+}
+.phylo .x-axis path {
   stroke: #EBE4DD;
   stroke-width: 1.5px;
 }
-
-.y-axis path {
+.phylo .y-axis path {
   stroke: #EBE4DD;
   stroke-width: 1.5px;
 }
-
-.y-highlight {
+.phylo .y-highlight {
   stroke: #F3BE54;
   stroke-width: 1.5px;
 }
-
-.x-mark {
+.phylo .x-mark {
   fill: #4A5C70;
   stroke-width: 1px;
   stroke: #FFFFFF;
 }
-
-.x-mark-over {
+.phylo .x-mark-over {
   fill: #F3BE54;
 }
-
-.x-mark-focus {
+.phylo .x-mark-focus {
   fill: #F24C3D;
 }
-
-.tick text {
+.phylo .tick text {
   font-family: "Inter-Regular";
 }
-
-.tick text:hover {
+.phylo .tick text:hover {
   cursor: pointer;
 }
-
-.y-label {
+.phylo .y-label {
   font-size: 10px;
   font-family: "Inter-Regular";
   font-weight: normal;
 }
-
-.y-label-bold {
+.phylo .y-label-bold {
   font-size: 12px;
   font-family: "Inter-Bold";
   font-weight: bold;
 }
-
-.y-mark-year-inner {
+.phylo .y-mark-year-inner {
   fill: #4A5C70;
 }
-
-.y-mark-year-inner-highlight {
+.phylo .y-mark-year-inner-highlight {
   fill: #F3BE54;
 }
-
-.y-mark-year-outer {
+.phylo .y-mark-year-outer {
   fill: #FFFFFF;
   stroke: #4A5C70;
   stroke-width: 1px;
 }
-
-.y-mark-year-outer-highlight {
+.phylo .y-mark-year-outer-highlight {
   fill: #FFFFFF;
   stroke: #F3BE54;
   stroke-width: 3px;
 }
-
-.y-mark-month {
+.phylo .y-mark-month {
   fill: #4A5C70;
 }
-
-/* ---------- header ---------- */
-.header {
+.phylo .header {
   fill: #012840;
   cursor: pointer;
 }
-
-.header-wrapper {
+.phylo .header-wrapper {
   display: none;
   fill: #FFFFFF;
   filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.1));
 }
-.header-wrapper--hover {
+.phylo .header-wrapper--hover {
   display: initial;
 }
-
-/* ---------- group ---------- */
-.group-outer {
+.phylo .group-outer {
   stroke-width: 0.8px;
   stroke: #FFFFFF;
   fill: #FFFFFF;
 }
-
-.group-inner {
+.phylo .group-inner {
   stroke-width: 0.8px;
   stroke: #0D1824;
   fill: #0D1824;
   /*cursor: pointer;*/
   z-index: 10;
 }
-
-.group-heading {
+.phylo .group-heading {
   fill: #FFFFFF;
   stroke: #B5B5B5;
 }
-
-.group-focus {
+.phylo .group-focus {
   stroke: #F24C3D;
 }
-
-.source-focus {
+.phylo .source-focus {
   stroke: #61A3A9;
 }
-
-.group-unfocus {
+.phylo .group-unfocus {
   stroke: #A9A9A9;
 }
-
-.group-path {
+.phylo .group-path {
   cursor: pointer;
 }
-
-/* ---------- labels ---------- */
-.ngrams {
+.phylo .ngrams {
   visibility: hidden;
 }
-
-.term {
+.phylo .term {
   cursor: pointer;
 }
-
-.term:hover {
+.phylo .term:hover {
   font-weight: bold;
 }
-
-.term-path {
+.phylo .term-path {
   fill: none;
   stroke: #F24C3D;
   stroke-width: 1.5px;
 }
-
-.emerging {
+.phylo .emerging {
   /*text-decoration: underline #F0684D;*/
   /*fill:#5AA350;*/
   /*fill: #5AA350;*/
   fill: #F24C3D;
 }
-
-.decreasing {
+.phylo .decreasing {
   /*text-decoration: underline #74B5FF;*/
   fill: #11638F;
 }
-
-.path-focus {
+.phylo .path-focus {
   fill: none;
   stroke: #F24C3D;
   stroke-width: 1.5px;
 }
-
-.path-unfocus {
+.phylo .path-unfocus {
   stroke: #A9A9A9;
 }
-
-.path-heading {
+.phylo .path-heading {
   stroke: #B5B5B5;
 }
-
-/* ---------- phylo ---------- */
-.branch-hover {
+.phylo .branch-hover {
   fill: #F3BE54;
   opacity: 0.5;
 }
-
-/* elements */
-#file-path {
-  display: none;
-}
-
-/* axis */
-.axisRight {
-  font-family: "Inter-Regular";
-  font-size: 10px;
-}
-
-/* isoline */
-.peak {
+.phylo .peak {
   stroke: #FFFFFF;
   stroke-width: 1px;
   font-family: "Inter-Regular";
@@ -11520,28 +11477,24 @@ select.form-control {
   text-anchor: middle;
   visibility: visible;
 }
-
-.peak-over {
+.phylo .peak-over {
   font-size: 18px;
   stroke-width: 2px;
   cursor: pointer;
   stroke: #F3BE54;
   z-index: 100;
 }
-
-.peak-focus {
+.phylo .peak-focus {
   font-size: 18px;
   stroke-width: 2px;
   stroke: #F24C3D;
 }
-
-.peak-focus-source {
+.phylo .peak-focus-source {
   font-size: 18px;
   stroke-width: 2px;
   stroke: #74B5FF;
 }
-
-.peak-label {
+.phylo .peak-label {
   text-align: center;
   font-family: "Inter-Regular";
   font-size: 14px;
@@ -11557,11 +11510,6 @@ select.form-control {
   z-index: 10;
   position: absolute;
   visibility: hidden;
-}
-
-.word-cloud {
-  font-family: "Inter-Regular";
-  font-size: 12px;
 }
 
 .phylo {

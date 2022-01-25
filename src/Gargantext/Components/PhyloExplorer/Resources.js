@@ -1010,8 +1010,6 @@ function getCSSStyles( parentElement ) {
       arr   = [],
       count = 0;
 
-  d3.selectAll(".word-cloud").remove();
-
   groups.forEach(function(g){
     let gid = (g.getAttribute("id")).replace("group","");
     let terms = d3.selectAll(".term").filter(".g-" + gid).nodes();

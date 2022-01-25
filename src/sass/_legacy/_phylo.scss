@@ -46,266 +46,252 @@ $fill-idle-color: #F5EEE6;
 $emergence-color: #012840;
 $decreasing-color: #11638F;
 
-/* ---------- axis ---------- */
+////////////////////////////////////////////////////////////////
 
-// @WIP check if all classes are actually being used
+/// (?) SVG related classes (isoline, scape)
 
-.x-axis path {
-  stroke: $graph-layout-line-color;
-  stroke-width: 1.5px;
-}
+.phylo {
 
-.y-axis path {
-  stroke:$graph-layout-line-color;
-  stroke-width: 1.5px;
-}
+  /* ---------- axis ---------- */
 
-.y-highlight {
-  stroke: $mark-hover;
-  stroke-width: 1.5px;
-}
-
-.x-mark {
-  fill: $mark-default;
-  stroke-width: 1px;
-  stroke: $graph-background-color;
-}
-
-.x-mark-over {
-  fill: $mark-hover;
-}
-
-.x-mark-focus {
-  fill: $mark-focus;
-}
-
-.tick text {
-  font-family: "Inter-Regular";
-}
-
-.tick text:hover {
-  cursor: pointer;
-}
-
-.y-label {
-  font-size: 10px;
-  font-family: "Inter-Regular";
-  font-weight: normal;
-}
-
-.y-label-bold {
-  font-size: 12px;
-  font-family: "Inter-Bold";
-  font-weight: bold;
-}
-
-.y-mark-year-inner {
-  fill: $mark-default;
-}
-
-.y-mark-year-inner-highlight {
-  fill: $mark-hover;
-}
-
-.y-mark-year-outer {
-  fill: $graph-background-color;
-  stroke: $mark-default;
-  stroke-width: 1px;
-}
-
-.y-mark-year-outer-highlight {
-  fill: $graph-background-color;
-  stroke: $mark-hover;
-  stroke-width: 3px;
-}
-
-.y-mark-month {
-  fill: $mark-default;
-}
-
-/* ---------- header ---------- */
-
-.header {
-  fill: $emergence-color;
-  cursor: pointer;
-}
-
-.header-wrapper {
-  display: none;
-  fill: $graph-background-color;
-  filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.1));
-
-  &--hover {
-    display: initial;
+  .x-axis path {
+    stroke: $graph-layout-line-color;
+    stroke-width: 1.5px;
   }
-}
+
+  .y-axis path {
+    stroke:$graph-layout-line-color;
+    stroke-width: 1.5px;
+  }
+
+  .y-highlight {
+    stroke: $mark-hover;
+    stroke-width: 1.5px;
+  }
+
+  .x-mark {
+    fill: $mark-default;
+    stroke-width: 1px;
+    stroke: $graph-background-color;
+  }
+  // (!) unused class
+  .x-mark-over {
+    fill: $mark-hover;
+  }
+  // (!) unused class
+  .x-mark-focus {
+    fill: $mark-focus;
+  }
+
+  .tick text {
+    font-family: "Inter-Regular";
+  }
+
+  .tick text:hover {
+    cursor: pointer;
+  }
+
+  .y-label {
+    font-size: 10px;
+    font-family: "Inter-Regular";
+    font-weight: normal;
+  }
+  // (!) unused class (see `Resources.js:groupOver`)
+  .y-label-bold {
+    font-size: 12px;
+    font-family: "Inter-Bold";
+    font-weight: bold;
+  }
+
+  .y-mark-year-inner {
+    fill: $mark-default;
+  }
+  // (!) unused class (see `Resources.js:groupOver`)
+  .y-mark-year-inner-highlight {
+    fill: $mark-hover;
+  }
+
+  .y-mark-year-outer {
+    fill: $graph-background-color;
+    stroke: $mark-default;
+    stroke-width: 1px;
+  }
+  // (!) unused class (see `Resources.js:groupOver`)
+  .y-mark-year-outer-highlight {
+    fill: $graph-background-color;
+    stroke: $mark-hover;
+    stroke-width: 3px;
+  }
+
+  .y-mark-month {
+    fill: $mark-default;
+  }
+
+  /* ---------- header ---------- */
+
+  .header {
+    fill: $emergence-color;
+    cursor: pointer;
+  }
+
+  .header-wrapper {
+    display: none;
+    fill: $graph-background-color;
+    filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.1));
+
+    &--hover {
+      display: initial;
+    }
+  }
 
 
-/* ---------- group ---------- */
+  /* ---------- group ---------- */
 
-.group-outer {
-  stroke-width: 0.8px;
-  stroke: $graph-background-color;
-  fill: $graph-background-color;
-}
+  .group-outer {
+    stroke-width: 0.8px;
+    stroke: $graph-background-color;
+    fill: $graph-background-color;
+  }
 
-.group-inner {
-  stroke-width: 0.8px;
-  stroke: $graph-text-color;
-  fill: $graph-text-color;
-  /*cursor: pointer;*/
-  z-index: 10;
-}
+  .group-inner {
+    stroke-width: 0.8px;
+    stroke: $graph-text-color;
+    fill: $graph-text-color;
+    /*cursor: pointer;*/
+    z-index: 10;
+  }
 
-.group-heading {
-  fill: $graph-background-color;
-  stroke: $graph-heading-color;
-}
+  .group-heading {
+    fill: $graph-background-color;
+    stroke: $graph-heading-color;
+  }
 
-.group-focus {
-  stroke: $mark-focus;
-}
+  .group-focus {
+    stroke: $mark-focus;
+  }
 
-.source-focus {
-  stroke: $fill-default-color;
-}
+  .source-focus {
+    stroke: $fill-default-color;
+  }
 
-.group-unfocus {
-  stroke: $group-unfocus;
-}
+  .group-unfocus {
+    stroke: $group-unfocus;
+  }
 
-.group-path {
-  cursor: pointer;
-}
+  .group-path {
+    cursor: pointer;
+  }
 
-/* ---------- labels ---------- */
+  /* ---------- labels ---------- */
 
-.ngrams {
-  visibility:  hidden;
-}
+  .ngrams {
+    visibility:  hidden;
+  }
 
-.term {
-  cursor: pointer;
-}
+  .term {
+    cursor: pointer;
+  }
 
-.term:hover {
-  font-weight: bold;
-}
+  .term:hover {
+    font-weight: bold;
+  }
 
-// .term-unfocus {
-//   fill: #A9A9A9;
-// }
+  // .term-unfocus {
+  //   fill: #A9A9A9;
+  // }
 
-// .term-focus {
-//   fill: black;
-// }
+  // .term-focus {
+  //   fill: black;
+  // }
 
-.term-path {
-  fill: none;
-  stroke: $mark-focus;
-  stroke-width: 1.5px;
-}
+  .term-path {
+    fill: none;
+    stroke: $mark-focus;
+    stroke-width: 1.5px;
+  }
 
-.emerging {
-  /*text-decoration: underline #F0684D;*/
-  /*fill:#5AA350;*/
-  /*fill: #5AA350;*/
-  fill: $mark-focus;
-}
+  .emerging {
+    /*text-decoration: underline #F0684D;*/
+    /*fill:#5AA350;*/
+    /*fill: #5AA350;*/
+    fill: $mark-focus;
+  }
 
-.decreasing {
-  /*text-decoration: underline #74B5FF;*/
-  fill: $decreasing-color;
-}
+  .decreasing {
+    /*text-decoration: underline #74B5FF;*/
+    fill: $decreasing-color;
+  }
 
-.path-focus {
-  fill: none;
-  stroke: $mark-focus;
-  stroke-width: 1.5px;
-}
+  .path-focus {
+    fill: none;
+    stroke: $mark-focus;
+    stroke-width: 1.5px;
+  }
 
-.path-unfocus {
-  stroke: $group-unfocus;
-}
+  .path-unfocus {
+    stroke: $group-unfocus;
+  }
 
-.path-heading {
-  stroke: $graph-heading-color;
-}
+  .path-heading {
+    stroke: $graph-heading-color;
+  }
 
-/* ---------- phylo ---------- */
+  /* ---------- phylo ---------- */
 
-.branch-hover {
-  fill: $mark-hover;
-  opacity: 0.5;
-}
+  .branch-hover {
+    fill: $mark-hover;
+    opacity: 0.5;
+  }
 
-/* elements */
+  /* isoline */
 
-#file-path {
-  display:  none;
-}
+  .peak {
+    stroke: $graph-background-color;
+    stroke-width: 1px;
+    font-family: "Inter-Regular";
+    font-size: 14px;
+    text-anchor: middle;
+    visibility: visible;
+  }
 
+  .peak-over {
+    font-size: 18px;
+    stroke-width: 2px;
+    cursor: pointer;
+    stroke: $mark-hover;
+    z-index: 100;
+  }
 
-/* axis */
+  .peak-focus {
+    font-size: 18px;
+    stroke-width: 2px;
+    stroke: $mark-focus;
+  }
 
-.axisRight {
-  font-family: "Inter-Regular";
-  font-size: 10px;
-}
+  .peak-focus-source {
+    font-size: 18px;
+    stroke-width: 2px;
+    stroke: $isoline-stroke-color;
+  }
 
-/* isoline */
+  .peak-label {
+    text-align: center;
+    font-family: "Inter-Regular";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    color: $graph-background-color;
+    border-radius: 3px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: $graph-background-color;
+    background: $visible-peak;
+    padding: 5px;
+    z-index: 10;
+    position: absolute;
+    visibility: hidden;
+  }
 
-.peak {
-  stroke: $graph-background-color;
-  stroke-width: 1px;
-  font-family: "Inter-Regular";
-  font-size: 14px;
-  text-anchor: middle;
-  visibility: visible;
-}
-
-.peak-over {
-  font-size: 18px;
-  stroke-width: 2px;
-  cursor: pointer;
-  stroke: $mark-hover;
-  z-index: 100;
-}
-
-.peak-focus {
-  font-size: 18px;
-  stroke-width: 2px;
-  stroke: $mark-focus;
-}
-
-.peak-focus-source {
-  font-size: 18px;
-  stroke-width: 2px;
-  stroke: $isoline-stroke-color;
-}
-
-
-.peak-label {
-  text-align: center;
-  font-family: "Inter-Regular";
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  color: $graph-background-color;
-  border-radius: 3px;
-  border-style: solid;
-  border-width: 2px;
-  border-color: $graph-background-color;
-  background: $visible-peak;
-  padding: 5px;
-  z-index: 10;
-  position: absolute;
-  visibility: hidden;
-}
-
-.word-cloud {
-  font-family: "Inter-Regular";
-  font-size: 12px;
 }
 
 ////////////////////////////////////////////////////////////////
