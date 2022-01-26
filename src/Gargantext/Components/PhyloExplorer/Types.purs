@@ -345,9 +345,12 @@ parseSources
   >>> String.split (String.Pattern ",")
   >>> Array.filter (\s -> not eq 0 $ String.length s)
 
--- @WIP `Resources.js` business's methods still use `source` as an unsorted
---      `Array String`, we have to dissociate the parsing and sorting
---      computation (hence this second method to use for sorting purposes)
+-- @NOTE #219: `Resources.js` business's methods still use `source` as
+--             an unsorted `Array String`, we have to dissociate the parsing
+--             and sorting computation
+--
+--                ↳ Hence the below additionnal method to use for
+--                  sorting purpose only
 sortSources :: Array String -> Array Source
 sortSources
   =   Array.mapWithIndex setSource
