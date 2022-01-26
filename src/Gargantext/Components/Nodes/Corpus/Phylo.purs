@@ -6,12 +6,14 @@ import Gargantext.Prelude
 
 import Affjax as AX
 import Affjax.ResponseFormat as ResponseFormat
+import DOM.Simple (document, querySelector)
 import DOM.Simple.Console (log2)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
+import FFI.Simple ((..), (.=))
 import Gargantext.Components.PhyloExplorer.JSON (PhyloJSONSet)
 import Gargantext.Components.PhyloExplorer.Layout (layout)
 import Gargantext.Components.PhyloExplorer.Types (PhyloDataSet, parsePhyloJSONSet)
@@ -39,6 +41,23 @@ phyloLayoutCpt = here.component "phyloLayout" cpt where
 
     fetchedDataBox <- T.useBox (Nothing :: Maybe PhyloDataSet)
     fetchedData    <- T.useLive T.unequal fetchedDataBox
+
+    R.useEffectOnce' do
+      -- @XXX: inopinent <div> (see Gargantext.Components.Router) (@TODO?)
+      mEl <- querySelector document ".main-page__main-route .container"
+      case mEl of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "display") "none"
+      -- @XXX: reset "main-page__main-route" wrapper margin
+      --       see Gargantext.Components.Router) (@TODO?)
+      mEl' <- querySelector document ".main-page__main-route"
+      case mEl' of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "padding") "initial"
 
     R.useEffectOnce' $ launchAff_ do
       result <- fetchPhyloJSON

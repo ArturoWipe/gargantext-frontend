@@ -6,6 +6,7 @@ import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector, window)
 import Data.Either (Either(..))
+import Data.Foldable (intercalate)
 import Data.Int as Int
 import Data.Maybe (Maybe(..))
 import Data.String (null)
@@ -147,7 +148,8 @@ layoutCpt = here.component "layout" cpt where
   -- Effects
   ----------
 
-    useFirstEffect' $ do
+    -- Drawing the phylo
+    useFirstEffect' do
       (sortSources >>> flip T.write_ sourcesBox) o.sources
       RS.setGlobalD3Reference window d3
       RS.setGlobalDependencies window (PhyloDataSet o)
@@ -201,24 +203,7 @@ layoutCpt = here.component "layout" cpt where
           pure $ (style .= "display") $
             isIsolineDisplayed ? "flex" $ "none"
 
-    useFirstEffect' do
-      -- @WIP: remove inopinent <div> (see Gargantext.Components.Router)
-      mEl <- querySelector document ".main-page__main-route .container"
-      case mEl of
-        Nothing -> pure unit
-        Just el -> do
-          style <- pure $ (el .. "style")
-          pure $ (style .= "display") "none"
-      -- @WIP: reset "main-page__main-route" wrapper margin
-      --       (see Gargantext.Components.Router)
-      mEl' <- querySelector document ".main-page__main-route"
-      case mEl' of
-        Nothing -> pure unit
-        Just el -> do
-          style <- pure $ (el .. "style")
-          pure $ (style .= "padding") "initial"
-
-    -- @NOTE #219: handling global variables
+    -- @NOTE #219: handling global variables (eg. via `window`)
     --             (see `Resources.js` how they are being used)
     useUpdateEffect1' displayView do
       pure $ (window .= "displayView") (show displayView)
@@ -229,12 +214,21 @@ layoutCpt = here.component "layout" cpt where
     pure $
 
       H.div
-      { className: "phylo" }
+      { className: intercalate " "
+          [ "phylo"
+          , not isDisplayed ? "phylo--preloading" $ ""
+          ]
+      }
       [
         -- Preloading spinner
         R2.if' (not isDisplayed) $
-          B.spinner
-          { className: "phylo__spinner" }
+
+          H.div
+          { className: "phylo__spinner-wrapper" }
+          [
+            B.spinner
+            { className: "phylo__spinner" }
+          ]
       ,
         -- Topbar
         R2.createPortal' mTopBarHost

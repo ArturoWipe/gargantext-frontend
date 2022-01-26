@@ -3,6 +3,7 @@
 $topbar-height: 56px; // ~ unworthy empirical value (@TODO topbar height calculation)
 $graph-margin: 16px;
 
+$layout-height: calc(100vh - #{ $topbar-height} );
 $graph-height: calc(100vh - #{ $topbar-height } - #{ $graph-margin * 2 });
 
 $isoline-height: 158px;
@@ -298,9 +299,25 @@ $decreasing-color: #11638F;
 
 .phylo {
   position: relative;
-
   width: 100%;
-  height: $graph-height;
+  height: $layout-height;
+
+  &--preloading {
+    // (!) As the drawing process need must have all its elements displayed,
+    //     the browser scrollbar will flicker during the process
+    //     So during this time (in addition to the preloader spinner), we
+    //     ensure the height of the layout does not exceed the browser height
+    //     limit, hence avoiding a flickering effect
+    overflow: hidden;
+  }
+
+  &__spinner-wrapper {
+    @include fit-positions;
+
+    position: absolute;
+    z-index: z-index("phylo-layout", "spinner");
+    background: $body-bg;
+  }
 
   &__spinner {
     $size: 100px;

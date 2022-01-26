@@ -11515,7 +11515,19 @@ select.form-control {
 .phylo {
   position: relative;
   width: 100%;
-  height: calc(100vh - 56px - 32px);
+  height: calc(100vh - 56px );
+}
+.phylo--preloading {
+  overflow: hidden;
+}
+.phylo__spinner-wrapper {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  z-index: 2;
+  background: #fff;
 }
 .phylo__spinner {
   position: absolute;
