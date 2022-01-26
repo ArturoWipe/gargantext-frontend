@@ -261,15 +261,6 @@ setGlobalD3Reference window d3 = void $ pure $ (window .= "d3") d3
 
 -----------------------------------------------------------
 
--- (?) This function precedes its JavaScript pendant (see `selectSource_`)
---     It was transformed from JavaScript to PureScript to mesure the difficulty
---     of translating one business to another
---
---     Conlusion is that it is:
---        a) more time-consuming, due to PureScript way of writing
---        b) raise unanticipated issue and warning, for example here we could
---           not have been able to transpose some JavaScript part (due to the
---           design of the JavaScript `Resource.js` file: purity issue mostly)
 selectSource :: Window -> Maybe Source -> Effect Unit
 selectSource window source =
   let
