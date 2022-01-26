@@ -39,6 +39,8 @@ $mark-unfocus: #FFECEC;
 
 $group-unfocus: #A9A9A9;
 
+$source-focus: #A6BDDB;
+
 $isoline-stroke-color: #74B5FF;
 
 $fill-default-color: #61A3A9;
@@ -172,7 +174,10 @@ $decreasing-color: #11638F;
   }
 
   .source-focus {
-    stroke: $fill-default-color;
+    stroke: $isoline-stroke-color;
+    // @NOTE #219: single source of truth for color management (HTML attribute
+    //             style takes precedence over CSS ones)
+    fill: $source-focus !important;
   }
 
   .group-unfocus {
@@ -367,9 +372,9 @@ $decreasing-color: #11638F;
   //       This might be due to the underlying ratio of the matrix placement
   //       (ie. for a given "height", it forces a "width")
   //
-  //       Workaround here is to limit the size of the SVG (its only a patch
-  //       surgery, as the `Element.width` property will still be at its wrong
-  //       value)
+  //          ↳ Workaround here is to limit the size of the SVG (its only
+  //            a patch surgery, as the `Element.width` property will still
+  //            be at its wrong value)
   svg {
     max-width: 100%;
   }

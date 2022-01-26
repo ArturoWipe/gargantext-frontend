@@ -305,10 +305,10 @@ selectSource window source =
           >>= selectionNodes
 
         drawWordCloud arr
-        for_ arr selectPeak
         initPath
         for_ arr $ focusBranch window
         highlightGroups arr
+        for_ arr markSourceFocus
 
   where
 
@@ -318,11 +318,10 @@ selectSource window source =
       pure $ (style .= "fill") hex
 
 
-    selectPeak :: Element -> Effect Unit
-    selectPeak el = do
+    markSourceFocus :: Element -> Effect Unit
+    markSourceFocus el = do
       R2.removeClass el [ "group-unfocus" ]
       R2.addClass el [ "source-focus" ]
-      fill "#a6bddb" el
 
       bid <- pure $ (el ~~ "getAttribute") [ "bId" ]
 

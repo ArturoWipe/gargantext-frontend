@@ -11179,7 +11179,8 @@ select.form-control {
   stroke: #F24C3D;
 }
 .phylo .source-focus {
-  stroke: #61A3A9;
+  stroke: #74B5FF;
+  fill: #A6BDDB !important;
 }
 .phylo .group-unfocus {
   stroke: #A9A9A9;
