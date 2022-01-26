@@ -11313,11 +11313,13 @@ select.form-control {
 .phylo-isoline {
   display: flex;
   position: relative;
-  width: 100%;
   height: 158px;
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
   user-select: none;
+}
+.phylo-isoline svg {
+  max-width: 100%;
 }
 
 .phylo-margin {
@@ -11349,15 +11351,15 @@ select.form-control {
   height: inherit;
 }
 .phylo-grid__blueprint__center {
-  width: 89%;
+  width: 85%;
   height: inherit;
 }
 .phylo-grid__blueprint__right {
-  width: 1%;
+  width: 5%;
   height: inherit;
 }
 .phylo-grid__content__scape {
-  width: calc( 10% + 89%);
+  width: calc( 10% + 85%);
 }
 
 .phylo-topbar {

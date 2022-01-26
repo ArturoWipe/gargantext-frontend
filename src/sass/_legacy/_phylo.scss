@@ -9,8 +9,8 @@ $graph-height: calc(100vh - #{ $topbar-height } - #{ $graph-margin * 2 });
 $isoline-height: 158px;
 
 $left-column-width: 10%;
-$center-column-width: 89%;
-$right-column-width: 1%;
+$center-column-width: 85%;
+$right-column-width: 5%;
 
 /* Topbar constants */
 
@@ -358,11 +358,21 @@ $decreasing-color: #11638F;
 .phylo-isoline {
   display: flex;
   position: relative;
-  width: 100%;
   height: $isoline-height;
   background-color: $gray-100;
   border-bottom: 1px solid $border-color;
   user-select: none;
+
+  // @XXX: Annoying UI artefact where the SVG breaks its provided size
+  //       This might be due to the underlying ratio of the matrix placement
+  //       (ie. for a given "height", it forces a "width")
+  //
+  //       Workaround here is to limit the size of the SVG (its only a patch
+  //       surgery, as the `Element.width` property will still be at its wrong
+  //       value)
+  svg {
+    max-width: 100%;
+  }
 }
 
 ////////////////////////////////////////////////////////////////
