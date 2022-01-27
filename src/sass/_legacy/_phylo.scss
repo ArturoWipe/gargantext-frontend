@@ -16,8 +16,8 @@
 ///
 ///  Our workaround here has been to KISS via removing every CSS rules
 ///  created with the "Inter-regular" font. Instead it will fallback of the
-///  application set font ; which worked very well to our need AND mimicking
-///  almost perfectly the "Inter-regular" one
+///  application set font ; which with our default theme worked very well
+///  to our need AND mimicking almost perfectly the "Inter-regular" one
 ///
 ///  [1] https://stackoverflow.com/questions/16426223/why-svg-bbox-method-on-text-element-gives-different-result-in-different-browser
 ///  [2] https://stackoverflow.com/questions/38270865/why-does-svg-viewed-in-chrome-51-not-position-correctly-with-added-gap-after-tex
@@ -32,7 +32,7 @@ $graph-margin: 16px;
 $layout-height: calc(100vh - #{ $topbar-height} );
 $graph-height: calc(100vh - #{ $topbar-height } - #{ $graph-margin * 2 });
 
-$isoline-height: 158px;
+$isoline-height: 174px;
 
 $left-column-width: 10%;
 $center-column-width: 85%;
@@ -50,7 +50,7 @@ $tab-margin-x: space-x(2.5);
 
 /* Colors */
 
-$graph-background-color: #FFFFFF;
+$graph-background-color: $body-bg;
 $graph-layout-line-color: #EBE4DD;
 $graph-text-color: #0D1824;
 $graph-heading-color: #B5B5B5;
@@ -67,6 +67,7 @@ $group-unfocus: #A9A9A9;
 
 $source-focus: #A6BDDB;
 
+$isoline-background-color: $gray-150;
 $isoline-stroke-color: #74B5FF;
 
 $fill-default-color: #61A3A9;
@@ -274,7 +275,7 @@ $decreasing-color: #11638F;
   .peak {
     stroke: $graph-background-color;
     stroke-width: 1px;
-    font-size: 14px;
+    font-size: 18px;
     text-anchor: middle;
     visibility: visible;
   }
@@ -382,7 +383,7 @@ $decreasing-color: #11638F;
   display: flex;
   position: relative;
   height: $isoline-height;
-  background-color: $gray-100;
+  background-color:$isoline-background-color;
   border-bottom: 1px solid $border-color;
   user-select: none;
 

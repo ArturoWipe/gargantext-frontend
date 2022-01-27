@@ -11340,7 +11340,7 @@ select.form-control {
 .phylo .x-mark {
   fill: #4A5C70;
   stroke-width: 1px;
-  stroke: #FFFFFF;
+  stroke: #fff;
 }
 .phylo .x-mark-over {
   fill: #F3BE54;
@@ -11366,12 +11366,12 @@ select.form-control {
   fill: #F3BE54;
 }
 .phylo .y-mark-year-outer {
-  fill: #FFFFFF;
+  fill: #fff;
   stroke: #4A5C70;
   stroke-width: 1px;
 }
 .phylo .y-mark-year-outer-highlight {
-  fill: #FFFFFF;
+  fill: #fff;
   stroke: #F3BE54;
   stroke-width: 3px;
 }
@@ -11384,7 +11384,7 @@ select.form-control {
 }
 .phylo .header-wrapper {
   display: none;
-  fill: #FFFFFF;
+  fill: #fff;
   filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.1));
 }
 .phylo .header-wrapper--hover {
@@ -11392,8 +11392,8 @@ select.form-control {
 }
 .phylo .group-outer {
   stroke-width: 0.8px;
-  stroke: #FFFFFF;
-  fill: #FFFFFF;
+  stroke: #fff;
+  fill: #fff;
 }
 .phylo .group-inner {
   stroke-width: 0.8px;
@@ -11403,7 +11403,7 @@ select.form-control {
   z-index: 10;
 }
 .phylo .group-heading {
-  fill: #FFFFFF;
+  fill: #fff;
   stroke: #B5B5B5;
 }
 .phylo .group-focus {
@@ -11459,9 +11459,9 @@ select.form-control {
   opacity: 0.5;
 }
 .phylo .peak {
-  stroke: #FFFFFF;
+  stroke: #fff;
   stroke-width: 1px;
-  font-size: 14px;
+  font-size: 18px;
   text-anchor: middle;
   visibility: visible;
 }
@@ -11487,11 +11487,11 @@ select.form-control {
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
-  color: #FFFFFF;
+  color: #fff;
   border-radius: 3px;
   border-style: solid;
   border-width: 2px;
-  border-color: #FFFFFF;
+  border-color: #fff;
   background: #0D1824;
   padding: 5px;
   z-index: 10;
@@ -11543,8 +11543,8 @@ select.form-control {
 .phylo-isoline {
   display: flex;
   position: relative;
-  height: 158px;
-  background-color: #f8f9fa;
+  height: 174px;
+  background-color: #FAFAFA;
   border-bottom: 1px solid #dee2e6;
   user-select: none;
 }
