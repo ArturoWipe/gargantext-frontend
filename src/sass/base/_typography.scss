@@ -1,21 +1,3 @@
-/* fonts */
-
-@font-face {
-  font-family: 'Inter-Regular';
-  font-style:  normal;
-  font-weight: 400;
-  src: url("../fonts/phylo/Inter-Regular.woff2") format("woff2"),
-       url("../fonts/phylo/Inter-Regular.woff") format("woff");
-}
-
-@font-face {
-  font-family: 'Inter-Bold';
-  font-style:  normal;
-  font-weight: 700;
-  src: url("../fonts/phylo/Inter-Bold.woff2") format("woff2"),
-       url("../fonts/phylo/Inter-Bold.woff") format("woff");
-}
-
 // add more weight to Bootstrap header rules
 h4, h5, h6 {
   font-weight: bold;

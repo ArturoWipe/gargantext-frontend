@@ -1,3 +1,29 @@
+///  (!) Heads up: custom web font & SVG text BBox
+///
+///  There is a lot of inconvenience to use a non-safe web font with Chromium
+///  engine and SVG (for example: [1], [2], [3], [4])
+///
+///  Main issues are:
+///    - browser engine late loading: creating a race condition where the
+///      SVG text is rendered via another default fallback webfont than
+///      the one we have set
+///    - browser engine non compliancy with certain font file type: creating
+///      potential unanticipated issue
+///
+///  Empirically, we have found that even with a safe lazy loading (ie.
+///  using `<Promise> document.fonts.ready`), results were not satisfying
+///  with the original font used in the default Memiescape ("Inter-regular")
+///
+///  Our workaround here has been to KISS via removing every CSS rules
+///  created with the "Inter-regular" font. Instead it will fallback of the
+///  application set font ; which worked very well to our need AND mimicking
+///  almost perfectly the "Inter-regular" one
+///
+///  [1] https://stackoverflow.com/questions/16426223/why-svg-bbox-method-on-text-element-gives-different-result-in-different-browser
+///  [2] https://stackoverflow.com/questions/38270865/why-does-svg-viewed-in-chrome-51-not-position-correctly-with-added-gap-after-tex
+///  [3] https://stackoverflow.com/questions/14789059/pixel-perfect-consistent-text-width-in-svg-or-html
+///  [4] https://stackoverflow.com/questions/41059999/text-tag-in-svg-not-rendering-correctly-in-chrome
+
 /* Grid constants */
 
 $topbar-height: 56px; // ~ unworthy empirical value (@TODO topbar height calculation)
@@ -86,23 +112,17 @@ $decreasing-color: #11638F;
     fill: $mark-focus;
   }
 
-  .tick text {
-    font-family: "Inter-Regular";
-  }
-
   .tick text:hover {
     cursor: pointer;
   }
 
   .y-label {
     font-size: 10px;
-    font-family: "Inter-Regular";
     font-weight: normal;
   }
   // (!) unused class (see `Resources.js:groupOver`)
   .y-label-bold {
     font-size: 12px;
-    font-family: "Inter-Bold";
     font-weight: bold;
   }
 
@@ -254,7 +274,6 @@ $decreasing-color: #11638F;
   .peak {
     stroke: $graph-background-color;
     stroke-width: 1px;
-    font-family: "Inter-Regular";
     font-size: 14px;
     text-anchor: middle;
     visibility: visible;
@@ -282,7 +301,6 @@ $decreasing-color: #11638F;
 
   .peak-label {
     text-align: center;
-    font-family: "Inter-Regular";
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
@@ -388,7 +406,6 @@ $decreasing-color: #11638F;
 
 .phylo-grid {
   position: relative;
-  font-family: "Inter-Regular";
   user-select: none;
 
   &__content {

@@ -10112,19 +10112,6 @@ h3 {
   color: #262a2d;
 }
 
-/* fonts */
-@font-face {
-  font-family: "Inter-Regular";
-  font-style: normal;
-  font-weight: 400;
-  src: url("../fonts/phylo/Inter-Regular.woff2") format("woff2"), url("../fonts/phylo/Inter-Regular.woff") format("woff");
-}
-@font-face {
-  font-family: "Inter-Bold";
-  font-style: normal;
-  font-weight: 700;
-  src: url("../fonts/phylo/Inter-Bold.woff2") format("woff2"), url("../fonts/phylo/Inter-Bold.woff") format("woff");
-}
 h4, h5, h6 {
   font-weight: bold;
 }
@@ -11355,20 +11342,15 @@ select.form-control {
 .phylo .x-mark-focus {
   fill: #F24C3D;
 }
-.phylo .tick text {
-  font-family: "Inter-Regular";
-}
 .phylo .tick text:hover {
   cursor: pointer;
 }
 .phylo .y-label {
   font-size: 10px;
-  font-family: "Inter-Regular";
   font-weight: normal;
 }
 .phylo .y-label-bold {
   font-size: 12px;
-  font-family: "Inter-Bold";
   font-weight: bold;
 }
 .phylo .y-mark-year-inner {
@@ -11473,7 +11455,6 @@ select.form-control {
 .phylo .peak {
   stroke: #FFFFFF;
   stroke-width: 1px;
-  font-family: "Inter-Regular";
   font-size: 14px;
   text-anchor: middle;
   visibility: visible;
@@ -11497,7 +11478,6 @@ select.form-control {
 }
 .phylo .peak-label {
   text-align: center;
-  font-family: "Inter-Regular";
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -11572,7 +11552,6 @@ select.form-control {
 
 .phylo-grid {
   position: relative;
-  font-family: "Inter-Regular";
   user-select: none;
 }
 .phylo-grid__content {

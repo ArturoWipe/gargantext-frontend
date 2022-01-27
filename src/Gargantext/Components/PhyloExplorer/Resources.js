@@ -2234,37 +2234,37 @@ function addEmergenceLabels(k, emergences, branchByGroup, fontScale, opacityScal
     .node()
     .getBoundingClientRect();
 
-  var paddingX = (bbox.width * 0.25 + 4) / 2;
-  var paddingYt = bbox.height * 0.025 + 1;
-  var paddingYb = bbox.height * 0.25 + 2;
-  // (?) position and size are directly based on the text content ones, with
-  //     additions of:
-  //        - static padding value
-  //        - proportional padding value (due to text size differences)
-  //
-  // (?) "x" position need to be divide by 2, due to the "text-anchor: middle"
+  // (?) Empirical proportional padding value (due to text size diffences)
+  var padding = {
+    t: 0,
+    r: bbox.width * 0.05,
+    b: bbox.height * 0.4,
+    l: bbox.width * 0.05
+  };
+
   var w3
     =
     + bbox.width
-    + (paddingX * 2)
+    + padding.l
+    + padding.r;
 
   var h3
     =
     + bbox.height
-    + paddingYt
-    + paddingYb
+    + padding.t
+    + padding.b;
 
   var x3
     =
     + xr
     - (bbox.width / 2)
-    - paddingX
+    - padding.l;
 
   var y3
     =
     + yr
     - bbox.height
-    - paddingYt
+    - padding.t;
 
   panel
     .append("rect", "text")
