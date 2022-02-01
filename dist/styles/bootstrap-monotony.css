@@ -11704,6 +11704,10 @@ select.form-control {
   white-space: normal;
   word-break: break-word;
 }
+.phylo-selection-tab__highlight__type {
+  padding: 0.25em 0.4em;
+  font-weight: bold;
+}
 .phylo-selection-tab__selection {
   margin: 16px 20px 0;
 }
@@ -11727,6 +11731,10 @@ select.form-control {
 }
 .phylo-selection-tab__nil {
   margin: 16px 20px;
+}
+.phylo-selection-tab__separator {
+  color: #adb5bd;
+  text-align: center;
 }
 
 .phylo-toolbar {

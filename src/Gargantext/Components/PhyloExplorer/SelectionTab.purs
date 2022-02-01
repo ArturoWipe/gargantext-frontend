@@ -97,12 +97,6 @@ component = R.hooksComponent componentName cpt where
               H.div
               { className: "phylo-selection-tab__highlight" }
               [
-                H.h6
-                {}
-                [
-                  H.text "Selected source"
-                ]
-              ,
                 H.ul
                 { className: "list-group" }
                 [
@@ -117,6 +111,12 @@ component = R.hooksComponent componentName cpt where
                     }
                     [
                       H.text s
+                    ]
+                  ,
+                    H.span
+                    { className: "phylo-selection-tab__highlight__type" }
+                    [
+                      H.text "source"
                     ]
                   ]
                 ]
@@ -131,12 +131,6 @@ component = R.hooksComponent componentName cpt where
               H.div
               { className: "phylo-selection-tab__highlight" }
               [
-                H.h6
-                {}
-                [
-                  H.text "Selected branch"
-                ]
-              ,
                 H.ul
                 { className: "list-group" }
                 [
@@ -152,6 +146,12 @@ component = R.hooksComponent componentName cpt where
                     [
                       H.text s
                     ]
+                  ,
+                    H.span
+                    { className: "phylo-selection-tab__highlight__type" }
+                    [
+                      H.text "branch"
+                    ]
                   ]
                 ]
               ]
@@ -165,12 +165,6 @@ component = R.hooksComponent componentName cpt where
               H.div
               { className: "phylo-selection-tab__highlight" }
               [
-                H.h6
-                {}
-                [
-                  H.text "Selected term"
-                ]
-              ,
                 H.ul
                 { className: "list-group" }
                 [
@@ -185,6 +179,12 @@ component = R.hooksComponent componentName cpt where
                     }
                     [
                       H.text s
+                    ]
+                  ,
+                    H.span
+                    { className: "phylo-selection-tab__highlight__type" }
+                    [
+                      H.text "term"
                     ]
                   ]
                 ,
@@ -205,18 +205,23 @@ component = R.hooksComponent componentName cpt where
               ]
             ]
       ,
+        -- (separator)
+        R2.if' (haveSelection) $
+
+          H.div
+          { className: "phylo-selection-tab__separator" }
+          [
+            B.icon
+            { name: "angle-down"
+            }
+          ]
+      ,
         -- No extracted result
         R2.if' (haveSelection && null extractedTerms) $
 
           H.div
           { className: "phylo-selection-tab__selection" }
           [
-            H.h6
-            {}
-            [
-              H.text "Extracted result"
-            ]
-          ,
             B.caveat
             {}
             [
@@ -230,12 +235,6 @@ component = R.hooksComponent componentName cpt where
           H.div
           { className: "phylo-selection-tab__selection" }
           [
-            H.h6
-            {}
-            [
-              H.text "Extracted result"
-            ]
-          ,
             H.ul
             { className: "list-group" }
             [

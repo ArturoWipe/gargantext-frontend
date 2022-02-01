@@ -596,6 +596,11 @@ $decreasing-color: #11638F;
       white-space: normal;
       word-break: break-word;
     }
+
+    &__type {
+      padding: $badge-padding-y $badge-padding-x;
+      font-weight: bold;
+    }
   }
 
   &__selection {
@@ -631,6 +636,11 @@ $decreasing-color: #11638F;
 
   &__nil {
     margin: $margin-y $margin-x
+  }
+
+  &__separator {
+    color: $gray-500;
+    text-align: center;
   }
 }
 
