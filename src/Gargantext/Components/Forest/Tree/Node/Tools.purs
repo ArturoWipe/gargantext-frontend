@@ -14,7 +14,7 @@ import Gargantext.Components.Forest.Tree.Node.Action.Types (Action)
 import Gargantext.Components.GraphExplorer.Types (mCameraP)
 import Gargantext.Components.InputWithEnter (inputWithEnter)
 import Gargantext.Ends (Frontends, url)
-import Gargantext.Prelude (class Ord, class Read, class Show, Unit, bind, const, discard, map, not, pure, read, show, when, mempty, ($), (<), (<<<), (<>), (<$>), (<*>))
+import Gargantext.Prelude (class Ord, class Read, class Show, Unit, bind, const, discard, map, not, pure, read, show, when, mempty, ($), (<), (<<<), (<>), (<$>), (<*>), (/=))
 import Gargantext.Sessions (Session, sessionId)
 import Gargantext.Types as GT
 import Gargantext.Utils (toggleSet, (?))
@@ -306,7 +306,9 @@ nodeLinkCpt = here.component "nodeLink" cpt
         -- click on closed -> open
         -- click on open   -> ?
         click _ = when (not isSelected) (T.write_ true folderOpen)
-        href = url frontends $ GT.NodePath (sessionId session) nodeType (Just id)
+        href = if nodeType /= GT.NodeFrameVisio
+                  then url frontends $ GT.NodePath (sessionId session) nodeType (Just id)
+                  else "Execute here action to get the Frame Visio and open it in a new table?"
 -- END node link
 
 type NodeTextProps =
