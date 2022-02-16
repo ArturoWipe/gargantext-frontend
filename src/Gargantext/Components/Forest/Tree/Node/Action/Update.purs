@@ -11,7 +11,7 @@ import Gargantext.Components.Forest.Tree.Node.Tools (formChoiceSafe, submitButto
 import Gargantext.Config.REST (RESTError, AffRESTError)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, post)
-import Gargantext.Types (NodeType(..), ID)
+import Gargantext.Types (ID, NodeType(..))
 import Gargantext.Types as GT
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -43,6 +43,7 @@ updateCpt = here.component "update" cpt where
   cpt props@{ nodeType: Graph     } _ = pure $ updateGraph props []
   cpt props@{ nodeType: NodeList  } _ = pure $ updateNodeList props []
   cpt props@{ nodeType: NodeTexts } _ = pure $ updateTexts props []
+  cpt props@{ nodeType: Phylo     } _ = pure $ updatePhylo props
   cpt props@{ nodeType: _         } _ = pure $ updateOther props []
 
 updateDashboard :: R2.Component UpdateProps
@@ -76,6 +77,14 @@ updateGraphCpt = here.component "updateGraph" cpt where
                                  , print: show } []
                  ]
                  (submitButton (UpdateNode $ UpdateNodeParamsGraph { methodGraph: methodGraph' }) dispatch)
+
+updatePhylo :: R2.Leaf UpdateProps
+updatePhylo = R2.leaf updatePhyloCpt
+updatePhyloCpt :: R.Component UpdateProps
+updatePhyloCpt = here.component "updatePhylo" cpt where
+  cpt { dispatch } _ = do
+    -- @WIP: no `update/` async route created for phylo update in backend
+    pure $ H.div {} [ H.text "hello" ]
 
 updateNodeList :: R2.Component UpdateProps
 updateNodeList = R.createElement updateNodeListCpt

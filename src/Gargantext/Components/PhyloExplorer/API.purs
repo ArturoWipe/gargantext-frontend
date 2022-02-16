@@ -22,4 +22,13 @@ update :: S.Session -> NodeID -> Unit -> AffRESTError (PhyloDataSet)
 update session nodeId _ = request >>= (_ <#> parsePhyloJSONSet) >>> pure
   where
     request :: AffRESTError (PhyloJSONSet)
-    request = S.post session (PhyloAPI nodeId) {}
+    request = S.post session (PhyloAPI nodeId) options
+
+    options =
+      { phyloProximity: 0.5
+      , phyloSynchrony: 0.5
+      , phyloQuality: 0.5
+      , timeUnit: 3
+      , clique: 5
+      , exportFilter: [ 3 ]
+      }
