@@ -38,8 +38,9 @@ type Props =
   , nodeId       :: NodeID
   )
 
-layout :: R2.Component Props
-layout = R.createElement layoutCpt
+layout :: R2.Leaf Props
+layout = R2.leaf layoutCpt
+
 layoutCpt :: R.Component Props
 layoutCpt = here.component "layout" cpt where
   cpt { phyloDataSet: (PhyloDataSet o)

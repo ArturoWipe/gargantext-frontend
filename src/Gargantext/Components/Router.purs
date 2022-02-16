@@ -27,6 +27,7 @@ import Gargantext.Components.Nodes.Corpus.Code (corpusCodeLayout)
 import Gargantext.Components.Nodes.Corpus.Dashboard (dashboardLayout)
 import Gargantext.Components.Nodes.Corpus.Document (documentMainLayout)
 import Gargantext.Components.Nodes.Corpus.Phylo (phyloLayout)
+import Gargantext.Components.Nodes.Corpus.Phylo as PhyloExplorer
 import Gargantext.Components.Nodes.File (fileLayout)
 import Gargantext.Components.Nodes.Frame (frameLayout)
 import Gargantext.Components.Nodes.Home (homeLayout)
@@ -427,25 +428,45 @@ graphExplorerCpt :: R.Component SessionNodeProps
 graphExplorerCpt = here.component "graphExplorer" cpt where
   cpt props@{ boxes
             , nodeId } _ = do
-    let sessionProps = RE.pick props :: Record SessionProps
-    pure $ authed (Record.merge { content: \session ->
-                                   GraphExplorer.explorerLayoutWithKey { boxes
-                                                                       , graphId: nodeId
-                                                                       , key: "graphId-" <> show nodeId
-                                                                       , session } [] } sessionProps) []
---                                   GraphExplorer.explorerLayout { boxes
---                                                                , graphId: nodeId
---                                                                , session } [] } sessionProps) []
+    let
+      sessionProps = RE.pick props :: Record SessionProps
+
+      authedProps =
+        Record.merge
+        { content:
+            \session -> GraphExplorer.explorerLayoutWithKey
+                        { boxes
+                        , graphId: nodeId
+                        , key: "graphId-" <> show nodeId
+                        , session }
+                        []
+        }
+        sessionProps
+
+    pure $ authed authedProps []
+
+
 phyloExplorer :: R2.Component SessionNodeProps
 phyloExplorer = R.createElement phyloExplorerCpt
 phyloExplorerCpt :: R.Component SessionNodeProps
-phyloExplorerCpt = here.component "phylo" cpt
-  where
-    cpt props@{ nodeId } _ = do
-      let sessionProps = RE.pick props :: Record SessionProps
-      pure $ authed (Record.merge { content: \session ->
-                                     phyloLayout { nodeId, session } [] } sessionProps) []
+phyloExplorerCpt = here.component "phylo" cpt where
+  cpt props@{ boxes
+            , nodeId } _ = do
+    let
+      sessionProps = (RE.pick props :: Record SessionProps)
 
+      authedProps =
+        Record.merge
+        { content:
+            \session -> PhyloExplorer.phyloLayout
+                        { boxes
+                        , nodeId
+                        , session
+                        }
+        }
+        sessionProps
+
+    pure $ authed authedProps []
 
 
 home :: R2.Component Props

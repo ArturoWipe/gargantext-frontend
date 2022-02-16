@@ -17,7 +17,7 @@ import Gargantext.Components.Forest.Tree.Node.Box (nodePopupView)
 import Gargantext.Components.Forest.Tree.Node.Settings (SettingsBox(..), settingsBox)
 import Gargantext.Components.Forest.Tree.Node.Tools (nodeLink)
 import Gargantext.Components.Forest.Tree.Node.Tools.ProgressBar (asyncProgressBar, BarType(..))
-import Gargantext.Components.Forest.Tree.Node.Tools.Sync (nodeActionsGraph, nodeActionsNodeList)
+import Gargantext.Components.Forest.Tree.Node.Tools.Sync (nodeActionsGraph, nodeActionsNodeList, nodeActionsPhylo)
 import Gargantext.Components.GraphExplorer.API as GraphAPI
 import Gargantext.Components.Lang (Lang(EN))
 import Gargantext.Components.Nodes.Corpus (loadCorpusWithChild)
@@ -195,7 +195,7 @@ nodeMainSpanCpt = here.component "nodeMainSpan" cpt
                           , session }
 
     popOverIcon =
-      H.a { className: "settings fa fa-cog" 
+      H.a { className: "settings fa fa-cog"
           , title : "Each node of the Tree can perform some actions.\n"
             <> "Click here to execute one of them." } []
     dropProps droppedFile droppedFile' isDragOver isDragOver' =
@@ -304,6 +304,7 @@ nodeActionsCpt = here.component "nodeActions" cpt where
     childProps = Record.delete nodeActionsP props
     child GT.NodeList = listNodeActions childProps
     child GT.Graph = graphNodeActions childProps
+    child GT.Phylo = phyloNodeActions childProps
     child _ = H.div {} []
 
 graphNodeActions :: R2.Leaf NodeActionsCommon
@@ -318,6 +319,14 @@ graphNodeActionsCpt = here.component "graphNodeActions" cpt where
   graphVersions session graphId = GraphAPI.graphVersions { graphId, session }
   errorHandler = logRESTError here "[graphNodeActions]"
 
+phyloNodeActions :: R2.Leaf NodeActionsCommon
+phyloNodeActions = R2.leafComponent phyloNodeActionsCpt
+phyloNodeActionsCpt :: R.Component NodeActionsCommon
+phyloNodeActionsCpt = here.component "phyloNodeActions" cpt where
+  cpt { id, session, refresh } _ = pure $
+    nodeActionsPhylo { id, session, refresh }
+
+
 listNodeActions :: R2.Leaf NodeActionsCommon
 listNodeActions = R2.leafComponent listNodeActionsCpt
 listNodeActionsCpt :: R.Component NodeActionsCommon
@@ -331,4 +340,3 @@ listNodeActionsCpt = here.component "listNodeActions" cpt where
                  , nodeType: GT.TabNgramType GT.CTabTerms } }
     where
       errorHandler = logRESTError here "[listNodeActions]"
-

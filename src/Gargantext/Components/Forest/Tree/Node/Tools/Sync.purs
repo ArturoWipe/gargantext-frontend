@@ -1,17 +1,21 @@
 module Gargantext.Components.Forest.Tree.Node.Tools.Sync where
 
-import Gargantext.Prelude (Unit, bind, discard, pure, unit, ($), (<>), (==))
-import Effect.Aff (Aff, launchAff_)
+import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..))
+import Data.Tuple.Nested ((/\))
+import Effect (Effect)
+import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
-import Reactix.DOM.HTML as H
-import Reactix as R
-import Toestand as T
-
 import Gargantext.Components.GraphExplorer.API as GraphAPI
-import Gargantext.Types as GT
+import Gargantext.Components.PhyloExplorer.API as PhyloAPI
+import Gargantext.Prelude (Unit, bind, discard, pure, unit, ($), (<>), (==))
 import Gargantext.Sessions (Session)
+import Gargantext.Types as GT
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
+import Reactix as R
+import Reactix.DOM.HTML as H
+import Toestand as T
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Forest.Tree.Node.Tools.Sync"
@@ -71,6 +75,64 @@ graphUpdateButtonCpt = here.component "graphUpdateButton" cpt
             refresh unit
           pure unit
 
+-- | Sync Node (Phylo)
+type NodeActionsPhyloProps =
+  ( id          :: GT.ID
+  , session     :: Session
+  , refresh     :: Unit -> Aff Unit
+  )
+
+nodeActionsPhylo :: R2.Leaf NodeActionsPhyloProps
+nodeActionsPhylo = R2.leaf nodeActionsPhyloCpt
+nodeActionsPhyloCpt :: R.Component NodeActionsPhyloProps
+nodeActionsPhyloCpt = here.component "nodeActionsPhylo" cpt where
+  cpt { id, session, refresh } _ = pure $
+    H.div { className: "node-actions" }
+    [
+      phyloUpdateButton
+      { id, session, refresh }
+    ]
+
+type PhyloUpdateButtonProps =
+  ( id            :: GT.ID
+  , session       :: Session
+  , refresh       :: Unit -> Aff Unit
+  )
+
+phyloUpdateButton :: R2.Leaf PhyloUpdateButtonProps
+phyloUpdateButton = R2.leaf phyloUpdateButtonCpt
+phyloUpdateButtonCpt :: R.Component PhyloUpdateButtonProps
+phyloUpdateButtonCpt = here.component "phyloUpdateButton" cpt where
+  cpt { id, session, refresh } _ = do
+    enabled /\ enabledBox <- R2.useBox' true
+
+    let
+      onClick :: forall e. T.Box (Boolean) -> Boolean -> e -> Effect Unit
+      onClick box value _ = case value of
+        false -> pure unit
+        true  -> launchAff_ do
+          liftEffect $ T.write_ false box
+          _ <- PhyloAPI.update session id unit
+          liftEffect $ T.write_ true box
+          refresh unit
+
+    pure $
+
+      H.div
+      { className: intercalate " "
+          [ "update-button"
+          , enabled == true ?
+              "enabled" $
+              "disabled text-muted"
+          ]
+      }
+      [
+        H.span
+        { className: "fa fa-refresh"
+        , on: { click: onClick enabledBox enabled }
+        } []
+      ]
+
 -- | Sync Node (List)
 type NodeActionsNodeListProps =
   (
@@ -107,7 +169,7 @@ nodeListUpdateButtonCpt = here.component "nodeListUpdateButton" cpt
     cpt _ _ = do
       -- enabled <- T.useBox true
 
-      pure $ H.div {} [] {- { className: "update-button " 
+      pure $ H.div {} [] {- { className: "update-button "
                      <> if (fst enabled) then "enabled" else "disabled text-muted"
                    } [ H.span { className: "fa fa-refresh"
                      , on: { click: onClick enabled } } []
