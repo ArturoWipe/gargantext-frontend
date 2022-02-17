@@ -1230,7 +1230,6 @@ function drawPhylo(branches, periods, groups, links, aLinks, bLinks, frame) {
   /* labels */
 
   var firstDate = Math.min(...groups.map(g => (g.from).getFullYear()))
-
   var yLabels = (periods.map(p => ({y:p.y,from:p.from,to:p.to,label:(p.from).getFullYear()}))).filter(p => p.label >= firstDate);
   var xLabels = toXLabels(branches,groups,frame[2]);
 
