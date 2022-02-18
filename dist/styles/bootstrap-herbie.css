@@ -10523,27 +10523,26 @@ li .leaf a.settings {
 li .leaf:hover a.settings {
   visibility: visible;
 }
-
-.tree ul li {
+li ul li {
   position: relative;
 }
-.tree ul li::after {
+li ul li::after {
   content: " ";
   height: 1px;
   position: absolute;
   top: 12px;
 }
-.tree ul li::before {
+li ul li::before {
   bottom: -12px;
   content: " ";
   height: 7px;
   position: absolute;
   top: 5px;
 }
-.tree ul li:not(:first-child):last-child::before {
+li ul li:not(:first-child):last-child::before {
   display: none;
 }
-.tree ul li:only-child::before {
+li ul li:only-child::before {
   bottom: 7px;
   content: " ";
   display: list-item;
@@ -10551,68 +10550,68 @@ li .leaf:hover a.settings {
   width: 1px;
   top: 5px;
 }
-.tree ul li.with-children::after {
+li ul li.with-children::after {
   background-color: #000;
 }
-.tree ul li.with-children::before {
+li ul li.with-children::before {
   background-color: #000;
 }
-.tree .lefthanded .leaf {
+li .lefthanded .leaf {
   justify-content: flex-end;
 }
-.tree .lefthanded ul {
+li .lefthanded ul {
   margin-right: 5px;
 }
-.tree .lefthanded ul li {
+li .lefthanded ul li {
   margin-right: 10px;
   padding-right: 5px;
 }
-.tree .lefthanded ul li.with-children::after {
+li .lefthanded ul li.with-children::after {
   right: -10px;
   width: 5px;
 }
-.tree .lefthanded ul li.with-children::before {
+li .lefthanded ul li.with-children::before {
   right: -10px;
   width: 1px;
 }
-.tree .righthanded .leaf {
+li .righthanded .leaf {
   justify-content: flex-start;
 }
-.tree .righthanded ul {
+li .righthanded ul {
   margin-left: 5px;
 }
-.tree .righthanded ul li {
+li .righthanded ul li {
   margin-left: 10px;
   padding-left: 5px;
 }
-.tree .righthanded ul li.with-children::after {
+li .righthanded ul li.with-children::after {
   left: -10px;
   width: 5px;
 }
-.tree .righthanded ul li.with-children::before {
+li .righthanded ul li.with-children::before {
   left: -10px;
   width: 1px;
 }
-.tree .righthanded ul li.with-children:only::before {
+li .righthanded ul li.with-children:only::before {
   background-color: #000;
   right: 10px;
 }
-.tree .file-dropped {
+li .file-dropped {
   background-color: #d8dfe5;
 }
-.tree .node-actions {
+li .node-actions {
   padding-left: 5px;
 }
-.tree .node-actions .update-button.enabled {
+li .node-actions .update-button.enabled {
   cursor: pointer;
 }
-.tree .node-actions .update-button.disabled {
+li .node-actions .update-button.disabled {
   cursor: wait;
 }
-.tree .node {
+li .node {
   margin-top: 1px;
 }
-.tree .node.node-type-valid .text {
+li .node.node-type-valid .text {
   text-decoration: underline;
 }
 
@@ -10869,6 +10868,10 @@ li .leaf:hover a.settings {
 
 .forest-layout-content > ul.tree:last-child {
   margin-bottom: 24px;
+}
+.forest-layout-content .fa.fa-spinner,
+.forest-layout-content .tree .fa.fa-spinner {
+  color: #083358;
 }
 
 .ids-selector .tree .children {

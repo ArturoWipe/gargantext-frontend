@@ -1,5 +1,5 @@
 module Gargantext.Components.PhyloExplorer.API
-  ( get, update ) where
+  ( get, update) where
 
 import Gargantext.Prelude
 
