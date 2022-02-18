@@ -381,9 +381,12 @@ parseBB
   >>> map parseFloat
 
 parseNodeDate :: Maybe String -> String -> Boolean -> Date.Date
-parseNodeDate Nothing    year _     = yearToDate(year)
-parseNodeDate (Just str) _    true  = utcStringToDate(str)
-parseNodeDate (Just str) _    false = stringToDate(str)
+-- parseNodeDate Nothing    year _     = yearToDate(year)
+-- parseNodeDate (Just str) _    true  = utcStringToDate(str)
+-- parseNodeDate (Just str) _    false = stringToDate(str)
+-- @NOTE #219 ^ as soon as the issue regarding `Date` (< 1970) is resolved
+--              please uncomment above lines + delete below one
+parseNodeDate _ y _ = yearToDate(y)
 
 parsePos :: String -> Tuple.Tuple Number Number
 parsePos

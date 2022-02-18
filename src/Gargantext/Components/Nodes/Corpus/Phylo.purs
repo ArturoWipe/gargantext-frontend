@@ -5,7 +5,6 @@ module Gargantext.Components.Nodes.Corpus.Phylo
 import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector)
-import DOM.Simple.Console (log)
 import Data.Maybe (Maybe(..))
 import FFI.Simple ((..), (.=))
 import Gargantext.Components.App.Data (Boxes)
@@ -70,8 +69,6 @@ contentCpt = here.component "content" cpt where
   -- Hooks
 
     useFirstEffect' do
-      -- @WIP
-      log dataset
       -- @XXX: inopinent <div> (see Gargantext.Components.Router) (@TODO?)
       mEl <- querySelector document ".main-page__main-route .container"
       case mEl of
