@@ -97,19 +97,20 @@ component = here.component "main" cpt where
               B.icon
               { name: "dot-circle-o" }
             ]
-          ,
-            B.button
-            { title: "Show default landing view"
-            , callback: \_ -> changeViewCallback LandingMode
-            , variant: OutlinedButtonVariant Secondary
-            , className: displayView == LandingMode ?
-                "active" $
-                ""
-            }
-            [
-              B.icon
-              { name: "circle" }
-            ]
+          -- @NOTE #219: disable "landing view" (deprecated feature)
+          -- ,
+          --   B.button
+          --   { title: "Show default landing view"
+          --   , callback: \_ -> changeViewCallback LandingMode
+          --   , variant: OutlinedButtonVariant Secondary
+          --   , className: displayView == LandingMode ?
+          --       "active" $
+          --       ""
+          --   }
+          --   [
+          --     B.icon
+          --     { name: "circle" }
+          --   ]
           ]
         ]
       ,
