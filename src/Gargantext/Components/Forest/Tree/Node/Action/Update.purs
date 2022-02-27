@@ -3,11 +3,17 @@ module Gargantext.Components.Forest.Tree.Node.Action.Update where
 import Gargantext.Components.Forest.Tree.Node.Action.Update.Types
 import Gargantext.Prelude
 
+import DOM.Simple.Console (log)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Aff)
+import Effect.Aff (Aff, launchAff, launchAff_)
+import Effect.Class (liftEffect)
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Types (Action(..))
 import Gargantext.Components.Forest.Tree.Node.Tools (formChoiceSafe, submitButton, panel)
+import Gargantext.Components.PhyloExplorer.API (Clique(..), CliqueFilter(..), TimeUnit(..), TimeUnitCriteria(..))
+import Gargantext.Components.PhyloExplorer.API as Phylo
+import Gargantext.Components.PhyloExplorer.ConfigForm (configForm)
 import Gargantext.Config.REST (RESTError, AffRESTError)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, post)
@@ -17,6 +23,7 @@ import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Toestand as T
+import Unsafe.Coerce (unsafeCoerce)
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Forest.Tree.Node.Action.Update"
@@ -83,8 +90,36 @@ updatePhylo = R2.leaf updatePhyloCpt
 updatePhyloCpt :: R.Component UpdateProps
 updatePhyloCpt = here.component "updatePhylo" cpt where
   cpt { dispatch } _ = do
-    -- @WIP: no `update/` async route created for phylo update in backend
-    pure $ H.div {} [ H.text "hello" ]
+  -- Behavior
+    let
+      params :: Action
+      params
+        = UpdateNode $ UpdateNodeParamsPhylo
+          { methodPhylo: paramsValue
+          }
+      paramsValue :: Phylo.UpdateData
+      paramsValue = Phylo.UpdateData
+        { proximity: 0.1
+        , synchrony: 0.1
+        , quality: 0.1
+        , exportFilter: 0.1
+        , timeUnit: Year $ TimeUnitCriteria
+            { period: 3
+            , step: 1
+            , matchingFrame: 5
+            }
+        , clique: FIS
+          { support: 1
+          , size: 1
+          }
+        }
+
+  -- Render
+    pure $
+      configForm
+      { callback: \_ -> launchAff_ $ dispatch $ params
+      , status: Enabled
+      }
 
 updateNodeList :: R2.Component UpdateProps
 updateNodeList = R.createElement updateNodeListCpt

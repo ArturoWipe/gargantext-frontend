@@ -1,18 +1,21 @@
 module Gargantext.Components.Forest.Tree.Node.Action.Update.Types where
 
+import Gargantext.Prelude
+
 import Data.Generic.Rep (class Generic)
-import Data.Show.Generic (genericShow)
 import Data.Maybe (Maybe(..))
+import Data.Show.Generic (genericShow)
+import Gargantext.Components.PhyloExplorer.API as Phylo
 import Simple.JSON as JSON
 import Simple.JSON.Generics as JSONG
 
-import Gargantext.Prelude
 
-
-data UpdateNodeParams = UpdateNodeParamsList  { methodList  :: Method      }
-                      | UpdateNodeParamsGraph { methodGraph :: GraphMetric }
-                      | UpdateNodeParamsTexts { methodTexts :: Granularity }
-                      | UpdateNodeParamsBoard { methodBoard :: Charts      }
+data UpdateNodeParams
+  = UpdateNodeParamsList  { methodList  :: Method      }
+  | UpdateNodeParamsGraph { methodGraph :: GraphMetric }
+  | UpdateNodeParamsTexts { methodTexts :: Granularity }
+  | UpdateNodeParamsBoard { methodBoard :: Charts      }
+  | UpdateNodeParamsPhylo { methodPhylo :: Phylo.UpdateData }
 derive instance Eq UpdateNodeParams
 derive instance Generic UpdateNodeParams _
 instance Show UpdateNodeParams where show = genericShow
@@ -30,6 +33,9 @@ instance JSON.WriteForeign UpdateNodeParams where
   writeImpl (UpdateNodeParamsBoard { methodBoard }) =
     JSON.writeImpl { type: "UpdateNodeParamsBoard"
                    , methodBoard }
+  writeImpl (UpdateNodeParamsPhylo { methodPhylo }) =
+    JSON.writeImpl { type: "UpdateNodePhylo"
+                   , config: methodPhylo }
 
 ----------------------------------------------------------------------
 data Method = Basic | Advanced | WithModel
@@ -55,7 +61,7 @@ instance Read GraphMetric where
   read _           = Nothing
 instance JSON.ReadForeign GraphMetric where readImpl = JSONG.enumSumRep
 instance JSON.WriteForeign GraphMetric where writeImpl = JSON.writeImpl <<< show
-                                        
+
 ----------------------------------------------------------------------
 
 data Granularity = NewNgrams | NewTexts | Both
@@ -86,4 +92,3 @@ instance JSON.ReadForeign Charts where readImpl = JSONG.enumSumRep
 instance JSON.WriteForeign Charts where
   writeImpl All = JSON.writeImpl $ "AllCharts"
   writeImpl f = JSON.writeImpl $ show f
-
