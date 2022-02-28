@@ -13,7 +13,6 @@ import Prim.RowList (class RowToList)
 import Reactix as R
 import Toestand as T
 
--- @TODO: /!\ `bindStateKey` + `setStateKey` not working together
 
 type Methods r a =
   -- | Every provided props will be available within the `formFields` proxy

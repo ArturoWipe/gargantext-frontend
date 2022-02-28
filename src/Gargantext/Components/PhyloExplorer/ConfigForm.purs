@@ -8,13 +8,15 @@ import DOM.Simple.Console (log, log3)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, intercalate)
 import Data.Generic.Rep (class Generic)
-import Data.Maybe (Maybe(..))
+import Data.Int as Int
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Newtype (unwrap)
 import Data.Number as Number
 import Data.Show.Generic (genericShow)
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), ComponentStatus(..), Variant(..))
-import Gargantext.Components.PhyloExplorer.API (Clique(..), CliqueFilter(..), ReflexiveClique(..), ReflexiveTimeUnit(..), TimeUnit(..), TimeUnitCriteria(..), UpdateData(..))
+import Gargantext.Components.PhyloExplorer.API (Clique(..), CliqueFilter(..), ReflexiveClique(..), ReflexiveTimeUnit(..), TimeUnit(..), TimeUnitCriteria(..), UpdateData(..), extractCriteria, fromReflexiveTimeUnit, toReflexiveTimeUnit)
 import Gargantext.Config.REST (AffRESTError)
 import Gargantext.Hooks.FormValidation (VForm, useFormValidation)
 import Gargantext.Hooks.FormValidation.Unboxed as FV
@@ -23,7 +25,7 @@ import Gargantext.Hooks.StateRecord.Behaviors (setter)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, post, get)
 import Gargantext.Types as GT
-import Gargantext.Utils (nbsp, (?))
+import Gargantext.Utils (getter, nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -53,7 +55,11 @@ component = R.hooksComponent "configForm" cpt where
   cpt props _ = do
   -- Hooks
 
-    { state, bindStateKey, stateBox, setStateKey } <- useStateRecord (pick props :: Record FormData)
+    { state
+    , bindStateKey
+    , stateBox
+    , setStateKey
+    } <- useStateRecord $ parseFormData (pick props :: Record FormData)
     fv <- useFormValidation
 
     R.useEffect1' state $ log state
@@ -68,7 +74,7 @@ component = R.hooksComponent "configForm" cpt where
         result <- pure $ Right state
         case result of
           Left err -> log3 "configForm validation error" state err
-          Right _  -> props.callback state
+          Right _  -> props.callback $ parseRawData state
 
   -- Render
 
@@ -98,11 +104,7 @@ component = R.hooksComponent "configForm" cpt where
           [
             B.formInput $
             { type: "number"
-            , value: show state.proximity
-            , callback: Number.fromString >>> case _ of
-                Nothing -> pure unit
-                Just v  -> setter stateBox "proximity" v
-            }
+            } `merge` bindStateKey "proximity"
           ,
             R2.if' (fv.hasError' "proximity") $
               H.div
@@ -133,7 +135,8 @@ component = R.hooksComponent "configForm" cpt where
           { className: "form-group__field" }
           [
             B.formInput $
-              bindStateKey "synchrony"
+            { type: "number"
+            } `merge` bindStateKey "synchrony"
           ,
             R2.if' (fv.hasError' "synchrony") $
               H.div
@@ -164,7 +167,8 @@ component = R.hooksComponent "configForm" cpt where
           { className: "form-group__field" }
           [
             B.formInput $
-              bindStateKey "quality"
+            { type: "number"
+            } `merge` bindStateKey "quality"
           ,
             R2.if' (fv.hasError' "quality") $
               H.div
@@ -195,7 +199,8 @@ component = R.hooksComponent "configForm" cpt where
           { className: "form-group__field" }
           [
             B.formInput $
-              bindStateKey "exportFilter"
+            { type: "number"
+            } `merge` bindStateKey "exportFilter"
           ,
             R2.if' (fv.hasError' "exportFilter") $
               H.div
@@ -227,12 +232,7 @@ component = R.hooksComponent "configForm" cpt where
             { className: "form-group__field" }
             [
               B.formSelect
-              { value: show state.granularity
-              , callback: read >>> case _ of
-                  Nothing -> pure unit
-                  Just (v :: ReflexiveTimeUnit) ->
-                    setter stateBox "granularity" v
-              }
+              (bindStateKey "granularity")
               [
                 H.option
                 { value: show Year_ }
@@ -273,7 +273,8 @@ component = R.hooksComponent "configForm" cpt where
             { className: "form-group__field" }
             [
               B.formInput $
-                bindStateKey "period"
+              { type: "number"
+              } `merge` bindStateKey "period"
             ,
               R2.if' (fv.hasError' "period") $
                 H.div
@@ -304,7 +305,8 @@ component = R.hooksComponent "configForm" cpt where
             { className: "form-group__field" }
             [
               B.formInput $
-                bindStateKey "step"
+              { type: "number"
+              } `merge` bindStateKey "step"
             ,
               R2.if' (fv.hasError' "step") $
                 H.div
@@ -335,7 +337,8 @@ component = R.hooksComponent "configForm" cpt where
             { className: "form-group__field" }
             [
               B.formInput $
-                bindStateKey "matchingFrame"
+              { type: "number"
+              } `merge` bindStateKey "matchingFrame"
             ,
               R2.if' (fv.hasError' "matchingFrame") $
                 H.div
@@ -375,7 +378,7 @@ component = R.hooksComponent "configForm" cpt where
                 B.button
                 { callback: \_ -> setter stateBox "cliqueType" FIS_
                 , variant: OutlinedButtonVariant Secondary
-                , className: state.cliqueType == FIS_ ?
+                , className: state.cliqueType == show FIS_ ?
                     "active" $
                     ""
                 }
@@ -386,7 +389,7 @@ component = R.hooksComponent "configForm" cpt where
                 B.button
                 { callback: \_ -> setter stateBox "cliqueType" MaxClique_
                 , variant: OutlinedButtonVariant Secondary
-                , className: state.cliqueType == MaxClique_ ?
+                , className: state.cliqueType == show MaxClique_ ?
                     "active" $
                     ""
                 }
@@ -398,7 +401,7 @@ component = R.hooksComponent "configForm" cpt where
           ]
         ,
           -- TYPE::FIS_
-          R2.if' (state.cliqueType == FIS_) $R.fragment
+          R2.if' (state.cliqueType == show FIS_) $R.fragment
           [
             -- Support
             H.div
@@ -464,7 +467,7 @@ component = R.hooksComponent "configForm" cpt where
           ]
         ,
           -- TYPE::MaxClique_
-          R2.if' (state.cliqueType == MaxClique_) $R.fragment
+          R2.if' (state.cliqueType == show MaxClique_) $R.fragment
           [
             -- Size
             H.div
@@ -486,7 +489,8 @@ component = R.hooksComponent "configForm" cpt where
               { className: "form-group__field" }
               [
                 B.formInput $
-                  bindStateKey "size"
+                { type: "number"
+                } `merge` bindStateKey "size"
               ,
                 R2.if' (fv.hasError' "sjze") $
                   H.div
@@ -517,7 +521,8 @@ component = R.hooksComponent "configForm" cpt where
               { className: "form-group__field" }
               [
                 B.formInput $
-                  bindStateKey "threshold"
+                { type: "number"
+                } `merge` bindStateKey "threshold"
               ,
                 R2.if' (fv.hasError' "threshold") $
                   H.div
@@ -545,12 +550,7 @@ component = R.hooksComponent "configForm" cpt where
               { className: "form-group__field" }
               [
                 B.formSelect
-                { value: show state.cliqueFilter
-                , callback: read >>> case _ of
-                    Nothing -> pure unit
-                    Just (v :: CliqueFilter) ->
-                      setter stateBox "cliqueFilter" v
-                }
+                ( bindStateKey "cliqueFilter" )
                 [
                   H.option
                   { value: show ByThreshold }
@@ -585,16 +585,16 @@ type FormData =
   , quality       :: Number
   , exportFilter  :: Number
   -- TimeUnit
-  , granularity   :: ReflexiveTimeUnit
-  , period        :: Int
-  , step          :: Int
-  , matchingFrame :: Int
+  , timeUnit      :: TimeUnit
   -- Clique
-  , cliqueType    :: ReflexiveClique
-  , support       :: Int
-  , size          :: Int
-  , threshold     :: Number
-  , cliqueFilter  :: CliqueFilter
+
+
+  -- , cliqueType    :: ReflexiveClique
+  -- , support       :: Int
+  -- , size          :: Int
+  -- , threshold     :: Number
+  -- , cliqueFilter  :: CliqueFilter
+  , clique :: Clique
   )
 
 defaultData :: Record FormData
@@ -604,17 +604,150 @@ defaultData =
   , quality: 0.1
   , exportFilter: 0.1
   -- TimeUnit
-  , granularity: Year_
-  , period: 3
-  , step: 1
-  , matchingFrame: 5
+  , timeUnit: Year $ TimeUnitCriteria
+    { period: 3
+    , step: 1
+    , matchingFrame: 5
+    }
   -- Clique
-  , cliqueType: FIS_
-  , support: 1
-  , size: 1
-  , threshold: 0.5
-  , cliqueFilter: ByThreshold
+  -- , cliqueType: FIS_
+  -- , support: 1
+  -- , size: 1
+  -- , threshold: 0.5
+  -- , cliqueFilter: ByThreshold
+  , clique: FIS
+      { support: 1
+      , size: 1
+      }
   }
+
+type RawData =
+  ( proximity     :: String
+  , synchrony     :: String
+  , quality       :: String
+  , exportFilter  :: String
+  -- TimeUnit
+  , granularity   :: String
+  , period        :: String
+  , step          :: String
+  , matchingFrame :: String
+  -- Clique
+  , cliqueType    :: String
+  , support       :: String
+  , size          :: String
+  , threshold     :: String
+  , cliqueFilter  :: String
+  )
+
+-- (?) due to `Clique` multi constructors nature, we have to relying on a
+--     set of default data for every constructor property
+defaultCliqueData ::
+  { cliqueType    :: String
+  , support       :: String
+  , size          :: String
+  , threshold     :: String
+  , cliqueFilter  :: String
+  }
+defaultCliqueData =
+  { cliqueType: "FIS_"
+  , support: "1"
+  , size: "1"
+  , threshold: "0.5"
+  , cliqueFilter: "ByThreshold"
+  }
+
+parseFormData :: Record FormData -> Record RawData
+parseFormData { proximity
+              , synchrony
+              , quality
+              , exportFilter
+              , timeUnit
+              , clique
+              }
+  = { proximity: show proximity
+    , synchrony: show synchrony
+    , quality: show quality
+    , exportFilter: show exportFilter
+    -- Time unit
+    , granularity: timeUnit #
+        (show <<< toReflexiveTimeUnit)
+    , period: timeUnit #
+        (show <<< getter _.period <<< extractCriteria)
+    , step: timeUnit #
+        (show <<< getter _.step <<< extractCriteria)
+    , matchingFrame: timeUnit #
+        (show <<< getter _.matchingFrame <<< extractCriteria)
+    -- Clique
+    } `merge` (parseClique clique)
+    where
+      parseClique :: Clique ->
+        { cliqueType    :: String
+        , support       :: String
+        , size          :: String
+        , threshold     :: String
+        , cliqueFilter  :: String
+        }
+      parseClique (FIS o) =
+        { support: show o.support
+        , size: show o.size
+        } `merge` defaultCliqueData
+      parseClique (MaxClique o) =
+        { size: show o.size
+        , threshold: show o.threshold
+        , cliqueFilter: show o.filter
+        } `merge` defaultCliqueData
+
+
+parseRawData :: Record RawData -> Record FormData
+parseRawData raw@{ proximity
+               , synchrony
+               , quality
+               , exportFilter
+               , granularity
+               , period
+               , step
+               , matchingFrame
+               }
+  = { proximity: fromMaybe 0.0 (Number.fromString proximity)
+    , synchrony: fromMaybe 0.0 (Number.fromString synchrony)
+    , quality: fromMaybe 0.0 (Number.fromString quality)
+    , exportFilter: fromMaybe 0.0 (Number.fromString exportFilter)
+    -- Time unit
+    , timeUnit: parseTimeUnit
+        (parseCriteria period step matchingFrame)
+        granularity
+    -- Clique
+    , clique: parseClique raw raw.cliqueType
+  }
+  where
+    parseCriteria :: String -> String -> String -> TimeUnitCriteria
+    parseCriteria a b c = TimeUnitCriteria
+      { period       : fromMaybe 0 (Int.fromString a)
+      , step         : fromMaybe 0 (Int.fromString b)
+      , matchingFrame: fromMaybe 0 (Int.fromString c)
+      }
+
+    parseTimeUnit :: TimeUnitCriteria -> String -> TimeUnit
+    parseTimeUnit criteria = read >>> case _ of
+      Nothing                       -> Year criteria
+      Just (r :: ReflexiveTimeUnit) -> fromReflexiveTimeUnit r criteria
+
+    parseClique :: Record RawData -> String -> Clique
+    parseClique o = read >>> case _ of
+      Nothing -> FIS
+        { support: 1
+        , size: 1
+        }
+      Just (r :: ReflexiveClique) -> case r of
+        FIS_ -> FIS
+          { support: fromMaybe 0 (Int.fromString o.support)
+          , size: fromMaybe 0 (Int.fromString o.size)
+          }
+        MaxClique_ -> MaxClique
+          { size: fromMaybe 0 (Int.fromString o.support)
+          , threshold: fromMaybe 0.0 (Number.fromString o.threshold)
+          , filter: fromMaybe ByThreshold (read o.cliqueFilter)
+          }
 
 
 -- formValidation :: Record FormData -> Effect VForm

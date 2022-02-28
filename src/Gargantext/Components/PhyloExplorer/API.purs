@@ -3,6 +3,8 @@ module Gargantext.Components.PhyloExplorer.API
   , UpdateData(..)
   , TimeUnit(..), ReflexiveTimeUnit(..), TimeUnitCriteria(..)
   , Clique(..), ReflexiveClique(..), CliqueFilter(..)
+  , toReflexiveTimeUnit, fromReflexiveTimeUnit, extractCriteria
+  , toReflexiveClique
   , update, updateProgress
   ) where
 
@@ -11,6 +13,7 @@ import Gargantext.Prelude
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype)
 import Data.Show.Generic (genericShow)
 import Data.Symbol (SProxy(..))
 import Gargantext.Components.PhyloExplorer.JSON (PhyloJSONSet)
@@ -170,12 +173,12 @@ instance Show ReflexiveTimeUnit where show = genericShow
 instance Read ReflexiveTimeUnit where
   read :: String -> Maybe ReflexiveTimeUnit
   read = case _ of
-    "Epoch" -> Just Epoch_
-    "Year"  -> Just Year_
-    "Month" -> Just Month_
-    "Week"  -> Just Week_
-    "Day"   -> Just Day_
-    _       -> Nothing
+    "Epoch_" -> Just Epoch_
+    "Year_"  -> Just Year_
+    "Month_" -> Just Month_
+    "Week_"  -> Just Week_
+    "Day_"   -> Just Day_
+    _        -> Nothing
 
 
 newtype TimeUnitCriteria = TimeUnitCriteria
@@ -186,6 +189,7 @@ newtype TimeUnitCriteria = TimeUnitCriteria
 
 derive instance Generic TimeUnitCriteria _
 derive instance Eq TimeUnitCriteria
+derive instance Newtype TimeUnitCriteria _
 instance Show TimeUnitCriteria where show = genericShow
 derive newtype instance JSON.ReadForeign TimeUnitCriteria
 
@@ -245,9 +249,9 @@ instance Show ReflexiveClique where show = genericShow
 instance Read ReflexiveClique where
   read :: String -> Maybe ReflexiveClique
   read = case _ of
-    "FIS"       -> Just FIS_
-    "MaxClique" -> Just MaxClique_
-    _           -> Nothing
+    "FIS_"       -> Just FIS_
+    "MaxClique_" -> Just MaxClique_
+    _            -> Nothing
 
 
 data CliqueFilter = ByThreshold | ByNeighbours
@@ -260,9 +264,37 @@ instance JSON.WriteForeign CliqueFilter where writeImpl = JSON.writeImpl <<< sho
 instance Read CliqueFilter where
   read :: String -> Maybe CliqueFilter
   read = case _ of
-    "ByTreshold"   -> Just ByThreshold
+    "ByThreshold"  -> Just ByThreshold
     "ByNeighbours" -> Just ByNeighbours
     _              -> Nothing
+
+
+toReflexiveTimeUnit :: TimeUnit -> ReflexiveTimeUnit
+toReflexiveTimeUnit (Epoch _) = Epoch_
+toReflexiveTimeUnit (Year _)  = Year_
+toReflexiveTimeUnit (Month _) = Month_
+toReflexiveTimeUnit (Week _)  = Week_
+toReflexiveTimeUnit (Day _)   = Day_
+
+fromReflexiveTimeUnit :: ReflexiveTimeUnit -> TimeUnitCriteria -> TimeUnit
+fromReflexiveTimeUnit Epoch_ c = Epoch c
+fromReflexiveTimeUnit Year_  c = Year c
+fromReflexiveTimeUnit Month_ c = Month c
+fromReflexiveTimeUnit Week_  c = Week c
+fromReflexiveTimeUnit Day_   c = Day c
+
+extractCriteria :: TimeUnit -> TimeUnitCriteria
+extractCriteria (Epoch (o :: TimeUnitCriteria)) = o
+extractCriteria (Year  (o :: TimeUnitCriteria)) = o
+extractCriteria (Month (o :: TimeUnitCriteria)) = o
+extractCriteria (Week  (o :: TimeUnitCriteria)) = o
+extractCriteria (Day   (o :: TimeUnitCriteria)) = o
+
+
+toReflexiveClique :: Clique -> ReflexiveClique
+toReflexiveClique (FIS _)       = FIS_
+toReflexiveClique (MaxClique _) = MaxClique_
+
 
 
 update ::
