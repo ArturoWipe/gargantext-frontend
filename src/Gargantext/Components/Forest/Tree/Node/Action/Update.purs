@@ -3,36 +3,27 @@ module Gargantext.Components.Forest.Tree.Node.Action.Update where
 import Gargantext.Components.Forest.Tree.Node.Action.Update.Types
 import Gargantext.Prelude
 
-import DOM.Simple.Console (log, log3)
-import Data.Array as Array
+import DOM.Simple.Console (log3)
 import Data.Either (Either(..))
-import Data.Int as Int
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Newtype (unwrap)
-import Data.Number as Number
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Effect.Aff (Aff, launchAff, launchAff_)
-import Effect.Class (liftEffect)
+import Effect.Aff (Aff, launchAff_)
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Types (Action(..))
 import Gargantext.Components.Forest.Tree.Node.Tools (formChoiceSafe, submitButton, panel)
-import Gargantext.Components.PhyloExplorer.API (Clique(..), CliqueFilter(..), TimeUnit(..), TimeUnitCriteria(..), UpdateData(..), toReflexiveTimeUnit)
 import Gargantext.Components.PhyloExplorer.API as Phylo
 import Gargantext.Components.PhyloExplorer.ConfigForm as PhyloForm
-import Gargantext.Components.PhyloExplorer.ConfigFormParser (useConfigFormParser)
 import Gargantext.Components.PhyloExplorer.ConfigFormParser as PhyloHook
 import Gargantext.Config.REST (RESTError, AffRESTError)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, post)
 import Gargantext.Types (ID, NodeType(..))
 import Gargantext.Types as GT
-import Gargantext.Utils (getter)
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Record (merge)
 import Toestand as T
-import Unsafe.Coerce (unsafeCoerce)
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Forest.Tree.Node.Action.Update"
@@ -104,21 +95,22 @@ updatePhyloCpt = here.component "updatePhylo" cpt where
 
   -- Helpers
     let
-
+      -- @NOTE #219: use a config property returned by GET phylo route
       defaultData :: Phylo.UpdateData
       defaultData = Phylo.UpdateData
-        { proximity: 0.1
-        , synchrony: 0.1
-        , quality: 0.1
-        , exportFilter: 0.1
+        { proximity: 0.5
+        , synchrony: 0.5
+        , quality: 0.5
+        , exportFilter: 0.5
         , timeUnit: Phylo.Year $ Phylo.TimeUnitCriteria
           { period: 3
           , step: 1
           , matchingFrame: 5
           }
-        , clique: FIS
-            { support: 1
-            , size: 2
+        , clique: Phylo.MaxClique
+            { size: 5
+            , threshold: 0.0001
+            , filter: Phylo.ByThreshold
             }
         }
 

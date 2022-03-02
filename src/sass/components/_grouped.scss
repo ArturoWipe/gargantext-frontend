@@ -136,3 +136,42 @@
     background-color: inherit;
   }
 }
+
+/// PhyloExplorer.ConfigForm
+///-----------------------------------------------------------------------------
+
+.phylo-config-form {
+
+
+  &__row {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &__group {
+    // @TODO: generic "form-group" margin-bottom constant
+    margin-bottom: space-x(3);
+  }
+
+  .b-fieldset {
+    margin-left: $card-spacer-x;
+    margin-right: $card-spacer-x;
+  }
+
+  &__col {
+    width: 50%;
+
+    &:first-child {
+      padding-right: space-x(1);
+    }
+
+    &:last-child {
+      padding-left: space-x(1);
+    }
+  }
+
+  &__submit {
+    text-align: center;
+  }
+}
