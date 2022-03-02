@@ -3,25 +3,34 @@ module Gargantext.Components.Forest.Tree.Node.Action.Update where
 import Gargantext.Components.Forest.Tree.Node.Action.Update.Types
 import Gargantext.Prelude
 
-import DOM.Simple.Console (log)
+import DOM.Simple.Console (log, log3)
+import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
+import Data.Int as Int
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Newtype (unwrap)
+import Data.Number as Number
+import Effect (Effect)
 import Effect.Aff (Aff, launchAff, launchAff_)
 import Effect.Class (liftEffect)
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Types (Action(..))
 import Gargantext.Components.Forest.Tree.Node.Tools (formChoiceSafe, submitButton, panel)
-import Gargantext.Components.PhyloExplorer.API (Clique(..), CliqueFilter(..), TimeUnit(..), TimeUnitCriteria(..))
+import Gargantext.Components.PhyloExplorer.API (Clique(..), CliqueFilter(..), TimeUnit(..), TimeUnitCriteria(..), UpdateData(..), toReflexiveTimeUnit)
 import Gargantext.Components.PhyloExplorer.API as Phylo
-import Gargantext.Components.PhyloExplorer.ConfigForm (configForm)
+import Gargantext.Components.PhyloExplorer.ConfigForm as PhyloForm
+import Gargantext.Components.PhyloExplorer.ConfigFormParser (useConfigFormParser)
+import Gargantext.Components.PhyloExplorer.ConfigFormParser as PhyloHook
 import Gargantext.Config.REST (RESTError, AffRESTError)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, post)
 import Gargantext.Types (ID, NodeType(..))
 import Gargantext.Types as GT
+import Gargantext.Utils (getter)
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
+import Record (merge)
 import Toestand as T
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -90,36 +99,51 @@ updatePhylo = R2.leaf updatePhyloCpt
 updatePhyloCpt :: R.Component UpdateProps
 updatePhyloCpt = here.component "updatePhylo" cpt where
   cpt { dispatch } _ = do
-  -- Behavior
+  -- Hooks
+    parser <- PhyloHook.useConfigFormParser
+
+  -- Helpers
     let
-      params :: Action
-      params
-        = UpdateNode $ UpdateNodeParamsPhylo
-          { methodPhylo: paramsValue
-          }
-      paramsValue :: Phylo.UpdateData
-      paramsValue = Phylo.UpdateData
+
+      defaultData :: Phylo.UpdateData
+      defaultData = Phylo.UpdateData
         { proximity: 0.1
         , synchrony: 0.1
         , quality: 0.1
         , exportFilter: 0.1
-        , timeUnit: Year $ TimeUnitCriteria
-            { period: 3
-            , step: 1
-            , matchingFrame: 5
-            }
-        , clique: FIS
-          { support: 1
-          , size: 1
+        , timeUnit: Phylo.Year $ Phylo.TimeUnitCriteria
+          { period: 3
+          , step: 1
+          , matchingFrame: 5
           }
+        , clique: FIS
+            { support: 1
+            , size: 2
+            }
         }
+
+  -- Behaviors
+
+      onSubmit :: Record PhyloForm.FormData -> Effect Unit
+      onSubmit r = case parser.fromFormData r of
+        Left error -> log3 "[handleFormError]" error r
+        Right r'   -> do
+          opts <- pure $ options r'
+          launchAff_ $ dispatch opts
+
+        where
+          options :: Phylo.UpdateData -> Action
+          options params
+            = UpdateNode $ UpdateNodeParamsPhylo
+              { methodPhylo: params
+              }
 
   -- Render
     pure $
-      configForm
-      { callback: \_ -> launchAff_ $ dispatch $ params
+      PhyloForm.configForm $
+      { callback: onSubmit
       , status: Enabled
-      }
+      } `merge` parser.toFormData defaultData
 
 updateNodeList :: R2.Component UpdateProps
 updateNodeList = R.createElement updateNodeListCpt

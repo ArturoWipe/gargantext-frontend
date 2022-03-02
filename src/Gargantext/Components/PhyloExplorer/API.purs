@@ -49,6 +49,7 @@ newtype UpdateData = UpdateData
 
 derive instance Generic UpdateData _
 derive instance Eq UpdateData
+derive instance Newtype UpdateData _
 instance Show UpdateData where show = genericShow
 derive newtype instance JSON.ReadForeign UpdateData
 instance JSON.WriteForeign UpdateData where
