@@ -13,7 +13,7 @@ import Web.File.Blob (Blob, size)
 import Web.File.FileReader.Aff (readAsArrayBuffer, readAsText)
 
 
-data FileType = CSV | CSV_HAL | WOS | PresseRIS | Arbitrary | JSON | ZIP
+data FileType = CSV | CSV_HAL | JSON | PresseRIS | WOS | WOS_ZIP | Arbitrary | ZIP
 
 derive instance Generic FileType _
 instance Eq FileType where eq = genericEq
@@ -23,9 +23,10 @@ instance Read FileType where
   read "Arbitrary" = Just Arbitrary
   read "CSV"       = Just CSV
   read "CSV_HAL"   = Just CSV_HAL
+  read "JSON"      = Just JSON
   read "PresseRIS" = Just PresseRIS
   read "WOS"       = Just WOS
-  read "JSON"      = Just JSON
+  read "WOS_ZIP"   = Just WOS_ZIP
   read "ZIP"       = Just ZIP
   read _           = Nothing
 
