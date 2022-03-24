@@ -17,110 +17,79 @@ $node-popup-width: 544px
 
 /////////////////////////////////////////
 
-body > .tree ul > li:first-child::before
-  top: 12px
+.maintree
+  $self: &
+  // empirical vertical alignments for folder carets
+  $caret-1-y-offset: 2px
+  $caret-2-y-offset: 3px
+  // empircal horizontal offset to align a "node" with its below children
+  // icons
+  $node-x-offset: 3px
 
-li
-  a
-    // color: map_get($theme-colors, 'primary')
-    color: $primary
-  a:hover
-    // color: darken( map_get($theme-colors, 'primary'), 15% )
-    color: darken($primary, 15%)
+  position: relative
 
-  .leaf
-    display: flex
-    flex-direction: row
-    color: #005a9aff
+  &__node
+    margin-left: calc( #{ space-x(2) } + #{ $node-x-offset } )
+    margin-bottom: space-x(0.25)
 
-    .folder-icon
-      padding: 0 2 0 2
-      cursor: pointer
+  & > &__node
+    margin-right: space-x(2)
 
-    .node-link
-      a
-        cursor: pointer
-      & > .node-text
-        color: #000000
+  &--with-child > &__node > &
 
-    a.settings
-      cursor: pointer
-      display: block
-      padding: 0 2 0 2
-      text-decoration: none
-      visibility: hidden
-      z-index: 1
-    &:hover
-      a.settings
-        visibility: visible
+    &:not(:last-child)::before
+      content: "├"
+      color: $gray-500
+      position: absolute
+      font-size: 12px
+      top: $caret-1-y-offset
 
-  ul
-    li
-      position: relative
-      &::after
-        content: " "
-        height: 1px
-        position: absolute
-        top: 12px
-      &::before
-        bottom: -12px
-        content: " "
-        height: 7px
-        position: absolute
-        top: 5px
-      &:not(:first-child):last-child::before
-        display: none
-      &:only-child::before
-        bottom: 7px
-        content: " "
-        display: list-item
-        //height: 7px
-        position: absolute
-        width: 1px
-        top: 5px
-      &.with-children
-        &::after
-          background-color: #000
-        &::before
-          background-color: #000
+    &:last-child::before
+      content: "└"
+      color: $gray-500
+      position: absolute
+      font-size: 12px
+      top: $caret-2-y-offset
 
 
+.mainleaf
+  $self: &
 
-  .lefthanded
-    .leaf
-      justify-content : flex-end
-    ul
-      margin-right : 5px
-      li
-        margin-right: 10px
-        padding-right: 5px
-        &.with-children
-          &::after
-            right: -10px
-            width: 5px
-          &::before
-            right: -10px
-            width: 1px
-          &:only-child::before
-            //right: 1px
-  .righthanded
-    .leaf
-      justify-content : flex-start
-    ul
-      margin-left : 5px
-      li
-        margin-left: 10px
-        padding-left: 5px
-        &.with-children
-          &::after
-            left: -10px
-            width: 5px
-          &::before
-            left: -10px
-            width: 1px
-          &:only::before
-            background-color: #000
-            right: 10px
+  display: flex
+  align-items: center
+  margin-bottom: space-x(0.25)
+  // forcing inline width to overflow its container width
+  // this is mainly due to the multi-level of nested folders that keeps
+  // increasing the mainleaf width
+  width: max-content
+
+  &__folder-icon
+    margin-right: space-x(1)
+    font-size: 14px
+    color: $gray-600
+
+    &--leaf
+      color: $gray-500
+
+  &__node-icon
+    margin-right: space-x(1)
+
+  &__node-link
+    margin-right: space-x(1)
+
+    // @TODO: handle default <a> color (override "_reboot.scss" rules or
+    //        whole file?)
+    a
+      color: $body-color
+
+  &__settings-icon
+    visibility: hidden
+
+  &:hover
+
+    #{ $self }__settings-icon
+      visibility: visible
+
 
   .file-dropped
     background-color: #d8dfe5
@@ -137,6 +106,7 @@ li
       .text
         text-decoration: underline
 
+////////////////////////////////////////
 
 .subtree
   $self: &
@@ -144,7 +114,7 @@ li
   &__node
     margin-top: space-x(0.25)
 
-    &__text
+    &__inner
       display: flex
       align-items: center // align icon with text
       cursor: pointer
@@ -157,13 +127,20 @@ li
         margin-left: space-x(0.25)
         margin-right: space-x(0.25)
 
+    &__text
+      margin-left: space-x(0.5)
+
     &--can-be-selected
       text-decoration: underline
       text-underline-offset: 2px // easing node reading (empirical)
 
+    &--is-selected
+      text-decoration: underline
+      font-weight: bold
+
     @include right-handed
 
-      &__text
+      &__inner
         flex-direction: row
         text-align: left
 
@@ -175,7 +152,7 @@ li
 
     @include left-handed
 
-      &__text
+      &__inner
         flex-direction: row-reverse
         text-align: right
 
@@ -185,21 +162,9 @@ li
       &__children > #{ $self }__node
         padding-right: space-x(2.5)
 
+/////////////////////////////////////////
 
-.node-text
-  display: inline-flex
-
-  &--selected
-    font-weight: bold
-    text-decoration: underline
-
-  @include right-handed
-    flex-direction: row
-
-  @include left-handed
-    flex-direction: row-reverse
-
-
+// @WIP: used?
 
 // based on https://codeburst.io/how-to-pure-css-pie-charts-w-css-variables-38287aea161e
 .progress-pie
@@ -238,6 +203,8 @@ li
 
     &:after
       opacity: var(--over50, 0)
+
+/////////////////////////////////////////
 
 #node-popup-tooltip
   // @XXX "react-awesome-popover" lack of parent host parameter
@@ -334,6 +301,8 @@ li
     max-height: 70vh
     overflow-y: auto
 
+/////////////////////////////////////////
+
 .forest-layout-wrapper
   // removing Bootstrap "col" padding
   padding-left: 0
@@ -408,22 +377,23 @@ li
   width: 100%
 
 
-.forest-layout-content
+.forest-layout-tree
+  margin-top: space-x(3)
 
-  & > ul.tree // `ul` prefixed to override bootstrap "_reboot.scss" rules
+  &:last-child
+    margin-bottom: $forest-layout-bottom-teaser-height
 
-    @include forest-layout-gutter
+  // remove leaf nested caret for first entry only
+  & > .maintree--with-children > .maintree__node
 
-    margin-top: space-x(3)
-    margin-bottom: 0
+    &::before,
+    &::after
+        content: none
 
-    &:last-child
-      margin-bottom: $forest-layout-bottom-teaser-height
+  // remove horizontal offset for first entry only (see ".maintree")
+  & > .maintree > .maintree__node
+    margin-left: space-x(2)
 
-
-  .fa.fa-spinner,
-  .tree .fa.fa-spinner
-    color: $primary
 
 /////////////////////////////////////////
 

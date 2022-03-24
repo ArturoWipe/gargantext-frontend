@@ -53,12 +53,16 @@ forestCpt = here.component "forest" cpt where
     where
       trees handed' sessions' = (tree handed') <$> unSessions sessions'
       tree handed' s@(Session { treeId }) =
-        treeLoader { boxes
+        H.div
+        { className: "forest-layout-tree" }
+        [
+          treeLoader { boxes
                    , frontends
                    , handed: handed'
                    , reload: reloadForest
                    , root: treeId
                    , session: s } []
+        ]
 
 type Plus = ( boxes :: Boxes )
 

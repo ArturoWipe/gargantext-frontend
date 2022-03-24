@@ -3,8 +3,9 @@ module Gargantext.Components.Forest.Tree where
 import Gargantext.Prelude
 
 import Data.Array as A
+import Data.Array as Array
 import Data.Maybe (Maybe(..))
-import Data.Traversable (traverse_, traverse)
+import Data.Traversable (intercalate, traverse, traverse_)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -34,6 +35,7 @@ import Gargantext.Sessions (Session, get, mkNodeId)
 import Gargantext.Sessions.Types (useOpenNodesMemberBox, openNodesInsert, openNodesDelete)
 import Gargantext.Types (Handed, ID, isPublic, publicize, switchHanded)
 import Gargantext.Types as GT
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
@@ -135,58 +137,69 @@ treeCpt :: R.Component TreeProps
 treeCpt = here.component "tree" cpt where
   cpt p@{ boxes: boxes@{ forestOpen }
         , frontends
-        , handed
         , reload
         , root
         , session
         , tree: NTree (LNode { id, name, nodeType }) children } _ = do
+
     setPopoverRef <- R.useRef Nothing
     folderOpen <- useOpenNodesMemberBox nodeId forestOpen
-    pure $ H.ul { className: ulClass }
-      [ H.li { className: childrenClass children' }
-        [ nodeSpan { boxes
-                   , dispatch: dispatch setPopoverRef
-                   , folderOpen
-                   , frontends
-                   , id
-                   , isLeaf
-                   , name
-                   , nodeType
-                   , reload
-                   , root
-                   , session
-                   , setPopoverRef }
-          [ renderChildren (Record.merge p { childProps: { children', folderOpen, render: tree } } ) [] ]
+    folderOpen' <- T.useLive T.unequal folderOpen
+
+    pure $
+
+      H.ul
+      { className: intercalate " "
+          [ "maintree"
+          , Array.null children' ?
+              "maintree--no-child" $
+              "maintree--with-child"
+          ]
+      }
+      [
+        H.li
+        { className: "maintree__node" }
+        [
+          nodeSpan
+          { boxes
+          , dispatch: dispatch setPopoverRef
+          , folderOpen
+          , frontends
+          , id
+          , isLeaf
+          , name
+          , nodeType
+          , reload
+          , root
+          , session
+          , setPopoverRef
+          }
+        <>
+          R2.if' (folderOpen')
+          (
+            renderTreeChildren $
+            { childProps:
+                { children'
+                , folderOpen
+                , render: tree
+                }
+            } `Record.merge` p
+          )
         ]
       ]
     where
       isLeaf = A.null children
       nodeId = mkNodeId session id
-      ulClass  = switchHanded "ml left" "mr right" handed <> "-auto tree handed"
       children' = A.sortWith fTreeID pubChildren
       pubChildren = if isPublic nodeType then map (map pub) children else children
       dispatch setPopoverRef a = performAction a (Record.merge common' spr) where
         common' = RecordE.pick p :: Record PACommon
         spr = { setPopoverRef }
   pub (LNode n@{ nodeType: t }) = LNode (n { nodeType = publicize t })
-  childrenClass [] = "no-children"
-  childrenClass _  = "with-children"
 
 
-renderChildren :: R2.Component ChildrenTreeProps
-renderChildren = R.createElement renderChildrenCpt
-renderChildrenCpt :: R.Component ChildrenTreeProps
-renderChildrenCpt = here.component "renderChildren" cpt where
-  cpt p@{ childProps: { folderOpen } } _ = do
-    folderOpen' <- T.useLive T.unequal folderOpen
-
-    if folderOpen' then
-      pure $ renderTreeChildren p []
-    else
-      pure $ H.div {} []
-
-renderTreeChildren :: R2.Component ChildrenTreeProps
-renderTreeChildren = R.createElement renderTreeChildrenCpt
+renderTreeChildren :: R2.Leaf ChildrenTreeProps
+renderTreeChildren = R2.leaf renderTreeChildrenCpt
 renderTreeChildrenCpt :: R.Component ChildrenTreeProps
 renderTreeChildrenCpt = here.component "renderTreeChildren" cpt where
   cpt p@{ childProps: { children'
