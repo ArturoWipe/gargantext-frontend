@@ -2,6 +2,7 @@ $forest-layout-top-teaser-height: 24px
 $forest-layout-bottom-teaser-height: 24px // ~line-height to 1.5 (covering tree)
 $node-popop-radius: 6px
 $node-popup-width: 544px
+$overlay-radius: 5px
 
 
 @mixin forest-layout-gutter
@@ -20,16 +21,12 @@ $node-popup-width: 544px
 .maintree
   $self: &
   // empirical vertical alignments for folder carets
-  $caret-1-y-offset: 2px
-  $caret-2-y-offset: 3px
-  // empircal horizontal offset to align a "node" with its below children
-  // icons
-  $node-x-offset: 3px
+  $caret-y-offset: 3px
 
   position: relative
 
   &__node
-    margin-left: calc( #{ space-x(2) } + #{ $node-x-offset } )
+    margin-left: space-x(2)
     margin-bottom: space-x(0.25)
 
   & > &__node
@@ -37,19 +34,12 @@ $node-popup-width: 544px
 
   &--with-child > &__node > &
 
-    &:not(:last-child)::before
-      content: "├"
-      color: $gray-500
-      position: absolute
-      font-size: 12px
-      top: $caret-1-y-offset
-
-    &:last-child::before
+    &::before
       content: "└"
-      color: $gray-500
+      color: $gray-400
       position: absolute
       font-size: 12px
-      top: $caret-2-y-offset
+      top: $caret-y-offset
 
 
 .mainleaf
@@ -64,18 +54,44 @@ $node-popup-width: 544px
   width: max-content
 
   &__folder-icon
-    margin-right: space-x(1)
+    // padding instead of margin will ensure to add a gap for the icon call
+    // to action area
+    padding-right: space-x(1)
     font-size: 14px
-    color: $gray-600
+    // @XXX Glyphicon icons lack of homogeneous width
+    width: 16px
 
     &--leaf
-      color: $gray-500
+      color: $gray-400
 
   &__node-icon
+    font-size: 16px
     margin-right: space-x(1)
+    // @XXX Glyphicon icons lack of homogeneous width
+    //      (this also means that we can not align harmoniously the leaf
+    //      content)
+    width: 14px
+    //      Micromanaging icons width as an attempt of alignment harmony
+    &.fa-address-card-o,
+    &.fa-newspaper-o
+      font-size: 14px
+    &.fa-share-alt,
+    &.fa-globe-circle,
+    &.fa-folder-open-o,
+    &.fa-file-code-o,
+    &.fa-list,
+    &.fa-signal
+      font-size: 15px
+    &.fa-user
+      font-size: 17px
+    &.fa-lock,
+    &.fa-fork
+      font-size: 18px
 
   &__node-link
+    position: relative
     margin-right: space-x(1)
+    font-size: 15px
 
     // @TODO: handle default <a> color (override "_reboot.scss" rules or
     //        whole file?)
@@ -83,7 +99,27 @@ $node-popup-width: 544px
       color: $body-color
 
   &__settings-icon
+    // empirical alignement with "mainleaf-selected" background
+    $overlay-offset: -6px
+
     visibility: hidden
+    margin-left: space-x(2)
+    position: relative
+    // @WIP: common rules for B.iconButton?
+    color: $secondary
+    transition: color 0.2s
+
+    &::before
+      @include fit-positions($overlay-offset)
+
+      content: ""
+      background-color: $gray-100
+      border-radius: $overlay-radius
+      z-index: -1
+      position: absolute
+
+    &:hover
+      color: darken($secondary, 15%)
 
   &:hover
 
@@ -91,8 +127,36 @@ $node-popup-width: 544px
       visibility: visible
 
 
-  .file-dropped
+  &--selected
+    // margin for the selected background
+    $overlay-offset: -2px
+    // left extra offset: including icons, caret, ...
+    $extra-left-overlay-offset: -56px
+    // right extra offset: adding extra margin
+    $extra-right-overlay-offset: - space-x(1.25)
+
+    #{ $self }__node-link::before
+      content: ""
+      background-color: $gray-100
+      left: calc( #{ $overlay-offset } + #{ $extra-left-overlay-offset })
+      right: calc( #{ $overlay-offset } + #{ $extra-right-overlay-offset })
+      top: $overlay-offset
+      bottom: $overlay-offset
+      border-radius: $overlay-radius
+      position: absolute
+      z-index: -1
+
+    #{ $self }__node-icon
+      color: $primary
+
+    #{ $self }__node-link a
+      color: $primary
+      font-weight: bold
+
+  &--file-dropped
     background-color: #d8dfe5
+
+
   .node-actions
     padding-left: 5px
     .update-button

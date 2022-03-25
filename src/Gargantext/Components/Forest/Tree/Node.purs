@@ -4,6 +4,7 @@ import Gargantext.Prelude
 
 import DOM.Simple as DOM
 import DOM.Simple.Event as DE
+import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, null)
 import Data.Symbol (SProxy(..))
@@ -109,8 +110,8 @@ nodeSpanCpt = here.component "nodeSpan" cpt
       let
 
         dropClass :: Maybe DroppedFile -> Boolean -> String
-        dropClass (Just _) _    = "file-dropped"
-        dropClass _        true = "file-dropped"
+        dropClass (Just _) _    = "mainleaf--file-dropped"
+        dropClass _        true = "mainleaf--file-dropped"
         dropClass Nothing  _    = ""
 
         name' :: String -> GT.NodeType -> Session -> String
@@ -208,7 +209,11 @@ nodeSpanCpt = here.component "nodeSpan" cpt
       pure $
 
         H.span
-        { className: "mainleaf " <> (dropClass droppedFile' isDragOver')
+        { className: intercalate " "
+            [ "mainleaf"
+            , dropClass droppedFile' isDragOver'
+            , isSelected ? "mainleaf--selected" $ ""
+            ]
         , on: { dragLeave: onDragLeave isDragOver
               , dragOver: onDragOverHandler isDragOver
               , drop: dropHandler
@@ -225,6 +230,8 @@ nodeSpanCpt = here.component "nodeSpan" cpt
           { nodeType
           , isLeaf
           , callback: const $ T.modify_ (not) folderOpen
+          , id
+          , name: name' props.name nodeType session
           }
         ,
           nodeLink
@@ -245,16 +252,21 @@ nodeSpanCpt = here.component "nodeSpan" cpt
             , open: false
             , onClose: \_ -> pure unit
             , onOpen:  \_ -> pure unit
-            , ref: popoverRef }
+            , ref: popoverRef
+            }
             [
-              B.iconButton
-              { className: "mainleaf__settings-icon"
-              , name: "cog"
-              , callback: const R.nothing
-              , title:
-                     "Each node of the Tree can perform some actions.\n"
-                  <> "Click here to execute one of them."
-              }
+              H.div
+              { className: "mainleaf__settings-icon" }
+              [
+                B.iconButton
+                { name: "cog"
+                -- (cf. Popover callbacks)
+                , callback: const R.nothing
+                , title:
+                      "Each node of the Tree can perform some actions.\n"
+                    <> "Click here to execute one of them."
+                }
+              ]
             ,
               nodePopupView
               { boxes
@@ -295,10 +307,33 @@ nodeSpanCpt = here.component "nodeSpan" cpt
 
 ---------------------------------------------------------
 
+-- type NodeIconProps =
+--   ( nodeType ::  GT.NodeType
+--   , callback :: Unit -> Effect Unit
+--   , isLeaf   :: Boolean
+--   )
+
+-- nodeIcon :: R2.Leaf NodeIconProps
+-- nodeIcon = R2.leaf nodeIconCpt
+-- nodeIconCpt :: R.Component NodeIconProps
+-- nodeIconCpt = here.component "nodeIcon" cpt where
+--   cpt { nodeType
+--       , callback
+--       , isLeaf } _ = pure $
+
+--     B.iconButton
+--     { className: "mainleaf__node-icon"
+--     , name: GT.getIcon nodeType true
+--     , callback
+--     , status: isLeaf ? Idled $ Enabled
+--     }
+
 type NodeIconProps =
   ( nodeType ::  GT.NodeType
   , callback :: Unit -> Effect Unit
   , isLeaf   :: Boolean
+  , name     :: GT.Name
+  , id       :: ID
   )
 
 nodeIcon :: R2.Leaf NodeIconProps
@@ -307,14 +342,41 @@ nodeIconCpt :: R.Component NodeIconProps
 nodeIconCpt = here.component "nodeIcon" cpt where
   cpt { nodeType
       , callback
-      , isLeaf } _ = pure $
+      , isLeaf
+      , name
+      , id
+      } _ = pure $
 
-    B.iconButton
-    { className: "mainleaf__node-icon"
-    , name: GT.getIcon nodeType true
-    , callback
-    , status: isLeaf ? Idled $ Enabled
-    }
+    R.fragment
+    [
+      B.iconButton
+      { className: "mainleaf__node-icon"
+      , name: GT.getIcon nodeType true
+      , callback
+      , status: isLeaf ? Idled $ Enabled
+      }
+    ,
+      ReactTooltip.reactTooltip
+      { effect: "float"
+      , id: name <> "-" <> (tooltipId id)
+      , type: "dark"
+      }
+      [
+        R2.row
+        [
+          H.h4
+          { className: GT.fldr nodeType true }
+          [ H.text $ GT.prettyNodeType nodeType ]
+        ]
+      ,
+        R2.row
+        [
+          H.span {} [ H.text $ name ]
+        ]
+      ]
+    ]
+
+
 -----------------------------------------------
 
 type FolderIconProps =
@@ -331,14 +393,14 @@ folderIconCpt = here.component "folderIcon" cpt where
 
     B.icon
     { className: "mainleaf__folder-icon mainleaf__folder-icon--leaf"
-    , name: "square-o"
+    , name: "caret-right"
     }
 
   cpt { callback, isOpened } _ = pure $
 
     B.iconButton
     { className: "mainleaf__folder-icon"
-    , name: isOpened ? "minus-square-o" $ "plus-square-o"
+    , name: isOpened ? "caret-down" $ "caret-right"
     , callback
     }
 
@@ -381,25 +443,25 @@ nodeLinkCpt = here.component "nodeLink" cpt
         }
         [
           B.span_ $ textEllipsisBreak 15 name
-        ,
-          ReactTooltip.reactTooltip
-          { effect: "float"
-          , id: name <> "-" <> (tooltipId id)
-          , type: "dark"
-          }
-          [
-            R2.row
-            [
-              H.h4
-              { className: GT.fldr nodeType true }
-              [ H.text $ GT.prettyNodeType nodeType ]
-            ]
-          ,
-            R2.row
-            [
-              H.span {} [ H.text $ name ]
-            ]
-          ]
+        -- ,
+          -- ReactTooltip.reactTooltip
+          -- { effect: "float"
+          -- , id: name <> "-" <> (tooltipId id)
+          -- , type: "dark"
+          -- }
+          -- [
+          --   R2.row
+          --   [
+          --     H.h4
+          --     { className: GT.fldr nodeType true }
+          --     [ H.text $ GT.prettyNodeType nodeType ]
+          --   ]
+          -- ,
+          --   R2.row
+          --   [
+          --     H.span {} [ H.text $ name ]
+          --   ]
+          -- ]
         ]
       ]
 
