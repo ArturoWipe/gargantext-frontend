@@ -10558,6 +10558,7 @@ a:focus, a:hover {
   color: #ced4da;
 }
 .mainleaf__node-icon {
+  position: relative;
   font-size: 16px;
   margin-right: 8px;
   width: 14px;
@@ -10574,6 +10575,21 @@ a:focus, a:hover {
 .mainleaf__node-icon.fa-lock, .mainleaf__node-icon.fa-fork {
   font-size: 18px;
 }
+.mainleaf__version-badge {
+  position: absolute;
+  font-size: 12px;
+  background-color: #fff;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  bottom: -8px;
+  right: -4px;
+}
+.mainleaf__version-badge--matched {
+  color: #333333;
+}
+.mainleaf__version-badge--mismatched {
+  color: #5f5f5f;
+}
 .mainleaf__node-link {
   position: relative;
   margin-right: 8px;
@@ -10584,23 +10600,41 @@ a:focus, a:hover {
 }
 .mainleaf__settings-icon {
   visibility: hidden;
-  margin-left: 8px;
+  margin-left: 16px;
   position: relative;
+  color: #666666;
+  transition: color 0.2s;
+}
+.mainleaf__settings-icon::before {
+  top: -6px;
+  right: -6px;
+  bottom: -6px;
+  left: -6px;
+  content: "";
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  z-index: -1;
+  position: absolute;
+}
+.mainleaf__settings-icon:hover {
+  color: #404040;
 }
 .mainleaf:hover .mainleaf__settings-icon {
   visibility: visible;
-  background-color: #f8f9fa;
-  left: -2px;
-  right: -2px;
-  top: -2px;
-  bottom: -2px;
-  border-radius: 5px;
+}
+.mainleaf__version-comparator {
+  margin-top: 8px;
+}
+.mainleaf__version-comparator li {
+  margin-left: 24px;
+  list-style-type: disc;
+  line-height: 1.4;
 }
 .mainleaf--selected .mainleaf__node-link::before {
   content: "";
   background-color: #f8f9fa;
-  left: -58px;
-  right: -12px;
+  left: calc( -2px + -56px);
+  right: calc( -2px + -10px);
   top: -2px;
   bottom: -2px;
   border-radius: 5px;

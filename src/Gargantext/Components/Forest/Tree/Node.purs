@@ -14,7 +14,8 @@ import Effect.Class (liftEffect)
 import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Components.Bootstrap.Tooltip (tooltipBind)
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), TooltipEffect(..), Variant(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Types (Action(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Upload (DroppedFile(..), fileTypeView)
 import Gargantext.Components.Forest.Tree.Node.Action.Upload.Types (FileType(..), UploadFileBlob(..))
@@ -27,17 +28,17 @@ import Gargantext.Components.Lang (Lang(EN))
 import Gargantext.Components.Nodes.Corpus (loadCorpusWithChild)
 import Gargantext.Config.REST (logRESTError)
 import Gargantext.Ends (Frontends, url)
+import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Hooks.Loader (useLoader)
+import Gargantext.Hooks.Version (Version, useVersion)
 import Gargantext.Routes as Routes
 import Gargantext.Sessions (Session, sessionId)
 import Gargantext.Types (ID, Name)
 import Gargantext.Types as GT
-import Gargantext.Utils (textEllipsisBreak, (?))
+import Gargantext.Utils (nbsp, textEllipsisBreak, (?))
 import Gargantext.Utils.Popover as Popover
-import Gargantext.Utils.ReactTooltip as ReactTooltip
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
-import Gargantext.Version as GV
 import React.SyntheticEvent (SyntheticEvent_)
 import React.SyntheticEvent as E
 import React.SyntheticEvent as SE
@@ -201,8 +202,12 @@ nodeSpanCpt = here.component "nodeSpan" cpt
 
     -- Hooks
 
-      R.useEffect' $ do
+      useFirstEffect' $
         R.setRef setPopoverRef $ Just $ Popover.setOpen popoverRef
+
+      mVersion <- useVersion $ nodeType == GT.NodeUser ?
+        Just { session } $
+        Nothing
 
     -- Render
 
@@ -230,16 +235,29 @@ nodeSpanCpt = here.component "nodeSpan" cpt
           { nodeType
           , isLeaf
           , callback: const $ T.modify_ (not) folderOpen
-          , id
-          , name: name' props.name nodeType session
           }
+          [
+            case mVersion of
+              Nothing                              -> mempty
+              Just { clientVersion, remoteVersion} ->
+                B.icon
+                { className: intercalate " "
+                    [ "mainleaf__version-badge"
+                    , clientVersion == remoteVersion ?
+                        "mainleaf__version-badge--matched" $
+                        "mainleaf__version-badge--mismatched"
+                    ]
+                , name: clientVersion == remoteVersion ?
+                    "check-circle" $
+                    "exclamation-circle"
+                }
+          ]
         ,
           nodeLink
           { callback: onNodeLinkClick
           , href
           , id
           , name: name' props.name nodeType session
-          , nodeType
           }
         ,
           fileTypeView
@@ -291,63 +309,44 @@ nodeSpanCpt = here.component "nodeSpan" cpt
           --       ) currentTasks'
           -- )
         -- ,
-          R2.if' (nodeType == GT.NodeUser) $
-
-            GV.versionView { session } []
-
-        ,
           nodeActions
           { id
           , nodeType
           , refresh: const $ dispatch RefreshTree
           , session
           } []
+        ,
+          nodeTooltip
+          { id
+          , nodeType
+          , name: name' props.name nodeType session
+          }
+          [
+            case mVersion of
+              Nothing -> mempty
+              Just v  -> versionComparator v
+          ]
         ]
 
 
 ---------------------------------------------------------
 
--- type NodeIconProps =
---   ( nodeType ::  GT.NodeType
---   , callback :: Unit -> Effect Unit
---   , isLeaf   :: Boolean
---   )
-
--- nodeIcon :: R2.Leaf NodeIconProps
--- nodeIcon = R2.leaf nodeIconCpt
--- nodeIconCpt :: R.Component NodeIconProps
--- nodeIconCpt = here.component "nodeIcon" cpt where
---   cpt { nodeType
---       , callback
---       , isLeaf } _ = pure $
-
---     B.iconButton
---     { className: "mainleaf__node-icon"
---     , name: GT.getIcon nodeType true
---     , callback
---     , status: isLeaf ? Idled $ Enabled
---     }
-
 type NodeIconProps =
   ( nodeType ::  GT.NodeType
   , callback :: Unit -> Effect Unit
   , isLeaf   :: Boolean
-  , name     :: GT.Name
-  , id       :: ID
   )
 
-nodeIcon :: R2.Leaf NodeIconProps
-nodeIcon = R2.leaf nodeIconCpt
+nodeIcon :: R2.Component NodeIconProps
+nodeIcon = R2.component nodeIconCpt
 nodeIconCpt :: R.Component NodeIconProps
 nodeIconCpt = here.component "nodeIcon" cpt where
   cpt { nodeType
       , callback
-      , isLeaf
-      , name
-      , id
-      } _ = pure $
+      , isLeaf } children = pure $
 
-    R.fragment
+    H.span
+    { className: "mainleaf__node-icon" } $
     [
       B.iconButton
       { className: "mainleaf__node-icon"
@@ -355,27 +354,8 @@ nodeIconCpt = here.component "nodeIcon" cpt where
       , callback
       , status: isLeaf ? Idled $ Enabled
       }
-    ,
-      ReactTooltip.reactTooltip
-      { effect: "float"
-      , id: name <> "-" <> (tooltipId id)
-      , type: "dark"
-      }
-      [
-        R2.row
-        [
-          H.h4
-          { className: GT.fldr nodeType true }
-          [ H.text $ GT.prettyNodeType nodeType ]
-        ]
-      ,
-        R2.row
-        [
-          H.span {} [ H.text $ name ]
-        ]
-      ]
     ]
-
+      <> children
 
 -----------------------------------------------
 
@@ -392,7 +372,10 @@ folderIconCpt = here.component "folderIcon" cpt where
   cpt { isLeaf: true } _ = pure $
 
     B.icon
-    { className: "mainleaf__folder-icon mainleaf__folder-icon--leaf"
+    { className: intercalate " "
+        ["mainleaf__folder-icon"
+        , "mainleaf__folder-icon--leaf"
+        ]
     , name: "caret-right"
     }
 
@@ -407,14 +390,11 @@ folderIconCpt = here.component "folderIcon" cpt where
 -----------------------------------------------
 
 
--- START node link
-
 type NodeLinkProps =
   ( callback   :: Unit -> Effect Unit
   , href       :: String
   , id         :: Int
   , name       :: GT.Name
-  , nodeType   :: GT.NodeType
   )
 
 nodeLink :: R2.Leaf NodeLinkProps
@@ -426,50 +406,66 @@ nodeLinkCpt = here.component "nodeLink" cpt
         , href
         , id
         , name
-        , nodeType
-        } _ = pure $
+        } _ = do
 
-      H.div
-      { className: "mainleaf__node-link"
-      , on: { click: const $ callback unit }
-      }
-      [
-        H.a
-        { href
-        , data:
-            { for: name <> "-" <> (tooltipId id)
-            , tip: true
-            }
+      let
+        tid = tooltipId name id
+
+        aProps =
+          { href
+          } `Record.merge` tooltipBind tid
+
+      pure $
+
+        H.div
+        { className: "mainleaf__node-link"
+        , on: { click: const $ callback unit }
         }
         [
-          B.span_ $ textEllipsisBreak 15 name
-        -- ,
-          -- ReactTooltip.reactTooltip
-          -- { effect: "float"
-          -- , id: name <> "-" <> (tooltipId id)
-          -- , type: "dark"
-          -- }
-          -- [
-          --   R2.row
-          --   [
-          --     H.h4
-          --     { className: GT.fldr nodeType true }
-          --     [ H.text $ GT.prettyNodeType nodeType ]
-          --   ]
-          -- ,
-          --   R2.row
-          --   [
-          --     H.span {} [ H.text $ name ]
-          --   ]
-          -- ]
+          H.a
+          aProps
+          [
+            B.span_ $ textEllipsisBreak 15 name
+          ]
         ]
+
+---------------------------------------------------
+
+type NodeTooltipProps =
+  ( name      :: String
+  , id        :: GT.NodeID
+  , nodeType  :: GT.NodeType
+  )
+
+nodeTooltip :: R2.Component NodeTooltipProps
+nodeTooltip = R2.component nodeTooltipCpt
+nodeTooltipCpt :: R.Component NodeTooltipProps
+nodeTooltipCpt = here.component "nodeTooltip" cpt where
+  cpt { name, id, nodeType } children = pure $
+
+    B.tooltip
+    { id: tooltipId name id
+    , effect: FloatEffect
+    , delayShow: 600
+    } $
+    [
+      H.b
+      {}
+      [
+        B.icon
+        { name: GT.getIcon nodeType true }
+      ,
+        B.span_ $
+          GT.prettyNodeType nodeType
       ]
+    ,
+      B.div_ $
+        name
+    ]
+      <> children
 
--- END node link
-
-tooltipId :: GT.NodeID -> String
-tooltipId id = "node-link-" <> show id
-
+tooltipId :: String -> GT.NodeID -> String
+tooltipId name id = name <> "-node-link-" <> show id
 
 -----------------------------------------------
 
@@ -524,3 +520,82 @@ listNodeActionsCpt = here.component "listNodeActions" cpt where
                  , nodeType: GT.TabNgramType GT.CTabTerms } }
     where
       errorHandler = logRESTError here "[listNodeActions]"
+
+-----------------------------------------------
+
+type VersionComparatorProps =
+  ( clientVersion :: Version
+  , remoteVersion :: Version
+  )
+
+versionComparator :: R2.Leaf VersionComparatorProps
+versionComparator = R2.leaf versionComparatorCpt
+versionComparatorCpt :: R.Component VersionComparatorProps
+versionComparatorCpt = here.component "versionComparator" cpt where
+  cpt { clientVersion, remoteVersion } _
+    | clientVersion == remoteVersion = pure $
+        B.caveat
+        { variant: Success
+        , className: "mainleaf__version-comparator"
+        }
+        [
+          B.div_ $
+            "Versions match"
+        ,
+          H.ul
+          {}
+          [
+            H.li
+            {}
+            [
+              B.b_ "frontend: "
+            ,
+              H.text $ nbsp 1
+            ,
+              B.code_ clientVersion
+            ]
+          ,
+            H.li
+            {}
+            [
+              B.b_ "backend: "
+            ,
+              H.text $ nbsp 1
+            ,
+              B.code_ remoteVersion
+            ]
+          ]
+        ]
+    | otherwise = pure $
+        B.caveat
+        { variant: Warning
+        , className: "mainleaf__version-comparator"
+        }
+        [
+          B.div_ $
+            "Versions mismatch"
+        ,
+          H.ul
+          {}
+          [
+            H.li
+            {}
+            [
+              B.b_ "frontend: "
+            ,
+              H.text $ nbsp 1
+            ,
+              B.code_ clientVersion
+            ]
+          ,
+            H.li
+            {}
+            [
+              B.b_ "backend: "
+            ,
+              H.text $ nbsp 1
+            ,
+              B.code_ remoteVersion
+            ]
+          ]
+        ]

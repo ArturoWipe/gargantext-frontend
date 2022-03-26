@@ -3,6 +3,7 @@ module Gargantext.Components.Bootstrap.Types
   , Variant(..), ButtonVariant(..)
   , Sizing(..)
   , SpinnerTheme(..)
+  , TooltipEffect(..)
   ) where
 
 import Gargantext.Prelude
@@ -115,3 +116,18 @@ derive instance Eq SpinnerTheme
 instance Show SpinnerTheme where
   show BorderTheme = "border"
   show GrowTheme   = "grow"
+
+----------------------------------------------------------------------
+
+-- | Effect used on React Tooltip
+-- |
+-- | https://github.com/wwayne/react-tooltip#options
+data TooltipEffect
+ = FloatEffect
+ | SolidEffect
+
+derive instance Generic TooltipEffect _
+derive instance Eq TooltipEffect
+instance Show TooltipEffect where
+  show FloatEffect = "float"
+  show SolidEffect = "grow"

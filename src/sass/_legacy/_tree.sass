@@ -65,6 +65,7 @@ $overlay-radius: 5px
       color: $gray-400
 
   &__node-icon
+    position: relative
     font-size: 16px
     margin-right: space-x(1)
     // @XXX Glyphicon icons lack of homogeneous width
@@ -87,6 +88,24 @@ $overlay-radius: 5px
     &.fa-lock,
     &.fa-fork
       font-size: 18px
+
+  &__version-badge
+    // pin the icon on bottom-right of the "&__node-icon"
+    $offset-y: -8px
+    $offset-x: -4px
+
+    position: absolute
+    font-size: 12px
+    background-color: $white
+    border: 1px solid $white
+    border-radius: 50%
+    bottom: $offset-y
+    right: $offset-x
+
+    &--matched
+      color: $success
+    &--mismatched
+      color: $warning
 
   &__node-link
     position: relative
@@ -125,6 +144,15 @@ $overlay-radius: 5px
 
     #{ $self }__settings-icon
       visibility: visible
+
+
+  &__version-comparator
+    margin-top: space-x(1)
+
+    li
+      margin-left: space-x(3)
+      list-style-type: disc
+      line-height: 1.4
 
 
   &--selected

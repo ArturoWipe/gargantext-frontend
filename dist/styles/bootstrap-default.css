@@ -10552,6 +10552,7 @@ a:focus, a:hover {
   color: #ced4da;
 }
 .mainleaf__node-icon {
+  position: relative;
   font-size: 16px;
   margin-right: 8px;
   width: 14px;
@@ -10567,6 +10568,21 @@ a:focus, a:hover {
 }
 .mainleaf__node-icon.fa-lock, .mainleaf__node-icon.fa-fork {
   font-size: 18px;
+}
+.mainleaf__version-badge {
+  position: absolute;
+  font-size: 12px;
+  background-color: #fff;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  bottom: -8px;
+  right: -4px;
+}
+.mainleaf__version-badge--matched {
+  color: #28a745;
+}
+.mainleaf__version-badge--mismatched {
+  color: #ffc107;
 }
 .mainleaf__node-link {
   position: relative;
@@ -10599,6 +10615,14 @@ a:focus, a:hover {
 }
 .mainleaf:hover .mainleaf__settings-icon {
   visibility: visible;
+}
+.mainleaf__version-comparator {
+  margin-top: 8px;
+}
+.mainleaf__version-comparator li {
+  margin-left: 24px;
+  list-style-type: disc;
+  line-height: 1.4;
 }
 .mainleaf--selected .mainleaf__node-link::before {
   content: "";
