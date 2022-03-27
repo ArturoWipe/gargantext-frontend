@@ -288,7 +288,7 @@ nodeSpanCpt = here.component "nodeSpan" cpt
               , title:
                     "Each node of the Tree can perform some actions.\n"
                   <> "Click here to execute one of them."
-              , variant: Primary
+              , variant: Secondary
               , overlay: true
               }
             ,
