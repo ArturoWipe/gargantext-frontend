@@ -2,7 +2,6 @@ $forest-layout-top-teaser-height: 24px
 $forest-layout-bottom-teaser-height: 24px // ~line-height to 1.5 (covering tree)
 $node-popop-radius: 6px
 $node-popup-width: 544px
-$overlay-radius: 5px
 
 
 @mixin forest-layout-gutter
@@ -44,14 +43,17 @@ $overlay-radius: 5px
 
 .mainleaf
   $self: &
+  $leaf-margin-bottom: 3px
 
   display: flex
   align-items: center
-  margin-bottom: space-x(0.25)
+  margin-bottom: $leaf-margin-bottom
   // forcing inline width to overflow its container width
   // this is mainly due to the multi-level of nested folders that keeps
   // increasing the mainleaf width
   width: max-content
+
+  ///////////////////////////
 
   &__folder-icon
     // padding instead of margin will ensure to add a gap for the icon call
@@ -63,6 +65,8 @@ $overlay-radius: 5px
 
     &--leaf
       color: $gray-400
+
+  ///////////////////////////
 
   &__node-icon
     position: relative
@@ -89,6 +93,8 @@ $overlay-radius: 5px
     &.fa-fork
       font-size: 18px
 
+  ///////////////////////////
+
   &__version-badge
     // pin the icon on bottom-right of the "&__node-icon"
     $offset-y: -8px
@@ -107,6 +113,8 @@ $overlay-radius: 5px
     &--mismatched
       color: $warning
 
+  ///////////////////////////
+
   &__node-link
     position: relative
     margin-right: space-x(1)
@@ -117,34 +125,31 @@ $overlay-radius: 5px
     a
       color: $body-color
 
-  &__settings-icon
-    // empirical alignement with "mainleaf-selected" background
-    $overlay-offset: -6px
+  ///////////////////////////
 
+  &__settings-icon
     visibility: hidden
     margin-left: space-x(2)
-    position: relative
-    // @WIP: common rules for B.iconButton?
-    color: $secondary
-    transition: color 0.2s
 
-    &::before
-      @include fit-positions($overlay-offset)
+  &:hover &__settings-icon
+    visibility: visible
 
-      content: ""
-      background-color: $gray-100
-      border-radius: $overlay-radius
-      z-index: -1
-      position: absolute
+  ///////////////////////////
 
-    &:hover
-      color: darken($secondary, 15%)
+  &__update-icon
+    margin-left: space-x(2)
 
-  &:hover
+  ///////////////////////////
 
-    #{ $self }__settings-icon
-      visibility: visible
+  &__update-icon,
+  &__settings-icon
+    // altering component overlay offset to fit it with the ".mainleaf" overlay
+    // dimension
+    &.b-icon-button--overlay::before
+      top: -5px
+      bottom: -5px
 
+  ///////////////////////////
 
   &__version-comparator
     margin-top: space-x(1)
@@ -154,6 +159,7 @@ $overlay-radius: 5px
       list-style-type: disc
       line-height: 1.4
 
+  ///////////////////////////
 
   &--selected
     // margin for the selected background
@@ -161,7 +167,7 @@ $overlay-radius: 5px
     // left extra offset: including icons, caret, ...
     $extra-left-overlay-offset: -56px
     // right extra offset: adding extra margin
-    $extra-right-overlay-offset: - space-x(1.25)
+    $extra-right-overlay-offset: - 12px
 
     #{ $self }__node-link::before
       content: ""
@@ -181,17 +187,11 @@ $overlay-radius: 5px
       color: $primary
       font-weight: bold
 
+  ///////////////////////////
+
   &--file-dropped
     background-color: #d8dfe5
 
-
-  .node-actions
-    padding-left: 5px
-    .update-button
-      &.enabled
-        cursor: pointer
-      &.disabled
-        cursor: wait
   .node
     margin-top: 1px
     &.node-type-valid

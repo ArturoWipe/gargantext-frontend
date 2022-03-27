@@ -10014,16 +10014,94 @@ h3 {
 }
 
 .b-icon-button {
+  transition: color 0.2s;
+  position: relative;
+}
+.b-icon-button--overlay.b-icon-button::before {
+  top: -6px;
+  right: -6px;
+  bottom: -6px;
+  left: -6px;
+  content: "";
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  z-index: -1;
+  position: absolute;
+}
+.b-icon-button--enabled, .b-icon-button--muted {
   cursor: pointer;
 }
-.b-icon-button:focus {
+.b-icon-button--enabled:focus, .b-icon-button--muted:focus {
   outline: 0;
+}
+.b-icon-button--enabled.b-icon-button--warning, .b-icon-button--muted.b-icon-button--warning {
+  color: #5f5f5f;
+}
+.b-icon-button--enabled.b-icon-button--success, .b-icon-button--muted.b-icon-button--success {
+  color: #333333;
+}
+.b-icon-button--enabled.b-icon-button--danger, .b-icon-button--muted.b-icon-button--danger {
+  color: #434343;
+}
+.b-icon-button--enabled.b-icon-button--info, .b-icon-button--muted.b-icon-button--info {
+  color: #515151;
+}
+.b-icon-button--enabled.b-icon-button--primary, .b-icon-button--muted.b-icon-button--primary {
+  color: #222222;
+}
+.b-icon-button--enabled.b-icon-button--secondary, .b-icon-button--muted.b-icon-button--secondary {
+  color: #666666;
+}
+.b-icon-button--enabled.b-icon-button--dark, .b-icon-button--muted.b-icon-button--dark {
+  color: #212529;
+}
+.b-icon-button--enabled.b-icon-button--warning:hover, .b-icon-button--muted.b-icon-button--warning:hover {
+  color: #525252;
+}
+.b-icon-button--enabled.b-icon-button--success:hover, .b-icon-button--muted.b-icon-button--success:hover {
+  color: #262626;
+}
+.b-icon-button--enabled.b-icon-button--danger:hover, .b-icon-button--muted.b-icon-button--danger:hover {
+  color: #363636;
+}
+.b-icon-button--enabled.b-icon-button--info:hover, .b-icon-button--muted.b-icon-button--info:hover {
+  color: #444444;
+}
+.b-icon-button--enabled.b-icon-button--primary:hover, .b-icon-button--muted.b-icon-button--primary:hover {
+  color: #151515;
+}
+.b-icon-button--enabled.b-icon-button--secondary:hover, .b-icon-button--muted.b-icon-button--secondary:hover {
+  color: #595959;
+}
+.b-icon-button--enabled.b-icon-button--dark:hover, .b-icon-button--muted.b-icon-button--dark:hover {
+  color: #16181b;
 }
 .b-icon-button--disabled, .b-icon-button--deferred, .b-icon-button--idled {
   cursor: default;
 }
 .b-icon-button--disabled:focus, .b-icon-button--deferred:focus, .b-icon-button--idled:focus {
   outline: 0;
+}
+.b-icon-button--disabled.b-icon-button--warning, .b-icon-button--deferred.b-icon-button--warning, .b-icon-button--idled.b-icon-button--warning {
+  color: #858585;
+}
+.b-icon-button--disabled.b-icon-button--success, .b-icon-button--deferred.b-icon-button--success, .b-icon-button--idled.b-icon-button--success {
+  color: #595959;
+}
+.b-icon-button--disabled.b-icon-button--danger, .b-icon-button--deferred.b-icon-button--danger, .b-icon-button--idled.b-icon-button--danger {
+  color: dimgray;
+}
+.b-icon-button--disabled.b-icon-button--info, .b-icon-button--deferred.b-icon-button--info, .b-icon-button--idled.b-icon-button--info {
+  color: #777777;
+}
+.b-icon-button--disabled.b-icon-button--primary, .b-icon-button--deferred.b-icon-button--primary, .b-icon-button--idled.b-icon-button--primary {
+  color: #484848;
+}
+.b-icon-button--disabled.b-icon-button--secondary, .b-icon-button--deferred.b-icon-button--secondary, .b-icon-button--idled.b-icon-button--secondary {
+  color: #8c8c8c;
+}
+.b-icon-button--disabled.b-icon-button--dark, .b-icon-button--deferred.b-icon-button--dark, .b-icon-button--idled.b-icon-button--dark {
+  color: #434b53;
 }
 
 .b-fieldset {
@@ -10601,26 +10679,12 @@ a:focus, a:hover {
 .mainleaf__settings-icon {
   visibility: hidden;
   margin-left: 16px;
-  position: relative;
-  color: #666666;
-  transition: color 0.2s;
-}
-.mainleaf__settings-icon::before {
-  top: -6px;
-  right: -6px;
-  bottom: -6px;
-  left: -6px;
-  content: "";
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  z-index: -1;
-  position: absolute;
-}
-.mainleaf__settings-icon:hover {
-  color: #404040;
 }
 .mainleaf:hover .mainleaf__settings-icon {
   visibility: visible;
+}
+.mainleaf__update-icon {
+  margin-left: 16px;
 }
 .mainleaf__version-comparator {
   margin-top: 8px;
@@ -10650,15 +10714,6 @@ a:focus, a:hover {
 }
 .mainleaf--file-dropped {
   background-color: #d8dfe5;
-}
-.mainleaf .node-actions {
-  padding-left: 5px;
-}
-.mainleaf .node-actions .update-button.enabled {
-  cursor: pointer;
-}
-.mainleaf .node-actions .update-button.disabled {
-  cursor: wait;
 }
 .mainleaf .node {
   margin-top: 1px;

@@ -4,7 +4,8 @@ import Gargantext.Prelude
 
 import Data.Foldable (elem, intercalate)
 import Effect (Effect)
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Variant(..))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import React.SyntheticEvent as SE
 import Reactix as R
@@ -20,6 +21,8 @@ type Options =
   ( className :: String
   , status    :: ComponentStatus
   , title     :: String
+  , overlay   :: Boolean
+  , variant   :: Variant
   )
 
 options :: Record Options
@@ -27,6 +30,8 @@ options =
   { className : ""
   , status    : Enabled
   , title     : ""
+  , overlay   : false
+  , variant   : Dark
   }
 
 -- | Structural Component for a simple Glyphicon element with call-to-action
@@ -47,29 +52,42 @@ component = R.hooksComponent componentName cpt where
             , status
             , name } _ = do
     -- Computed
-    className <- pure $ intercalate " "
-      -- provided custom className
-      [ props.className
-      -- BEM classNames
-      , componentName
-      , componentName <> "--" <> show status
-      -- Bootstrap specific classNames
-      , bootstrapName
-      , bootstrapName <> "-" <> name
-      ]
+    let
+      wrapperClassName = intercalate " "
+        -- provided custom className
+        [ props.className
+        -- BEM classNames
+        , componentName
+        , componentName <> "--" <> show status
+        , componentName <> "--" <> show props.variant
+        , props.overlay ?
+            componentName <> "--overlay" $
+            ""
+        ]
+
+      contentClassName = intercalate " "
+        -- Bootstrap specific classNames
+        [ bootstrapName
+        , bootstrapName <> "-" <> name
+        ]
     -- Behaviors
     let
       click = onClick status callback
     -- Render
     pure $
 
-      H.i
-      { className
+      H.span
+      { className: wrapperClassName
       , on: { click }
       , disabled: elem status [ Disabled, Deferred ]
-      , title: props.title
       }
-      []
+      [
+        H.i
+        { title: props.title
+        , className: contentClassName
+        }
+        []
+      ]
 
 -- | Clicked event will effectively be triggered according to the
 -- | component status props

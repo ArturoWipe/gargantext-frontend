@@ -260,6 +260,13 @@ nodeSpanCpt = here.component "nodeSpan" cpt
           , name: name' props.name nodeType session
           }
         ,
+          nodeActions
+          { id
+          , nodeType
+          , refresh: const $ dispatch RefreshTree
+          , session
+          } []
+        ,
           fileTypeView
           { dispatch, droppedFile, id, isDragOver, nodeType } []
         ,
@@ -273,18 +280,17 @@ nodeSpanCpt = here.component "nodeSpan" cpt
             , ref: popoverRef
             }
             [
-              H.div
-              { className: "mainleaf__settings-icon" }
-              [
-                B.iconButton
-                { name: "cog"
-                -- (cf. Popover callbacks)
-                , callback: const R.nothing
-                , title:
-                      "Each node of the Tree can perform some actions.\n"
-                    <> "Click here to execute one of them."
-                }
-              ]
+              B.iconButton
+              { name: "cog"
+              , className: "mainleaf__settings-icon"
+              -- (cf. Popover callbacks)
+              , callback: const R.nothing
+              , title:
+                    "Each node of the Tree can perform some actions.\n"
+                  <> "Click here to execute one of them."
+              , variant: Primary
+              , overlay: true
+              }
             ,
               nodePopupView
               { boxes
@@ -296,25 +302,18 @@ nodeSpanCpt = here.component "nodeSpan" cpt
               , session
               }
             ]
-        ,
-          -- H.span
-          -- { style: { width: "8em" } }
-          -- (map (\t -> asyncProgressBar { asyncTask: t
-          --                                 --, barType: Pie
-          --                               , barType: Bar
-          --                               , errors
-          --                               , nodeId: id
-          --                               , onFinish: onTaskFinish id t
-          --                               , session } []
-          --       ) currentTasks'
-          -- )
         -- ,
-          nodeActions
-          { id
-          , nodeType
-          , refresh: const $ dispatch RefreshTree
-          , session
-          } []
+        --   H.span
+        --   { style: { width: "8em" } }
+        --   (map (\t -> asyncProgressBar { asyncTask: t
+        --                                   --, barType: Pie
+        --                                 , barType: Bar
+        --                                 , errors
+        --                                 , nodeId: id
+        --                                 , onFinish: onTaskFinish id t
+        --                                 , session } []
+        --         ) currentTasks'
+        --   )
         ,
           nodeTooltip
           { id
@@ -343,7 +342,8 @@ nodeIconCpt :: R.Component NodeIconProps
 nodeIconCpt = here.component "nodeIcon" cpt where
   cpt { nodeType
       , callback
-      , isLeaf } children = pure $
+      , isLeaf
+      } children = pure $
 
     H.span
     { className: "mainleaf__node-icon" } $
@@ -352,7 +352,7 @@ nodeIconCpt = here.component "nodeIcon" cpt where
       { className: "mainleaf__node-icon"
       , name: GT.getIcon nodeType true
       , callback
-      , status: isLeaf ? Idled $ Enabled
+      , status: isLeaf ? Muted $ Enabled
       }
     ]
       <> children
@@ -539,32 +539,9 @@ versionComparatorCpt = here.component "versionComparator" cpt where
         , className: "mainleaf__version-comparator"
         }
         [
-          B.div_ $
-            "Versions match"
+          B.b_ "Versions match"
         ,
-          H.ul
-          {}
-          [
-            H.li
-            {}
-            [
-              B.b_ "frontend: "
-            ,
-              H.text $ nbsp 1
-            ,
-              B.code_ clientVersion
-            ]
-          ,
-            H.li
-            {}
-            [
-              B.b_ "backend: "
-            ,
-              H.text $ nbsp 1
-            ,
-              B.code_ remoteVersion
-            ]
-          ]
+          content clientVersion remoteVersion
         ]
     | otherwise = pure $
         B.caveat
@@ -572,30 +549,33 @@ versionComparatorCpt = here.component "versionComparator" cpt where
         , className: "mainleaf__version-comparator"
         }
         [
-          B.div_ $
-            "Versions mismatch"
+          B.b_ "Versions mismatch"
         ,
-          H.ul
-          {}
-          [
-            H.li
-            {}
-            [
-              B.b_ "frontend: "
-            ,
-              H.text $ nbsp 1
-            ,
-              B.code_ clientVersion
-            ]
-          ,
-            H.li
-            {}
-            [
-              B.b_ "backend: "
-            ,
-              H.text $ nbsp 1
-            ,
-              B.code_ remoteVersion
-            ]
-          ]
+          content clientVersion remoteVersion
         ]
+
+  content :: Version -> Version -> R.Element
+  content clientVersion remoteVersion =
+    H.ul
+    {}
+    [
+      H.li
+      {}
+      [
+        B.span_ "frontend: "
+      ,
+        H.text $ nbsp 1
+      ,
+        B.code_ clientVersion
+      ]
+    ,
+      H.li
+      {}
+      [
+        B.span_ "backend: "
+      ,
+        H.text $ nbsp 1
+      ,
+        B.code_ remoteVersion
+      ]
+    ]
