@@ -10676,6 +10676,10 @@ a:focus, a:hover {
 .mainleaf__node-link a {
   color: #212529;
 }
+.mainleaf__node-link::before {
+  position: absolute;
+  z-index: -1;
+}
 .mainleaf__settings-icon {
   visibility: hidden;
   margin-left: 16px;
@@ -10706,8 +10710,6 @@ a:focus, a:hover {
   top: -2px;
   bottom: -2px;
   border-radius: 5px;
-  position: absolute;
-  z-index: -1;
 }
 .mainleaf--selected .mainleaf__node-icon {
   color: #222222;
@@ -10716,14 +10718,9 @@ a:focus, a:hover {
   color: #222222;
   font-weight: bold;
 }
-.mainleaf--file-dropped {
-  background-color: #d8dfe5;
-}
-.mainleaf .node {
-  margin-top: 1px;
-}
-.mainleaf .node.node-type-valid .text {
-  text-decoration: underline;
+.mainleaf--file-dropped .mainleaf__node-link::before {
+  content: "";
+  border: 1px dashed #666666;
 }
 
 .subtree__node {

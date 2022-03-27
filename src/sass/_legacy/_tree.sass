@@ -40,6 +40,7 @@ $node-popup-width: 544px
       font-size: 12px
       top: $caret-y-offset
 
+////////////////////////////////////
 
 .mainleaf
   $self: &
@@ -53,7 +54,7 @@ $node-popup-width: 544px
   // increasing the mainleaf width
   width: max-content
 
-  ///////////////////////////
+  //----------------------------
 
   &__folder-icon
     // padding instead of margin will ensure to add a gap for the icon call
@@ -66,7 +67,7 @@ $node-popup-width: 544px
     &--leaf
       color: $gray-400
 
-  ///////////////////////////
+  //----------------------------
 
   &__node-icon
     position: relative
@@ -93,7 +94,7 @@ $node-popup-width: 544px
     &.fa-fork
       font-size: 18px
 
-  ///////////////////////////
+  //----------------------------
 
   &__version-badge
     // pin the icon on bottom-right of the "&__node-icon"
@@ -113,7 +114,7 @@ $node-popup-width: 544px
     &--mismatched
       color: $warning
 
-  ///////////////////////////
+  //----------------------------
 
   &__node-link
     position: relative
@@ -125,7 +126,24 @@ $node-popup-width: 544px
     a
       color: $body-color
 
-  ///////////////////////////
+    // preparing "before" content (see "&--selected", "&--file-dropped")
+    &::before
+      // margin for the before background
+      $overlay-offset: -2px
+      // left extra offset: used to include besides icons, caret, ...
+      $extra-left-overlay-offset: -56px
+      // right extra offset: adding extra margin
+      $extra-right-overlay-offset: - 12px
+
+      position: absolute
+      z-index: -1
+      left: calc( #{ $overlay-offset } + #{ $extra-left-overlay-offset })
+      right: calc( #{ $overlay-offset } + #{ $extra-right-overlay-offset })
+      top: $overlay-offset
+      bottom: $overlay-offset
+      border-radius: $overlay-radius
+
+  //----------------------------
 
   &__settings-icon
     visibility: hidden
@@ -134,12 +152,12 @@ $node-popup-width: 544px
   &:hover &__settings-icon
     visibility: visible
 
-  ///////////////////////////
+  //----------------------------
 
   &__update-icon
     margin-left: space-x(2)
 
-  ///////////////////////////
+  //----------------------------
 
   &__update-icon,
   &__settings-icon
@@ -149,7 +167,7 @@ $node-popup-width: 544px
       top: -5px
       bottom: -5px
 
-  ///////////////////////////
+  //----------------------------
 
   &__version-comparator
     margin-top: space-x(1)
@@ -159,26 +177,13 @@ $node-popup-width: 544px
       list-style-type: disc
       line-height: 1.4
 
-  ///////////////////////////
+  //----------------------------
 
   &--selected
-    // margin for the selected background
-    $overlay-offset: -2px
-    // left extra offset: including icons, caret, ...
-    $extra-left-overlay-offset: -56px
-    // right extra offset: adding extra margin
-    $extra-right-overlay-offset: - 12px
 
     #{ $self }__node-link::before
       content: ""
       background-color: $gray-100
-      left: calc( #{ $overlay-offset } + #{ $extra-left-overlay-offset })
-      right: calc( #{ $overlay-offset } + #{ $extra-right-overlay-offset })
-      top: $overlay-offset
-      bottom: $overlay-offset
-      border-radius: $overlay-radius
-      position: absolute
-      z-index: -1
 
     #{ $self }__node-icon
       color: $primary
@@ -187,16 +192,13 @@ $node-popup-width: 544px
       color: $primary
       font-weight: bold
 
-  ///////////////////////////
+  //----------------------------
 
   &--file-dropped
-    background-color: #d8dfe5
 
-  .node
-    margin-top: 1px
-    &.node-type-valid
-      .text
-        text-decoration: underline
+    #{ $self }__node-link::before
+      content: ""
+      border: 1px dotted $secondary
 
 ////////////////////////////////////////
 

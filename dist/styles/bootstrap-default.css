@@ -10517,14 +10517,12 @@ li#rename #rename-a {
 }
 
 #file-type-tooltip {
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
   position: absolute;
-  left: 96px;
-  top: -64px;
   background-color: white;
   z-index: 1000;
-}
-#file-type-tooltip .card-body select {
-  min-width: 200px;
 }
 
 .glyphitem {
@@ -10670,6 +10668,15 @@ a:focus, a:hover {
 .mainleaf__node-link a {
   color: #212529;
 }
+.mainleaf__node-link::before {
+  position: absolute;
+  z-index: -1;
+  left: calc( -2px + -56px);
+  right: calc( -2px + -12px);
+  top: -2px;
+  bottom: -2px;
+  border-radius: 5px;
+}
 .mainleaf__settings-icon {
   visibility: hidden;
   margin-left: 16px;
@@ -10695,13 +10702,6 @@ a:focus, a:hover {
 .mainleaf--selected .mainleaf__node-link::before {
   content: "";
   background-color: #f8f9fa;
-  left: calc( -2px + -56px);
-  right: calc( -2px + -12px);
-  top: -2px;
-  bottom: -2px;
-  border-radius: 5px;
-  position: absolute;
-  z-index: -1;
 }
 .mainleaf--selected .mainleaf__node-icon {
   color: #005a9a;
@@ -10710,14 +10710,9 @@ a:focus, a:hover {
   color: #005a9a;
   font-weight: bold;
 }
-.mainleaf--file-dropped {
-  background-color: #d8dfe5;
-}
-.mainleaf .node {
-  margin-top: 1px;
-}
-.mainleaf .node.node-type-valid .text {
-  text-decoration: underline;
+.mainleaf--file-dropped .mainleaf__node-link::before {
+  content: "";
+  border: 1px dotted #007bff;
 }
 
 .subtree__node {

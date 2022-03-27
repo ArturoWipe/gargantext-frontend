@@ -209,6 +209,8 @@ nodeSpanCpt = here.component "nodeSpan" cpt
         Just { session } $
         Nothing
 
+      host <- R2.getPortalHost
+
     -- Render
 
       pure $
@@ -267,9 +269,6 @@ nodeSpanCpt = here.component "nodeSpan" cpt
           , session
           } []
         ,
-          fileTypeView
-          { dispatch, droppedFile, id, isDragOver, nodeType } []
-        ,
           R2.if' (showBox) $
 
             Popover.popover
@@ -325,6 +324,13 @@ nodeSpanCpt = here.component "nodeSpan" cpt
               Nothing -> mempty
               Just v  -> versionComparator v
           ]
+        ,
+          R.createPortal
+          [
+            fileTypeView
+            { dispatch, droppedFile, id, isDragOver, nodeType } []
+          ]
+          host
         ]
 
 
