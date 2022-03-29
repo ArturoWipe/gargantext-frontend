@@ -161,26 +161,20 @@ $node-popup-width: 544px
 
   &__progress-bar
     $progress-bar-width: 64px
-    // align progress bar height with other ".mainleaf" overlay and asides icons
-    $progress-bar-height: 10px
-    $overlay-offset-y: -8px
-    $overlay-offset-x: -5px
+    $progress-bar-height: 8px
 
     width: $progress-bar-width
     position: relative
     margin-left: 16px
 
     &::before
+      @include fit-positions(-3px)
+
       content: ""
       position: absolute
       z-index: -1
       border: 1px solid $info
       border-radius: $overlay-radius
-      top: $overlay-offset-y
-      bottom: $overlay-offset-y
-      left: $overlay-offset-x
-      right: $overlay-offset-x
-
 
     .b-progress-bar
       height: $progress-bar-height

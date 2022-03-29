@@ -10693,18 +10693,18 @@ a:focus, a:hover {
   margin-left: 16px;
 }
 .mainleaf__progress-bar::before {
+  top: -3px;
+  right: -3px;
+  bottom: -3px;
+  left: -3px;
   content: "";
   position: absolute;
   z-index: -1;
   border: 1px solid #17a2b8;
   border-radius: 5px;
-  top: -8px;
-  bottom: -8px;
-  left: -5px;
-  right: -5px;
 }
 .mainleaf__progress-bar .b-progress-bar {
-  height: 10px;
+  height: 8px;
   background-color: #fff;
 }
 .mainleaf__update-icon.b-icon-button--overlay::before, .mainleaf__settings-icon.b-icon-button--overlay::before {
