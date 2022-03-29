@@ -10687,6 +10687,26 @@ a:focus, a:hover {
 .mainleaf__update-icon {
   margin-left: 16px;
 }
+.mainleaf__progress-bar {
+  width: 64px;
+  position: relative;
+  margin-left: 16px;
+}
+.mainleaf__progress-bar::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border: 1px solid #17a2b8;
+  border-radius: 5px;
+  top: -8px;
+  bottom: -8px;
+  left: -5px;
+  right: -5px;
+}
+.mainleaf__progress-bar .b-progress-bar {
+  height: 10px;
+  background-color: #fff;
+}
 .mainleaf__update-icon.b-icon-button--overlay::before, .mainleaf__settings-icon.b-icon-button--overlay::before {
   top: -5px;
   bottom: -5px;
@@ -10762,43 +10782,6 @@ a:focus, a:hover {
 }
 .left-handed .subtree__node__children > .subtree__node {
   padding-right: 20px;
-}
-
-.progress-pie {
-  background: rgba(51, 122, 183, 0.1);
-  border-radius: 100%;
-  height: calc(var(--size, 14) * 1px);
-  overflow: hidden;
-  position: relative;
-  width: calc(var(--size, 14) * 1px);
-}
-.progress-pie .progress-pie-segment {
-  --a: calc(var(--over50, 0) * -100%);
-  --b: calc((1 + var(--over50, 0)) * 100%);
-  --degrees: calc((var(--offset, 0) / 100) * 360);
-  -webkit-clip-path: polygon(var(--a) var(--a), var(--b) var(--a), var(--b) var(--b), var(--a) var(--b));
-  clip-path: polygon(var(--a) var(--a), var(--b) var(--a), var(--b) var(--b), var(--a) var(--b));
-  height: 100%;
-  position: absolute;
-  transform: translate(0, -50%) rotate(90deg) rotate(calc(var(--degrees) * 1deg));
-  transform-origin: 50% 100%;
-  width: 100%;
-  z-index: calc(1 + var(--over50));
-}
-.progress-pie .progress-pie-segment:after, .progress-pie .progress-pie-segment:before {
-  background: var(--bg, #337ab7);
-  content: "";
-  height: 100%;
-  position: absolute;
-  width: 100%;
-}
-.progress-pie .progress-pie-segment:before {
-  --degrees: calc((var(--value, 45) / 100) * 360);
-  transform: translate(0, 100%) rotate(calc(var(--degrees) * 1deg));
-  transform-origin: 50% 0%;
-}
-.progress-pie .progress-pie-segment:after {
-  opacity: var(--over50, 0);
 }
 
 #node-popup-tooltip {
@@ -11306,6 +11289,43 @@ select.form-control {
 
 .jitsi-iframe {
   height: 70em;
+}
+
+.progress-pie {
+  background: rgba(51, 122, 183, 0.1);
+  border-radius: 100%;
+  height: calc(var(--size, 14) * 1px);
+  overflow: hidden;
+  position: relative;
+  width: calc(var(--size, 14) * 1px);
+}
+.progress-pie .progress-pie-segment {
+  --a: calc(var(--over50, 0) * -100%);
+  --b: calc((1 + var(--over50, 0)) * 100%);
+  --degrees: calc((var(--offset, 0) / 100) * 360);
+  -webkit-clip-path: polygon(var(--a) var(--a), var(--b) var(--a), var(--b) var(--b), var(--a) var(--b));
+  clip-path: polygon(var(--a) var(--a), var(--b) var(--a), var(--b) var(--b), var(--a) var(--b));
+  height: 100%;
+  position: absolute;
+  transform: translate(0, -50%) rotate(90deg) rotate(calc(var(--degrees) * 1deg));
+  transform-origin: 50% 100%;
+  width: 100%;
+  z-index: calc(1 + var(--over50));
+}
+.progress-pie .progress-pie-segment:after, .progress-pie .progress-pie-segment:before {
+  background: var(--bg, #337ab7);
+  content: "";
+  height: 100%;
+  position: absolute;
+  width: 100%;
+}
+.progress-pie .progress-pie-segment:before {
+  --degrees: calc((var(--value, 45) / 100) * 360);
+  transform: translate(0, 100%) rotate(calc(var(--degrees) * 1deg));
+  transform-origin: 50% 0%;
+}
+.progress-pie .progress-pie-segment:after {
+  opacity: var(--over50, 0);
 }
 
 .range {

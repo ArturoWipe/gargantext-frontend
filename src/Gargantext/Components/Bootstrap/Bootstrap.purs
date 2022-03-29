@@ -12,6 +12,7 @@ import Gargantext.Components.Bootstrap.FormSelect(formSelect) as Exports
 import Gargantext.Components.Bootstrap.FormTextarea(formTextarea) as Exports
 import Gargantext.Components.Bootstrap.Icon(icon) as Exports
 import Gargantext.Components.Bootstrap.IconButton(iconButton) as Exports
+import Gargantext.Components.Bootstrap.ProgressBar(progressBar) as Exports
 import Gargantext.Components.Bootstrap.Spinner(spinner) as Exports
 import Gargantext.Components.Bootstrap.Tooltip(tooltip) as Exports
 

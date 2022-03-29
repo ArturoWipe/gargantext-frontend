@@ -159,13 +159,44 @@ $node-popup-width: 544px
 
   //----------------------------
 
+  &__progress-bar
+    $progress-bar-width: 64px
+    // align progress bar height with other ".mainleaf" overlay and asides icons
+    $progress-bar-height: 10px
+    $overlay-offset-y: -8px
+    $overlay-offset-x: -5px
+
+    width: $progress-bar-width
+    position: relative
+    margin-left: 16px
+
+    &::before
+      content: ""
+      position: absolute
+      z-index: -1
+      border: 1px solid $info
+      border-radius: $overlay-radius
+      top: $overlay-offset-y
+      bottom: $overlay-offset-y
+      left: $overlay-offset-x
+      right: $overlay-offset-x
+
+
+    .b-progress-bar
+      height: $progress-bar-height
+      background-color: $white
+
+  //----------------------------
+
   &__update-icon,
   &__settings-icon
     // altering component overlay offset to fit it with the ".mainleaf" overlay
     // dimension
+    $aside-icon-offset-y: -5px
+
     &.b-icon-button--overlay::before
-      top: -5px
-      bottom: -5px
+      top: $aside-icon-offset-y
+      bottom: $aside-icon-offset-y
 
   //----------------------------
 
@@ -255,48 +286,6 @@ $node-popup-width: 544px
 
       &__children > #{ $self }__node
         padding-right: space-x(2.5)
-
-/////////////////////////////////////////
-
-// @WIP: used?
-
-// based on https://codeburst.io/how-to-pure-css-pie-charts-w-css-variables-38287aea161e
-.progress-pie
-  background: rgba(51, 122, 183, 0.1)
-  border-radius: 100%
-  height: calc(var(--size, 14) * 1px)
-  overflow: hidden
-  position: relative
-  width: calc(var(--size, 14) * 1px)
-
-  .progress-pie-segment
-    --a: calc(var(--over50, 0) * -100%)
-    --b: calc((1 + var(--over50, 0)) * 100%)
-    --degrees: calc((var(--offset, 0) / 100) * 360)
-    -webkit-clip-path: polygon(var(--a) var(--a), var(--b) var(--a), var(--b) var(--b), var(--a) var(--b))
-    clip-path: polygon(var(--a) var(--a), var(--b) var(--a), var(--b) var(--b), var(--a) var(--b))
-    height: 100%
-    position: absolute
-    transform: translate(0, -50%) rotate(90deg) rotate(calc(var(--degrees) * 1deg))
-    transform-origin: 50% 100%
-    width: 100%
-    z-index: calc(1 + var(--over50))
-
-    &:after,
-    &:before
-      background: var(--bg, rgb(51, 122, 183))
-      content: ''
-      height: 100%
-      position: absolute
-      width: 100%
-
-    &:before
-      --degrees: calc((var(--value, 45) / 100) * 360)
-      transform: translate(0, 100%) rotate(calc(var(--degrees) * 1deg))
-      transform-origin: 50% 0%
-
-    &:after
-      opacity: var(--over50, 0)
 
 /////////////////////////////////////////
 

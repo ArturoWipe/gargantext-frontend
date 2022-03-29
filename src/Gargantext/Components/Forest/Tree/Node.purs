@@ -21,12 +21,14 @@ import Gargantext.Components.Forest.Tree.Node.Action.Upload (DroppedFile(..), fi
 import Gargantext.Components.Forest.Tree.Node.Action.Upload.Types (FileType(..), UploadFileBlob(..))
 import Gargantext.Components.Forest.Tree.Node.Box (nodePopupView)
 import Gargantext.Components.Forest.Tree.Node.Settings (SettingsBox(..), settingsBox)
-import Gargantext.Components.Forest.Tree.Node.Tools.ProgressBar (asyncProgressBar, BarType(..))
+import Gargantext.Components.Forest.Tree.Node.Tools.ProgressBar (BarType(..), asyncProgressBar)
+import Gargantext.Components.Forest.Tree.Node.Tools.ProgressBar as PB
 import Gargantext.Components.Forest.Tree.Node.Tools.Sync (nodeActionsGraph, nodeActionsNodeList)
 import Gargantext.Components.GraphExplorer.API as GraphAPI
 import Gargantext.Components.Lang (Lang(EN))
 import Gargantext.Components.Nodes.Corpus (loadCorpusWithChild)
 import Gargantext.Config.REST (logRESTError)
+import Gargantext.Context.Progress (AsyncProps, asyncContext, asyncProgress)
 import Gargantext.Ends (Frontends, url)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Hooks.Loader (useLoader)
@@ -227,6 +229,9 @@ nodeSpanCpt = here.component "nodeSpan" cpt
               }
         }
         [
+
+      -- // Leaf informations data //
+
           folderIcon
           { isLeaf
           , isOpened: folderOpen'
@@ -262,6 +267,9 @@ nodeSpanCpt = here.component "nodeSpan" cpt
           , name: name' props.name nodeType session
           }
         ,
+
+      -- // Leaf action features //
+
           nodeActions
           { id
           , nodeType
@@ -301,19 +309,23 @@ nodeSpanCpt = here.component "nodeSpan" cpt
               , session
               }
             ]
-        -- ,
-        --   H.span
-        --   { style: { width: "8em" } }
-        --   (map (\t -> asyncProgressBar { asyncTask: t
-        --                                   --, barType: Pie
-        --                                 , barType: Bar
-        --                                 , errors
-        --                                 , nodeId: id
-        --                                 , onFinish: onTaskFinish id t
-        --                                 , session } []
-        --         ) currentTasks'
-        --   )
         ,
+          R.fragment $ flip map currentTasks' \task ->
+
+            asyncProgress
+            { asyncTask: task
+            , errors
+            , nodeId: id
+            , onFinish: onTaskFinish id task
+            , session
+            }
+            [
+              taskProgress
+              {}
+            ]
+        ,
+      -- // Abstract informations //
+
           nodeTooltip
           { id
           , nodeType
@@ -585,3 +597,24 @@ versionComparatorCpt = here.component "versionComparator" cpt where
         B.code_ remoteVersion
       ]
     ]
+
+-------------------------------------------------------
+
+taskProgress :: R2.Leaf ()
+taskProgress = R2.leaf taskProgressCpt
+taskProgressCpt :: R.Component ()
+taskProgressCpt = here.component "progress" cpt where
+  cpt _ _ = do
+    -- Context
+    asyncProgressContext <- R.useContext asyncContext
+    -- Render
+    pure $
+
+      H.span
+      { className: "mainleaf__progress-bar" }
+      [
+        B.progressBar
+        { value: asyncProgressContext
+        , variant: Info
+        }
+      ]
