@@ -431,7 +431,7 @@ nodeLinkCpt = here.component "nodeLink" cpt
 
         aProps =
           { href
-          } `Record.merge` tooltipBind tid
+          } `Record.merge` B.tooltipBind tid
 
       pure $
 

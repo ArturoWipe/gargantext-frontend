@@ -116,6 +116,7 @@
 
   transition: color 0.2s;
   position: relative;
+  transition: color 150ms ease-in-out;
 
   &--overlay {
 
@@ -127,6 +128,14 @@
       border-radius: $overlay-radius;
       z-index: -1;
       position: absolute;
+      transition: background-color 150ms ease-in-out
+    }
+
+    &:hover {
+
+      &#{ $self }::before {
+        background-color: darken($gray-100, 10%);
+      }
     }
   }
 

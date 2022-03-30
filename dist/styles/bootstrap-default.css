@@ -10011,6 +10011,7 @@ h3 {
 .b-icon-button {
   transition: color 0.2s;
   position: relative;
+  transition: color 150ms ease-in-out;
 }
 .b-icon-button--overlay.b-icon-button::before {
   top: -6px;
@@ -10022,6 +10023,10 @@ h3 {
   border-radius: 5px;
   z-index: -1;
   position: absolute;
+  transition: background-color 150ms ease-in-out;
+}
+.b-icon-button--overlay:hover.b-icon-button::before {
+  background-color: #dae0e5;
 }
 .b-icon-button--enabled, .b-icon-button--muted {
   cursor: pointer;
@@ -10236,6 +10241,9 @@ h4, h5, h6 {
   position: sticky;
   top: 0;
   z-index: 910;
+}
+.main-topbar__theme-switcher, .main-topbar__lang-switcher, .main-topbar__tree-switcher {
+  margin-right: 8px;
 }
 .main-topbar.navbar-dark .navbar-text:hover {
   color: rgba(255, 255, 255, 0.75);

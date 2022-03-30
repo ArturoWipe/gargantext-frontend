@@ -9767,6 +9767,7 @@ h3 {
 .b-icon-button {
   transition: color 0.2s;
   position: relative;
+  transition: color 150ms ease-in-out;
 }
 .b-icon-button--overlay.b-icon-button::before {
   top: -6px;
@@ -9778,6 +9779,10 @@ h3 {
   border-radius: 5px;
   z-index: -1;
   position: absolute;
+  transition: background-color 150ms ease-in-out;
+}
+.b-icon-button--overlay:hover.b-icon-button::before {
+  background-color: #dae0e5;
 }
 .b-icon-button--enabled, .b-icon-button--muted {
   cursor: pointer;
@@ -9853,10 +9858,6 @@ h3 {
 }
 .b-icon-button--disabled.b-icon-button--dark, .b-icon-button--deferred.b-icon-button--dark, .b-icon-button--idled.b-icon-button--dark {
   color: #434b53;
-}
-
-.b-progress-bar {
-  position: relative;
 }
 
 .b-fieldset {
@@ -9997,6 +9998,9 @@ h4, h5, h6 {
   position: sticky;
   top: 0;
   z-index: 910;
+}
+.main-topbar__theme-switcher, .main-topbar__lang-switcher, .main-topbar__tree-switcher {
+  margin-right: 8px;
 }
 .main-topbar.navbar-dark .navbar-text:hover {
   color: rgba(255, 255, 255, 0.75);
@@ -10450,8 +10454,23 @@ a:focus, a:hover {
 }
 .mainleaf__progress-bar {
   width: 64px;
+  position: relative;
+  margin-left: 16px;
+}
+.mainleaf__progress-bar::before {
+  top: -3px;
+  right: -3px;
+  bottom: -3px;
+  left: -3px;
+  content: "";
+  position: absolute;
+  z-index: -1;
   border: 1px solid #5c8f94;
-  padding: 4px;
+  border-radius: 5px;
+}
+.mainleaf__progress-bar .b-progress-bar {
+  height: 8px;
+  background-color: #fff;
 }
 .mainleaf__update-icon.b-icon-button--overlay::before, .mainleaf__settings-icon.b-icon-button--overlay::before {
   top: -5px;

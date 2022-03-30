@@ -3,7 +3,8 @@ module Gargantext.Components.Bootstrap.Types
   , Variant(..), ButtonVariant(..)
   , Sizing(..)
   , SpinnerTheme(..)
-  , TooltipEffect(..)
+  , TooltipEffect(..), TooltipPosition(..)
+  , Position(..)
   ) where
 
 import Gargantext.Prelude
@@ -125,9 +126,37 @@ instance Show SpinnerTheme where
 data TooltipEffect
  = FloatEffect
  | SolidEffect
-
+----------------------------------------------------------------------
 derive instance Generic TooltipEffect _
 derive instance Eq TooltipEffect
 instance Show TooltipEffect where
   show FloatEffect = "float"
-  show SolidEffect = "grow"
+  show SolidEffect = "solid"
+
+----------------------------------------------------------------------
+
+-- | Generic enum type used by various libraries and components
+data Position
+  = Top
+  | Right
+  | Left
+  | Bottom
+
+derive instance Generic Position _
+derive instance Eq Position
+instance Show Position where show = kebabCase <<< genericShow
+
+----------------------------------------------------------------------
+
+-- | Position used on React Tooltip
+-- |
+-- | -- | https://github.com/wwayne/react-tooltip#options
+data TooltipPosition
+  = TooltipPosition Position
+  | AutomaticPosition
+
+derive instance Generic TooltipPosition _
+derive instance Eq TooltipPosition
+instance Show TooltipPosition where
+  show (TooltipPosition a)       = (kebabCase <<< genericShow) a
+  show AutomaticPosition         = ""
