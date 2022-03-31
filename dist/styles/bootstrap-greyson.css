@@ -10374,8 +10374,8 @@ a:focus, a:hover {
   content: "└";
   color: #ced4da;
   position: absolute;
-  font-size: 12px;
-  top: 3px;
+  font-size: 11px;
+  top: 2px;
 }
 
 .mainleaf {

@@ -140,7 +140,8 @@
   }
 
   &--enabled,
-  &--muted {
+  &--muted,
+  &--idled {
     @include clickable;
 
     &#{ $self }--warning    { color: $warning; }
@@ -150,8 +151,10 @@
     &#{ $self }--primary    { color: $primary; }
     &#{ $self }--secondary  { color: $secondary; }
     &#{ $self }--dark       { color: $body-color; }
+  }
 
-
+  &--enabled,
+  &--muted {
     &#{ $self }--warning:hover    { color: darken($warning, 10%); }
     &#{ $self }--success:hover    { color: darken($success, 10%); }
     &#{ $self }--danger:hover     { color: darken($danger, 10%); }
@@ -159,12 +162,14 @@
     &#{ $self }--primary:hover    { color: darken($primary, 10%); }
     &#{ $self }--secondary:hover  { color: darken($secondary, 10%); }
     &#{ $self }--dark:hover       { color: darken($body-color, 10%); }
+  }
 
+  &--idled:hover {
+    @include unclickable();
   }
 
   &--disabled,
-  &--deferred,
-  &--idled {
+  &--deferred {
     @include unclickable();
 
     &#{ $self }--warning    { color: lighten($warning, 15%); }

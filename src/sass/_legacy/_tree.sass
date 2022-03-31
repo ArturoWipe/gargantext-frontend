@@ -20,7 +20,7 @@ $node-popup-width: 544px
 .maintree
   $self: &
   // empirical vertical alignments for folder carets
-  $caret-y-offset: 3px
+  $caret-y-offset: 2px
 
   position: relative
 
@@ -37,7 +37,7 @@ $node-popup-width: 544px
       content: "└"
       color: $gray-400
       position: absolute
-      font-size: 12px
+      font-size: 11px
       top: $caret-y-offset
 
 ////////////////////////////////////
@@ -109,10 +109,16 @@ $node-popup-width: 544px
     bottom: $offset-y
     right: $offset-x
 
+    // (remove hover effect to maintain continuity with folder + node icon
+    // lack of hover effect)
     &--matched
-      color: $success
+      &.b-icon-button,
+      &.b-icon-button:hover
+        color: $success
     &--mismatched
-      color: $warning
+      &.b-icon-button,
+      &.b-icon-button:hover
+        color: $warning
 
   //----------------------------
 

@@ -247,7 +247,7 @@ nodeSpanCpt = here.component "nodeSpan" cpt
             case mVersion of
               Nothing                              -> mempty
               Just { clientVersion, remoteVersion} ->
-                B.icon
+                B.iconButton
                 { className: intercalate " "
                     [ "mainleaf__version-badge"
                     , clientVersion == remoteVersion ?
@@ -257,6 +257,7 @@ nodeSpanCpt = here.component "nodeSpan" cpt
                 , name: clientVersion == remoteVersion ?
                     "check-circle" $
                     "exclamation-circle"
+                , callback: const $ T.modify_ (not) folderOpen
                 }
           ]
         ,
@@ -370,7 +371,7 @@ nodeIconCpt = here.component "nodeIcon" cpt where
       { className: "mainleaf__node-icon"
       , name: GT.getIcon nodeType true
       , callback
-      , status: isLeaf ? Muted $ Enabled
+      , status: isLeaf ? Idled $ Enabled
       }
     ]
       <> children
