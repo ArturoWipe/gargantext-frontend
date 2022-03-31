@@ -88,14 +88,21 @@ select.form-control
 #app
   width: 100%
 
-.router-inner
-  display: flex
+.router
 
-  @include left-handed
-    flex-direction: row-reverse
+  &__inner
+    display: flex
+    position: relative
 
-  @include right-handed
-    flex-direction: row
+    @include left-handed
+      flex-direction: row-reverse
+
+    @include right-handed
+      flex-direction: row
+
+  &__aside
+    width: $col-for-6
+    position: relative
 
 
 .main-page

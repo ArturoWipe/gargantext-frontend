@@ -10033,31 +10033,31 @@ h3 {
 .b-icon-button--overlay:hover.b-icon-button::before {
   background-color: #dae0e5;
 }
-.b-icon-button--enabled, .b-icon-button--muted {
+.b-icon-button--enabled, .b-icon-button--muted, .b-icon-button--idled {
   cursor: pointer;
 }
-.b-icon-button--enabled:focus, .b-icon-button--muted:focus {
+.b-icon-button--enabled:focus, .b-icon-button--muted:focus, .b-icon-button--idled:focus {
   outline: 0;
 }
-.b-icon-button--enabled.b-icon-button--warning, .b-icon-button--muted.b-icon-button--warning {
+.b-icon-button--enabled.b-icon-button--warning, .b-icon-button--muted.b-icon-button--warning, .b-icon-button--idled.b-icon-button--warning {
   color: #5f5f5f;
 }
-.b-icon-button--enabled.b-icon-button--success, .b-icon-button--muted.b-icon-button--success {
+.b-icon-button--enabled.b-icon-button--success, .b-icon-button--muted.b-icon-button--success, .b-icon-button--idled.b-icon-button--success {
   color: #333333;
 }
-.b-icon-button--enabled.b-icon-button--danger, .b-icon-button--muted.b-icon-button--danger {
+.b-icon-button--enabled.b-icon-button--danger, .b-icon-button--muted.b-icon-button--danger, .b-icon-button--idled.b-icon-button--danger {
   color: #434343;
 }
-.b-icon-button--enabled.b-icon-button--info, .b-icon-button--muted.b-icon-button--info {
+.b-icon-button--enabled.b-icon-button--info, .b-icon-button--muted.b-icon-button--info, .b-icon-button--idled.b-icon-button--info {
   color: #515151;
 }
-.b-icon-button--enabled.b-icon-button--primary, .b-icon-button--muted.b-icon-button--primary {
+.b-icon-button--enabled.b-icon-button--primary, .b-icon-button--muted.b-icon-button--primary, .b-icon-button--idled.b-icon-button--primary {
   color: #222222;
 }
-.b-icon-button--enabled.b-icon-button--secondary, .b-icon-button--muted.b-icon-button--secondary {
+.b-icon-button--enabled.b-icon-button--secondary, .b-icon-button--muted.b-icon-button--secondary, .b-icon-button--idled.b-icon-button--secondary {
   color: #666666;
 }
-.b-icon-button--enabled.b-icon-button--dark, .b-icon-button--muted.b-icon-button--dark {
+.b-icon-button--enabled.b-icon-button--dark, .b-icon-button--muted.b-icon-button--dark, .b-icon-button--idled.b-icon-button--dark {
   color: #212529;
 }
 .b-icon-button--enabled.b-icon-button--warning:hover, .b-icon-button--muted.b-icon-button--warning:hover {
@@ -10081,31 +10081,37 @@ h3 {
 .b-icon-button--enabled.b-icon-button--dark:hover, .b-icon-button--muted.b-icon-button--dark:hover {
   color: #0a0c0d;
 }
-.b-icon-button--disabled, .b-icon-button--deferred, .b-icon-button--idled {
+.b-icon-button--idled:hover {
   cursor: default;
 }
-.b-icon-button--disabled:focus, .b-icon-button--deferred:focus, .b-icon-button--idled:focus {
+.b-icon-button--idled:hover:focus {
   outline: 0;
 }
-.b-icon-button--disabled.b-icon-button--warning, .b-icon-button--deferred.b-icon-button--warning, .b-icon-button--idled.b-icon-button--warning {
+.b-icon-button--disabled, .b-icon-button--deferred {
+  cursor: default;
+}
+.b-icon-button--disabled:focus, .b-icon-button--deferred:focus {
+  outline: 0;
+}
+.b-icon-button--disabled.b-icon-button--warning, .b-icon-button--deferred.b-icon-button--warning {
   color: #858585;
 }
-.b-icon-button--disabled.b-icon-button--success, .b-icon-button--deferred.b-icon-button--success, .b-icon-button--idled.b-icon-button--success {
+.b-icon-button--disabled.b-icon-button--success, .b-icon-button--deferred.b-icon-button--success {
   color: #595959;
 }
-.b-icon-button--disabled.b-icon-button--danger, .b-icon-button--deferred.b-icon-button--danger, .b-icon-button--idled.b-icon-button--danger {
+.b-icon-button--disabled.b-icon-button--danger, .b-icon-button--deferred.b-icon-button--danger {
   color: dimgray;
 }
-.b-icon-button--disabled.b-icon-button--info, .b-icon-button--deferred.b-icon-button--info, .b-icon-button--idled.b-icon-button--info {
+.b-icon-button--disabled.b-icon-button--info, .b-icon-button--deferred.b-icon-button--info {
   color: #777777;
 }
-.b-icon-button--disabled.b-icon-button--primary, .b-icon-button--deferred.b-icon-button--primary, .b-icon-button--idled.b-icon-button--primary {
+.b-icon-button--disabled.b-icon-button--primary, .b-icon-button--deferred.b-icon-button--primary {
   color: #484848;
 }
-.b-icon-button--disabled.b-icon-button--secondary, .b-icon-button--deferred.b-icon-button--secondary, .b-icon-button--idled.b-icon-button--secondary {
+.b-icon-button--disabled.b-icon-button--secondary, .b-icon-button--deferred.b-icon-button--secondary {
   color: #8c8c8c;
 }
-.b-icon-button--disabled.b-icon-button--dark, .b-icon-button--deferred.b-icon-button--dark, .b-icon-button--idled.b-icon-button--dark {
+.b-icon-button--disabled.b-icon-button--dark, .b-icon-button--deferred.b-icon-button--dark {
   color: #434b53;
 }
 
@@ -10633,6 +10639,14 @@ a:focus, a:hover {
   margin-bottom: 3px;
   width: max-content;
 }
+.right-handed .mainleaf {
+  padding-right: 16px;
+}
+
+.left-handed .mainleaf {
+  padding-left: 16px;
+}
+
 .mainleaf__folder-icon {
   padding-right: 8px;
   font-size: 14px;
@@ -10668,10 +10682,10 @@ a:focus, a:hover {
   bottom: -8px;
   right: -4px;
 }
-.mainleaf__version-badge--matched {
+.mainleaf__version-badge--matched.b-icon-button, .mainleaf__version-badge--matched.b-icon-button:hover {
   color: #333333;
 }
-.mainleaf__version-badge--mismatched {
+.mainleaf__version-badge--mismatched.b-icon-button, .mainleaf__version-badge--mismatched.b-icon-button:hover {
   color: #5f5f5f;
 }
 .mainleaf__node-link {
@@ -10868,17 +10882,11 @@ a:focus, a:hover {
   overflow-y: auto;
 }
 
-.forest-layout-wrapper {
-  padding-left: 0;
-  padding-right: 0;
-}
-
 .forest-layout {
   z-index: 909;
+  width: inherit;
   position: fixed;
   height: calc(100vh - 56px);
-  width: 100%;
-  max-width: inherit;
   scrollbar-width: none;
   overflow-y: scroll;
   overflow-x: visible;
@@ -10892,6 +10900,25 @@ a:focus, a:hover {
 
 .left-handed .forest-layout {
   border-left: 2px solid #dee2e6;
+}
+
+.forest-layout__bottom-teaser {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 24px;
+  width: 100%;
+}
+.forest-layout__top-teaser {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  top: 0;
+  height: 24px;
+  width: 100%;
 }
 
 .forest-layout-action {
@@ -10919,26 +10946,6 @@ a:focus, a:hover {
 }
 .left-handed .forest-layout-action__button {
   margin-left: 16px;
-}
-
-.forest-layout-bottom-teaser {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
-  z-index: 1;
-  pointer-events: none;
-  position: sticky;
-  bottom: 0;
-  height: 24px;
-  width: 100%;
-}
-
-.forest-layout-top-teaser {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
-  z-index: 1;
-  pointer-events: none;
-  position: sticky;
-  top: 0;
-  height: 24px;
-  width: 100%;
 }
 
 .forest-layout-tree {
@@ -11206,15 +11213,21 @@ select.form-control {
   width: 100%;
 }
 
-.router-inner {
+.router__inner {
   display: flex;
+  position: relative;
 }
-.left-handed .router-inner {
+.left-handed .router__inner {
   flex-direction: row-reverse;
 }
 
-.right-handed .router-inner {
+.right-handed .router__inner {
   flex-direction: row;
+}
+
+.router__aside {
+  width: 16.6666666667%;
+  position: relative;
 }
 
 .main-page {

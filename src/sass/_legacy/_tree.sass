@@ -54,6 +54,12 @@ $node-popup-width: 544px
   // increasing the mainleaf width
   width: max-content
 
+  @include right-handed
+    padding-right: space-x(2)
+
+  @include left-handed
+    padding-left: space-x(2)
+
   //----------------------------
 
   &__folder-icon
@@ -386,23 +392,17 @@ $node-popup-width: 544px
 
 /////////////////////////////////////////
 
-.forest-layout-wrapper
-  // removing Bootstrap "col" padding
-  padding-left: 0
-  padding-right: 0
-
 .forest-layout
+  // @WIP: topbar width
   $offset-y: 56px
 
+  // @TODO: z-index management
   z-index: 909
 
   // make the sidebar a scrollable component
-  // `max-width` rule is an addition due to Bootstrap "col-2" applied on its
-  // parent
+  width: inherit
   position: fixed
   height: calc(100vh - #{ $offset-y })
-  width: 100%
-  max-width: inherit
 
   // avoiding ugly scrollbar
   scrollbar-width: none
@@ -417,6 +417,28 @@ $node-popup-width: 544px
 
   @include left-handed
     border-left: 2px solid $border-color
+
+  // UX best pratice: when a lengthy column is overflowy hidden (with a scroll),
+  // a teaser UI element shows to the user that a scroll is possible
+  &__bottom-teaser
+    @include bottom-teaser
+
+    z-index: z-index('forest-layout', 'teaser')
+    pointer-events: none
+    position: sticky
+    bottom: 0
+    height: $forest-layout-bottom-teaser-height
+    width: 100%
+
+  &__top-teaser
+    @include top-teaser
+
+    z-index: z-index('forest-layout', 'teaser')
+    pointer-events: none
+    position: sticky
+    top: 0
+    height: $forest-layout-top-teaser-height
+    width: 100%
 
 
 .forest-layout-action
@@ -435,29 +457,6 @@ $node-popup-width: 544px
 
     &__button
       margin-left: space-x(2)
-
-
-// UX best pratice: when a lengthy column is overflowy hidden (with a scroll),
-// a teaser UI element shows to the user that a scroll is possible
-.forest-layout-bottom-teaser
-  @include bottom-teaser
-
-  z-index: z-index('forest-layout', 'teaser')
-  pointer-events: none
-  position: sticky
-  bottom: 0
-  height: $forest-layout-bottom-teaser-height
-  width: 100%
-
-.forest-layout-top-teaser
-  @include top-teaser
-
-  z-index: z-index('forest-layout', 'teaser')
-  pointer-events: none
-  position: sticky
-  top: 0
-  height: $forest-layout-top-teaser-height
-  width: 100%
 
 
 .forest-layout-tree

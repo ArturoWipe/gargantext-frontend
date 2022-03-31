@@ -10633,6 +10633,14 @@ a:focus, a:hover {
   margin-bottom: 3px;
   width: max-content;
 }
+.right-handed .mainleaf {
+  padding-right: 16px;
+}
+
+.left-handed .mainleaf {
+  padding-left: 16px;
+}
+
 .mainleaf__folder-icon {
   padding-right: 8px;
   font-size: 14px;
@@ -10868,17 +10876,11 @@ a:focus, a:hover {
   overflow-y: auto;
 }
 
-.forest-layout-wrapper {
-  padding-left: 0;
-  padding-right: 0;
-}
-
 .forest-layout {
   z-index: 909;
+  width: inherit;
   position: fixed;
   height: calc(100vh - 56px);
-  width: 100%;
-  max-width: inherit;
   scrollbar-width: none;
   overflow-y: scroll;
   overflow-x: visible;
@@ -10892,6 +10894,25 @@ a:focus, a:hover {
 
 .left-handed .forest-layout {
   border-left: 2px solid #dee2e6;
+}
+
+.forest-layout__bottom-teaser {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 24px;
+  width: 100%;
+}
+.forest-layout__top-teaser {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  top: 0;
+  height: 24px;
+  width: 100%;
 }
 
 .forest-layout-action {
@@ -10919,26 +10940,6 @@ a:focus, a:hover {
 }
 .left-handed .forest-layout-action__button {
   margin-left: 16px;
-}
-
-.forest-layout-bottom-teaser {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
-  z-index: 1;
-  pointer-events: none;
-  position: sticky;
-  bottom: 0;
-  height: 24px;
-  width: 100%;
-}
-
-.forest-layout-top-teaser {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
-  z-index: 1;
-  pointer-events: none;
-  position: sticky;
-  top: 0;
-  height: 24px;
-  width: 100%;
 }
 
 .forest-layout-tree {
@@ -11206,15 +11207,21 @@ select.form-control {
   width: 100%;
 }
 
-.router-inner {
+.router__inner {
   display: flex;
+  position: relative;
 }
-.left-handed .router-inner {
+.left-handed .router__inner {
   flex-direction: row-reverse;
 }
 
-.right-handed .router-inner {
+.right-handed .router__inner {
   flex-direction: row;
+}
+
+.router__aside {
+  width: 16.6666666667%;
+  position: relative;
 }
 
 .main-page {

@@ -7,7 +7,6 @@ module Gargantext.Components.Forest
 import Gargantext.Prelude
 
 import Data.Array as A
-import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..))
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
@@ -15,7 +14,7 @@ import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Position(..), T
 import Gargantext.Components.Forest.Tree (treeLoader)
 import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.LinkHandler (useLinkHandler)
-import Gargantext.Routes (AppRoute(..), appPath)
+import Gargantext.Routes (AppRoute(..))
 import Gargantext.Sessions (Session(..), unSessions)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
@@ -52,7 +51,7 @@ forestCpt = here.component "forest" cpt where
 
     -- TODO If `reloadForest` is set, `reload` state should be updated
     -- TODO fix tasks ref
-    pure $ H.div { className: "forest-layout-content" }
+    pure $ R.fragment
       (A.cons (plus { boxes }) (trees handed' sessions'))
     where
       trees handed' sessions' = (tree handed') <$> unSessions sessions'
@@ -147,20 +146,18 @@ plusCpt = here.component "plus" cpt where
   -- [ H.i { className: "material-icons md-36"} [] ]
 
 
-forestLayout :: R2.Component Props
-forestLayout = R.createElement forestLayoutCpt
-forestLayoutCpt :: R.Component Props
-forestLayoutCpt = here.component "forestLayout" cpt where
+forestLayout :: R2.Leaf Props
+forestLayout = R2.leaf forestLayoutCpt
+forestLayoutCpt :: R.Memo Props
+forestLayoutCpt = R.memo' $ here.component "forestLayout" cpt where
   cpt p _ = pure $
 
-    H.div { className: "forest-layout-wrapper col-md-2" }
+    H.div
+    { className: "forest-layout" }
     [
-      H.div { className: "forest-layout" }
-      [
-        H.div { className: "forest-layout-top-teaser" } []
-      ,
-        forest p []
-      ,
-        H.div { className: "forest-layout-bottom-teaser" } []
-      ]
+      H.div { className: "forest-layout__top-teaser" } []
+    ,
+      forest p []
+    ,
+      H.div { className: "forest-layout__bottom-teaser" } []
     ]
