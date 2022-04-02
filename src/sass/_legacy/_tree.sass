@@ -316,7 +316,6 @@ $node-popup-width: 544px
     border: none
     text-decoration: none
 
-
   // @XXX "react-awesome-popover" lack of parent host parameter
   //
   //       as the container where the popover will be appended is actually a
@@ -324,18 +323,8 @@ $node-popup-width: 544px
   //       the library tends to add the tooltip position in the middle of the
   //       sidebar height: which can be off screen
   //
-  //       this workaround appends the tooltip in a static position
-  @include right-handed
-    $offset-x: 16.6666666667% // simulate "col-2" sidebar attributes
-    top: 50%
-    left: $offset-x
-    transform: translateY(-50%)
-
-  @include left-handed
-    $offset-x: 16.6666666667% // simulate "col-2" sidebar attributes
-    top: 50%
-    right: $offset-x
-    transform: translateY(-50%)
+  //       this workaround appends the tooltip centered in a static position
+  @include centered
 
   .tree
     .node
@@ -393,22 +382,19 @@ $node-popup-width: 544px
 /////////////////////////////////////////
 
 .forest-layout
-  // @WIP: topbar width
-  $offset-y: 56px
-
   // @TODO: z-index management
   z-index: 909
 
   // make the sidebar a scrollable component
+  height: inherit
   width: inherit
   min-width: inherit
   position: fixed
-  height: calc(100vh - #{ $offset-y })
 
   // avoiding ugly scrollbar
   scrollbar-width: none
   overflow-y: scroll
-  overflow-x: visible
+  overflow-x: clip
 
   &::-webkit-scrollbar
     display: none

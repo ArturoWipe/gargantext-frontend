@@ -1,3 +1,7 @@
+// cf. "Resize" hook
+.no-user-select
+  user-select: none
+
 .cache-toggle
   cursor: pointer
 
@@ -101,6 +105,8 @@ select.form-control
       flex-direction: row
 
   &__aside
+    // @WIP: topbar width
+    $offset-y: 56px
     $min-width: 280px
 
     position: relative
@@ -108,9 +114,34 @@ select.form-control
     flex-shrink: 0
     width: $min-width
     min-width: $min-width
+    height: calc(100vh - #{ $offset-y })
+
+
+  &__handle
+    min-width: inherit
+    width: inherit
+    height: inherit
+    position: fixed
+    // @WIP: z-index management
+    z-index: 99999999999
+    pointer-events: none
+
+    &__action
+      $handle-width: 8px
+
+      width: $handle-width
+      height: inherit
+      background: transparent
+      cursor: col-resize
+      position: absolute
+      right: - #{ $handle-width / 2 }
+      pointer-events: all
+
 
   &__body
     position: relative
+    flex-grow: 1
+    flex-shrink: 1
 
 
 .main-page
@@ -118,7 +149,7 @@ select.form-control
   $page-padding: space-x(3) space-x(4)
   $topbar-height: 56px // ~ unworthy empirical value (@TODO topbar height calculation)
 
-  width: 100%
+  position: relative
 
   &__main-row
     display: flex

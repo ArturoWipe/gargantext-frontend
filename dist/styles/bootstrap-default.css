@@ -10810,23 +10810,14 @@ a:focus, a:hover {
   position: fixed;
   background-color: white;
   border-radius: 6px;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
 }
 #node-popup-tooltip:hover {
   border: none;
   text-decoration: none;
 }
-.right-handed #node-popup-tooltip {
-  top: 50%;
-  left: 16.6666666667%;
-  transform: translateY(-50%);
-}
-
-.left-handed #node-popup-tooltip {
-  top: 50%;
-  right: 16.6666666667%;
-  transform: translateY(-50%);
-}
-
 #node-popup-tooltip .tree .node {
   margin-top: 5px;
 }
@@ -10878,13 +10869,13 @@ a:focus, a:hover {
 
 .forest-layout {
   z-index: 909;
+  height: inherit;
   width: inherit;
   min-width: inherit;
   position: fixed;
-  height: calc(100vh - 56px);
   scrollbar-width: none;
   overflow-y: scroll;
-  overflow-x: visible;
+  overflow-x: clip;
 }
 .forest-layout::-webkit-scrollbar {
   display: none;
@@ -11107,6 +11098,10 @@ a:focus, a:hover {
   width: 200px;
 }
 
+.no-user-select {
+  user-select: none;
+}
+
 .cache-toggle {
   cursor: pointer;
 }
@@ -11226,13 +11221,33 @@ select.form-control {
   flex-shrink: 0;
   width: 280px;
   min-width: 280px;
+  height: calc(100vh - 56px);
+}
+.router__handle {
+  min-width: inherit;
+  width: inherit;
+  height: inherit;
+  position: fixed;
+  z-index: 99999999999;
+  pointer-events: none;
+}
+.router__handle__action {
+  width: 8px;
+  height: inherit;
+  background: transparent;
+  cursor: col-resize;
+  position: absolute;
+  right: -4px;
+  pointer-events: all;
 }
 .router__body {
   position: relative;
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 .main-page {
-  width: 100%;
+  position: relative;
 }
 .main-page__main-row {
   display: flex;

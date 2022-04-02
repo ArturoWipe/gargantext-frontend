@@ -2,6 +2,7 @@ module Gargantext.Components.Router (router) where
 
 import Gargantext.Prelude
 
+import DOM.Simple as DOM
 import Data.Array (filter, length)
 import Data.Array as A
 import Data.Foldable (intercalate)
@@ -37,6 +38,8 @@ import Gargantext.Components.Tile (tileBlock)
 import Gargantext.Components.TopBar as TopBar
 import Gargantext.Config (defaultFrontends, defaultBackends)
 import Gargantext.Ends (Backend)
+import Gargantext.Hooks.FirstEffect (useFirstEffect, useFirstEffect')
+import Gargantext.Hooks.Resize (ResizeType(..), useResizeHandler)
 import Gargantext.Routes (AppRoute, Tile)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, WithSession)
@@ -274,8 +277,18 @@ forest = R2.leaf forestCpt
 forestCpt :: R.Memo Props
 forestCpt = R.memo' $ here.component "forest" cpt where
   cpt { boxes: boxes@{ showTree } } _ = do
+    -- States
     showTree' <- T.useLive T.unequal showTree
+    resizeHandler <- useResizeHandler
 
+    -- Effects
+    useFirstEffect' $ resizeHandler
+      { source: ".router__handle__action"
+      , target: ".router__aside"
+      , type: Vertical
+      }
+
+    -- Render
     pure $
 
       H.div
@@ -287,7 +300,13 @@ forestCpt = R.memo' $ here.component "forest" cpt where
       [
         Forest.forestLayout
         { boxes
-        , frontends: defaultFrontends }
+        , frontends: defaultFrontends
+        }
+      ,
+        H.div { className: "router__handle" }
+        [
+          H.div { className: "router__handle__action" } []
+        ]
       ]
 
 sidePanel :: R2.Leaf Props

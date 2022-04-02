@@ -10927,12 +10927,13 @@ a:focus, a:hover {
 
 .forest-layout {
   z-index: 909;
+  height: inherit;
   width: inherit;
+  min-width: inherit;
   position: fixed;
-  height: calc(100vh - 56px);
   scrollbar-width: none;
   overflow-y: scroll;
-  overflow-x: visible;
+  overflow-x: clip;
 }
 .forest-layout::-webkit-scrollbar {
   display: none;
@@ -11155,6 +11156,10 @@ a:focus, a:hover {
   width: 200px;
 }
 
+.no-user-select {
+  user-select: none;
+}
+
 .cache-toggle {
   cursor: pointer;
 }
@@ -11269,12 +11274,38 @@ select.form-control {
 }
 
 .router__aside {
-  width: 16.6666666667%;
   position: relative;
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 280px;
+  min-width: 280px;
+  height: calc(100vh - 56px);
+}
+.router__handle {
+  min-width: inherit;
+  width: inherit;
+  height: inherit;
+  position: fixed;
+  z-index: 99999999999;
+  pointer-events: none;
+}
+.router__handle__action {
+  width: 8px;
+  height: inherit;
+  background: transparent;
+  cursor: col-resize;
+  position: absolute;
+  right: calc(- 8px / 2);
+  pointer-events: all;
+}
+.router__body {
+  position: relative;
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 .main-page {
-  flex-grow: 1;
+  position: relative;
 }
 .main-page__main-row {
   display: flex;

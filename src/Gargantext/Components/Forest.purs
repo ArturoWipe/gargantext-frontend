@@ -150,7 +150,7 @@ forestLayout :: R2.Leaf Props
 forestLayout = R2.leaf forestLayoutCpt
 forestLayoutCpt :: R.Memo Props
 forestLayoutCpt = R.memo' $ here.component "forestLayout" cpt where
-  cpt p _ = pure $
+  cpt p children = pure $
 
     H.div
     { className: "forest-layout" }
