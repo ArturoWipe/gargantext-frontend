@@ -101,7 +101,15 @@ select.form-control
       flex-direction: row
 
   &__aside
-    width: $col-for-6
+    $min-width: 280px
+
+    position: relative
+    flex-grow: 0
+    flex-shrink: 0
+    width: $min-width
+    min-width: $min-width
+
+  &__body
     position: relative
 
 
@@ -110,7 +118,7 @@ select.form-control
   $page-padding: space-x(3) space-x(4)
   $topbar-height: 56px // ~ unworthy empirical value (@TODO topbar height calculation)
 
-  flex-grow: 1 // quick workaround, stretching block when subjected to flex API
+  width: 100%
 
   &__main-row
     display: flex

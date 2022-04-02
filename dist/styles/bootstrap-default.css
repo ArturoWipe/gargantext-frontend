@@ -10879,6 +10879,7 @@ a:focus, a:hover {
 .forest-layout {
   z-index: 909;
   width: inherit;
+  min-width: inherit;
   position: fixed;
   height: calc(100vh - 56px);
   scrollbar-width: none;
@@ -11220,12 +11221,18 @@ select.form-control {
 }
 
 .router__aside {
-  width: 16.6666666667%;
+  position: relative;
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 280px;
+  min-width: 280px;
+}
+.router__body {
   position: relative;
 }
 
 .main-page {
-  flex-grow: 1;
+  width: 100%;
 }
 .main-page__main-row {
   display: flex;
