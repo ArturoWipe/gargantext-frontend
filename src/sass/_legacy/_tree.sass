@@ -4,17 +4,6 @@ $node-popop-radius: 6px
 $node-popup-width: 544px
 
 
-@mixin forest-layout-gutter
-
-  @include right-handed
-    padding-left: space-x(2)
-    padding-right: space-x(1)
-
-  @include left-handed
-    padding-left: space-x(1)
-    padding-right: space-x(2)
-
-
 /////////////////////////////////////////
 
 .maintree
@@ -25,20 +14,32 @@ $node-popup-width: 544px
   position: relative
 
   &__node
-    margin-left: space-x(2)
     margin-bottom: space-x(0.25)
 
-  & > &__node
-    margin-right: space-x(2)
+  @include right-handed
+    &__node
+      margin-left: space-x(2)
+    & > &__node
+      margin-right: space-x(2)
 
-  &--with-child > &__node > &
+  @include left-handed
+    &__node
+      margin-right: space-x(2)
+    & > &__node
+      margin-left: space-x(2)
 
-    &::before
+
+  &--with-child > &__node > &::before
+    color: $gray-400
+    position: absolute
+    font-size: 11px
+    top: $caret-y-offset
+
+    @include right-handed
       content: "└"
-      color: $gray-400
-      position: absolute
-      font-size: 11px
-      top: $caret-y-offset
+    @include left-handed
+      content: "┘"
+
 
 ////////////////////////////////////
 
@@ -55,17 +56,16 @@ $node-popup-width: 544px
   width: max-content
 
   @include right-handed
+    flex-direction: row
     padding-right: space-x(2)
 
   @include left-handed
+    flex-direction: row-reverse
     padding-left: space-x(2)
 
   //----------------------------
 
   &__folder-icon
-    // padding instead of margin will ensure to add a gap for the icon call
-    // to action area
-    padding-right: space-x(1)
     font-size: 14px
     // @XXX Glyphicon icons lack of homogeneous width
     width: 16px
@@ -73,12 +73,18 @@ $node-popup-width: 544px
     &--leaf
       color: $gray-400
 
+    // padding instead of margin will ensure to add a gap for the icon call
+    // to action area
+    @include right-handed
+      padding-right: space-x(1)
+    @include left-handed
+      padding-left: space-x(1)
+
   //----------------------------
 
   &__node-icon
     position: relative
     font-size: 16px
-    margin-right: space-x(1)
     // @XXX Glyphicon icons lack of homogeneous width
     //      (this also means that we can not align harmoniously the leaf
     //      content)
@@ -99,6 +105,11 @@ $node-popup-width: 544px
     &.fa-lock,
     &.fa-fork
       font-size: 18px
+
+    @include right-handed
+      margin-right: space-x(1)
+    @include left-handed
+      margin-left: space-x(1)
 
   //----------------------------
 
@@ -130,8 +141,12 @@ $node-popup-width: 544px
 
   &__node-link
     position: relative
-    margin-right: space-x(1)
     font-size: 15px
+
+    @include right-handed
+      margin-right: space-x(1)
+    @include left-handed
+      margin-left: space-x(1)
 
     // @TODO: handle default <a> color (override "_reboot.scss" rules or
     //        whole file?)
@@ -149,25 +164,41 @@ $node-popup-width: 544px
 
       position: absolute
       z-index: -1
-      left: calc( #{ $overlay-offset } + #{ $extra-left-overlay-offset })
-      right: calc( #{ $overlay-offset } + #{ $extra-right-overlay-offset })
       top: $overlay-offset
       bottom: $overlay-offset
       border-radius: $overlay-radius
+
+      @include right-handed
+        left: calc( #{ $overlay-offset } + #{ $extra-left-overlay-offset })
+        right: calc( #{ $overlay-offset } + #{ $extra-right-overlay-offset })
+      @include left-handed
+        right: calc( #{ $overlay-offset } + #{ $extra-left-overlay-offset })
+        left: calc( #{ $overlay-offset } + #{ $extra-right-overlay-offset })
 
   //----------------------------
 
   &__settings-icon
     visibility: hidden
-    margin-left: space-x(2)
 
   &:hover &__settings-icon
     visibility: visible
 
   //----------------------------
 
-  &__update-icon
-    margin-left: space-x(2)
+    &__update-icon,
+    &__settings-icon
+      // altering component overlay offset to fit it with the ".mainleaf" overlay
+      // dimension
+      $aside-icon-offset-y: -5px
+
+      &.b-icon-button--overlay::before
+        top: $aside-icon-offset-y
+        bottom: $aside-icon-offset-y
+
+      @include right-handed
+        margin-left: space-x(2)
+      @include left-handed
+        margin-right: space-x(2)
 
   //----------------------------
 
@@ -177,7 +208,6 @@ $node-popup-width: 544px
 
     width: $progress-bar-width
     position: relative
-    margin-left: 16px
 
     &::before
       @include fit-positions(-3px)
@@ -192,17 +222,10 @@ $node-popup-width: 544px
       height: $progress-bar-height
       background-color: $white
 
-  //----------------------------
-
-  &__update-icon,
-  &__settings-icon
-    // altering component overlay offset to fit it with the ".mainleaf" overlay
-    // dimension
-    $aside-icon-offset-y: -5px
-
-    &.b-icon-button--overlay::before
-      top: $aside-icon-offset-y
-      bottom: $aside-icon-offset-y
+    @include right-handed
+      margin-left: space-x(2)
+    @include left-handed
+      margin-right: space-x(2)
 
   //----------------------------
 
@@ -429,18 +452,20 @@ $node-popup-width: 544px
 
 
 .forest-layout-action
-  @include forest-layout-gutter
-
   display: flex
 
   @include right-handed
     flex-direction: row
+    padding-left: space-x(2)
+    padding-right: space-x(1)
 
     &__button
       margin-right: space-x(2)
 
   @include left-handed
     flex-direction: row-reverse
+    padding-left: space-x(1)
+    padding-right: space-x(2)
 
     &__button
       margin-left: space-x(2)
@@ -461,7 +486,10 @@ $node-popup-width: 544px
 
   // remove horizontal offset for first entry only (see ".maintree")
   & > .maintree > .maintree__node
-    margin-left: space-x(2)
+    @include right-handed
+      margin-left: space-x(2)
+    @include left-handed
+      margin-right: space-x(2)
 
 
 /////////////////////////////////////////
