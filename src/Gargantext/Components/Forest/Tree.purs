@@ -4,14 +4,16 @@ import Gargantext.Prelude
 
 import Data.Array as A
 import Data.Array as Array
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (intercalate, traverse, traverse_)
+import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.App.Data (Boxes)
-import Gargantext.Components.Forest.Tree.Node (nodeSpan)
+import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.Forest.Tree.Node (blankNodeSpan, nodeSpan)
 import Gargantext.Components.Forest.Tree.Node.Action.Add (AddNodeValue(..), addNode)
 import Gargantext.Components.Forest.Tree.Node.Action.Contact as Contact
 import Gargantext.Components.Forest.Tree.Node.Action.Delete (deleteNode, unpublishNode)
@@ -29,13 +31,13 @@ import Gargantext.Components.Forest.Tree.Node.Tools.SubTree.Types (SubTreeOut(..
 import Gargantext.Config.REST (AffRESTError, logRESTError)
 import Gargantext.Config.Utils (handleRESTError)
 import Gargantext.Ends (Frontends)
-import Gargantext.Hooks.Loader (useLoader)
+import Gargantext.Hooks.Loader (useLoader, useLoaderEffect)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, get, mkNodeId)
 import Gargantext.Sessions.Types (useOpenNodesMemberBox, openNodesInsert, openNodesDelete)
 import Gargantext.Types (Handed, ID, isPublic, publicize, switchHanded)
 import Gargantext.Types as GT
-import Gargantext.Utils ((?))
+import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
@@ -112,12 +114,30 @@ treeLoaderCpt = here.component "treeLoader" cpt where
 -- treeLoaderCpt = R.memo (here.component "treeLoader" cpt) memoCmp where
 --   memoCmp ({ root: t1 }) ({ root: t2 }) = t1 == t2
   cpt p@{ root, session } _ = do
+    -- States
     -- app     <- T.useLive T.unequal p.reloadRoot
+    state /\ stateBox <- R2.useBox' Nothing
     let fetch { root: r } = getNodeTree session r
-    useLoader { errorHandler
-              , loader: fetch
-              , path: { root }
-              , render: loaded }
+
+    -- Hooks
+    useLoaderEffect
+      { errorHandler
+      , loader: fetch
+      , path: { root }
+      , state: stateBox
+      }
+
+    -- Render
+    pure $
+
+      B.cloak
+      { isDisplayed: isJust state
+      , sustainingPhaseDuration: Just 50
+      , cloakSlot:
+          blankTree {}
+      , defaultSlot:
+          R2.fromMaybe_ state $ loaded
+      }
       where
         loaded tree' = tree props where
           props = Record.merge common extra where
@@ -198,6 +218,25 @@ treeCpt = here.component "tree" cpt where
   pub (LNode n@{ nodeType: t }) = LNode (n { nodeType = publicize t })
 
 
+
+blankTree :: R2.Leaf ()
+blankTree = R2.leaf blankTreeCpt
+blankTreeCpt :: R.Component ()
+blankTreeCpt = here.component "__blank__" cpt where
+  cpt _ _ = pure $
+
+    H.div
+    { className: "maintree maintree--blank" }
+    [
+      H.div
+      { className: "maintree__node" }
+      [
+        blankNodeSpan
+        {}
+      ]
+    ]
+
+
 renderTreeChildren :: R2.Leaf ChildrenTreeProps
 renderTreeChildren = R2.leaf renderTreeChildrenCpt
 renderTreeChildrenCpt :: R.Component ChildrenTreeProps
@@ -212,6 +251,29 @@ renderTreeChildrenCpt = here.component "renderTreeChildren" cpt where
       renderChild (NTree (LNode {id: cId}) _) = childLoader props [] where
         props = Record.merge nodeProps { id: cId, render, root }
 
+-- childLoader :: R2.Component ChildLoaderProps
+-- childLoader = R.createElement childLoaderCpt
+-- childLoaderCpt :: R.Component ChildLoaderProps
+-- childLoaderCpt = here.component "childLoader" cpt where
+--   cpt p@{ boxes: { reloadRoot }
+--         , reloadTree
+--         , render
+--         , root } _ = do
+--     reload <- T.useBox T2.newReload
+--     let reloads = [ reload, reloadRoot, reloadTree ]
+--     cache <- (A.cons p.id) <$> traverse (T.useLive T.unequal) reloads
+--     useLoader { errorHandler
+--               , loader: fetch
+--               , path: cache
+--               , render: paint reload }
+--     where
+--       errorHandler = logRESTError here "[childLoader]"
+--       fetch _ = getNodeTreeFirstLevel p.session p.id
+--       paint reload tree' = render (Record.merge base extra) where
+--         base = nodeProps { reload = reload }
+--         extra = { root, tree: tree' }
+--         nodeProps = RecordE.pick p :: Record NodeProps
+
 childLoader :: R2.Component ChildLoaderProps
 childLoader = R.createElement childLoaderCpt
 childLoaderCpt :: R.Component ChildLoaderProps
@@ -220,13 +282,32 @@ childLoaderCpt = here.component "childLoader" cpt where
         , reloadTree
         , render
         , root } _ = do
+    -- States
     reload <- T.useBox T2.newReload
+    state /\ stateBox <- R2.useBox' Nothing
     let reloads = [ reload, reloadRoot, reloadTree ]
     cache <- (A.cons p.id) <$> traverse (T.useLive T.unequal) reloads
-    useLoader { errorHandler
-              , loader: fetch
-              , path: cache
-              , render: paint reload }
+
+    -- Hooks
+    useLoaderEffect
+      { errorHandler
+      , loader: fetch
+      , path: cache
+      , state: stateBox
+      }
+
+    -- Render
+    pure $
+
+      B.cloak
+      { isDisplayed: isJust state
+      , sustainingPhaseDuration: Just 50
+      , cloakSlot:
+          blankTree {}
+      , defaultSlot:
+          R2.fromMaybe_ state $ paint reload
+      }
+
     where
       errorHandler = logRESTError here "[childLoader]"
       fetch _ = getNodeTreeFirstLevel p.session p.id

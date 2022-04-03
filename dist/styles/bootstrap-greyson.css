@@ -10000,6 +10000,126 @@ h4, h5, h6 {
   font-weight: bold;
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes enter-from-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes exit-to-bottom {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes exit-to-top {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+@keyframes enter-from-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes enter-from-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes exit-to-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes enter-from-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes exit-to-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes rotate-180 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(180deg);
+  }
+}
+@keyframes rotate-360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.maintree--blank::after {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  content: "";
+  animation-duration: 1.25s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: __placeholder;
+  animation-timing-function: linear;
+  background: linear-gradient(to right, transparent 10%, rgba(255, 255, 255, 0.6) 18%, transparent 33%);
+  background-size: 800px 100%;
+  position: absolute;
+}
+@keyframes __placeholder {
+  from {
+    background-position: -400px 0;
+  }
+  to {
+    background-position: 400px 0;
+  }
+}
+
 .main-topbar {
   position: sticky;
   top: 0;
@@ -10368,20 +10488,45 @@ a:focus, a:hover {
 
 .maintree {
   position: relative;
+  animation: 15ms fade-in;
 }
 .maintree__node {
-  margin-left: 16px;
   margin-bottom: 2px;
 }
-.maintree > .maintree__node {
+.right-handed .maintree__node {
+  margin-left: 16px;
+}
+.right-handed .maintree > .right-handed .maintree__node {
   margin-right: 16px;
 }
+
+.left-handed .maintree__node {
+  margin-right: 16px;
+}
+.left-handed .maintree > .left-handed .maintree__node {
+  margin-left: 16px;
+}
+
 .maintree--with-child > .maintree__node > .maintree::before {
-  content: "└";
   color: #ced4da;
   position: absolute;
   font-size: 11px;
   top: 2px;
+}
+.right-handed .maintree--with-child > .maintree__node > .maintree::before {
+  content: "└";
+}
+
+.left-handed .maintree--with-child > .maintree__node > .maintree::before {
+  content: "┘";
+}
+
+.maintree--blank {
+  animation-name: fade-in;
+  animation-delay: 150ms;
+  animation-duration: 15ms;
+  animation-fill-mode: forwards;
+  opacity: 0;
 }
 
 .mainleaf {
@@ -10391,39 +10536,65 @@ a:focus, a:hover {
   width: max-content;
 }
 .right-handed .mainleaf {
+  flex-direction: row;
   padding-right: 16px;
 }
 
 .left-handed .mainleaf {
+  flex-direction: row-reverse;
   padding-left: 16px;
 }
 
 .mainleaf__folder-icon {
-  padding-right: 8px;
   font-size: 14px;
   width: 16px;
 }
 .mainleaf__folder-icon--leaf {
   color: #ced4da;
 }
+.right-handed .mainleaf__folder-icon {
+  padding-right: 8px;
+}
+
+.left-handed .mainleaf__folder-icon {
+  padding-left: 8px;
+}
+
 .mainleaf__node-icon {
   position: relative;
   font-size: 16px;
-  margin-right: 8px;
   width: 14px;
 }
-.mainleaf__node-icon.fa-address-card-o, .mainleaf__node-icon.fa-newspaper-o {
+.mainleaf__node-icon .fa-address-card-o,
+.mainleaf__node-icon .fa-newspaper-o {
   font-size: 14px;
 }
-.mainleaf__node-icon.fa-share-alt, .mainleaf__node-icon.fa-globe-circle, .mainleaf__node-icon.fa-folder-open-o, .mainleaf__node-icon.fa-file-code-o, .mainleaf__node-icon.fa-list, .mainleaf__node-icon.fa-signal {
+.mainleaf__node-icon .fa-share-alt,
+.mainleaf__node-icon .fa-globe-circle,
+.mainleaf__node-icon .fa-folder-open-o,
+.mainleaf__node-icon .fa-file-code-o,
+.mainleaf__node-icon .fa-list,
+.mainleaf__node-icon .fa-signal {
   font-size: 15px;
 }
-.mainleaf__node-icon.fa-user {
+.mainleaf__node-icon .fa-user {
   font-size: 17px;
 }
-.mainleaf__node-icon.fa-lock, .mainleaf__node-icon.fa-fork {
+.mainleaf__node-icon .fa-lock,
+.mainleaf__node-icon .fa-fork {
   font-size: 18px;
 }
+.mainleaf__node-icon .fa-circle {
+  font-size: 20px;
+}
+.right-handed .mainleaf__node-icon {
+  margin-right: 8px;
+}
+
+.left-handed .mainleaf__node-icon {
+  margin-left: 8px;
+}
+
 .mainleaf__version-badge {
   position: absolute;
   font-size: 12px;
@@ -10441,35 +10612,61 @@ a:focus, a:hover {
 }
 .mainleaf__node-link {
   position: relative;
-  margin-right: 8px;
   font-size: 15px;
 }
+.right-handed .mainleaf__node-link {
+  margin-right: 8px;
+}
+
+.left-handed .mainleaf__node-link {
+  margin-left: 8px;
+}
+
 .mainleaf__node-link a {
   color: #212529;
 }
 .mainleaf__node-link::before {
   position: absolute;
   z-index: -1;
-  left: calc( -2px + -56px);
-  right: calc( -2px + -12px);
   top: -2px;
   bottom: -2px;
   border-radius: 5px;
 }
+.right-handed .mainleaf__node-link::before {
+  left: calc( -2px + -56px);
+  right: calc( -2px + -12px);
+}
+
+.left-handed .mainleaf__node-link::before {
+  right: calc( -2px + -56px);
+  left: calc( -2px + -12px);
+}
+
 .mainleaf__settings-icon {
   visibility: hidden;
-  margin-left: 16px;
 }
 .mainleaf:hover .mainleaf__settings-icon {
   visibility: visible;
 }
-.mainleaf__update-icon {
+.right-handed .mainleaf:hover .mainleaf__settings-icon {
   margin-left: 16px;
 }
+
+.left-handed .mainleaf:hover .mainleaf__settings-icon {
+  margin-right: 16px;
+}
+
+.right-handed .mainleaf__update-icon {
+  margin-left: 16px;
+}
+
+.left-handed .mainleaf__update-icon {
+  margin-right: 16px;
+}
+
 .mainleaf__progress-bar {
   width: 64px;
   position: relative;
-  margin-left: 16px;
 }
 .mainleaf__progress-bar::before {
   top: -3px;
@@ -10486,10 +10683,14 @@ a:focus, a:hover {
   height: 8px;
   background-color: #fff;
 }
-.mainleaf__update-icon.b-icon-button--overlay::before, .mainleaf__settings-icon.b-icon-button--overlay::before {
-  top: -5px;
-  bottom: -5px;
+.right-handed .mainleaf__progress-bar {
+  margin-left: 16px;
 }
+
+.left-handed .mainleaf__progress-bar {
+  margin-right: 16px;
+}
+
 .mainleaf__version-comparator {
   margin-top: 8px;
 }
@@ -10512,6 +10713,20 @@ a:focus, a:hover {
 .mainleaf--file-dropped .mainleaf__node-link::before {
   content: "";
   border: 1px dotted #6f7f8c;
+}
+.mainleaf--blank {
+  color: #f8f9fa;
+}
+.mainleaf--blank .mainleaf__folder-icon {
+  visibility: hidden;
+}
+.mainleaf--blank .mainleaf__node-link::after {
+  content: "";
+  background-color: #f8f9fa;
+  height: 12px;
+  width: 144px;
+  position: absolute;
+  top: 5px;
 }
 
 .subtree__node {
@@ -10567,23 +10782,14 @@ a:focus, a:hover {
   position: fixed;
   background-color: white;
   border-radius: 6px;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
 }
 #node-popup-tooltip:hover {
   border: none;
   text-decoration: none;
 }
-.right-handed #node-popup-tooltip {
-  top: 50%;
-  left: 16.6666666667%;
-  transform: translateY(-50%);
-}
-
-.left-handed #node-popup-tooltip {
-  top: 50%;
-  right: 16.6666666667%;
-  transform: translateY(-50%);
-}
-
 #node-popup-tooltip .tree .node {
   margin-top: 5px;
 }
@@ -10677,17 +10883,9 @@ a:focus, a:hover {
   display: flex;
 }
 .right-handed .forest-layout-action {
+  flex-direction: row;
   padding-left: 16px;
   padding-right: 8px;
-}
-
-.left-handed .forest-layout-action {
-  padding-left: 8px;
-  padding-right: 16px;
-}
-
-.right-handed .forest-layout-action {
-  flex-direction: row;
 }
 .right-handed .forest-layout-action__button {
   margin-right: 16px;
@@ -10695,6 +10893,8 @@ a:focus, a:hover {
 
 .left-handed .forest-layout-action {
   flex-direction: row-reverse;
+  padding-left: 8px;
+  padding-right: 16px;
 }
 .left-handed .forest-layout-action__button {
   margin-left: 16px;
@@ -10709,8 +10909,12 @@ a:focus, a:hover {
 .forest-layout-tree > .maintree--with-children > .maintree__node::before, .forest-layout-tree > .maintree--with-children > .maintree__node::after {
   content: none;
 }
-.forest-layout-tree > .maintree > .maintree__node {
+.right-handed .forest-layout-tree > .maintree > .maintree__node {
   margin-left: 16px;
+}
+
+.left-handed .forest-layout-tree > .maintree > .maintree__node {
+  margin-right: 16px;
 }
 
 .ids-selector .tree .children {
@@ -11003,7 +11207,7 @@ select.form-control {
   background: transparent;
   cursor: col-resize;
   position: absolute;
-  right: calc(- 8px / 2);
+  right: -4px;
   pointer-events: all;
 }
 .router__body {

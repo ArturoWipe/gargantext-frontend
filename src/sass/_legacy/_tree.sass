@@ -40,12 +40,29 @@ $node-popup-width: 544px
     @include left-handed
       content: "┘"
 
+  // for <Cloak> use cases
+  animation: 15ms fade-in
+
+  &--blank
+    @extend %placeholder
+
+    // adding an phase on top of <Cloak> ones
+    // (aim is to only display the cloack fallback when
+    // 1s has passed, in parallel of maintaining the Element
+    // dimension)
+    animation-name: fade-in
+    animation-delay: 150ms
+    animation-duration: 15ms
+    animation-fill-mode: forwards
+    opacity: 0
+
 
 ////////////////////////////////////
 
+$leaf-margin-bottom: 3px
+
 .mainleaf
   $self: &
-  $leaf-margin-bottom: 3px
 
   display: flex
   align-items: center
@@ -90,21 +107,23 @@ $node-popup-width: 544px
     //      content)
     width: 14px
     //      Micromanaging icons width as an attempt of alignment harmony
-    &.fa-address-card-o,
-    &.fa-newspaper-o
+    .fa-address-card-o,
+    .fa-newspaper-o
       font-size: 14px
-    &.fa-share-alt,
-    &.fa-globe-circle,
-    &.fa-folder-open-o,
-    &.fa-file-code-o,
-    &.fa-list,
-    &.fa-signal
+    .fa-share-alt,
+    .fa-globe-circle,
+    .fa-folder-open-o,
+    .fa-file-code-o,
+    .fa-list,
+    .fa-signal
       font-size: 15px
-    &.fa-user
+    .fa-user
       font-size: 17px
-    &.fa-lock,
-    &.fa-fork
+    .fa-lock,
+    .fa-fork
       font-size: 18px
+    .fa-circle
+      font-size: 20px
 
     @include right-handed
       margin-right: space-x(1)
@@ -183,6 +202,18 @@ $node-popup-width: 544px
   &:hover &__settings-icon
     visibility: visible
 
+    @include right-handed
+      margin-left: space-x(2)
+    @include left-handed
+      margin-right: space-x(2)
+
+  &__update-icon
+
+    @include right-handed
+      margin-left: space-x(2)
+    @include left-handed
+      margin-right: space-x(2)
+
   //----------------------------
 
     &__update-icon,
@@ -194,11 +225,6 @@ $node-popup-width: 544px
       &.b-icon-button--overlay::before
         top: $aside-icon-offset-y
         bottom: $aside-icon-offset-y
-
-      @include right-handed
-        margin-left: space-x(2)
-      @include left-handed
-        margin-right: space-x(2)
 
   //----------------------------
 
@@ -259,6 +285,32 @@ $node-popup-width: 544px
     #{ $self }__node-link::before
       content: ""
       border: 1px dotted $secondary
+
+  //----------------------------
+
+  &--blank // for <Cloak> use cases
+    $blank-color: $gray-100
+    $blank-link-width: 144px
+    $blank-link-height: 12px
+    $blank-link-offset-y: 5px
+
+    color: $blank-color
+
+    #{ $self }__folder-icon
+      visibility: hidden
+
+    // making a text placeholder block
+    #{ $self }__node-link
+
+      &::after
+        content: ""
+        background-color: $blank-color
+        height: $blank-link-height
+        width: $blank-link-width
+        position: absolute
+        top: $blank-link-offset-y
+
+
 
 ////////////////////////////////////////
 

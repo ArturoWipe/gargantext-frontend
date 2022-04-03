@@ -8,6 +8,7 @@ import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, null)
 import Data.Symbol (SProxy(..))
+import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff)
 import Effect.Class (liftEffect)
@@ -31,7 +32,7 @@ import Gargantext.Config.REST (logRESTError)
 import Gargantext.Context.Progress (AsyncProps, asyncContext, asyncProgress)
 import Gargantext.Ends (Frontends, url)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
-import Gargantext.Hooks.Loader (useLoader)
+import Gargantext.Hooks.Loader (useLoader, useLoaderEffect)
 import Gargantext.Hooks.Version (Version, useVersion)
 import Gargantext.Routes as Routes
 import Gargantext.Sessions (Session, sessionId)
@@ -368,8 +369,7 @@ nodeIconCpt = here.component "nodeIcon" cpt where
     { className: "mainleaf__node-icon" } $
     [
       B.iconButton
-      { className: "mainleaf__node-icon"
-      , name: GT.getIcon nodeType true
+      { name: GT.getIcon nodeType true
       , callback
       , status: isLeaf ? Idled $ Enabled
       }
@@ -486,6 +486,26 @@ nodeTooltipCpt = here.component "nodeTooltip" cpt where
 tooltipId :: String -> GT.NodeID -> String
 tooltipId name id = name <> "-node-link-" <> show id
 
+---------------------------------------------------------
+
+blankNodeSpan :: R2.Leaf ()
+blankNodeSpan = R2.leaf blankNodeSpanCpt
+blankNodeSpanCpt :: R.Component ()
+blankNodeSpanCpt = here.component "__blank__" cpt where
+  cpt _ _ = pure $
+
+    H.div { className: "mainleaf mainleaf--blank" }
+    [
+      B.icon { className: "mainleaf__folder-icon", name: "caret-right"}
+    ,
+      H.span { className: "mainleaf__node-icon" }
+      [
+        B.icon { name: "circle" }
+      ]
+    ,
+      H.div { className: "mainleaf__node-link"} [ H.text $ nbsp 1 ]
+    ]
+
 -----------------------------------------------
 
 -- START nodeActions
@@ -517,11 +537,25 @@ graphNodeActions :: R2.Leaf NodeActionsCommon
 graphNodeActions = R2.leafComponent graphNodeActionsCpt
 graphNodeActionsCpt :: R.Component NodeActionsCommon
 graphNodeActionsCpt = here.component "graphNodeActions" cpt where
-  cpt { id, session, refresh } _ =
-    useLoader { errorHandler
-              , loader: graphVersions session
-              , path: id
-              , render: \gv -> nodeActionsGraph { graphVersions: gv, session, id, refresh } [] }
+  cpt { id, session, refresh } _ = do
+    -- States
+    state /\ stateBox <- R2.useBox' Nothing
+
+    -- Hooks
+    useLoaderEffect
+      { errorHandler
+      , loader: graphVersions session
+      , path: id
+      , state: stateBox
+      }
+
+    -- Render
+    pure $ R2.fromMaybe_ state \gv ->
+
+      nodeActionsGraph
+      { graphVersions: gv, session, id, refresh }
+      []
+
   graphVersions session graphId = GraphAPI.graphVersions { graphId, session }
   errorHandler = logRESTError here "[graphNodeActions]"
 
@@ -530,13 +564,29 @@ listNodeActions :: R2.Leaf NodeActionsCommon
 listNodeActions = R2.leafComponent listNodeActionsCpt
 listNodeActionsCpt :: R.Component NodeActionsCommon
 listNodeActionsCpt = here.component "listNodeActions" cpt where
-  cpt { id, session, refresh } _ =
-    useLoader { errorHandler
-              , path: { nodeId: id, session }
-              , loader: loadCorpusWithChild
-              , render: \{ corpusId } -> nodeActionsNodeList
-                 { listId: id, nodeId: corpusId, session, refresh: refresh
-                 , nodeType: GT.TabNgramType GT.CTabTerms } }
+  cpt { id, session, refresh } _ = do
+    -- States
+    state /\ stateBox <- R2.useBox' Nothing
+
+    -- Hooks
+    useLoaderEffect
+      { errorHandler
+      , loader: loadCorpusWithChild
+      , path: { nodeId: id, session }
+      , state: stateBox
+      }
+
+    -- Render
+    pure $ R2.fromMaybe_ state \{ corpusId } ->
+
+      nodeActionsNodeList
+      { listId: id
+      , nodeId: corpusId
+      , session
+      , refresh: refresh
+      , nodeType: GT.TabNgramType GT.CTabTerms
+      }
+
     where
       errorHandler = logRESTError here "[listNodeActions]"
 
