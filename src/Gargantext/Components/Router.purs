@@ -2,7 +2,6 @@ module Gargantext.Components.Router (router) where
 
 import Gargantext.Prelude
 
-import DOM.Simple as DOM
 import Data.Array (filter, length)
 import Data.Array as A
 import Data.Foldable (intercalate)
@@ -18,7 +17,6 @@ import Gargantext.Components.Forest as Forest
 import Gargantext.Components.GraphExplorer as GraphExplorer
 import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
-import Gargantext.Components.Lang (LandingLang(LL_EN))
 import Gargantext.Components.Login (login)
 import Gargantext.Components.Nodes.Annuaire (annuaireLayout)
 import Gargantext.Components.Nodes.Annuaire.User (userLayout)
@@ -27,7 +25,6 @@ import Gargantext.Components.Nodes.Corpus (corpusLayout)
 import Gargantext.Components.Nodes.Corpus.Code (corpusCodeLayout)
 import Gargantext.Components.Nodes.Corpus.Dashboard (dashboardLayout)
 import Gargantext.Components.Nodes.Corpus.Document (documentMainLayout)
-import Gargantext.Components.Nodes.Corpus.Phylo (phyloLayout)
 import Gargantext.Components.Nodes.Corpus.Phylo as PhyloExplorer
 import Gargantext.Components.Nodes.File (fileLayout)
 import Gargantext.Components.Nodes.Frame (frameLayout)
@@ -38,7 +35,7 @@ import Gargantext.Components.Tile (tileBlock)
 import Gargantext.Components.TopBar as TopBar
 import Gargantext.Config (defaultFrontends, defaultBackends)
 import Gargantext.Ends (Backend)
-import Gargantext.Hooks.FirstEffect (useFirstEffect, useFirstEffect')
+import Gargantext.Hooks.FirstEffect (useFirstEffect)
 import Gargantext.Hooks.Resize (ResizeType(..), useResizeHandler)
 import Gargantext.Routes (AppRoute, Tile)
 import Gargantext.Routes as GR
@@ -172,16 +169,6 @@ routerCpt = here.component "router" cpt where
 --        ]
 
 
-loginModal :: R2.Leaf Props
-loginModal = R2.leafComponent loginModalCpt
-loginModalCpt :: R.Component Props
-loginModalCpt = here.component "loginModal" cpt
-  where
-    cpt { boxes: boxes@{ showLogin } } _ = do
-        showLogin' <- T.useLive T.unequal showLogin
-
-        pure $ if showLogin' then login' boxes else H.div {} []
-
 
 mainPage :: R2.Leaf Props
 mainPage = R2.leafComponent mainPageCpt
@@ -279,14 +266,14 @@ forestCpt = R.memo' $ here.component "forest" cpt where
   cpt { boxes: boxes@{ showTree } } _ = do
     -- States
     showTree' <- T.useLive T.unequal showTree
+
+    -- Hooks
     resizeHandler <- useResizeHandler
 
     -- Effects
-    useFirstEffect' $ resizeHandler
-      { source: ".router__handle__action"
-      , target: ".router__aside"
-      , type: Vertical
-      }
+    useFirstEffect do
+      resizeHandler.add ".router__handle__action" ".router__aside" Vertical
+      pure $ resizeHandler.remove ".router__handle__action"
 
     -- Render
     pure $
@@ -303,9 +290,13 @@ forestCpt = R.memo' $ here.component "forest" cpt where
         , frontends: defaultFrontends
         }
       ,
-        H.div { className: "router__handle" }
+        H.div
+        { className: "router__handle"
+        }
         [
-          H.div { className: "router__handle__action" } []
+          H.div
+          { className: "router__handle__action" }
+          []
         ]
       ]
 

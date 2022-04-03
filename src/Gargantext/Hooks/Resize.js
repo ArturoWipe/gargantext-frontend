@@ -1,11 +1,18 @@
-exports._resize = resize;
+exports._add = add;
+exports._remove = remove;
+/**
+ * @name add
+ * @param {Window} window
+ * @param {Document} document
+ * @param {String} sourceQuery
+ * @param {String} targetQuery
+ * @param {String} type
+ */
+function add(window, document, sourceQuery, targetQuery, type) {
+  var source = document.querySelector(sourceQuery);
+  var target = document.querySelector(targetQuery);
 
-function resize(window, document, source, target, type) {
-
-  var handle = document.querySelector(source);
-  var box    = document.querySelector(target);
-
-  handle.addEventListener('mousedown', initialiseResize, false);
+  source.addEventListener('mousedown', initialiseResize, false);
 
   function initialiseResize(e) {
     window.addEventListener('mousemove', startResizing, false);
@@ -14,9 +21,9 @@ function resize(window, document, source, target, type) {
 
   function startResizing(e) {
     if (type === 'both' || type === 'horizontal')
-      box.style.height = (e.clientY - box.offsetTop) + 'px';
+      target.style.height = (e.clientY - target.offsetTop) + 'px';
     if (type === 'both' || type === 'vertical')
-      box.style.width = (e.clientX - box.offsetLeft) + 'px';
+      target.style.width = (e.clientX - target.offsetLeft) + 'px';
 
     // prevent "user-select" highlights
     document.body.classList.add('no-user-select');
@@ -26,6 +33,16 @@ function resize(window, document, source, target, type) {
     window.removeEventListener('mousemove', startResizing, false);
     window.removeEventListener('mouseup', stopResizing, false);
 
-    box.classList.remove('no-user-select');
+    document.body.classList.remove('no-user-select');
   }
+}
+/**
+ * @name remove
+ * @param {Document} document
+ * @param {String} sourceQuery
+ */
+function remove(sourceQuery) {
+  var source = document.querySelector(sourceQuery);
+
+  source.removeEventListener('mousedown');
 }

@@ -10766,8 +10766,9 @@ a:focus, a:hover {
 
 .maintree--blank {
   animation-name: fade-in;
-  animation-delay: 150ms;
-  animation-duration: 15ms;
+  animation-delay: 100ms;
+  animation-duration: 50ms;
+  animation-timing-function: ease-in-out;
   animation-fill-mode: forwards;
   opacity: 0;
 }
