@@ -168,7 +168,7 @@ treeCpt = here.component "tree" cpt where
 
     pure $
 
-      H.ul
+      H.div
       { className: intercalate " "
           [ "maintree"
           , Array.null children' ?
@@ -177,7 +177,7 @@ treeCpt = here.component "tree" cpt where
           ]
       }
       [
-        H.li
+        H.div
         { className: "maintree__node" }
         [
           nodeSpan
@@ -251,28 +251,6 @@ renderTreeChildrenCpt = here.component "renderTreeChildren" cpt where
       renderChild (NTree (LNode {id: cId}) _) = childLoader props [] where
         props = Record.merge nodeProps { id: cId, render, root }
 
--- childLoader :: R2.Component ChildLoaderProps
--- childLoader = R.createElement childLoaderCpt
--- childLoaderCpt :: R.Component ChildLoaderProps
--- childLoaderCpt = here.component "childLoader" cpt where
---   cpt p@{ boxes: { reloadRoot }
---         , reloadTree
---         , render
---         , root } _ = do
---     reload <- T.useBox T2.newReload
---     let reloads = [ reload, reloadRoot, reloadTree ]
---     cache <- (A.cons p.id) <$> traverse (T.useLive T.unequal) reloads
---     useLoader { errorHandler
---               , loader: fetch
---               , path: cache
---               , render: paint reload }
---     where
---       errorHandler = logRESTError here "[childLoader]"
---       fetch _ = getNodeTreeFirstLevel p.session p.id
---       paint reload tree' = render (Record.merge base extra) where
---         base = nodeProps { reload = reload }
---         extra = { root, tree: tree' }
---         nodeProps = RecordE.pick p :: Record NodeProps
 
 childLoader :: R2.Component ChildLoaderProps
 childLoader = R.createElement childLoaderCpt
