@@ -34,7 +34,6 @@ import Math as Math
 import Partial.Unsafe (unsafePartial)
 import Reactix as R
 import Reactix.DOM.HTML as H
-import Reactix.DOM.HTML as RH
 import Toestand as T
 
 
@@ -62,18 +61,73 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
             , session
             , hyperdataGraph
             } _ = do
-    -- States
-    sideBarDisplayed /\ sideBarDisplayedBox <-
-      R2.useBox' (Closed :: SidePanelState)
+  -- Computed
+  -----------------
 
-    -- Computed
     let
       topBarPortalKey = "portal-topbar::" <> show graphId
 
-    -- Hooks
+      startForceAtlas = maybe true
+        (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData'
+
+      forceAtlasS = if startForceAtlas
+                    then SigmaxT.InitialRunning
+                    else SigmaxT.InitialStopped
+
+  -- States
+  -----------------
+
+    sideBarDisplayed /\ sideBarDisplayedBox <-
+      R2.useBox' (Closed :: SidePanelState)
+
+    { mMetaData: mMetaDataBox } <- GEST.focusedSidePanel boxes.sidePanelGraph
+    _graphVersion' <- T.useLive T.unequal boxes.graphVersion
+
+
+    -- _dataRef <- R.useRef graph
+    graphRef <- R.useRef null
+
+  -- Hooks
+  -----------------
+
+    controls <- Controls.useGraphControls { forceAtlasS
+                                          , graph
+                                          , graphId
+                                          , hyperdataGraph
+                                          , reloadForest: boxes.reloadForest
+                                          , session
+                                          , showTree: boxes.showTree
+                                          , sidePanel: boxes.sidePanelGraph
+                                          , sidePanelState: sideBarDisplayedBox
+                                          }
+
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
-    -- Render
+    -- graphVersionRef <- R.useRef graphVersion'
+    -- R.useEffect' $ do
+    --   let readData = R.readRef dataRef
+    --   let gv = R.readRef graphVersionRef
+    --   if SigmaxT.eqGraph readData graph then
+    --     pure unit
+    --   else do
+    --     -- Graph data changed, reinitialize sigma.
+    --     let rSigma = R.readRef controls.sigmaRef
+    --     Sigmax.cleanupSigma rSigma "explorerCpt"
+    --     R.setRef dataRef graph
+    --     R.setRef graphVersionRef graphVersion'
+    --     -- Reinitialize bunch of state as well.
+    --     T.write_ SigmaxT.emptyNodeIds controls.removedNodeIds
+    --     T.write_ SigmaxT.emptyNodeIds controls.selectedNodeIds
+    --     T.write_ SigmaxT.EShow controls.showEdges
+    --     T.write_ forceAtlasS controls.forceAtlasState
+    --     T.write_ Graph.Init controls.graphStage
+    --     T.write_ Types.InitialClosed controls.sidePanelState
+
+
+
+  -- Render
+  -----------------
+
     pure $
 
       H.div
@@ -114,101 +168,30 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
               }
         ]
       ,
-        -- Explorer
-        explorer
-        { graph
-        , hyperdataGraph
-        , session
-        , boxes
-        , graphId
-        , sidePanelState: sideBarDisplayedBox
+        -- Toolbar
+        H.div
+        { className: "graph-layout__toolbar"
+        , id: "controls-container" -- (?) used?
         }
-      ]
-
-----------------------------------------------------------
-
-type ExplorerProps =
-  ( graph           :: SigmaxT.SGraph
-  , hyperdataGraph  :: GET.HyperdataGraph
-  , session         :: Session
-  , boxes           :: Boxes
-  , graphId         :: GET.GraphId
-  , sidePanelState  :: T.Box (SidePanelState)
-  )
-
-explorer :: R2.Leaf ExplorerProps
-explorer = R2.leaf explorerCpt
-explorerCpt :: R.Component ExplorerProps
-explorerCpt = here.component "explorer" cpt where
-  cpt props@{ boxes: { graphVersion
-                     , reloadForest
-                     , showTree
-                     , sidePanelGraph
-                     , sidePanelState
-                     }
-            , graph
-            , graphId
-            , hyperdataGraph
-            , session
-            } _ = do
-    { mMetaData } <- GEST.focusedSidePanel sidePanelGraph
-    _graphVersion' <- T.useLive T.unequal graphVersion
-    mMetaData' <- T.useLive T.unequal mMetaData
-
-    let startForceAtlas = maybe true (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData'
-
-    let forceAtlasS = if startForceAtlas
-                        then SigmaxT.InitialRunning
-                        else SigmaxT.InitialStopped
-
-    _dataRef <- R.useRef graph
-    graphRef <- R.useRef null
-    controls <- Controls.useGraphControls { forceAtlasS
-                                          , graph
-                                          , graphId
-                                          , hyperdataGraph
-                                          , reloadForest
-                                          , session
-                                          , showTree
-                                          , sidePanel: sidePanelGraph
-                                          , sidePanelState }
-
-    -- graphVersionRef <- R.useRef graphVersion'
-    -- R.useEffect' $ do
-    --   let readData = R.readRef dataRef
-    --   let gv = R.readRef graphVersionRef
-    --   if SigmaxT.eqGraph readData graph then
-    --     pure unit
-    --   else do
-    --     -- Graph data changed, reinitialize sigma.
-    --     let rSigma = R.readRef controls.sigmaRef
-    --     Sigmax.cleanupSigma rSigma "explorerCpt"
-    --     R.setRef dataRef graph
-    --     R.setRef graphVersionRef graphVersion'
-    --     -- Reinitialize bunch of state as well.
-    --     T.write_ SigmaxT.emptyNodeIds controls.removedNodeIds
-    --     T.write_ SigmaxT.emptyNodeIds controls.selectedNodeIds
-    --     T.write_ SigmaxT.EShow controls.showEdges
-    --     T.write_ forceAtlasS controls.forceAtlasState
-    --     T.write_ Graph.Init controls.graphStage
-    --     T.write_ Types.InitialClosed controls.sidePanelState
-
-    pure $
-      RH.div { className: "graph-meta-container" }
-      [ RH.div { className: "graph-container" }
-        [ RH.div { className: "container-fluid" }
-          [ RH.div { id: "controls-container" } [ Controls.controls controls [] ]
-          , RH.div { className: "row graph-row" }
-            [ RH.div { ref: graphRef, id: "graph-view", className: "col-md-12" } []
-            , graphView { boxes: props.boxes
-                        , controls
-                        , elRef: graphRef
-                        , graph
-                        , hyperdataGraph
-                        , mMetaData
-                        }
-            ]
-          ]
+        [
+          Controls.controls controls []
+        ]
+      ,
+        -- Content
+        H.div
+        { ref: graphRef
+        , className: "graph-layout__content"
+        , id: "graph-view" -- (?) used?
+        }
+        [
+          graphView
+          { boxes: props.boxes
+          , controls
+          , elRef: graphRef
+          , graph
+          , hyperdataGraph
+          , mMetaData: mMetaDataBox
+          }
         ]
       ]
 
@@ -265,20 +248,23 @@ graphViewCpt = here.component "graphView" cpt
       R.useEffect1' multiSelectEnabled' $ do
         R.setRef multiSelectEnabledRef multiSelectEnabled'
 
-      pure $ Graph.graph { boxes
-                         , elRef
-                         , forceAtlas2Settings: Graph.forceAtlas2Settings
-                         , graph
-                         , mCamera
-                         , multiSelectEnabledRef
-                         , selectedNodeIds: controls.selectedNodeIds
-                         , showEdges: controls.showEdges
-                         , sigmaRef: controls.sigmaRef
-                         , sigmaSettings: Graph.sigmaSettings
-                         , stage: controls.graphStage
-                         , startForceAtlas
-                         , transformedGraph
-                         } []
+      pure $
+
+        Graph.graph
+        { boxes
+        , elRef
+        , forceAtlas2Settings: Graph.forceAtlas2Settings
+        , graph
+        , mCamera
+        , multiSelectEnabledRef
+        , selectedNodeIds: controls.selectedNodeIds
+        , showEdges: controls.showEdges
+        , sigmaRef: controls.sigmaRef
+        , sigmaSettings: Graph.sigmaSettings
+        , stage: controls.graphStage
+        , startForceAtlas
+        , transformedGraph
+        } []
 
 --------------------------------------------------------
 
