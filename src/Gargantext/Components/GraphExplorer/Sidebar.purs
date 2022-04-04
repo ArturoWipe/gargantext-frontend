@@ -59,8 +59,8 @@ type Props = (
   | Common
   )
 
-sidebar :: R2.Component Props
-sidebar = R.createElement sidebarCpt
+sidebar :: R2.Leaf Props
+sidebar = R2.leaf sidebarCpt
 sidebarCpt :: R.Component Props
 sidebarCpt = here.component "sidebar" cpt
   where
@@ -332,7 +332,7 @@ badgeCpt = here.component "badge" cpt where
     let style = {
           fontSize: show scale <> "em"
           }
-    
+
     pure $ RH.a { className: "badge badge-pill badge-light"
                 , on: { click: onClick }
                 } [ RH.h6 { style } [ RH.text label ] ]
@@ -504,4 +504,3 @@ Global/local view:
     The 'change level' button allows to change between global view and node centered view,
     To explore the neighborhood of a selection click on the 'change level' button.
 -}
-

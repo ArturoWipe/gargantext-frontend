@@ -14,7 +14,6 @@ import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.ErrorsView (errorsView)
 import Gargantext.Components.Footer (footer)
 import Gargantext.Components.Forest as Forest
-import Gargantext.Components.GraphExplorer.Layout as GraphExplorer
 import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
 import Gargantext.Components.Lang (LandingLang(LL_EN))
@@ -26,6 +25,7 @@ import Gargantext.Components.Nodes.Corpus (corpusLayout)
 import Gargantext.Components.Nodes.Corpus.Code (corpusCodeLayout)
 import Gargantext.Components.Nodes.Corpus.Dashboard (dashboardLayout)
 import Gargantext.Components.Nodes.Corpus.Document (documentMainLayout)
+import Gargantext.Components.Nodes.Corpus.Graph (graphLayout)
 import Gargantext.Components.Nodes.Corpus.Phylo (phyloLayout)
 import Gargantext.Components.Nodes.Corpus.Phylo as PhyloExplorer
 import Gargantext.Components.Nodes.File (fileLayout)
@@ -302,13 +302,10 @@ openedSidePanel = R.createElement openedSidePanelCpt
 openedSidePanelCpt :: R.Component (WithSession Props)
 openedSidePanelCpt = here.component "openedSidePanel" cpt where
   cpt { boxes: boxes@{ route
-                     , sidePanelGraph
                      , sidePanelState
                      , sidePanelTexts }
       , session } _ = do
-    { mGraph, mMetaData } <- GEST.focusedSidePanel sidePanelGraph
-    mGraph' <- T.useLive T.unequal mGraph
-    mGraphMetaData' <- T.useLive T.unequal mMetaData
+
     route' <- T.useLive T.unequal route
 
     let wrapper = H.div { className: "side-panel" }
@@ -318,19 +315,6 @@ openedSidePanelCpt = here.component "openedSidePanel" cpt where
         pure $ wrapper
           [ Lists.sidePanel { session
                             , sidePanelState } [] ]
-      GR.PGraphExplorer _s g -> do
-        case (mGraph' /\ mGraphMetaData') of
-          (Nothing /\ _) -> pure $ wrapper []
-          (_ /\ Nothing) -> pure $ wrapper []
-          (Just graph /\ Just metaData) -> do
-            pure $ wrapper
-              [ GES.sidebar { boxes
-                            , frontends: defaultFrontends
-                            , graph
-                            , graphId: g
-                            , metaData
-                            , session
-                            } [] ]
       GR.NodeTexts _s _n -> do
         pure $ wrapper
           [ Texts.textsSidePanel { boxes
@@ -434,7 +418,7 @@ graphExplorerCpt = here.component "graphExplorer" cpt where
       authedProps =
         Record.merge
         { content:
-            \session -> GraphExplorer.layout
+            \session -> graphLayout
                         { boxes
                         , graphId: nodeId
                         , key: "graphId-" <> show nodeId

@@ -1,14 +1,18 @@
+/* Grid constants */
+
+$layout-height: calc(100vh - #{ $topbar-height} )
+
+
+///////////////////////////////////
+
+// @WIP: clean this CSS section
+
 @mixin sidePanelCommon
   position: absolute
   max-height: 600px
   //overflow-y: scroll
   top: 170px
   //z-index: 1
-
-#graph-explorer
-  margin-left: 20rem
-  margin-right: 20rem
-  padding-top: 0px
 
 .graph-container
   #sp-container
@@ -85,6 +89,28 @@
     overflow-y: scroll
     width: 300px
     top: 50px
+
+/////////////////////////////////////////////
+
+.graph-layout
+  position: relative
+  width: 100%
+  height: $layout-height
+
+  &__sidebar
+    position: fixed
+    width: $sidebar-width
+    height: $sidebar-height
+    z-index: z-index('graph-layout', 'sidebar')
+
+    @include right-handed
+      right: 0
+      border-left: 1px solid $border-color
+
+    @include left-handed
+      left: 0
+      border-right: 1px solid $border-color
+
 
 /////////////////////////////////////////////
 

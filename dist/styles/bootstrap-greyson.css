@@ -9879,6 +9879,14 @@ h3 {
   border-style: dashed;
 }
 
+.input-with-autocomplete .completions {
+  position: fixed;
+  max-height: 300px;
+  overflow-y: scroll;
+  width: 300px;
+  top: 50px;
+}
+
 .with-icon-font {
   font-family: ForkAwesome, Muli;
 }
@@ -10028,12 +10036,7 @@ h4, h5, h6 {
   display: none;
 }
 
-#graph-explorer {
-  margin-left: 20rem;
-  margin-right: 20rem;
-  padding-top: 0px;
-}
-
+/* Grid constants */
 .graph-container {
   /* #toggle-container */
   /*   position: fixed */
@@ -10115,9 +10118,33 @@ h4, h5, h6 {
   top: 50px;
 }
 
+.graph-layout {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 56px );
+}
+.graph-layout__sidebar {
+  position: fixed;
+  width: 480px;
+  height: calc(100vh - 56px);
+  z-index: 1;
+}
+.right-handed .graph-layout__sidebar {
+  right: 0;
+  border-left: 1px solid #dee2e6;
+}
+
+.left-handed .graph-layout__sidebar {
+  left: 0;
+  border-right: 1px solid #dee2e6;
+}
+
 .graph-topbar {
   padding: 0 8px;
   height: 100%;
+  display: flex;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 .right-handed .graph-topbar {
   border-left: 1px solid rgba(255, 255, 255, 0.05);
@@ -10125,6 +10152,20 @@ h4, h5, h6 {
 
 .left-handed .graph-topbar {
   border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.graph-topbar__toolbar, .graph-topbar__sidebar {
+  width: 136px;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+.graph-topbar__search {
+  width: 304px;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+.graph-topbar__search [type=submit] {
+  display: none;
 }
 
 #logo-designed {
@@ -11111,8 +11152,6 @@ select.form-control {
 }
 
 /* Grid constants */
-/* Topbar constants */
-/* Sidebar constant */
 /* Colors */
 .phylo {
   /* ---------- axis ---------- */

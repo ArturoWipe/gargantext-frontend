@@ -12,68 +12,33 @@ import Data.Nullable (null, Nullable)
 import Data.Sequence as Seq
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
+import Data.Tuple.Nested ((/\))
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Graph as Graph
 import Gargantext.Components.GraphExplorer.Controls as Controls
+import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
 import Gargantext.Components.GraphExplorer.TopBar as GETB
 import Gargantext.Components.GraphExplorer.Types as GET
-import Gargantext.Config.REST (AffRESTError, logRESTError)
+import Gargantext.Config (defaultFrontends)
 import Gargantext.Data.Louvain as Louvain
-import Gargantext.Hooks.Loader (useLoader)
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
-import Gargantext.Routes (SessionRoute(NodeAPI))
-import Gargantext.Sessions (Session, get)
+import Gargantext.Sessions (Session)
+import Gargantext.Types (SidePanelState(..))
+import Gargantext.Types as GT
 import Gargantext.Types as Types
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Range as Range
 import Gargantext.Utils.Reactix as R2
-import Gargantext.Utils.Toestand as T2
 import Math as Math
 import Partial.Unsafe (unsafePartial)
 import Reactix as R
+import Reactix.DOM.HTML as H
 import Reactix.DOM.HTML as RH
-import Record.Extra as RX
 import Toestand as T
 
-here :: R2.Here
-here = R2.here "Gargantext.Components.GraphExplorer.Layout"
 
-
-type Props' =
-  ( key       :: String
-  , session   :: Session
-  , boxes     :: Boxes
-  , graphId   :: GET.GraphId
-  )
-
-
-layout :: R2.Leaf Props'
-layout = R2.leaf layoutCpt
-layoutCpt :: R.Component Props'
-layoutCpt = here.component "explorerLayout" cpt where
-  cpt props@{ boxes: { graphVersion }, graphId, session } _ = do
-    graphVersion' <- T.useLive T.unequal graphVersion
-
-    useLoader { errorHandler
-              , loader: getNodes session graphVersion'
-              , path: graphId
-              , render: handler }
-    where
-      errorHandler = logRESTError here "[explorerLayout]"
-      handler loaded@(GET.HyperdataGraph { graph: hyperdataGraph }) =
-        render { graph
-               , hyperdataGraph: loaded
-               , mMetaData'
-               , session
-               , boxes: props.boxes
-               , graphId
-               }
-        where
-          Tuple mMetaData' graph = convert hyperdataGraph
-
---------------------------------------------------------
-
-type RenderProps =
+type Props =
   ( mMetaData'      :: Maybe GET.MetaData
   , graph           :: SigmaxT.SGraph
   , hyperdataGraph  :: GET.HyperdataGraph
@@ -82,15 +47,25 @@ type RenderProps =
   , graphId         :: GET.GraphId
   )
 
-render :: R2.Leaf RenderProps
-render = R2.leaf renderCpt
-renderCpt :: R.Component RenderProps
-renderCpt = here.component "explorerWriteGraph" cpt where
+here :: R2.Here
+here = R2.here "Gargantext.Components.GraphExplorer.Layout"
+
+layout :: R2.Leaf Props
+layout = R2.leaf layoutCpt
+
+layoutCpt :: R.Component Props
+layoutCpt = here.component "explorerWriteGraph" cpt where
   cpt props@{ boxes
             , graph
             , mMetaData'
             , graphId
+            , session
+            , hyperdataGraph
             } _ = do
+    -- States
+    sideBarDisplayed /\ sideBarDisplayedBox <-
+      R2.useBox' (Closed :: SidePanelState)
+
     -- Computed
     let
       topBarPortalKey = "portal-topbar::" <> show graphId
@@ -98,38 +73,56 @@ renderCpt = here.component "explorerWriteGraph" cpt where
     -- Hooks
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
-    -- Effects
-    R.useEffectOnce' do
-      flip T.write_ boxes.sidePanelGraph $ Just
-        { mGraph: Just graph
-        , mMetaData: mMetaData'
-        , multiSelectEnabled: false
-        , removedNodeIds: Set.empty
-        , selectedNodeIds: Set.empty
-        , showControls: false
-        , sideTab: GET.SideTabLegend
-        }
-
     -- Render
-    pure $ R.fragment
+    pure $
+
+      H.div
+      { className: "graph-layout" }
       [
-        -- Explorer
-        explorer
-        (RX.pick props :: Record ExplorerProps)
-      ,
         -- Topbar
         R2.createPortal' mTopBarHost
         [
           R2.fragmentWithKey topBarPortalKey
           [
             GETB.topBar
-            { sidePanelState: props.boxes.sidePanelState
+            { sidePanelState: sideBarDisplayedBox
             , sidePanelGraph: props.boxes.sidePanelGraph
             }
           ]
         ]
-      -- ,
+      ,
         -- Sidebar
+        H.div
+        { className: "graph-layout__sidebar"
+        -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
+        -- @link https://github.com/facebook/react/issues/12039
+        , style: { display: sideBarDisplayed  == GT.Closed ? "none" $ "block" }
+        }
+        [
+          case mMetaData' of
+            Nothing ->
+              H.div {} [ H.text "nop" ]
+
+            Just metaData ->
+              GES.sidebar
+              { boxes
+              , frontends: defaultFrontends
+              , graph
+              , graphId
+              , metaData
+              , session
+              }
+        ]
+      ,
+        -- Explorer
+        explorer
+        { graph
+        , hyperdataGraph
+        , session
+        , boxes
+        , graphId
+        , sidePanelState: sideBarDisplayedBox
+        }
       ]
 
 ----------------------------------------------------------
@@ -140,6 +133,7 @@ type ExplorerProps =
   , session         :: Session
   , boxes           :: Boxes
   , graphId         :: GET.GraphId
+  , sidePanelState  :: T.Box (SidePanelState)
   )
 
 explorer :: R2.Leaf ExplorerProps
@@ -345,13 +339,6 @@ modeGraphType Types.Terms = "def"
 
 --------------------------------------------------------------
 
-getNodes :: Session -> T2.Reload -> GET.GraphId -> AffRESTError GET.HyperdataGraph
-getNodes session graphVersion graphId =
-  get session $ NodeAPI Types.Graph
-                        (Just graphId)
-                        ("?version=" <> (show graphVersion))
-
---------------------------------------------------------------
 
 type LiveProps = (
     edgeConfluence'  :: Range.NumberRange
