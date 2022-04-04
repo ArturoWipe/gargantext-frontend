@@ -3,6 +3,32 @@
 /* https://github.com/ThemesGuide/bootstrap-themes/blob/master/greyson/ */
 @import url(https://fonts.googleapis.com/css?family=Muli:200,300,400,700);
 @import url(https://fonts.googleapis.com/css?family=Oswald:200,300,400,700);
+.phylo-sidebar, .graph-sidebar {
+  background-color: #fff;
+  height: 100%;
+  position: relative;
+}
+.phylo-sidebar::before, .graph-sidebar::before {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
+  content: "";
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  top: 0;
+  height: 16px;
+  width: 100%;
+}
+.phylo-sidebar::after, .graph-sidebar::after {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
+  content: "";
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 16px;
+  width: 100%;
+}
+
 /*!
  * Bootstrap v4.6.0 (https://getbootstrap.com/)
  * Copyright 2011-2021 The Bootstrap Authors
@@ -9812,6 +9838,13 @@ h3 {
   text-align: center;
 }
 
+.b-tabs .nav-item:first-child {
+  margin-left: 16px;
+}
+.b-tabs .nav-item:last-child {
+  margin-right: 16px;
+}
+
 .form-group {
   position: relative;
   margin-bottom: 24px;
@@ -10037,87 +10070,6 @@ h4, h5, h6 {
 }
 
 /* Grid constants */
-.graph-container {
-  /* #toggle-container */
-  /*   position: fixed */
-  /*   z-index: 999 // needs to appear above solid menu bar */
-  /*   right: 25% */
-  /*   top: 10px */
-  /*   width: 50% */
-  /*   .container-fluid */
-  /*     padding-top: 90px */
-}
-.graph-container #sp-container {
-  position: absolute;
-  max-height: 600px;
-  top: 170px;
-  border: 1px white solid;
-  background-color: white;
-  width: 28%;
-  z-index: 15;
-}
-.graph-container #sp-container #myTab {
-  marginBottom: 18px;
-  marginTop: 18px;
-}
-.graph-container #sp-container #myTabContent {
-  borderBottom: 1px solid black;
-  paddingBottom: 19px;
-}
-.graph-container #sp-container #horizontal-checkbox ul {
-  display: inline;
-  float: left;
-}
-.graph-container .lefthanded #sp-container {
-  left: 0%;
-}
-.graph-container .righthanded #sp-container {
-  left: 70%;
-}
-.graph-container .graph-tree {
-  position: absolute;
-  max-height: 600px;
-  top: 170px;
-  background-color: #fff;
-  z-index: 1;
-}
-.graph-container .lefthanded .graph-tree {
-  left: 80%;
-}
-.graph-container .righthanded .graph-tree {
-  left: 0%;
-}
-.graph-container #controls-container {
-  position: absolute;
-  z-index: 900;
-  backdrop-filter: blur(4px);
-  background: rgba(255, 255, 255, 0.75);
-  left: 0;
-  right: 0;
-  top: 60px;
-}
-.graph-container #controls-container .nav-item {
-  padding-left: 0.8rem;
-}
-.graph-container .graph-row {
-  height: 100vh;
-}
-.graph-container .graph-row #graph-view {
-  height: 95vh;
-}
-.graph-container #tree {
-  position: absolute;
-  z-index: 1;
-}
-
-.input-with-autocomplete .completions {
-  position: fixed;
-  max-height: 300px;
-  overflow-y: scroll;
-  width: 300px;
-  top: 50px;
-}
-
 .graph-layout {
   position: relative;
   width: 100%;
@@ -10166,6 +10118,19 @@ h4, h5, h6 {
 }
 .graph-topbar__search [type=submit] {
   display: none;
+}
+
+.graph-sidebar #myTab {
+  marginBottom: 18px;
+  marginTop: 18px;
+}
+.graph-sidebar #myTabContent {
+  borderBottom: 1px solid black;
+  paddingBottom: 19px;
+}
+.graph-sidebar #horizontal-checkbox ul {
+  display: inline;
+  float: left;
 }
 
 #logo-designed {
@@ -10265,10 +10230,6 @@ li#rename #rename-a {
 .nooverflow:hover {
   overflow: visible;
   height: auto;
-}
-
-#graph-tree .tree {
-  margin-top: 27px;
 }
 
 .nopadding {
@@ -11474,41 +11435,6 @@ select.form-control {
 }
 .phylo-topbar__submit {
   display: none;
-}
-
-.phylo-sidebar {
-  background-color: #fff;
-  height: 100%;
-  scrollbar-width: none;
-  overflow-y: scroll;
-  overflow-x: visible;
-}
-.phylo-sidebar::-webkit-scrollbar {
-  display: none;
-}
-.phylo-sidebar__menu .nav-item:first-child {
-  margin-left: 16px;
-}
-.phylo-sidebar__menu .nav-item:last-child {
-  margin-right: 16px;
-}
-.phylo-sidebar__top-teaser {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
-  z-index: 1;
-  pointer-events: none;
-  position: sticky;
-  top: 0;
-  height: 16px;
-  width: 100%;
-}
-.phylo-sidebar__bottom-teaser {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
-  z-index: 1;
-  pointer-events: none;
-  position: sticky;
-  bottom: 0;
-  height: 16px;
-  width: 100%;
 }
 
 .phylo-details-tab__counter {

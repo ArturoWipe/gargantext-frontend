@@ -14,3 +14,4 @@ import Gargantext.Components.Bootstrap.FormTextarea(formTextarea) as Exports
 import Gargantext.Components.Bootstrap.Icon(icon) as Exports
 import Gargantext.Components.Bootstrap.Label(label', label_) as Exports
 import Gargantext.Components.Bootstrap.Spinner(spinner) as Exports
+import Gargantext.Components.Bootstrap.Tabs(tabs) as Exports

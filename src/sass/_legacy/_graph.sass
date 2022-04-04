@@ -7,47 +7,6 @@ $layout-height: calc(100vh - #{ $topbar-height} )
 
 // @WIP: clean this CSS section
 
-@mixin sidePanelCommon
-  position: absolute
-  max-height: 600px
-  //overflow-y: scroll
-  top: 170px
-  //z-index: 1
-
-.graph-container
-  #sp-container
-    @include sidePanelCommon
-    border: 1px white solid
-    background-color: white
-    width: 28%
-    z-index: 15
-
-    #myTab
-      marginBottom: 18px
-      marginTop: 18px
-
-    #myTabContent
-      borderBottom: 1px solid black
-      paddingBottom : 19px
-
-    #horizontal-checkbox
-      ul
-        display: inline
-        float : left
-  .lefthanded #sp-container
-    left: 0%
-  .righthanded #sp-container
-    left: 70%
-
-  .graph-tree
-    @include sidePanelCommon
-    background-color: #fff
-    z-index: 1
-  .lefthanded .graph-tree
-    left: 80%
-  .righthanded .graph-tree
-    left: 0%
-
   /* #toggle-container
   /*   position: fixed
   /*   z-index: 999 // needs to appear above solid menu bar
@@ -82,13 +41,7 @@ $layout-height: calc(100vh - #{ $topbar-height} )
     position: absolute
     z-index: 1
 
-.input-with-autocomplete
-  .completions
-    position: fixed
-    max-height: 300px
-    overflow-y: scroll
-    width: 300px
-    top: 50px
+
 
 /////////////////////////////////////////////
 
@@ -134,3 +87,23 @@ $layout-height: calc(100vh - #{ $topbar-height} )
 
     [type="submit"]
       display: none
+
+
+/////////////////////////////////////////////
+
+.graph-sidebar
+  @extend %sidebar
+
+  // @WIP
+  #myTab
+    marginBottom: 18px
+    marginTop: 18px
+
+  #myTabContent
+    borderBottom: 1px solid black
+    paddingBottom : 19px
+
+  #horizontal-checkbox
+    ul
+      display: inline
+      float : left

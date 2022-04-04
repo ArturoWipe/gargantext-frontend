@@ -18,6 +18,7 @@ import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Legend as Legend
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
 import Gargantext.Components.GraphExplorer.Types as GET
@@ -65,49 +66,43 @@ sidebarCpt :: R.Component Props
 sidebarCpt = here.component "sidebar" cpt
   where
     cpt props@{ boxes: { sidePanelGraph } } _ = do
+      -- States
       { sideTab } <- GEST.focusedSidePanel sidePanelGraph
       sideTab' <- T.useLive T.unequal sideTab
 
-      pure $ RH.div { id: "sp-container" }
-        [ sideTabNav { sideTab
-                     , sideTabs: [GET.SideTabLegend, GET.SideTabData, GET.SideTabCommunity] } []
-        , case sideTab' of
-            GET.SideTabLegend -> sideTabLegend sideTabProps []
-            GET.SideTabData -> sideTabData sideTabProps []
-            GET.SideTabCommunity -> sideTabCommunity sideTabProps []
+      -- Computed
+      let
+        sideTabs =
+          [ GET.SideTabLegend
+          , GET.SideTabData
+          , GET.SideTabCommunity
+          ]
+
+        sideTabProps = (RX.pick props :: Record Props)
+
+      -- Render
+      pure $
+
+        H.div
+        { className: "graph-sidebar" }
+        [
+          -- Menu
+          B.tabs
+          { value: sideTab'
+          , list: sideTabs
+          , callback: flip T.write_ sideTab
+          }
+        ,
+          case sideTab' of
+            GET.SideTabLegend     -> sideTabLegend sideTabProps
+            GET.SideTabData       -> sideTabData sideTabProps
+            GET.SideTabCommunity  -> sideTabCommunity sideTabProps
         ]
-      where
-        sideTabProps = RX.pick props :: Record Props
 
-type SideTabNavProps = (
-    sideTab  :: T.Box GET.SideTab
-  , sideTabs :: Array GET.SideTab
-  )
+------------------------------------------------------------
 
-sideTabNav :: R2.Component SideTabNavProps
-sideTabNav = R.createElement sideTabNavCpt
-sideTabNavCpt :: R.Component SideTabNavProps
-sideTabNavCpt = here.component "sideTabNav" cpt
-  where
-    cpt { sideTab, sideTabs } _ = do
-      sideTab' <- T.useLive T.unequal sideTab
-
-      pure $ R.fragment [ H.div { className: "text-primary center"} [H.text ""]
-                        , H.div { className: "nav nav-tabs"} (liItem sideTab' <$> sideTabs)
-                            -- , H.div {className: "center"} [ H.text "Doc sideTabs"]
-                        ]
-      where
-        liItem :: GET.SideTab -> GET.SideTab -> R.Element
-        liItem sideTab' tab =
-          H.div { className : "nav-item nav-link"
-                            <> if tab == sideTab'
-                                 then " active"
-                                 else ""
-                , on: { click: \_ -> T.write_ tab sideTab }
-                } [ H.text $ show tab ]
-
-sideTabLegend :: R2.Component Props
-sideTabLegend = R.createElement sideTabLegendCpt
+sideTabLegend :: R2.Leaf Props
+sideTabLegend = R2.leaf sideTabLegendCpt
 sideTabLegendCpt :: R.Component Props
 sideTabLegendCpt = here.component "sideTabLegend" cpt
   where
@@ -117,8 +112,10 @@ sideTabLegendCpt = here.component "sideTabLegend" cpt
         , documentation EN
         ]
 
-sideTabData :: R2.Component Props
-sideTabData = R.createElement sideTabDataCpt
+------------------------------------------------------------
+
+sideTabData :: R2.Leaf Props
+sideTabData = R2.leaf sideTabDataCpt
 sideTabDataCpt :: R.Component Props
 sideTabDataCpt = here.component "sideTabData" cpt
   where
@@ -140,9 +137,10 @@ sideTabDataCpt = here.component "sideTabData" cpt
           ]
         ]
 
+------------------------------------------------------------
 
-sideTabCommunity :: R2.Component Props
-sideTabCommunity = R.createElement sideTabCommunityCpt
+sideTabCommunity :: R2.Leaf Props
+sideTabCommunity = R2.leaf sideTabCommunityCpt
 sideTabCommunityCpt :: R.Component Props
 sideTabCommunityCpt = here.component "sideTabCommunity" cpt
   where

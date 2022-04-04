@@ -494,56 +494,7 @@ $decreasing-color: #11638F;
 ////////////////////////////////////////////////////////////////
 
 .phylo-sidebar {
-  $teaser-height: 16px;
-
-  background-color: $body-bg;
-  height: 100%;
-
-  // avoiding ugly scrollbar
-  scrollbar-width: none;
-  overflow-y: scroll;
-  overflow-x: visible;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  // adjust nav menu gutter (@TODO: generic?)
-  &__menu .nav-item {
-
-    &:first-child {
-      margin-left: space-x(2);
-    }
-
-    &:last-child {
-      margin-right: space-x(2);
-    }
-  }
-
-  // UX best pratice: when a lengthy column is overflowy hidden
-  // (with a scroll), a teaser UI element shows to the user that a scroll
-  // is possible
-  &__top-teaser {
-    @include top-teaser;
-
-    z-index: z-index('phylo-sidebar', 'teaser');
-    pointer-events: none;
-    position: sticky;
-    top: 0;
-    height: $teaser-height;
-    width: 100%;
-  }
-
-  &__bottom-teaser {
-    @include bottom-teaser;
-
-    z-index: z-index('phylo-sidebar', 'teaser');
-    pointer-events: none;
-    position: sticky;
-    bottom: 0;
-    height: $teaser-height;
-    width: 100%;
-  }
+  @extend %sidebar;
 }
 
 .phylo-details-tab {

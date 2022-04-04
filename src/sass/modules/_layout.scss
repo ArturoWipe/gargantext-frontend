@@ -40,3 +40,38 @@ $sidebar-tab-margin-x: space-x(2.5);
     mix-alpha($body-bg, 100%) 45%
   );
 }
+
+
+%sidebar {
+  $teaser-height: 16px;
+
+  background-color: $body-bg;
+  height: 100%;
+  position: relative;
+
+  &::before {
+    @include top-teaser;
+
+    content: "";
+    z-index: 1;
+    pointer-events: none;
+    position: sticky;
+    top: 0;
+    height: $teaser-height;
+    width: 100%;
+    display: block;
+  }
+
+  &::after {
+    @include bottom-teaser;
+
+    content: "";
+    z-index: 1;
+    pointer-events: none;
+    position: sticky;
+    bottom: 0;
+    height: $teaser-height;
+    width: 100%;
+    display: block;
+  }
+}
