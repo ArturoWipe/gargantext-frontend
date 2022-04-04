@@ -14,6 +14,7 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Graph as Graph
 import Gargantext.Components.GraphExplorer.Controls as Controls
 import Gargantext.Components.GraphExplorer.Sidebar as GES
@@ -78,9 +79,10 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
   -----------------
 
     sideBarDisplayed /\ sideBarDisplayedBox <-
-      R2.useBox' (Closed :: SidePanelState)
+      R2.useBox' (InitialClosed :: SidePanelState)
 
-    { mMetaData: mMetaDataBox } <- GEST.focusedSidePanel boxes.sidePanelGraph
+    { mMetaData: mMetaDataBox
+    } <- GEST.focusedSidePanel boxes.sidePanelGraph
     _graphVersion' <- T.useLive T.unequal boxes.graphVersion
 
 
@@ -123,8 +125,6 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
     --     T.write_ Graph.Init controls.graphStage
     --     T.write_ Types.InitialClosed controls.sidePanelState
 
-
-
   -- Render
   -----------------
 
@@ -150,12 +150,14 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
         { className: "graph-layout__sidebar"
         -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
         -- @link https://github.com/facebook/react/issues/12039
-        , style: { display: sideBarDisplayed  == GT.Closed ? "none" $ "block" }
+        , style: { display: sideBarDisplayed == GT.Opened ? "block" $ "none" }
         }
         [
           case mMetaData' of
             Nothing ->
-              H.div {} [ H.text "nop" ]
+              B.caveat
+              {}
+              [ H.text "No meta data has been found for this node." ]
 
             Just metaData ->
               GES.sidebar

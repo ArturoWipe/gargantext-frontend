@@ -10341,6 +10341,7 @@ h4, h5, h6 {
   position: absolute;
   z-index: 1;
   background: #fff;
+  width: 100%;
   border-bottom: 1px solid #dee2e6;
 }
 .graph-layout__content {
