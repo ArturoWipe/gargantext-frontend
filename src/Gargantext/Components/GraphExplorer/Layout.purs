@@ -1,8 +1,7 @@
-module Gargantext.Components.GraphExplorer where
+module Gargantext.Components.GraphExplorer.Layout where
 
 import Gargantext.Prelude hiding (max, min)
 
-import Control.Bind ((=<<))
 import DOM.Simple.Types (Element)
 import Data.Array as A
 import Data.FoldableWithIndex (foldMapWithIndex)
@@ -22,7 +21,6 @@ import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Config.REST (AffRESTError, logRESTError)
 import Gargantext.Data.Louvain as Louvain
 import Gargantext.Hooks.Loader (useLoader)
-import Gargantext.Hooks.Sigmax.Sigma (startForceAtlas2)
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
 import Gargantext.Routes (SessionRoute(NodeAPI))
 import Gargantext.Sessions (Session, get)
@@ -34,50 +32,25 @@ import Math as Math
 import Partial.Unsafe (unsafePartial)
 import Reactix as R
 import Reactix.DOM.HTML as RH
-import Record as Record
 import Record.Extra as RX
 import Toestand as T
 
 here :: R2.Here
-here = R2.here "Gargantext.Components.GraphExplorer"
+here = R2.here "Gargantext.Components.GraphExplorer.Layout"
 
-type BaseProps =
-  ( boxes          :: Boxes
-  , graphId        :: GET.GraphId
+
+type Props' =
+  ( key       :: String
+  , session   :: Session
+  , boxes     :: Boxes
+  , graphId   :: GET.GraphId
   )
 
-type LayoutProps =
-  ( session      :: Session
-  | BaseProps )
 
-type Props =
-  ( graph          :: SigmaxT.SGraph
-  , hyperdataGraph :: GET.HyperdataGraph
-  | LayoutProps
-  )
-
-type GraphWriteProps =
-  ( mMetaData'     :: Maybe GET.MetaData
-  | Props
-  )
-
-type LayoutWithKeyProps =
-  ( key :: String
-  | LayoutProps )
-
---------------------------------------------------------------
-explorerLayoutWithKey :: R2.Component LayoutWithKeyProps
-explorerLayoutWithKey = R.createElement explorerLayoutWithKeyCpt
-explorerLayoutWithKeyCpt :: R.Component LayoutWithKeyProps
-explorerLayoutWithKeyCpt = here.component "explorerLayoutWithKey" cpt where
-  cpt { boxes, graphId, session } _ = do
-    pure $ explorerLayout { boxes, graphId, session } []
-
-
-explorerLayout :: R2.Component LayoutProps
-explorerLayout = R.createElement explorerLayoutCpt
-explorerLayoutCpt :: R.Component LayoutProps
-explorerLayoutCpt = here.component "explorerLayout" cpt where
+layout :: R2.Leaf Props'
+layout = R2.leaf layoutCpt
+layoutCpt :: R.Component Props'
+layoutCpt = here.component "explorerLayout" cpt where
   cpt props@{ boxes: { graphVersion }, graphId, session } _ = do
     graphVersion' <- T.useLive T.unequal graphVersion
 
@@ -88,115 +61,164 @@ explorerLayoutCpt = here.component "explorerLayout" cpt where
     where
       errorHandler = logRESTError here "[explorerLayout]"
       handler loaded@(GET.HyperdataGraph { graph: hyperdataGraph }) =
-        explorerWriteGraph (Record.merge props { graph, hyperdataGraph: loaded, mMetaData' }) []
+        render { graph
+               , hyperdataGraph: loaded
+               , mMetaData'
+               , session
+               , boxes: props.boxes
+               , graphId
+               }
         where
           Tuple mMetaData' graph = convert hyperdataGraph
 
-explorerWriteGraph :: R2.Component GraphWriteProps
-explorerWriteGraph = R.createElement explorerWriteGraphCpt
-explorerWriteGraphCpt :: R.Component GraphWriteProps
-explorerWriteGraphCpt = here.component "explorerWriteGraph" cpt where
-  cpt props@{ boxes: { sidePanelGraph }
+--------------------------------------------------------
+
+type RenderProps =
+  ( mMetaData'      :: Maybe GET.MetaData
+  , graph           :: SigmaxT.SGraph
+  , hyperdataGraph  :: GET.HyperdataGraph
+  , session         :: Session
+  , boxes           :: Boxes
+  , graphId         :: GET.GraphId
+  )
+
+render :: R2.Leaf RenderProps
+render = R2.leaf renderCpt
+renderCpt :: R.Component RenderProps
+renderCpt = here.component "explorerWriteGraph" cpt where
+  cpt props@{ boxes
             , graph
-            , mMetaData' } _ = do
-      mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
+            , mMetaData'
+            , graphId
+            } _ = do
+    -- Computed
+    let
+      topBarPortalKey = "portal-topbar::" <> show graphId
 
-      R.useEffectOnce' $ do
-        T.write_ (Just { mGraph: Just graph
-                       , mMetaData: mMetaData'
-                       , multiSelectEnabled: false
-                       , removedNodeIds: Set.empty
-                       , selectedNodeIds: Set.empty
-                       , showControls: false
-                       , sideTab: GET.SideTabLegend }) sidePanelGraph
+    -- Hooks
+    mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
-      pure $ R.fragment
+    -- Effects
+    R.useEffectOnce' do
+      flip T.write_ boxes.sidePanelGraph $ Just
+        { mGraph: Just graph
+        , mMetaData: mMetaData'
+        , multiSelectEnabled: false
+        , removedNodeIds: Set.empty
+        , selectedNodeIds: Set.empty
+        , showControls: false
+        , sideTab: GET.SideTabLegend
+        }
+
+    -- Render
+    pure $ R.fragment
+      [
+        -- Explorer
+        explorer
+        (RX.pick props :: Record ExplorerProps)
+      ,
+        -- Topbar
+        R2.createPortal' mTopBarHost
         [
-          explorer (RX.pick props :: Record Props) []
-        ,
-          R2.createPortal' mTopBarHost
+          R2.fragmentWithKey topBarPortalKey
           [
-            GETB.topBar { boxes: props.boxes }
+            GETB.topBar
+            { sidePanelState: props.boxes.sidePanelState
+            , sidePanelGraph: props.boxes.sidePanelGraph
+            }
           ]
         ]
+      -- ,
+        -- Sidebar
+      ]
 
---------------------------------------------------------------
-explorer :: R2.Component Props
-explorer = R.createElement explorerCpt
-explorerCpt :: R.Component Props
-explorerCpt = here.component "explorer" cpt
-  where
-    cpt props@{ boxes: { graphVersion, handed, reloadForest, showTree, sidePanelGraph, sidePanelState }
-        , graph
-        , graphId
-        , hyperdataGraph
-        , session
-        } _ = do
-      { mMetaData } <- GEST.focusedSidePanel sidePanelGraph
-      _graphVersion' <- T.useLive T.unequal graphVersion
-      handed' <- T.useLive T.unequal handed
-      mMetaData' <- T.useLive T.unequal mMetaData
+----------------------------------------------------------
 
-      let startForceAtlas = maybe true (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData'
+type ExplorerProps =
+  ( graph           :: SigmaxT.SGraph
+  , hyperdataGraph  :: GET.HyperdataGraph
+  , session         :: Session
+  , boxes           :: Boxes
+  , graphId         :: GET.GraphId
+  )
 
-      let forceAtlasS = if startForceAtlas
-                          then SigmaxT.InitialRunning
-                          else SigmaxT.InitialStopped
+explorer :: R2.Leaf ExplorerProps
+explorer = R2.leaf explorerCpt
+explorerCpt :: R.Component ExplorerProps
+explorerCpt = here.component "explorer" cpt where
+  cpt props@{ boxes: { graphVersion
+                     , reloadForest
+                     , showTree
+                     , sidePanelGraph
+                     , sidePanelState
+                     }
+            , graph
+            , graphId
+            , hyperdataGraph
+            , session
+            } _ = do
+    { mMetaData } <- GEST.focusedSidePanel sidePanelGraph
+    _graphVersion' <- T.useLive T.unequal graphVersion
+    mMetaData' <- T.useLive T.unequal mMetaData
 
-      _dataRef <- R.useRef graph
-      graphRef <- R.useRef null
-      controls <- Controls.useGraphControls { forceAtlasS
-                                            , graph
-                                            , graphId
-                                            , hyperdataGraph
-                                            , reloadForest
-                                            , session
-                                            , showTree
-                                            , sidePanel: sidePanelGraph
-                                            , sidePanelState }
+    let startForceAtlas = maybe true (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData'
 
-      -- graphVersionRef <- R.useRef graphVersion'
-      -- R.useEffect' $ do
-      --   let readData = R.readRef dataRef
-      --   let gv = R.readRef graphVersionRef
-      --   if SigmaxT.eqGraph readData graph then
-      --     pure unit
-      --   else do
-      --     -- Graph data changed, reinitialize sigma.
-      --     let rSigma = R.readRef controls.sigmaRef
-      --     Sigmax.cleanupSigma rSigma "explorerCpt"
-      --     R.setRef dataRef graph
-      --     R.setRef graphVersionRef graphVersion'
-      --     -- Reinitialize bunch of state as well.
-      --     T.write_ SigmaxT.emptyNodeIds controls.removedNodeIds
-      --     T.write_ SigmaxT.emptyNodeIds controls.selectedNodeIds
-      --     T.write_ SigmaxT.EShow controls.showEdges
-      --     T.write_ forceAtlasS controls.forceAtlasState
-      --     T.write_ Graph.Init controls.graphStage
-      --     T.write_ Types.InitialClosed controls.sidePanelState
+    let forceAtlasS = if startForceAtlas
+                        then SigmaxT.InitialRunning
+                        else SigmaxT.InitialStopped
 
-      pure $
-        RH.div { className: "graph-meta-container" }
-        [ RH.div { className: "graph-container" }
-          [ RH.div { className: "container-fluid " <> hClass handed' }
-            [ RH.div { id: "controls-container" } [ Controls.controls controls [] ]
-            , RH.div { className: "row graph-row" }
-              [ RH.div { ref: graphRef, id: "graph-view", className: "col-md-12" } []
-              , graphView { boxes: props.boxes
-                          , controls
-                          , elRef: graphRef
-                          , graph
-                          , hyperdataGraph
-                          , mMetaData
-                          } []
-              ]
+    _dataRef <- R.useRef graph
+    graphRef <- R.useRef null
+    controls <- Controls.useGraphControls { forceAtlasS
+                                          , graph
+                                          , graphId
+                                          , hyperdataGraph
+                                          , reloadForest
+                                          , session
+                                          , showTree
+                                          , sidePanel: sidePanelGraph
+                                          , sidePanelState }
+
+    -- graphVersionRef <- R.useRef graphVersion'
+    -- R.useEffect' $ do
+    --   let readData = R.readRef dataRef
+    --   let gv = R.readRef graphVersionRef
+    --   if SigmaxT.eqGraph readData graph then
+    --     pure unit
+    --   else do
+    --     -- Graph data changed, reinitialize sigma.
+    --     let rSigma = R.readRef controls.sigmaRef
+    --     Sigmax.cleanupSigma rSigma "explorerCpt"
+    --     R.setRef dataRef graph
+    --     R.setRef graphVersionRef graphVersion'
+    --     -- Reinitialize bunch of state as well.
+    --     T.write_ SigmaxT.emptyNodeIds controls.removedNodeIds
+    --     T.write_ SigmaxT.emptyNodeIds controls.selectedNodeIds
+    --     T.write_ SigmaxT.EShow controls.showEdges
+    --     T.write_ forceAtlasS controls.forceAtlasState
+    --     T.write_ Graph.Init controls.graphStage
+    --     T.write_ Types.InitialClosed controls.sidePanelState
+
+    pure $
+      RH.div { className: "graph-meta-container" }
+      [ RH.div { className: "graph-container" }
+        [ RH.div { className: "container-fluid" }
+          [ RH.div { id: "controls-container" } [ Controls.controls controls [] ]
+          , RH.div { className: "row graph-row" }
+            [ RH.div { ref: graphRef, id: "graph-view", className: "col-md-12" } []
+            , graphView { boxes: props.boxes
+                        , controls
+                        , elRef: graphRef
+                        , graph
+                        , hyperdataGraph
+                        , mMetaData
+                        }
             ]
           ]
         ]
+      ]
 
-    hClass h = case h of
-      Types.LeftHanded  -> "lefthanded"
-      Types.RightHanded -> "righthanded"
+--------------------------------------------------------------
 
 type GraphProps =
   ( boxes          :: Boxes
@@ -207,8 +229,8 @@ type GraphProps =
   , mMetaData      :: T.Box (Maybe GET.MetaData)
 )
 
-graphView :: R2.Component GraphProps
-graphView = R.createElement graphViewCpt
+graphView :: R2.Leaf GraphProps
+graphView = R2.leaf graphViewCpt
 graphViewCpt :: R.Component GraphProps
 graphViewCpt = here.component "graphView" cpt
   where
@@ -217,7 +239,7 @@ graphViewCpt = here.component "graphView" cpt
         , elRef
         , graph
         , hyperdataGraph: GET.HyperdataGraph { mCamera }
-        , mMetaData } _children = do
+        , mMetaData } _ = do
       edgeConfluence' <- T.useLive T.unequal controls.edgeConfluence
       edgeWeight' <- T.useLive T.unequal controls.edgeWeight
       mMetaData' <- T.useLive T.unequal mMetaData
@@ -263,6 +285,8 @@ graphViewCpt = here.component "graphView" cpt
                          , startForceAtlas
                          , transformedGraph
                          } []
+
+--------------------------------------------------------
 
 convert :: GET.GraphData -> Tuple (Maybe GET.MetaData) SigmaxT.SGraph
 convert (GET.GraphData r) = Tuple r.metaData $ SigmaxT.Graph {nodes, edges}
@@ -310,6 +334,8 @@ convert (GET.GraphData r) = Tuple r.metaData $ SigmaxT.Graph {nodes, edges}
         targetNode = unsafePartial $ fromJust $ Map.lookup e.target nodesMap
         color = sourceNode.color
 
+--------------------------------------------------------------
+
 -- | See sigmajs/plugins/sigma.renderers.customShapes/shape-library.js
 modeGraphType :: Types.Mode -> String
 modeGraphType Types.Authors = "square"
@@ -317,12 +343,15 @@ modeGraphType Types.Institutes = "equilateral"
 modeGraphType Types.Sources = "star"
 modeGraphType Types.Terms = "def"
 
+--------------------------------------------------------------
 
 getNodes :: Session -> T2.Reload -> GET.GraphId -> AffRESTError GET.HyperdataGraph
 getNodes session graphVersion graphId =
   get session $ NodeAPI Types.Graph
                         (Just graphId)
                         ("?version=" <> (show graphVersion))
+
+--------------------------------------------------------------
 
 type LiveProps = (
     edgeConfluence'  :: Range.NumberRange

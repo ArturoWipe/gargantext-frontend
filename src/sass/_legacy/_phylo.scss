@@ -26,7 +26,6 @@
 
 /* Grid constants */
 
-$topbar-height: 56px; // ~ unworthy empirical value (@TODO topbar height calculation)
 $graph-margin: 16px;
 
 $layout-height: calc(100vh - #{ $topbar-height} );
@@ -37,16 +36,6 @@ $isoline-height: 174px;
 $left-column-width: 10%;
 $center-column-width: 85%;
 $right-column-width: 5%;
-
-/* Topbar constants */
-
-$topbar-input-width: 304px;
-
-/* Sidebar constant */
-
-$sidebar-width: 480px;
-$sidebar-height: calc(100vh - #{ $topbar-height });
-$tab-margin-x: space-x(2.5);
 
 /* Colors */
 
@@ -448,34 +437,33 @@ $decreasing-color: #11638F;
 ////////////////////////////////////////////////////////////////
 
 .phylo-topbar {
-  $margin: space-x(0.5);
   $fixed-button-width: 136px;
 
   @include aside-topbar();
 
-  padding-left: $margin;
-  padding-right: $margin;
+  padding-left: $topbar-item-margin;
+  padding-right: $topbar-item-margin;
   display: flex;
 
   &__toolbar,
   &__sidebar {
-    width: $fixed-button-width;
-    margin-left: $margin;
-    margin-right: $margin;
+    width: $topbar-fixed-button-width;
+    margin-left: $topbar-item-margin;
+    margin-right: $topbar-item-margin;
   }
 
   &__source {
     width: $topbar-input-width;
-    margin-left: $margin;
-    margin-right: $margin;
+    margin-left: $topbar-item-margin;
+    margin-right: $topbar-item-margin;
   }
 
   &__autocomplete {
     display: flex;
     width: $topbar-input-width;
     position: relative;
-    margin-left: $margin;
-    margin-right: $margin;
+    margin-left: $topbar-item-margin;
+    margin-right: $topbar-item-margin;
   }
 
   &__suggestion {
@@ -559,7 +547,7 @@ $decreasing-color: #11638F;
 }
 
 .phylo-details-tab {
-  $margin-x: $tab-margin-x;
+  $margin-x: $sidebar-tab-margin-x;
   $margin-y: space-x(2);
 
   &__counter {
@@ -585,7 +573,7 @@ $decreasing-color: #11638F;
 }
 
 .phylo-selection-tab {
-  $margin-x: $tab-margin-x;
+  $margin-x: $sidebar-tab-margin-x;
   $margin-y: space-x(2);
 
   &__highlight {

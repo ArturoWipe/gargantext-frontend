@@ -86,5 +86,25 @@
     width: 300px
     top: 50px
 
+/////////////////////////////////////////////
+
 .graph-topbar
   @include aside-topbar
+
+  display: flex
+  padding-left: $topbar-item-margin
+  padding-right: $topbar-item-margin
+
+  &__toolbar,
+  &__sidebar
+    width: $topbar-fixed-button-width
+    margin-left: $topbar-item-margin
+    margin-right: $topbar-item-margin
+
+  &__search
+    width: $topbar-input-width
+    margin-left: $topbar-item-margin
+    margin-right: $topbar-item-margin
+
+    [type="submit"]
+      display: none

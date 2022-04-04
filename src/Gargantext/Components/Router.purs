@@ -14,7 +14,7 @@ import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.ErrorsView (errorsView)
 import Gargantext.Components.Footer (footer)
 import Gargantext.Components.Forest as Forest
-import Gargantext.Components.GraphExplorer as GraphExplorer
+import Gargantext.Components.GraphExplorer.Layout as GraphExplorer
 import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
 import Gargantext.Components.Lang (LandingLang(LL_EN))
@@ -434,12 +434,13 @@ graphExplorerCpt = here.component "graphExplorer" cpt where
       authedProps =
         Record.merge
         { content:
-            \session -> GraphExplorer.explorerLayoutWithKey
+            \session -> GraphExplorer.layout
                         { boxes
                         , graphId: nodeId
                         , key: "graphId-" <> show nodeId
-                        , session }
-                        []
+                        , session
+                        }
+
         }
         sessionProps
 
