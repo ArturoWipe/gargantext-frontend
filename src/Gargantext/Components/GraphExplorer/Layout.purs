@@ -15,7 +15,7 @@ import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Graph as Graph
+import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.Controls as Controls
 import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST

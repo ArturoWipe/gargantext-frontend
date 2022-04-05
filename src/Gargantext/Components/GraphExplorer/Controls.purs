@@ -15,7 +15,7 @@ import Data.Sequence as Seq
 import Data.Set as Set
 import Effect.Timer (setTimeout)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Graph as Graph
+import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.Buttons (centerButton, cameraButton, edgesToggleButton, louvainToggleButton, pauseForceAtlasButton, multiSelectEnabledButton)
 import Gargantext.Components.GraphExplorer.RangeControl (edgeConfluenceControl, edgeWeightControl, nodeSizeControl)
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST

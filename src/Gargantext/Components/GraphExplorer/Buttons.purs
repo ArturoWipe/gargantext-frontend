@@ -27,7 +27,7 @@ import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), ComponentStatus(..), Variant(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Upload (uploadArbitraryData)
 import Gargantext.Components.Forest.Tree.Node.Action.Upload.Types (FileFormat(..))
-import Gargantext.Components.Graph as Graph
+import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.API (cloneGraph)
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Components.GraphExplorer.Utils as GEU
