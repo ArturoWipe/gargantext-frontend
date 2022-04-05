@@ -63,6 +63,9 @@ $knob-size: 14px
     // alignement with the bar
     transform: translateX(-5px) translateY(-3px)
 
+    &:hover
+      background-color: darken($range-bg-progress-color, 15%)
+
 
   &__placeholder
     display: none
@@ -98,6 +101,10 @@ $knob-size: 14px
     margin-bottom: revert
 
 ////////////////////////////////////////////
+
+// Cross browser rules
+input[type=range]
+  @include clickable
 
 // Styling FireFox input range, mimicking Chromium one
 //

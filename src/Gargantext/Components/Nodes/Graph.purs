@@ -8,13 +8,15 @@ import DOM.Simple (document, querySelector)
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
+import Data.Tuple.Nested ((/\))
 import FFI.Simple ((..), (.=))
 import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Layout (convert, layout)
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Config.REST (AffRESTError, logRESTError)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
-import Gargantext.Hooks.Loader (useLoader)
+import Gargantext.Hooks.Loader (useLoaderEffect)
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
 import Gargantext.Routes (SessionRoute(NodeAPI))
 import Gargantext.Sessions (Session, get)
@@ -22,6 +24,7 @@ import Gargantext.Types as Types
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
+import Reactix.DOM.HTML as H
 import Toestand as T
 
 
@@ -41,14 +44,63 @@ graphLayout = R2.leaf graphLayoutCpt
 graphLayoutCpt :: R.Component Props
 graphLayoutCpt = here.component "explorerLayout" cpt where
   cpt props@{ boxes: { graphVersion }, graphId, session } _ = do
-    graphVersion' <- T.useLive T.unequal graphVersion
 
-    useLoader
+    -- | States
+    -- |
+
+    graphVersion' <- T.useLive T.unequal graphVersion
+    state' /\ state <- R2.useBox' Nothing
+
+
+    -- | Hooks
+    -- |
+
+    useLoaderEffect
       { errorHandler
       , loader: getNodes session graphVersion'
       , path: graphId
-      , render: handler
+      , state
       }
+
+    useFirstEffect' do
+      -- @XXX: inopinent <div> (see Gargantext.Components.Router) (@TODO?)
+      mEl <- querySelector document ".main-page__main-route .container"
+      case mEl of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "display") "none"
+      -- @XXX: reset "main-page__main-route" wrapper margin
+      --       see Gargantext.Components.Router) (@TODO?)
+      mEl' <- querySelector document ".main-page__main-route"
+      case mEl' of
+        Nothing -> pure unit
+        Just el -> do
+          style <- pure $ (el .. "style")
+          pure $ (style .= "padding") "initial"
+
+
+    -- | Render
+    -- |
+
+    -- @WIP: cloak & R2.fromMaybe_
+    pure $
+
+      R.fragment
+      [
+        case state' of
+
+          Nothing ->
+            H.div
+            { className: "graph-loader" }
+            [
+              B.spinner
+              { className: "graph-loader__spinner" }
+            ]
+
+          Just s ->
+            handler s
+      ]
 
     where
       errorHandler = logRESTError here "[explorerLayout]"
@@ -93,23 +145,6 @@ contentCpt = here.component "content" cpt where
         , showControls: false
         , sideTab: GET.SideTabLegend
         }
-
-    useFirstEffect' do
-      -- @XXX: inopinent <div> (see Gargantext.Components.Router) (@TODO?)
-      mEl <- querySelector document ".main-page__main-route .container"
-      case mEl of
-        Nothing -> pure unit
-        Just el -> do
-          style <- pure $ (el .. "style")
-          pure $ (style .= "display") "none"
-      -- @XXX: reset "main-page__main-route" wrapper margin
-      --       see Gargantext.Components.Router) (@TODO?)
-      mEl' <- querySelector document ".main-page__main-route"
-      case mEl' of
-        Nothing -> pure unit
-        Just el -> do
-          style <- pure $ (el .. "style")
-          pure $ (style .= "padding") "initial"
 
   -- Render
 

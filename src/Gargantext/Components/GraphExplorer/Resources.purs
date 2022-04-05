@@ -8,7 +8,6 @@ module Gargantext.Components.GraphExplorer.Resources
 import Gargantext.Prelude
 
 import DOM.Simple (window)
-import DOM.Simple.Console (log)
 import DOM.Simple.Types (Element)
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
@@ -68,7 +67,6 @@ graphCpt = R.memo' $ here.component "graph" cpt where
       stageHooks (Record.merge { showEdges', stage' } props)
 
       R.useEffectOnce $ do
-        log "NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
         pure $ do
           here.log "[graphCpt (Cleanup)]"
           Sigmax.dependOnSigma (R.readRef sigmaRef) "[graphCpt (Cleanup)] no sigma" $ \sigma -> do

@@ -10371,14 +10371,19 @@ h4, h5, h6 {
   color: #495057;
   margin-bottom: 4px;
 }
+.range-control:hover .range-slider .range-slider__placeholder {
+  display: block;
+}
 
 .range-slider {
   position: relative;
+  width: 100%;
+  height: 8px;
 }
 .range-slider__scale {
   position: absolute;
-  width: 100%;
-  height: 8px;
+  width: inherit;
+  height: inherit;
   background-color: #EFEFEF;
   border: 1px solid #B2B2B2;
   border-radius: 3px;
@@ -10386,8 +10391,8 @@ h4, h5, h6 {
 .range-slider__scale-sel {
   position: absolute;
   background-color: #0075FF;
-  width: 100%;
-  height: 8px;
+  width: inherit;
+  height: inherit;
   border-radius: 3px;
 }
 .range-slider__knob {
@@ -10404,6 +10409,9 @@ h4, h5, h6 {
 }
 .range-slider__knob:focus {
   outline: 0;
+}
+.range-slider__knob:hover {
+  background-color: #0052b3;
 }
 .range-slider__placeholder {
   display: none;
@@ -10432,6 +10440,39 @@ h4, h5, h6 {
   font-size: 14px;
   color: #495057;
   margin-bottom: revert;
+}
+
+input[type=range] {
+  cursor: pointer;
+}
+input[type=range]:focus {
+  outline: 0;
+}
+
+input[type=range]::-moz-range-track {
+  height: 6px;
+  background: #0075FF;
+  border: 1px solid #B2B2B2;
+  border-radius: 3px;
+}
+
+input[type=range]::-moz-range-thumb {
+  border: none;
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
+  background-color: #0075FF;
+  box-shadow: 0 0 1px 0 #0075FF;
+}
+
+/*hide the outline behind the border*/
+input[type=range]:-moz-focusring {
+  outline: 1px solid white;
+  outline-offset: -1px;
+}
+
+input[type=range]:focus::-moz-range-track {
+  background-color: #0075FF;
 }
 
 .main-topbar {
@@ -10565,6 +10606,19 @@ h4, h5, h6 {
 }
 
 /* Grid constants */
+.graph-loader {
+  width: 100%;
+  height: 100%;
+}
+.graph-loader__spinner {
+  position: absolute;
+  font-size: 6px;
+  height: 100px;
+  width: 100px;
+  top: calc( 50% - 50px );
+  left: calc( 50% + 50px );
+}
+
 .graph-layout {
   position: relative;
   width: 100%;
@@ -10688,7 +10742,7 @@ h4, h5, h6 {
     transform: scale(1);
   }
   to {
-    transform: scale(1.2);
+    transform: scale(1.1);
   }
 }
 #logo-designed {
