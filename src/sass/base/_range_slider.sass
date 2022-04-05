@@ -1,0 +1,91 @@
+.range-control
+  display: inline-flex
+  flex-direction: column
+  vertical-align: top
+
+  &__label
+    font-size: 14px
+    color: $gray-700
+    margin-bottom: space-x(0.5)
+
+///////////////////////////////////////////////
+
+.range-slider
+  $self: &
+  // Colors based on Chromium engine
+  // (every browser renders its input range on its own, here we are trying
+  // to add some consistency)
+  $bg-color: #EFEFEF
+  $border-color: #B2B2B2
+  $bg-progress-color: #0075FF
+  $height: 8px
+  $radius: 3px
+  $knob-size: 14px
+  $placeholder-offset-y: -32px
+
+  position: relative
+
+
+  &__scale
+    position: absolute
+    width: 100%
+    height: $height
+    background-color: $bg-color
+    border: 1px solid $border-color
+    border-radius: $radius
+
+  &__scale-sel
+    position: absolute
+    background-color: $bg-progress-color
+    width: 100%
+    height: $height
+    border-radius: $radius
+
+  &__knob
+    @include unselectable
+    @include clickable
+
+    z-index: 1
+    background-color: $bg-progress-color
+    width: $knob-size
+    height: $knob-size
+    border-radius: 50%
+    position: absolute
+    box-shadow: 0 0 1px 0 $bg-progress-color
+
+    // alignement with the bar
+    transform: translateX(-5px) translateY(-3px)
+
+
+  &__placeholder
+    display: none
+    background-color: $black
+    color: $white
+    position: absolute
+    padding: space-x(0.5) space-x(1)
+    text-align: center
+    font-size: 14px
+    font-weight: bold
+    border-radius: 5px
+    box-shadow: 0 0 1px 0 $black
+    opacity: 0.8
+    transform: translateX(-25%) translateY($placeholder-offset-y)
+
+  &:hover &
+
+    &__placeholder
+      display: block
+
+////////////////////////////////////////////
+
+.range-simple
+  display: inline-flex
+  flex-direction: column
+  vertical-align: top
+
+  &__label
+    font-size: 14px
+    color: $gray-700
+
+    // @TODO: override "_reboot.scss"
+    margin-bottom: revert

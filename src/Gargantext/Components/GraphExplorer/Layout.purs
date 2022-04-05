@@ -92,18 +92,21 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
   -- Hooks
   -----------------
 
-    controls <- Controls.useGraphControls { forceAtlasS
-                                          , graph
-                                          , graphId
-                                          , hyperdataGraph
-                                          , reloadForest: boxes.reloadForest
-                                          , session
-                                          , showTree: boxes.showTree
-                                          , sidePanel: boxes.sidePanelGraph
-                                          , sidePanelState: sideBarDisplayedBox
-                                          }
+    controls <- Controls.useGraphControls
+      { forceAtlasS
+      , graph
+      , graphId
+      , hyperdataGraph
+      , reloadForest: boxes.reloadForest
+      , session
+      , showTree: boxes.showTree
+      , sidePanel: boxes.sidePanelGraph
+      , sidePanelState: sideBarDisplayedBox
+      }
 
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
+
+    showControls' <- R2.useLive' controls.showControls
 
     -- graphVersionRef <- R.useRef graphVersion'
     -- R.useEffect' $ do
@@ -173,7 +176,9 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
         -- Toolbar
         H.div
         { className: "graph-layout__toolbar"
-        , id: "controls-container" -- (?) used?
+        -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
+        -- @link https://github.com/facebook/react/issues/12039
+        , style: { display: showControls' ? "block" $ "none" }
         }
         [
           Controls.controls controls []
@@ -183,7 +188,6 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
         H.div
         { ref: graphRef
         , className: "graph-layout__content"
-        , id: "graph-view" -- (?) used?
         }
         [
           graphView

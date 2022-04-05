@@ -27,9 +27,12 @@ $layout-height: calc(100vh - #{ $topbar-height} )
   &__toolbar
     position: absolute
     z-index: z-index('graph-layout', 'toolbar')
-    background: $body-bg
+    background-color: $body-bg
     width: 100%
     border-bottom: 1px solid $border-color
+
+    .b-fieldset
+      background-color: $body-bg
 
   &__content
     width: 100%
@@ -78,3 +81,66 @@ $layout-height: calc(100vh - #{ $topbar-height} )
     ul
       display: inline
       float : left
+
+/////////////////////////////////////////////
+
+.graph-toolbar
+  $self: &
+  $section-margin: space-x(2)
+  $item-margin: space-x(1)
+
+  display: flex
+  padding: #{ $section-margin / 2 }
+
+  &__gap
+    width: $item-margin
+    display: inline-block
+
+  &__section
+    margin: #{ $section-margin / 2 }
+
+    // Selection settings
+    &--selection
+
+      .b-fieldset__content
+        display: flex
+
+      #{ $self }__gap
+        width: #{ $item-margin * 2 }
+
+      .range-simple
+        flex-grow: 1
+
+    // Controls
+    &--controls
+
+      .b-fieldset__content
+        position: relative
+
+      #{ $self }__gap
+        width: #{ $item-margin * 2 }
+
+      .range-control,
+      .range-simple
+        flex-basis: calc(50% - #{ $item-margin * 2 })
+
+
+
+/////////////////////////////////////////////////////
+
+// Atlas button animation
+// @TODO: better management ("_animation.scss", etc)
+.on-running-animation .b-icon
+  animation-name: pulse
+  animation-duration: 0.5s
+  animation-timing-function: ease
+  animation-direction: alternate
+  animation-iteration-count: infinite
+  animation-play-state: running
+
+@keyframes pulse
+  from
+    transform: scale(1)
+
+  to
+    transform: scale(1.2)
