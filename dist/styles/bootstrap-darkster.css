@@ -10440,25 +10440,45 @@ h4, h5, h6 {
   display: inline-flex;
   flex-direction: column;
   vertical-align: top;
+  position: relative;
 }
 .range-simple__label {
   font-size: 14px;
   color: #495057;
   margin-bottom: revert;
 }
+.range-simple__field {
+  position: relative;
+}
 
 input[type=range] {
   cursor: pointer;
+  width: 100%;
 }
 input[type=range]:focus {
   outline: 0;
 }
 
+input[type=range]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 3px;
+  border: 1px solid #B2B2B2;
+  background: #EFEFEF;
+  width: 100%;
+  position: absolute;
+  top: 4px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  transform: translateY(-5px);
+}
+
 input[type=range]::-moz-range-track {
   height: 6px;
-  background: #0075FF;
-  border: 1px solid #B2B2B2;
   border-radius: 3px;
+  border: 1px solid #B2B2B2;
+  background: #EFEFEF;
+  transform: translateY(-2px);
 }
 
 input[type=range]::-moz-range-thumb {
@@ -10467,17 +10487,13 @@ input[type=range]::-moz-range-thumb {
   width: 14px;
   border-radius: 50%;
   background-color: #0075FF;
-  box-shadow: 0 0 1px 0 #0075FF;
+  box-shadow: 0 0 2px 0 #0075FF;
+  transform: translateY(-2px);
 }
 
-/*hide the outline behind the border*/
 input[type=range]:-moz-focusring {
   outline: 1px solid white;
   outline-offset: -1px;
-}
-
-input[type=range]:focus::-moz-range-track {
-  background-color: #0075FF;
 }
 
 .main-topbar {
@@ -10701,7 +10717,7 @@ input[type=range]:focus::-moz-range-track {
   margin-bottom: 6px;
 }
 .graph-legend__code {
-  width: 12px;
+  width: 24px;
   height: 12px;
   display: inline-block;
   margin-right: 20px;
@@ -10712,16 +10728,21 @@ input[type=range]:focus::-moz-range-track {
 }
 
 .graph-documentation__text-section {
-  margin-bottom: 20px;
-  padding-left: 16px;
+  margin-bottom: 24px;
   font-size: 15px;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 .graph-documentation__text-section p {
   margin-bottom: 8px;
 }
+.graph-documentation__text-section ul {
+  margin-bottom: revert;
+}
 .graph-documentation__text-section li {
-  list-style-type: revert;
+  list-style-type: circle;
+  padding-left: 4px;
+  margin-left: 24px;
+  margin-bottom: 8px;
 }
 
 .graph-toolbar {

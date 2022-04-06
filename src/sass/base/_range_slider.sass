@@ -92,6 +92,7 @@ $knob-size: 14px
   display: inline-flex
   flex-direction: column
   vertical-align: top
+  position: relative
 
   &__label
     font-size: 14px
@@ -100,35 +101,70 @@ $knob-size: 14px
     // @TODO: override "_reboot.scss"
     margin-bottom: revert
 
+  &__field
+    position: relative
+
 ////////////////////////////////////////////
 
 // Cross browser rules
+//
+// (?) Range consistency issue between browsers UI engine: mostly rely on
+//     Chromium UI and adapt it to other engine
 input[type=range]
   @include clickable
 
+  width: 100%
+
 // Styling FireFox input range, mimicking Chromium one
 //
-// (?) * unable to differenciate background range and progress range
-//     * unable to position the input ideally
-input[type=range]::-moz-range-track
-  height: 6px
-  background: $range-bg-progress-color
-  border: 1px solid $range-border-color
-  border-radius: $range-radius
+// (?) * unable to differenciate selector betwenn background range and progress
+//       one → set only background range
+//     * unable to position the input ideally → have to rely on
+//       absolute + position
+input[type=range]::-webkit-slider-runnable-track
+  $chromium-offset-y: 4px
 
+  height: $range-height
+  border-radius: $range-radius
+  border: 1px solid $range-border-color
+  background: $range-bg-color
+  width: 100%
+  position: absolute
+  top: $chromium-offset-y
+
+input[type=range]::-webkit-slider-thumb
+  $chromium-offset-y: -5px
+
+  transform: translateY(-5px)
+
+// Styling FireFox input range, mimicking Chromium one
+//
+// (?) * unable to differenciate selector betwenn background range and progress
+//       one → set only background range
+//     * unable to position the input ideally → have to rely on
+//       translation
+input[type=range]::-moz-range-track
+  $firefox-height: #{ $range-height - 2px }
+  $firefox-offset-y: -2px
+
+  height: $firefox-height
+  border-radius: $range-radius
+  border: 1px solid $range-border-color
+  background: $range-bg-color
+  transform: translateY($firefox-offset-y)
 
 input[type=range]::-moz-range-thumb
+  $firefox-offset-y: -2px
+
   border: none
   height: $knob-size
   width: $knob-size
   border-radius: 50%
   background-color: $range-bg-progress-color
-  box-shadow: 0 0 1px 0 $range-bg-progress-color
+  box-shadow: 0 0 2px 0 $range-bg-progress-color
+  transform: translateY($firefox-offset-y)
 
-/*hide the outline behind the border*/
+// hide the outline behind the border
 input[type=range]:-moz-focusring
   outline: 1px solid white
   outline-offset: -1px
-
-input[type=range]:focus::-moz-range-track
-  background-color: $range-bg-progress-color

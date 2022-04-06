@@ -40,7 +40,6 @@ import Math as Math
 import Partial.Unsafe (unsafePartial)
 import Reactix as R
 import Reactix.DOM.HTML as H
-import Reactix.DOM.HTML as RH
 import Record as Record
 import Record.Extra as RX
 import Toestand as T
@@ -128,21 +127,31 @@ sideTabDataCpt :: R.Component Props
 sideTabDataCpt = here.component "sideTabData" cpt
   where
     cpt props@{ boxes: { sidePanelGraph } } _ = do
+      -- States
       { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
       selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
-      pure $ RH.div {}
-        [ selectedNodes (Record.merge { nodesMap: SigmaxT.nodesGraphMap props.graph } props) []
-        , neighborhood props []
-        , RH.div { className: "col-md-12", id: "query" }
-          [ query { frontends: props.frontends
-                  , metaData: props.metaData
-                  , nodesMap: SigmaxT.nodesGraphMap props.graph
-                  , searchType: SearchDoc
-                  , selectedNodeIds: selectedNodeIds'
-                  , session: props.session
-                  } []
-          ]
+      -- Render
+      pure $
+
+        H.div
+        { className: "graph-sidebar__data-tab" }
+        [
+          selectedNodes $
+          { nodesMap: SigmaxT.nodesGraphMap props.graph
+          } `Record.merge` props
+        ,
+          neighborhood
+          props
+        ,
+          query
+          { frontends: props.frontends
+          , metaData: props.metaData
+          , nodesMap: SigmaxT.nodesGraphMap props.graph
+          , searchType: SearchDoc
+          , selectedNodeIds: selectedNodeIds'
+          , session: props.session
+          }
         ]
 
 ------------------------------------------------------------
@@ -154,19 +163,31 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt
   where
     cpt props@{ boxes: { sidePanelGraph }
               , frontends } _ = do
+      -- States
       { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
       selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
-      pure $ RH.div { className: "col-md-12", id: "query" }
-        [ selectedNodes (Record.merge { nodesMap: SigmaxT.nodesGraphMap props.graph } props) []
-        , neighborhood props []
-        , query { frontends
-                , metaData: props.metaData
-                , nodesMap: SigmaxT.nodesGraphMap props.graph
-                , searchType: SearchContact
-                , selectedNodeIds: selectedNodeIds'
-                , session: props.session
-                } []
+      -- Render
+      pure $
+
+        H.div
+        { className: "graph-sidebar__community-tab" }
+        [
+          selectedNodes $
+          { nodesMap: SigmaxT.nodesGraphMap props.graph
+          } `Record.merge` props
+        ,
+          neighborhood
+          props
+        ,
+          query
+          { frontends
+          , metaData: props.metaData
+          , nodesMap: SigmaxT.nodesGraphMap props.graph
+          , searchType: SearchContact
+          , selectedNodeIds: selectedNodeIds'
+          , session: props.session
+          }
         ]
 
 
@@ -174,66 +195,73 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt
 -- TODO
 -- selectedNodes :: Record Props -> Map.Map String Nodes -> R.Element
 
-type SelectedNodesProps = (
-  nodesMap :: SigmaxT.NodesMap
+type SelectedNodesProps =
+  ( nodesMap :: SigmaxT.NodesMap
   | Props
   )
 
-selectedNodes :: R2.Component SelectedNodesProps
-selectedNodes = R.createElement selectedNodesCpt
+selectedNodes :: R2.Leaf SelectedNodesProps
+selectedNodes = R2.leaf selectedNodesCpt
 selectedNodesCpt :: R.Component SelectedNodesProps
-selectedNodesCpt = here.component "selectedNodes" cpt
-  where
-    cpt props@{ boxes: { sidePanelGraph }
-              , graph
-              , nodesMap } _ = do
-      { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
-      selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
+selectedNodesCpt = here.component "selectedNodes" cpt where
+  cpt props@{ boxes: { sidePanelGraph }
+            , graph
+            , nodesMap } _ = do
+    -- States
+    { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
+    selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
-      pure $ R2.row
-        [ R2.col 12
-          [ RH.ul { className: "nav nav-tabs d-flex justify-content-center"
-                  , id: "myTab"
-                  , role: "tablist" }
-            [ RH.div { className: "tab-content" }
-              [ RH.div { className: "d-flex flex-wrap justify-content-center"
-                       , role: "tabpanel" }
-                ( Seq.toUnfoldable
-                  $ ( Seq.map (\node -> badge { minSize: node.size  -- same size for all badges
-                                              , maxSize: node.size
-                                              , node
-                                              , selectedNodeIds })
-                      (badges graph selectedNodeIds')
-                    )
---                  $ ( Seq.map (\node -> badge { maxSize, minSize, node, selectedNodeIds }) badges')
-                )
-              , H.br {}
-              ]
-            ]
-          , RH.div { className: "tab-content flex-space-between" }
-            [ updateTermButton (Record.merge { buttonType: "primary"
-                                             , rType: CandidateTerm
-                                             , nodesMap
-                                             , text: "Move as candidate" } commonProps) []
-            , H.br {}
-            , updateTermButton (Record.merge { buttonType: "danger"
-                                             , nodesMap
-                                             , rType: StopTerm
-                                             , text: "Move as stop" } commonProps) []
-            ]
-          ]
-        ]
-      where
-        commonProps = RX.pick props :: Record Common
+    -- Computed
+    let
+      commonProps = RX.pick props :: Record Common
+
+    -- Render
+    pure $
+
+      H.div
+      { className: "graph-selected-nodes" }
+      [
+        H.div
+        {} $
+        Seq.toUnfoldable $
+          flip Seq.map (badges graph selectedNodeIds') \node ->
+
+            badge
+            { minSize: node.size  -- same size for all badges
+            , maxSize: node.size
+            , node
+            , selectedNodeIds
+            }
+      ,
+        updateTermButton $
+        { buttonType: "primary"
+        , rType: CandidateTerm
+        , nodesMap
+        , text: "Move as candidate"
+        } `Record.merge` commonProps
+      ,
+        updateTermButton $
+        { buttonType: "danger"
+        , nodesMap
+        , rType: StopTerm
+        , text: "Move as stop"
+        } `Record.merge` commonProps
+      ]
+
+
+---------------------------------------------------------
 
 data TagCloudState = Folded | Unfolded
 derive instance Eq TagCloudState
+
 flipFold :: TagCloudState -> TagCloudState
 flipFold Folded = Unfolded
 flipFold Unfolded = Folded
 
-neighborhood :: R2.Component Props
-neighborhood = R.createElement neighborhoodCpt
+---------------------------------------------------------
+
+neighborhood :: R2.Leaf Props
+neighborhood = R2.leaf neighborhoodCpt
 neighborhoodCpt :: R.Component Props
 neighborhoodCpt = here.component "neighborhood" cpt
   where
@@ -258,30 +286,31 @@ neighborhoodCpt = here.component "neighborhood" cpt
             Unfolded -> "Show less"
           -- showFoldedTooltip = A.length orderedBadges > numberOfBadgesToShowWhenFolded
 
-      pure $ RH.div { className: "tab-content", id: "myTabContent" }
-        [ RH.div { -- className: "flex-space-around d-flex justify-content-center"
+      pure $ H.div { className: "tab-content", id: "myTabContent" }
+        [ H.div { -- className: "flex-space-around d-flex justify-content-center"
              className: "d-flex flex-wrap flex-space-around"
              , id: "home"
              , role: "tabpanel"
              }
           ((\node -> badge { maxSize, minSize, node, selectedNodeIds }) <$> displayBadges) <>
-          RH.a { className: ""  -- with empty class name, bootstrap renders this blue
-               , on: { click: toggleUnfold state} } [ RH.text stateText ]
+          H.a { className: ""  -- with empty class name, bootstrap renders this blue
+               , on: { click: toggleUnfold state} } [ H.text stateText ]
         ]
         where
           toggleUnfold state = T.modify_ flipFold state
 
+---------------------------------------------------------
 
-type UpdateTermButtonProps = (
-    buttonType :: String
+type UpdateTermButtonProps =
+  ( buttonType :: String
   , nodesMap   :: SigmaxT.NodesMap
   , rType      :: TermList
   , text       :: String
   | Common
   )
 
-updateTermButton :: R2.Component UpdateTermButtonProps
-updateTermButton = R.createElement updateTermButtonCpt
+updateTermButton :: R2.Leaf UpdateTermButtonProps
+updateTermButton = R2.leaf updateTermButtonCpt
 updateTermButtonCpt :: R.Component UpdateTermButtonProps
 updateTermButtonCpt = here.component "updateTermButton" cpt
   where
@@ -299,11 +328,11 @@ updateTermButtonCpt = here.component "updateTermButton" cpt
       selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
       pure $ if Set.isEmpty selectedNodeIds' then
-               RH.div {} []
+               H.div {} []
              else
-               RH.button { className: "btn btn-sm btn-" <> buttonType
+               H.button { className: "btn btn-sm btn-" <> buttonType
                          , on: { click: onClickRemove removedNodeIds selectedNodeIds selectedNodeIds' }
-                         } [ RH.text text ]
+                         } [ H.text text ]
       where
         onClickRemove removedNodeIds selectedNodeIds selectedNodeIds' _ = do
           let nodes = mapMaybe (\id -> Map.lookup id nodesMap)
@@ -318,6 +347,7 @@ updateTermButtonCpt = here.component "updateTermButton" cpt
           T.write_ selectedNodeIds' removedNodeIds
           T.write_ SigmaxT.emptyNodeIds selectedNodeIds
 
+---------------------------------------------------------
 
 type BadgeProps =
   ( maxSize         :: Number
@@ -339,9 +369,9 @@ badgeCpt = here.component "badge" cpt where
           fontSize: show scale <> "em"
           }
 
-    pure $ RH.a { className: "badge badge-pill badge-light"
+    pure $ H.a { className: "badge badge-pill badge-light"
                 , on: { click: onClick }
-                } [ RH.h6 { style } [ RH.text label ] ]
+                } [ H.h6 { style } [ H.text label ] ]
     where
       onClick _ = do
         T.write_ (Set.singleton id) selectedNodeIds
@@ -352,6 +382,8 @@ badges graph selectedNodeIds = SigmaxT.graphNodes $ SigmaxT.nodesById graph sele
 neighbourBadges :: SigmaxT.SGraph -> SigmaxT.NodeIds -> Seq.Seq (Record SigmaxT.Node)
 neighbourBadges graph selectedNodeIds = SigmaxT.neighbours graph selectedNodes' where
   selectedNodes' = SigmaxT.graphNodes $ SigmaxT.nodesById graph selectedNodeIds
+
+---------------------------------------------------------
 
 type SendPatches =
   ( errors       :: T.Box (Array FrontendError)
@@ -414,6 +446,8 @@ sendPatch termList session (GET.MetaData metaData) node = do
     patch_list :: NTC.Replace TermList
     patch_list = NTC.Replace { new: termList, old: MapTerm }
 
+---------------------------------------------------------
+
 type Query =
   ( frontends       :: Frontends
   , metaData        :: GET.MetaData
@@ -422,15 +456,15 @@ type Query =
   , selectedNodeIds :: SigmaxT.NodeIds
   , session         :: Session )
 
-query :: R2.Component Query
-query = R.createElement queryCpt
+query :: R2.Leaf Query
+query = R2.leaf queryCpt
 
 queryCpt :: R.Component Query
 queryCpt = here.component "query" cpt where
   cpt props@{ selectedNodeIds } _ = do
 
     pure $ if Set.isEmpty selectedNodeIds
-           then RH.div {} []
+           then H.div {} []
            else query' props []
 
 query' :: R2.Component Query
@@ -445,7 +479,7 @@ queryCpt' = here.component "query'" cpt where
       , selectedNodeIds
       , session } _ = do
     pure $ case (head metaData.corpusId) of
-      Nothing -> RH.div {} []
+      Nothing -> H.div {} []
       Just corpusId ->
         CGT.tabs { frontends
                  , query: SearchQuery { expected: searchType
@@ -467,8 +501,8 @@ queryCpt' = here.component "query'" cpt where
 
 ------------------------------------------------------------------------
 
-            {-, RH.div { className: "col-md-12", id: "horizontal-checkbox" }
-              [ RH.ul {}
+            {-, H.div { className: "col-md-12", id: "horizontal-checkbox" }
+              [ H.ul {}
                 [ checkbox "Pubs"
                 , checkbox "Projects"
                 , checkbox "Patents"
@@ -478,15 +512,9 @@ queryCpt' = here.component "query'" cpt where
               -}
 --------------------------------------------------------------------------
 
-
 documentation :: Lang -> R.Element
 documentation _ =
-  let
-    section children = H.div { className: "graph-document__section" } children
-    item children = H.p { className: "graph-document__item" } children
 
-
-  in
     H.div
     { className: "graph-documentation" }
     [

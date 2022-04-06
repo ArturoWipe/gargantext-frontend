@@ -44,14 +44,18 @@ sizeButtonCpt = here.component "sizeButton" cpt where
         { className: "range-simple__label" }
         [ H.text caption ]
       ,
-        H.input
-        { type: "range"
-        , min: show min
-        , max: show max
-        , defaultValue
-        , on: { input: onChange }
-        , className: "range-simple__input"
-        }
+        H.span
+        { className: "range-simple__field" }
+        [
+          H.input
+          { type: "range"
+          , min: show min
+          , max: show max
+          , defaultValue
+          , on: { input: onChange }
+          , className: "range-simple__input"
+          }
+        ]
       ]
 
 labelSizeButton :: R.Ref Sigmax.Sigma -> T.Box Number -> R.Element
