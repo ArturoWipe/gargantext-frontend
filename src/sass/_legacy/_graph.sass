@@ -88,19 +88,57 @@ $layout-height: calc(100vh - #{ $topbar-height} )
 .graph-sidebar
   @extend %sidebar
 
-  // @WIP
-  #myTab
-    marginBottom: 18px
-    marginTop: 18px
+  $margin-x: $sidebar-tab-margin-x
+  $margin-y: space-x(2)
 
-  #myTabContent
-    borderBottom: 1px solid black
-    paddingBottom : 19px
+  &__legend-tab
+    padding: $margin-y $margin-x
 
-  #horizontal-checkbox
+    .graph-legend
+      margin-bottom: $margin-y
+
+
+
+.graph-legend
+  $legend-code-width: 24px
+  $legend-code-height: 12px
+
+  &__item
+    list-style: none
+    margin-bottom: space-x(0.75)
+
+  &__code
+    width: $legend-code-width
+    height: $legend-code-height
+    display: inline-block
+    margin-right: space-x(2.5)
+    border: 1px solid $gray-500
+
+  &__caption
+    vertical-align: top
+
+
+.graph-documentation
+
+  &__text-section
+    margin-bottom: space-x(3)
+    font-size: 15px
+    line-height: 1.5
+
+    // @WIP: remove "_reboot.scss"
+    p
+      margin-bottom: space-x(1)
+
     ul
-      display: inline
-      float : left
+      margin-bottom: revert
+
+    li
+      list-style-type: circle
+      padding-left: space-x(0.5)
+      margin-left: space-x(3)
+      margin-bottom: space-x(1)
+
+
 
 /////////////////////////////////////////////
 

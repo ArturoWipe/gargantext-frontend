@@ -2,9 +2,14 @@
 /*! Themestr.app `Darkster` Bootstrap 4.3.1 theme */
 @import url(https://fonts.googleapis.com/css?family=Comfortaa:200,300,400,700);
 .phylo-sidebar, .graph-sidebar {
+  scrollbar-width: none;
+  overflow-y: scroll;
   background-color: #fff;
   height: 100%;
   position: relative;
+}
+.phylo-sidebar::-webkit-scrollbar, .graph-sidebar::-webkit-scrollbar {
+  display: none;
 }
 .phylo-sidebar::before, .graph-sidebar::before {
   background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
@@ -10684,17 +10689,39 @@ input[type=range]:focus::-moz-range-track {
   display: none;
 }
 
-.graph-sidebar #myTab {
-  marginBottom: 18px;
-  marginTop: 18px;
+.graph-sidebar__legend-tab {
+  padding: 16px 20px;
 }
-.graph-sidebar #myTabContent {
-  borderBottom: 1px solid black;
-  paddingBottom: 19px;
+.graph-sidebar__legend-tab .graph-legend {
+  margin-bottom: 16px;
 }
-.graph-sidebar #horizontal-checkbox ul {
-  display: inline;
-  float: left;
+
+.graph-legend__item {
+  list-style: none;
+  margin-bottom: 6px;
+}
+.graph-legend__code {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin-right: 20px;
+  border: 1px solid #adb5bd;
+}
+.graph-legend__caption {
+  vertical-align: top;
+}
+
+.graph-documentation__text-section {
+  margin-bottom: 20px;
+  padding-left: 16px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.graph-documentation__text-section p {
+  margin-bottom: 8px;
+}
+.graph-documentation__text-section li {
+  list-style-type: revert;
 }
 
 .graph-toolbar {

@@ -1,6 +1,7 @@
 module Gargantext.Components.GraphExplorer.Sidebar
-  -- (Props, sidebar)
-  where
+  ( Props, sidebar
+  , Common
+  ) where
 
 import Gargantext.Prelude
 
@@ -106,11 +107,18 @@ sideTabLegend = R2.leaf sideTabLegendCpt
 sideTabLegendCpt :: R.Component Props
 sideTabLegendCpt = here.component "sideTabLegend" cpt
   where
-    cpt { metaData: GET.MetaData { legend } } _ = do
-      pure $ H.div {}
-        [ Legend.legend { items: Seq.fromFoldable legend }
-        , documentation EN
-        ]
+    cpt { metaData: GET.MetaData { legend } } _ = pure $
+
+      H.div
+      { className: "graph-sidebar__legend-tab" }
+      [
+        Legend.legend
+        { items: Seq.fromFoldable legend }
+      ,
+        H.hr {}
+      ,
+        documentation EN
+      ]
 
 ------------------------------------------------------------
 
@@ -248,7 +256,7 @@ neighborhoodCpt = here.component "neighborhood" cpt
           stateText = case state' of
             Folded -> "Show more"
             Unfolded -> "Show less"
-          showFoldedTooltip = A.length orderedBadges > numberOfBadgesToShowWhenFolded
+          -- showFoldedTooltip = A.length orderedBadges > numberOfBadgesToShowWhenFolded
 
       pure $ RH.div { className: "tab-content", id: "myTabContent" }
         [ RH.div { -- className: "flex-space-around d-flex justify-content-center"
@@ -473,25 +481,92 @@ queryCpt' = here.component "query'" cpt where
 
 documentation :: Lang -> R.Element
 documentation _ =
-  H.div {} [ H.h2 {} [ H.text "What is Graph ?"]
-           , ul [ "Graph is a conveniant tool to explore your documents. "
-                , "Nodes are terms selected in your Map List. "
-                <> "Node size is proportional to the number of documents with the associated term. "
-                , "Edges between nodes represent proximities of terms according to a specific distance between your documents. "
-                <> "Link strength is proportional to the strenght of terms association."
-                ]
-           , H.h3 {} [ H.text "Basic Interactions:"]
-           , ul [ "Click on a node to select/unselect and get its information. "
-                , "In case of multiple selection, the button unselect clears all selections. "
-                <> "Use your mouse scroll to zoom in and out in the graph. "
-                , "Use the node filter to create a subgraph with nodes of a given size "
-                <>"range (e.g. display only generic terms). "
-                , "Use the edge filter so create a subgraph with links in a given range (e.g. keep the strongest association)."
-                ]
-           ]
+  let
+    section children = H.div { className: "graph-document__section" } children
+    item children = H.p { className: "graph-document__item" } children
 
-  where
-    ul ts = H.ul {} $ map (\t -> H.li {} [ H.text t ]) ts
+
+  in
+    H.div
+    { className: "graph-documentation" }
+    [
+      -- @WIP: shortcuts
+      H.div
+      { className: "graph-documentation__text-section" }
+      [
+        H.p
+        {}
+        [
+          H.b {} [ H.text "What is a graph? "]
+        ,
+          H.text "Graph is a conveniant tool to explore your documents."
+        ]
+      ,
+        H.p
+        {}
+        [
+          H.text $
+
+            "Nodes are terms selected in your Map List. "
+          <>
+            "Node size is proportional to the number of documents with the associated term. "
+        ]
+      ,
+        H.p
+        {}
+        [
+          H.text $
+
+            "Edges between nodes represent proximities of terms according to a specific distance between your documents. "
+          <>
+            "Link strength is proportional to the strenght of terms association."
+        ]
+      ]
+    ,
+      H.div
+      { className: "graph-documentation__text-section" }
+      [
+        H.ul
+        {}
+        [
+          H.li
+          {}
+          [
+            H.text $
+
+              "Click on a node to select/unselect and get its information."
+          ]
+        ,
+          H.li
+          {}
+          [
+            H.text $
+
+              "In case of multiple selection, the button unselect clears all selections. "
+            <>
+              "Use your mouse scroll to zoom in and out in the graph. "
+          ]
+        ,
+          H.li
+          {}
+          [
+            H.text $
+
+              "Use the node filter to create a subgraph with nodes of a given size "
+            <>
+              "range (e.g. display only generic terms). "
+          ]
+        ,
+          H.li
+          {}
+          [
+            H.text $
+
+              "Use the edge filter so create a subgraph with links in a given range (e.g. keep the strongest association)."
+          ]
+        ]
+      ]
+    ]
 
 {-
 TODO DOC

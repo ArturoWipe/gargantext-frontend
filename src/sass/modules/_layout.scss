@@ -43,6 +43,8 @@ $sidebar-tab-margin-x: space-x(2.5);
 
 
 %sidebar {
+  @include hidden-scrollbar;
+
   $teaser-height: 16px;
 
   background-color: $body-bg;
