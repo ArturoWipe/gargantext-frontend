@@ -10416,8 +10416,17 @@ input[type=range]:-moz-focusring {
 .graph-sidebar__legend-tab {
   padding: 16px 20px;
 }
-.graph-sidebar__legend-tab .graph-legend {
+.graph-sidebar__data-tab {
+  padding: 16px 20px;
+}
+.graph-sidebar__community-tab {
+  padding: 16px 20px;
+}
+.graph-sidebar__separator {
+  margin-top: 16px;
   margin-bottom: 16px;
+  color: #adb5bd;
+  text-align: center;
 }
 
 .graph-legend__item {
@@ -10451,6 +10460,37 @@ input[type=range]:-moz-focusring {
   padding-left: 4px;
   margin-left: 24px;
   margin-bottom: 8px;
+}
+
+.graph-selected-nodes__item:not(:last-child) {
+  margin-bottom: 4px;
+}
+.graph-selected-nodes__badge {
+  font-size: 1rem;
+  white-space: normal;
+  word-break: break-word;
+}
+.graph-selected-nodes__actions {
+  display: flex;
+  justify-content: space-around;
+}
+.graph-selected-nodes__actions .b-button {
+  width: calc(50% - 8px );
+}
+
+.graph-neighborhood__counter {
+  font-weight: bold;
+}
+.graph-neighborhood__badge {
+  white-space: normal;
+  word-break: break-word;
+  line-height: initial;
+}
+.graph-neighborhood__badge:not(:last-child) {
+  margin-bottom: 6px;
+}
+.graph-neighborhood__show-more {
+  margin-top: 16px;
 }
 
 .graph-toolbar {
@@ -11246,12 +11286,6 @@ li .node.node-type-valid .text {
 }
 
 /* */
-.btn-primary {
-  color: white;
-  background-color: #005a9aff;
-  border-color: black;
-}
-
 .frame {
   height: 100vh;
 }

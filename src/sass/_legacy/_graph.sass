@@ -94,9 +94,17 @@ $layout-height: calc(100vh - #{ $topbar-height} )
   &__legend-tab
     padding: $margin-y $margin-x
 
-    .graph-legend
-      margin-bottom: $margin-y
+  &__data-tab
+    padding: $margin-y $margin-x
 
+  &__community-tab
+    padding: $margin-y $margin-x
+
+  &__separator
+    margin-top: $margin-y
+    margin-bottom: $margin-y
+    color: $gray-500
+    text-align: center
 
 
 .graph-legend
@@ -138,6 +146,45 @@ $layout-height: calc(100vh - #{ $topbar-height} )
       margin-left: space-x(3)
       margin-bottom: space-x(1)
 
+
+.graph-selected-nodes
+
+  &__item
+
+    &:not(:last-child)
+      margin-bottom: space-x(0.5)
+
+  &__badge
+    font-size: $font-size-base
+    white-space: normal
+    word-break: break-word
+
+  &__actions
+    $gutter: space-x(2)
+
+    display: flex
+    justify-content: space-around
+
+    .b-button
+      width: calc(50% - #{ space-x(2) / 2 } )
+
+
+.graph-neighborhood
+
+  &__counter
+    font-weight: bold
+
+  &__badge
+    white-space: normal
+    word-break: break-word
+    // remove "_reboot.scss" line height
+    line-height: initial
+
+    &:not(:last-child)
+      margin-bottom: space-x(0.75)
+
+  &__show-more
+    margin-top: space-x(2)
 
 
 /////////////////////////////////////////////

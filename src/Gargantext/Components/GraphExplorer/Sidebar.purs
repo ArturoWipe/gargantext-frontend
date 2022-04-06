@@ -6,20 +6,23 @@ module Gargantext.Components.GraphExplorer.Sidebar
 import Gargantext.Prelude
 
 import Control.Parallel (parTraverse)
-import Data.Array (head, last, concat)
+import Data.Array (concat, head, last, mapWithIndex)
 import Data.Array as A
 import Data.Either (Either(..))
+import Data.Foldable (intercalate)
 import Data.Foldable as F
 import Data.Int (fromString)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromJust)
 import Data.Sequence as Seq
 import Data.Set as Set
+import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
 import Gargantext.Components.GraphExplorer.Legend as Legend
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
 import Gargantext.Components.GraphExplorer.Types as GET
@@ -34,6 +37,7 @@ import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
 import Gargantext.Sessions (Session)
 import Gargantext.Types (CTabNgramType, FrontendError(..), NodeID, TabSubType(..), TabType(..), TermList(..), modeTabType)
+import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Math as Math
@@ -131,27 +135,56 @@ sideTabDataCpt = here.component "sideTabData" cpt
       { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
       selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
+      -- Computed
+      let
+        hasSelection = not $ Set.isEmpty selectedNodeIds'
+
       -- Render
       pure $
 
         H.div
         { className: "graph-sidebar__data-tab" }
         [
-          selectedNodes $
-          { nodesMap: SigmaxT.nodesGraphMap props.graph
-          } `Record.merge` props
-        ,
-          neighborhood
-          props
-        ,
-          query
-          { frontends: props.frontends
-          , metaData: props.metaData
-          , nodesMap: SigmaxT.nodesGraphMap props.graph
-          , searchType: SearchDoc
-          , selectedNodeIds: selectedNodeIds'
-          , session: props.session
-          }
+          case hasSelection of
+
+            -- No result
+            false ->
+
+              B.caveat
+              {}
+              [
+                H.text "No selection has been made"
+              ]
+
+            -- Nodes have been selected
+            true ->
+
+              R.fragment
+              [
+                selectedNodes $
+                { nodesMap: SigmaxT.nodesGraphMap props.graph
+                } `Record.merge` props
+              ,
+                -- (separator)
+                H.div
+                { className: "graph-sidebar__separator" }
+                [
+                  B.icon
+                  { name: "angle-down" }
+                ]
+              ,
+                neighborhood
+                props
+              ,
+                query
+                { frontends: props.frontends
+                , metaData: props.metaData
+                , nodesMap: SigmaxT.nodesGraphMap props.graph
+                , searchType: SearchDoc
+                , selectedNodeIds: selectedNodeIds'
+                , session: props.session
+                }
+              ]
         ]
 
 ------------------------------------------------------------
@@ -167,27 +200,48 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt
       { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
       selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
+      -- Computed
+      let
+        hasSelection = not $ Set.isEmpty selectedNodeIds'
+
       -- Render
       pure $
 
         H.div
         { className: "graph-sidebar__community-tab" }
         [
-          selectedNodes $
-          { nodesMap: SigmaxT.nodesGraphMap props.graph
-          } `Record.merge` props
-        ,
-          neighborhood
-          props
-        ,
-          query
-          { frontends
-          , metaData: props.metaData
-          , nodesMap: SigmaxT.nodesGraphMap props.graph
-          , searchType: SearchContact
-          , selectedNodeIds: selectedNodeIds'
-          , session: props.session
-          }
+          case hasSelection of
+
+            -- No result
+            false ->
+
+              B.caveat
+              {}
+              [
+                H.text "No selection has been made"
+              ]
+
+            -- Nodes have been selection
+            true ->
+
+              R.fragment
+              [
+                selectedNodes $
+                { nodesMap: SigmaxT.nodesGraphMap props.graph
+                } `Record.merge` props
+              ,
+                neighborhood
+                props
+              ,
+                query
+                { frontends
+                , metaData: props.metaData
+                , nodesMap: SigmaxT.nodesGraphMap props.graph
+                , searchType: SearchContact
+                , selectedNodeIds: selectedNodeIds'
+                , session: props.session
+                }
+              ]
         ]
 
 
@@ -215,166 +269,254 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
     let
       commonProps = RX.pick props :: Record Common
 
+    -- Behaviors
+    let
+      onBadgeClick id _ = T.write_ (Set.singleton id) selectedNodeIds
+
     -- Render
     pure $
 
-      H.div
-      { className: "graph-selected-nodes" }
+      H.ul
+      { className: intercalate " "
+          [ "graph-selected-nodes"
+          , "list-group"
+          ]
+        }
       [
-        H.div
-        {} $
-        Seq.toUnfoldable $
-          flip Seq.map (badges graph selectedNodeIds') \node ->
+        H.li
+        { className: "list-group-item" }
+        [
+          H.ul
+          {} $
 
-            badge
-            { minSize: node.size  -- same size for all badges
-            , maxSize: node.size
-            , node
-            , selectedNodeIds
+          Seq.toUnfoldable $
+            flip Seq.map (badges graph selectedNodeIds') \node ->
+
+              H.li
+              { className: "graph-selected-nodes__item" }
+              [
+                H.a
+                { className: intercalate " "
+                    [ "graph-selected-nodes__badge"
+                    , "badge badge-info"
+                    ]
+                , on: { click: onBadgeClick node.id }
+                }
+                [ H.text node.label ]
+              ]
+
+        ]
+      ,
+        H.li
+        { className: intercalate " "
+            [ "list-group-item"
+            , "graph-selected-nodes__actions"
+            ]
+        }
+        [
+          updateTermButton
+          ( commonProps `Record.merge`
+            { variant: ButtonVariant Primary
+            , rType: CandidateTerm
+            , nodesMap
             }
-      ,
-        updateTermButton $
-        { buttonType: "primary"
-        , rType: CandidateTerm
-        , nodesMap
-        , text: "Move as candidate"
-        } `Record.merge` commonProps
-      ,
-        updateTermButton $
-        { buttonType: "danger"
-        , nodesMap
-        , rType: StopTerm
-        , text: "Move as stop"
-        } `Record.merge` commonProps
+          )
+          [ H.text "Move as candidate" ]
+        ,
+          updateTermButton
+          ( commonProps `Record.merge`
+            { variant: ButtonVariant Danger
+            , nodesMap
+            , rType: StopTerm
+            }
+          )
+          [ H.text "Move as stop" ]
+        ]
       ]
 
 
----------------------------------------------------------
 
-data TagCloudState = Folded | Unfolded
-derive instance Eq TagCloudState
-
-flipFold :: TagCloudState -> TagCloudState
-flipFold Folded = Unfolded
-flipFold Unfolded = Folded
 
 ---------------------------------------------------------
 
 neighborhood :: R2.Leaf Props
 neighborhood = R2.leaf neighborhoodCpt
-neighborhoodCpt :: R.Component Props
-neighborhoodCpt = here.component "neighborhood" cpt
-  where
-    cpt { boxes: { sidePanelGraph }
-        , graph
-         } _ = do
-      { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
-      selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
-      state <- T.useBox Folded
-      state' <- T.useLive T.unequal state
+neighborhoodCpt :: R.Memo Props
+neighborhoodCpt = R.memo' $ here.component "neighborhood" cpt where
+  cpt { boxes: { sidePanelGraph }
+      , graph
+      } _ = do
+    -- States
+    { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
+    selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
-      let numberOfBadgesToShowWhenFolded = 5
-          badges' = neighbourBadges graph selectedNodeIds'
-          minSize = F.foldl Math.min 0.0 (Seq.map _.size (SigmaxT.graphNodes graph))
-          maxSize = F.foldl Math.max 0.0 (Seq.map _.size (SigmaxT.graphNodes graph))
-          orderedBadges = A.sortWith (\n -> -n.size) $ Seq.toUnfoldable badges'  -- reverse sort (largest size first)
-          displayBadges = case state' of
-            Folded -> A.take numberOfBadgesToShowWhenFolded orderedBadges
-            Unfolded -> orderedBadges
-          stateText = case state' of
-            Folded -> "Show more"
-            Unfolded -> "Show less"
-          -- showFoldedTooltip = A.length orderedBadges > numberOfBadgesToShowWhenFolded
+    showMore /\ showMoreBox <- R2.useBox' false
 
-      pure $ H.div { className: "tab-content", id: "myTabContent" }
-        [ H.div { -- className: "flex-space-around d-flex justify-content-center"
-             className: "d-flex flex-wrap flex-space-around"
-             , id: "home"
-             , role: "tabpanel"
-             }
-          ((\node -> badge { maxSize, minSize, node, selectedNodeIds }) <$> displayBadges) <>
-          H.a { className: ""  -- with empty class name, bootstrap renders this blue
-               , on: { click: toggleUnfold state} } [ H.text stateText ]
+    -- Computed
+    let
+      badges' = neighbourBadges graph selectedNodeIds'
+
+      minSize = F.foldl Math.min 0.0 (Seq.map _.size (SigmaxT.graphNodes graph))
+
+      maxSize = F.foldl Math.max 0.0 (Seq.map _.size (SigmaxT.graphNodes graph))
+
+      orderedBadges = A.sortWith (\n -> -n.size) $ Seq.toUnfoldable badges'
+
+      maxTruncateResult = 5
+
+      termCount = Seq.length badges'
+
+      truncateResults
+         = termCount > maxTruncateResult
+        && not showMore
+
+    -- Behaviors
+    let
+      onBadgeClick id _ = T.write_ (Set.singleton id) selectedNodeIds
+
+    -- Render
+    pure $
+
+      H.ul
+      { className: intercalate " "
+          [ "graph-neighborhood"
+          , "list-group"
+          ]
+      }
+      [
+        -- Extracted count
+        H.li
+        { className: "list-group-item" }
+        [
+          -- @XXX: Bootstrap CSS w/ one <li> deduped the list-style-type bullet
+          H.div
+          { className: "graph-neighborhood__counter" }
+          [
+            -- @WIP utility classes component
+            H.span
+            { className: "text-info" }
+            [
+              H.text $ show termCount
+            ]
+          ,
+            H.text $ nbsp 1 <> "terms"
+          ]
         ]
-        where
-          toggleUnfold state = T.modify_ flipFold state
+      ,
+        -- Word cloud
+        H.li
+        { className: "list-group-item" }
+        [
+          H.ul
+          {} $
+          flip mapWithIndex orderedBadges \index node ->
+
+            R2.if'
+            (
+               truncateResults == false
+            || index < maxTruncateResult
+            ) $
+              H.li
+              { className: "graph-neighborhood__badge" }
+              [
+                H.a
+                { className: "badge badge-light"
+                -- adjust font accordingly
+                , style:
+                    { fontSize: badgeSize
+                        minSize
+                        maxSize
+                        node.size
+                    , lineHeight: badgeSize
+                        minSize
+                        maxSize
+                        node.size
+                    }
+                , on: { click: onBadgeClick node.id }
+                }
+                [ H.text node.label ]
+              ]
+        ,
+          R2.if' (truncateResults) $
+
+            B.button
+            { variant: ButtonVariant Light
+            , callback: \_ -> T.modify_ (not) showMoreBox
+            , block: true
+            , className: "graph-neighborhood__show-more"
+            }
+            [
+              H.text "Show more"
+            ]
+        ]
+      ]
 
 ---------------------------------------------------------
 
 type UpdateTermButtonProps =
-  ( buttonType :: String
+  ( variant    :: ButtonVariant
   , nodesMap   :: SigmaxT.NodesMap
   , rType      :: TermList
-  , text       :: String
   | Common
   )
 
-updateTermButton :: R2.Leaf UpdateTermButtonProps
-updateTermButton = R2.leaf updateTermButtonCpt
+updateTermButton :: R2.Component UpdateTermButtonProps
+updateTermButton = R2.component updateTermButtonCpt
 updateTermButtonCpt :: R.Component UpdateTermButtonProps
-updateTermButtonCpt = here.component "updateTermButton" cpt
-  where
-    cpt { boxes: { errors
-                 , reloadForest
-                 , sidePanelGraph }
-        , buttonType
-        , graphId
-        , metaData
-        , nodesMap
-        , rType
-        , session
-        , text } _ = do
-      { removedNodeIds, selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
-      selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
+updateTermButtonCpt = here.component "updateTermButton" cpt where
+  cpt { boxes: { errors
+                , reloadForest
+                , sidePanelGraph }
+      , variant
+      , graphId
+      , metaData
+      , nodesMap
+      , rType
+      , session
+      } children = do
+    -- States
+    { removedNodeIds, selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
+    selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
-      pure $ if Set.isEmpty selectedNodeIds' then
-               H.div {} []
-             else
-               H.button { className: "btn btn-sm btn-" <> buttonType
-                         , on: { click: onClickRemove removedNodeIds selectedNodeIds selectedNodeIds' }
-                         } [ H.text text ]
-      where
-        onClickRemove removedNodeIds selectedNodeIds selectedNodeIds' _ = do
-          let nodes = mapMaybe (\id -> Map.lookup id nodesMap)
-                              $ Set.toUnfoldable selectedNodeIds'
-          sendPatches { errors
-                      , graphId: graphId
-                      , metaData: metaData
-                      , nodes
-                      , session: session
-                      , termList: rType
-                      , reloadForest }
-          T.write_ selectedNodeIds' removedNodeIds
-          T.write_ SigmaxT.emptyNodeIds selectedNodeIds
+    -- Behaviors
+    let
+      callback _ = do
+        let nodes = mapMaybe (\id -> Map.lookup id nodesMap)
+                            $ Set.toUnfoldable selectedNodeIds'
+        sendPatches { errors
+                    , graphId: graphId
+                    , metaData: metaData
+                    , nodes
+                    , session: session
+                    , termList: rType
+                    , reloadForest }
+        T.write_ selectedNodeIds' removedNodeIds
+        T.write_ SigmaxT.emptyNodeIds selectedNodeIds
+
+    -- Render
+    pure $
+
+      B.button
+      { variant
+      , callback
+      }
+      children
+
 
 ---------------------------------------------------------
 
-type BadgeProps =
-  ( maxSize         :: Number
-  , minSize         :: Number
-  , node            :: Record SigmaxT.Node
-  , selectedNodeIds :: T.Box SigmaxT.NodeIds )
+badgeSize :: Number -> Number -> Number -> String
+badgeSize minSize maxSize size =
+  let
+    minFontSize = 13.0
+    maxFontSize = 24.0
+    sizeScaled = (size - minSize) / (maxSize - minSize)  -- in [0; 1] range
+    scale' = Math.log (sizeScaled + 1.0) / (Math.log 2.0)  -- in [0; 1] range
+    scale = minFontSize + scale' * (maxFontSize - minFontSize)
 
-badge :: R2.Leaf BadgeProps
-badge = R2.leafComponent badgeCpt
-badgeCpt :: R.Component BadgeProps
-badgeCpt = here.component "badge" cpt where
-  cpt { maxSize, minSize, node: { id, label, size }, selectedNodeIds } _ = do
-    let minFontSize = 1.0  -- "em"
-    let maxFontSize = 3.0  -- "em"
-    let sizeScaled = (size - minSize) / (maxSize - minSize)  -- in [0; 1] range
-    let scale' = Math.log (sizeScaled + 1.0) / (Math.log 2.0)  -- in [0; 1] range
-    let scale = minFontSize + scale' * (maxFontSize - minFontSize)
-    let style = {
-          fontSize: show scale <> "em"
-          }
+  in
+    show scale <> "px"
 
-    pure $ H.a { className: "badge badge-pill badge-light"
-                , on: { click: onClick }
-                } [ H.h6 { style } [ H.text label ] ]
-    where
-      onClick _ = do
-        T.write_ (Set.singleton id) selectedNodeIds
 
 badges :: SigmaxT.SGraph -> SigmaxT.NodeIds -> Seq.Seq (Record SigmaxT.Node)
 badges graph selectedNodeIds = SigmaxT.graphNodes $ SigmaxT.nodesById graph selectedNodeIds
