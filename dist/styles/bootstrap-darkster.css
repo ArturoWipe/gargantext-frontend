@@ -10751,7 +10751,10 @@ input[type=range]:-moz-focusring {
   list-style-type: circle;
   padding-left: 4px;
   margin-left: 24px;
-  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.graph-documentation__text-section li:not(:last-child) {
+  margin-bottom: 12px;
 }
 
 .graph-selected-nodes__item:not(:last-child) {

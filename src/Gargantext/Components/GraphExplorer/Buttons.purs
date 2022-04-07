@@ -27,8 +27,8 @@ import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), ComponentStatus(..), Variant(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Upload (uploadArbitraryData)
 import Gargantext.Components.Forest.Tree.Node.Action.Upload.Types (FileFormat(..))
-import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.API (cloneGraph)
+import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Components.GraphExplorer.Utils as GEU
 import Gargantext.Hooks.Sigmax as Sigmax
@@ -282,7 +282,7 @@ multiSelectEnabledButtonCpt = here.component "multiSelectEnabledButton" cpt
           { variant: state' ?
               OutlinedButtonVariant Secondary $
               ButtonVariant Secondary
-          , callback: \_ -> T.modify_ (not) state
+          , callback: \_ -> T.write_ false state
           }
           [ H.text "Single-node" ]
         ,
@@ -290,7 +290,7 @@ multiSelectEnabledButtonCpt = here.component "multiSelectEnabledButton" cpt
           { variant: state' ?
               ButtonVariant Secondary $
               OutlinedButtonVariant Secondary
-          , callback: \_ -> T.modify_ (not) state
+          , callback: \_ -> T.write_ true state
           }
           [ H.text "Multi-node" ]
         ]

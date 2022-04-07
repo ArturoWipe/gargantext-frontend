@@ -470,8 +470,8 @@ data TabView
 derive instance Generic TabView _
 derive instance Eq TabView
 instance Show TabView where
-  show DetailsTab   = "Details"
-  show SelectionTab = "Selection"
+  show DetailsTab   = "Legend"
+  show SelectionTab = "Data"
 
 -----------------------------------------------------------
 

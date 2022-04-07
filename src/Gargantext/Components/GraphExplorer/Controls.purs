@@ -89,8 +89,8 @@ controlsCpt = here.component "controls" cpt
         , sideTab
         , sigmaRef } _ = do
 
--- | States
--- |
+--    | States
+--    |
 
       forceAtlasState' <- T.useLive T.unequal forceAtlasState
       graphStage' <- T.useLive T.unequal graphStage
@@ -103,8 +103,8 @@ controlsCpt = here.component "controls" cpt
       mFAPauseRef <- R.useRef Nothing
 
 
--- | Effects
--- |
+--    | Effects
+--    |
 
       -- When graph is changed, cleanup the mFAPauseRef so that forceAtlas
       -- timeout is retriggered.
@@ -146,8 +146,8 @@ controlsCpt = here.component "controls" cpt
            pure unit
 
 
--- | Computed
--- |
+--    | Computed
+--    |
 
       let edgesConfluenceSorted = A.sortWith (_.confluence) $ Seq.toUnfoldable $ SigmaxT.graphEdges graph
       let edgeConfluenceMin = maybe 0.0 _.confluence $ A.head edgesConfluenceSorted
@@ -170,8 +170,8 @@ controlsCpt = here.component "controls" cpt
 
       let gap = H.span { className: "graph-toolbar__gap" } []
 
--- | Render
--- |
+--    | Render
+--    |
 
       pure $
 

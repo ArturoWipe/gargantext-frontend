@@ -144,7 +144,10 @@ $layout-height: calc(100vh - #{ $topbar-height} )
       list-style-type: circle
       padding-left: space-x(0.5)
       margin-left: space-x(3)
-      margin-bottom: space-x(1)
+      line-height: 1.4
+
+      &:not(:last-child)
+        margin-bottom: space-x(1.5)
 
 
 .graph-selected-nodes

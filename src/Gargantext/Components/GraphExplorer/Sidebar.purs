@@ -153,7 +153,7 @@ sideTabDataCpt = here.component "sideTabData" cpt
               B.caveat
               {}
               [
-                H.text "No selection has been made"
+                H.text "Select one or more nodes to get their informations"
               ]
 
             -- Nodes have been selected
@@ -218,7 +218,7 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt
               B.caveat
               {}
               [
-                H.text "No selection has been made"
+                H.text "Select one or more nodes to get their informations"
               ]
 
             -- Nodes have been selection
@@ -352,6 +352,8 @@ neighborhoodCpt = R.memo' $ here.component "neighborhood" cpt where
 
     showMore /\ showMoreBox <- R2.useBox' false
 
+    truncateResults /\ truncateResultsBox <- R2.useBox' false
+
     -- Computed
     let
       badges' = neighbourBadges graph selectedNodeIds'
@@ -366,13 +368,21 @@ neighborhoodCpt = R.memo' $ here.component "neighborhood" cpt where
 
       termCount = Seq.length badges'
 
-      truncateResults
-         = termCount > maxTruncateResult
-        && not showMore
+      -- truncateResults
+      --    = termCount > maxTruncateResult
+      --   && not showMore
 
     -- Behaviors
     let
       onBadgeClick id _ = T.write_ (Set.singleton id) selectedNodeIds
+
+    -- Effects
+    R.useEffect1' selectedNodeIds' $
+      T.write_ false showMoreBox
+
+    R.useEffect1' showMore $
+      flip T.write_ truncateResultsBox $
+        (termCount > maxTruncateResult) && (not showMore)
 
     -- Render
     pure $
@@ -508,7 +518,7 @@ updateTermButtonCpt = here.component "updateTermButton" cpt where
 badgeSize :: Number -> Number -> Number -> String
 badgeSize minSize maxSize size =
   let
-    minFontSize = 13.0
+    minFontSize = 10.0
     maxFontSize = 24.0
     sizeScaled = (size - minSize) / (maxSize - minSize)  -- in [0; 1] range
     scale' = Math.log (sizeScaled + 1.0) / (Math.log 2.0)  -- in [0; 1] range

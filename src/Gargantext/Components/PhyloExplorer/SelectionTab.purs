@@ -86,7 +86,7 @@ component = R.hooksComponent componentName cpt where
           B.caveat
           { className: "phylo-selection-tab__nil" }
           [
-            H.text "No selection has been made"
+            H.text "Select term, branch or source to get their informations"
           ]
       ,
         -- Selected source
