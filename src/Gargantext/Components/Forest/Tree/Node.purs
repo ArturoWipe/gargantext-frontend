@@ -5,6 +5,7 @@ module Gargantext.Components.Forest.Tree.Node
 
 import Gargantext.Prelude
 
+import DOM.Simple.Console (log)
 import Data.Array.NonEmpty as NArray
 import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..), maybe)
@@ -28,12 +29,13 @@ import Gargantext.Components.Forest.Tree.Node.Tools.Sync (nodeActionsGraph, node
 import Gargantext.Components.GraphExplorer.API as GraphAPI
 import Gargantext.Components.Lang (Lang(EN))
 import Gargantext.Components.Nodes.Corpus (loadCorpusWithChild)
-import Gargantext.Config.REST (logRESTError)
+import Gargantext.Config.REST (logRESTError')
 import Gargantext.Context.Progress (asyncContext, asyncProgress)
 import Gargantext.Ends (Frontends, url)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Hooks.Loader (useLoaderEffect)
 import Gargantext.Hooks.Version (Version, useVersion)
+import Gargantext.Plugins.Core.Console as C
 import Gargantext.Routes as Routes
 import Gargantext.Sessions (Session, sessionId)
 import Gargantext.Types (ID, Name)
@@ -54,8 +56,8 @@ foreign import nodeUserRegexp :: Regex.Regex
 moduleName :: R2.Module
 moduleName = "Gargantext.Components.Forest.Tree.Node"
 
-here :: R2.Here
-here = R2.here moduleName
+console :: C.Console
+console = C.encloseContext C.Component "Forest.Tree.Node"
 
 -- Main Node
 type MainLeafProps =
@@ -171,20 +173,20 @@ mainLeaf = B.leaf (moduleName <> "mainLeaf") cpt where
       onTaskFinish id' t _ = do
         GAT.finish id' t tasks
         if GAT.asyncTaskTTriggersAppReload t then do
-          here.log2 "reloading root for task" t
+          console.log2 "reloading root for task" t
           T2.reload reloadRoot
         else do
           if GAT.asyncTaskTTriggersTreeReload t then do
-            here.log2 "reloading tree for task" t
+            console.log2 "reloading tree for task" t
             T2.reload reload
           else do
-            here.log2 "task doesn't trigger a tree reload" t
+            console.log2 "task doesn't trigger a tree reload" t
             pure unit
           if GAT.asyncTaskTTriggersMainPageReload t then do
-            here.log2 "reloading main page for task" t
+            console.log2 "reloading main page for task" t
             T2.reload reloadMainPage
           else do
-            here.log2 "task doesn't trigger a main page reload" t
+            console.log2 "task doesn't trigger a main page reload" t
             pure unit
         -- snd tasks $ GAT.Finish id' t
         -- mT <- T.read tasks
@@ -527,18 +529,31 @@ type NodeActionsProps = ( nodeType :: GT.NodeType | NodeActionsCommon )
 
 nodeActions :: B.Tree NodeActionsProps
 nodeActions = B.tree (moduleName <> "nodeActions") cpt where
-  cpt props _ = pure (child props.nodeType)
-    where
-      nodeActionsP      = SProxy :: SProxy "nodeType"
+  cpt props@{ nodeType: GT.NodeList } _ =
+    pure $ listNodeActions (childProps props)
 
-      childProps        = Record.delete nodeActionsP props
+  cpt props@{ nodeType: GT.Graph    } _ =
+    pure $ graphNodeActions (childProps props)
 
-      child GT.NodeList = listNodeActions childProps
-      child GT.Graph    = graphNodeActions childProps
-      child _           = mempty
+  cpt _                               _ =
+    pure $ mempty
+
+  childProps p = Record.delete nodeActionsP p
+
+  nodeActionsP      = SProxy :: SProxy "nodeType"
+
+  -- cpt props _ = pure (child props.nodeType)
+  --   where
+  --     nodeActionsP      = SProxy :: SProxy "nodeType"
+
+  --     childProps        = Record.delete nodeActionsP props
+
+  --     child GT.NodeList = listNodeActions childProps
+  --     child GT.Graph    = graphNodeActions childProps
+  --     child _           = mempty
 
 graphNodeActions :: B.Leaf NodeActionsCommon
-graphNodeActions = B.leaf (moduleName <> "graphNodeActions") cpt where
+graphNodeActions = B.leaf' (moduleName <> "graphNodeActions") cpt where
   cpt { id, session, refresh } _ = do
     -- States
     state /\ stateBox <- R2.useBox' Nothing
@@ -559,7 +574,7 @@ graphNodeActions = B.leaf (moduleName <> "graphNodeActions") cpt where
       []
 
   graphVersions session graphId = GraphAPI.graphVersions { graphId, session }
-  errorHandler = logRESTError here "[graphNodeActions]"
+  errorHandler = logRESTError' console "[graphNodeActions]"
 
 
 listNodeActions :: B.Leaf NodeActionsCommon
@@ -588,7 +603,7 @@ listNodeActions = B.leaf (moduleName <> "listNodeActions") cpt where
       }
 
     where
-      errorHandler = logRESTError here "[listNodeActions]"
+      errorHandler = logRESTError' console "[listNodeActions]"
 
 -----------------------------------------------
 

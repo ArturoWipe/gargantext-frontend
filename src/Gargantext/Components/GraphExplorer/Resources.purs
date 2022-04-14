@@ -14,12 +14,14 @@ import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
 import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Components.Themes (darksterTheme)
 import Gargantext.Components.Themes as Themes
 import Gargantext.Hooks.Sigmax as Sigmax
 import Gargantext.Hooks.Sigmax.Sigma as Sigma
 import Gargantext.Hooks.Sigmax.Types as SigmaxTypes
+import Gargantext.Plugins.Core.Console as C
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as RH
@@ -27,8 +29,11 @@ import Record (merge)
 import Record as Record
 import Toestand as T
 
-here :: R2.Here
-here = R2.here "Gargantext.Components.Graph"
+moduleName :: R2.Module
+moduleName = "Gargantext.Components.GraphExplorer.Resources"
+
+console :: C.Console
+console = C.encloseContext C.Component "Graph"
 
 
 data Stage = Init | Ready | Cleanup
@@ -52,11 +57,8 @@ type Props sigma forceatlas2 =
   , transformedGraph      :: SigmaxTypes.SGraph
   )
 
-graph :: forall s fa2. R2.Component (Props s fa2)
-graph = R.createElement graphCpt
-
-graphCpt :: forall s fa2. R.Memo (Props s fa2)
-graphCpt = R.memo' $ here.component "graph" cpt where
+graph :: forall s fa2. B.Leaf (Props s fa2)
+graph = B.leaf' (moduleName <> "graph") cpt where
     cpt props@{ elRef
               , showEdges
               , sigmaRef
@@ -68,12 +70,12 @@ graphCpt = R.memo' $ here.component "graph" cpt where
 
       R.useEffectOnce $ do
         pure $ do
-          here.log "[graphCpt (Cleanup)]"
+          console.log "[graphCpt (Cleanup)]"
           Sigmax.dependOnSigma (R.readRef sigmaRef) "[graphCpt (Cleanup)] no sigma" $ \sigma -> do
             Sigma.stopForceAtlas2 sigma
-            here.log2 "[graphCpt (Cleanup)] forceAtlas stopped for" sigma
+            console.log2 "[graphCpt (Cleanup)] forceAtlas stopped for" sigma
             Sigma.kill sigma
-            here.log "[graphCpt (Cleanup)] sigma killed"
+            console.log "[graphCpt (Cleanup)] sigma killed"
 
       -- NOTE: This div is not empty after sigma initializes.
       -- When we change state, we make it empty though.
@@ -102,7 +104,7 @@ graphCpt = R.memo' $ here.component "graph" cpt where
             theme <- T.read boxes.theme
             eSigma <- Sigma.sigma {settings: sigmaSettings theme}
             case eSigma of
-              Left err -> here.log2 "[graphCpt] error creating sigma" err
+              Left err -> console.log2 "[graphCpt] error creating sigma" err
               Right sig -> do
                 Sigmax.writeSigma rSigma $ Just sig
 
@@ -124,7 +126,7 @@ graphCpt = R.memo' $ here.component "graph" cpt where
 
                 Sigmax.setEdges sig false
 
-                -- here.log2 "[graph] startForceAtlas" startForceAtlas
+                -- console.log2 "[graph] startForceAtlas" startForceAtlas
                 if startForceAtlas then
                   Sigma.startForceAtlas2 sig fa2
                 else
@@ -165,7 +167,7 @@ graphCpt = R.memo' $ here.component "graph" cpt where
           Sigmax.updateEdges sigma tEdgesMap
           Sigmax.updateNodes sigma tNodesMap
           let edgesState = not $ SigmaxTypes.edgeStateHidden showEdges'
-          here.log2 "[graphCpt] edgesState" edgesState
+          console.log2 "[graphCpt] edgesState" edgesState
           Sigmax.setEdges sigma edgesState
 
 

@@ -45,14 +45,12 @@ type Props =
   , graphId         :: GET.GraphId
   )
 
-here :: R2.Here
-here = R2.here "Gargantext.Components.GraphExplorer.Layout"
+moduleName :: R2.Module
+moduleName = "Gargantext.Components.GraphExplorer.Layout"
 
-layout :: R2.Leaf Props
-layout = R2.leaf layoutCpt
 
-layoutCpt :: R.Component Props
-layoutCpt = here.component "explorerWriteGraph" cpt where
+layout :: B.Leaf Props
+layout = B.leaf (moduleName <> "explorerWriteGraph") cpt where
   cpt props@{ boxes
             , graph
             , mMetaData'
@@ -207,10 +205,8 @@ type GraphProps =
   , mMetaData      :: T.Box (Maybe GET.MetaData)
 )
 
-graphView :: R2.Leaf GraphProps
-graphView = R2.leaf graphViewCpt
-graphViewCpt :: R.Component GraphProps
-graphViewCpt = here.component "graphView" cpt
+graphView :: B.Leaf GraphProps
+graphView = B.leaf (moduleName <> "graphView") cpt
   where
     cpt { boxes
         , controls
@@ -265,7 +261,7 @@ graphViewCpt = here.component "graphView" cpt
         , stage: controls.graphStage
         , startForceAtlas
         , transformedGraph
-        } []
+        }
 
 --------------------------------------------------------
 

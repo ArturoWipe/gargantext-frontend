@@ -30,10 +30,11 @@ import Gargantext.Components.Forest.Tree.Node.Action.Upload (uploadFile, uploadA
 import Gargantext.Components.Forest.Tree.Node.Action.WriteNodesDocuments (documentsFromWriteNodesReq)
 import Gargantext.Components.Forest.Tree.Node.Tools.FTree (FTree, LNode(..), NTree(..), fTreeID)
 import Gargantext.Components.Forest.Tree.Node.Tools.SubTree.Types (SubTreeOut(..))
-import Gargantext.Config.REST (AffRESTError, logRESTError)
+import Gargantext.Config.REST (AffRESTError, logRESTError')
 import Gargantext.Config.Utils (handleRESTError)
 import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Loader (useLoaderEffect)
+import Gargantext.Plugins.Core.Console as C
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, get, mkNodeId)
 import Gargantext.Sessions.Types (useOpenNodesMemberBox, openNodesInsert, openNodesDelete)
@@ -51,8 +52,8 @@ import Toestand as T
 moduleName :: R2.Module
 moduleName = "Gargantext.Components.Forest.Tree"
 
-here :: R2.Here
-here = R2.here moduleName
+console :: C.Console
+console = C.encloseContext C.Component "Forest.Tree"
 
 -- Shared by every component here
 type Common =
@@ -146,7 +147,7 @@ treeLoader = B.leaf (moduleName <> "treeLoader") cpt where
           props = Record.merge common extra where
             common = RecordE.pick p :: Record Common
             extra = { reloadTree: p.reload, root, session, tree: tree' }
-        errorHandler = logRESTError here "[treeLoader]"
+        errorHandler = logRESTError' console "[treeLoader]"
 
 ---------------------------------------------------
 
@@ -279,7 +280,7 @@ childLoader = B.leaf (moduleName <> "childLoader") cpt where
       }
 
     where
-      errorHandler = logRESTError here "[childLoader]"
+      errorHandler = logRESTError' console "[childLoader]"
       fetch _ = getNodeTreeFirstLevel p.session p.id
       paint reload tree' = render (Record.merge base extra) where
         base = nodeProps { reload = reload }
@@ -309,13 +310,13 @@ deleteNode' nt p@{ boxes: { forestOpen }, session, tree: (NTree (LNode {id, pare
 
 doSearch task { boxes: { tasks }, tree: NTree (LNode {id}) _ } = liftEffect $ do
   GAT.insert id task tasks
-  here.log2 "[doSearch] DoSearch task:" task
+  console.log2 "[doSearch] DoSearch task:" task
 
 updateNode params { boxes: { errors, tasks }, session, tree: (NTree (LNode {id}) _) } = do
   eTask <- updateRequest params session id
   handleRESTError errors eTask $ \task -> liftEffect $ do
     GAT.insert id task tasks
-    here.log2 "[updateNode] UpdateNode task:" task
+    console.log2 "[updateNode] UpdateNode task:" task
 
 renameNode name p@{ boxes: { errors }, session, tree: (NTree (LNode {id}) _) } = do
   eTask <- rename session id $ RenameValue { text: name }
@@ -347,19 +348,19 @@ uploadFile' nodeType fileType fileFormat mName contents p@{ boxes: { errors, tas
   eTask <- uploadFile { contents, fileFormat, fileType, id, mName, nodeType, selection, session }
   handleRESTError errors eTask $ \task -> liftEffect $ do
     GAT.insert id task tasks
-    here.log2 "[uploadFile'] UploadFile, uploaded, task:" task
+    console.log2 "[uploadFile'] UploadFile, uploaded, task:" task
 
 uploadArbitraryFile' fileFormat mName blob p@{ boxes: { errors, tasks }, session, tree: (NTree (LNode { id }) _) } selection = do
   eTask <- uploadArbitraryFile session id { blob, fileFormat, mName } selection
   handleRESTError errors eTask $ \task -> liftEffect $ do
     GAT.insert id task tasks
-    here.log2 "[uploadArbitraryFile'] UploadArbitraryFile, uploaded, task:" task
+    console.log2 "[uploadArbitraryFile'] UploadArbitraryFile, uploaded, task:" task
 
 uploadFrameCalc' p@{ boxes: { errors, tasks }, session, tree: (NTree (LNode { id }) _) } = do
   eTask <- uploadFrameCalc session id
   handleRESTError errors eTask $ \task -> liftEffect $ do
     GAT.insert id task tasks
-    here.log2 "[performAction] UploadFrameCalc, uploaded, task:" task
+    console.log2 "[performAction] UploadFrameCalc, uploaded, task:" task
 
 moveNode params p@{ boxes: { errors, forestOpen }, session } = traverse_ f params where
   f (SubTreeOut { in: in', out }) = do
@@ -401,11 +402,11 @@ performAction (UploadFile nodeType fileType fileFormat mName contents selection)
   uploadFile' nodeType fileType fileFormat mName contents p selection
 performAction (UploadArbitraryFile fileFormat mName blob selection) p              =
   uploadArbitraryFile' fileFormat mName blob p selection
-performAction DownloadNode _                                  = liftEffect $ here.log "[performAction] DownloadNode"
+performAction DownloadNode _                                  = liftEffect $ console.log "[performAction] DownloadNode"
 performAction (MoveNode {params}) p                           = moveNode params p
 performAction (MergeNode {params}) p                          = mergeNode params p
 performAction (LinkNode { nodeType, params }) p               = linkNode nodeType params p
 performAction RefreshTree p                                   = refreshTree p
 performAction ClosePopover p                                  = closePopover p
 performAction (DocumentsFromWriteNodes { id }) p              = documentsFromWriteNodes id p
-performAction NoAction _                                      = liftEffect $ here.log "[performAction] NoAction"
+performAction NoAction _                                      = liftEffect $ console.log "[performAction] NoAction"

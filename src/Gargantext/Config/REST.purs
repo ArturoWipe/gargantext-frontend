@@ -1,5 +1,7 @@
 module Gargantext.Config.REST where
 
+import Gargantext.Prelude
+
 import Affjax (Error(..), defaultRequest, request)
 import Affjax as Affjax
 import Affjax.RequestBody (formData, formURLEncoded, string)
@@ -18,7 +20,7 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Foreign as Foreign
-import Gargantext.Prelude
+import Gargantext.Plugins.Core.Console as C
 import Gargantext.Utils.Reactix as R2
 import Simple.JSON as JSON
 import Web.XHR.FormData as XHRFormData
@@ -34,7 +36,7 @@ instance Show RESTError where
   show (SendResponseError e) = "SendResponseError " <> showError e
     where
       showError (RequestContentError e')  = "(RequestContentError " <> show e' <> ")"
-      showError (ResponseBodyError fe rf) = "(ResponseBodyError " <> show fe <> " (rf)"  -- <> show rf <> ")"
+      showError (ResponseBodyError fe _) = "(ResponseBodyError " <> show fe <> " (rf)"  -- <> show rf <> ")"
       showError (TimeoutError)            = "(TimeoutError)"
       showError (RequestFailedError)      = "(RequestFailedError)"
       showError (XHROtherError e')        = "(XHROtherError " <> show e' <> ")"
@@ -48,6 +50,12 @@ logRESTError :: R2.Here -> String -> RESTError -> Effect Unit
 logRESTError here prefix (SendResponseError e) = here.log2 (prefix <> " SendResponseError ") e  -- TODO: No show
 logRESTError here prefix (ReadJSONError e) = here.log2 (prefix <> " ReadJSONError ") $ show e
 logRESTError here prefix (CustomError e) = here.log2 (prefix <> " CustomError ") $ e
+
+-- (for now just create a derived function)
+logRESTError' :: C.Console -> String -> RESTError -> Effect Unit
+logRESTError' console prefix (SendResponseError e) = console.log2 (prefix <> " SendResponseError ") e  -- TODO: No show
+logRESTError' console prefix (ReadJSONError e) = console.log2 (prefix <> " ReadJSONError ") $ show e
+logRESTError' console prefix (CustomError e) = console.log2 (prefix <> " CustomError ") $ e
 
 type AffRESTError a = Aff (Either RESTError a)
 

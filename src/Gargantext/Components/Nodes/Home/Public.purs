@@ -6,18 +6,23 @@ import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Show.Generic (genericShow)
 import Data.String (take)
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Config (publicBackend)
-import Gargantext.Config.REST (AffRESTError, get, logRESTError)
+import Gargantext.Config.REST (AffRESTError, get, logRESTError')
 import Gargantext.Ends (backendUrl)
 import Gargantext.Hooks.Loader (useLoader)
+import Gargantext.Plugins.Core.Console as C
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.SimpleJSON as GUSJ
 import Reactix as R
 import Reactix.DOM.HTML as H
 import Simple.JSON as JSON
 
-here :: R2.Here
-here = R2.here "Gargantext.Components.Nodes.Home.Public"
+moduleName :: R2.Module
+moduleName = "Gargantext.Components.Nodes.Home.Public"
+
+console :: C.Console
+console = C.encloseContext C.Page "Nodes.Home.Public"
 
 type PublicDataProps = ( publicData :: Array PublicData )
 
@@ -65,10 +70,8 @@ loadPublicData _l = do
     backends
 -}
 
-renderPublic :: R2.Leaf ()
-renderPublic = R2.leafComponent renderPublicCpt
-renderPublicCpt :: R.Component ()
-renderPublicCpt = here.component "renderPublic" cpt where
+renderPublic :: B.Leaf ()
+renderPublic = B.leaf (moduleName <> "renderPublic") cpt where
   cpt _ _ = do
     useLoader { errorHandler
               , loader: loadPublicData
@@ -76,13 +79,10 @@ renderPublicCpt = here.component "renderPublic" cpt where
               , render:  loaded }
       where
         loaded publicData = publicLayout { publicData }
-        errorHandler = logRESTError here "[renderPublic]"
+        errorHandler = logRESTError' console "[renderPublic]"
 
-publicLayout :: Record PublicDataProps -> R.Element
-publicLayout props = R.createElement publicLayoutCpt props []
-publicLayoutCpt :: R.Component PublicDataProps
-publicLayoutCpt = here.component "publicLayout" cpt
-  where
+publicLayout :: B.Leaf PublicDataProps
+publicLayout = B.leaf (moduleName <> "publicLayout") cpt where
     cpt { publicData } _ = do
       pure $
         H.span {}
