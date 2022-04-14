@@ -73,7 +73,7 @@ component = here.component "topBar" cpt where
         ]
       ,
         -- Search
-        R2.fromMaybe_ mGraph' \graph ->
+        B.fromMaybe_ mGraph' \graph ->
 
           nodeSearchControl
           { graph

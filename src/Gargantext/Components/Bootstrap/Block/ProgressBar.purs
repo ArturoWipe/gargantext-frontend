@@ -3,9 +3,8 @@ module Gargantext.Components.Bootstrap.ProgressBar(progressBar) where
 import Gargantext.Prelude
 
 import Data.Foldable (intercalate)
+import Gargantext.Components.Bootstrap.Components (OptLeaf, optLeaf)
 import Gargantext.Components.Bootstrap.Types (Variant(..))
-import Gargantext.Utils.Reactix as R2
-import Reactix as R
 import Reactix.DOM.HTML as H
 
 type Props   =
@@ -24,20 +23,17 @@ options =
   , variant   : Primary
   }
 
--- | Structural Component for the Bootsrap "Progress Bar"
--- |
--- | https://getbootstrap.com/docs/4.6/components/progress/
-progressBar :: forall r. R2.OptLeaf Options Props r
-progressBar = R2.optLeaf component options
-
 componentName :: String
 componentName = "b-progress-bar"
 
 bootstrapName :: String
 bootstrapName = "progress"
 
-component :: R.Component Props
-component = R.hooksComponent componentName cpt where
+-- | Structural Component for the Bootsrap "Progress Bar"
+-- |
+-- | https://getbootstrap.com/docs/4.6/components/progress/
+progressBar :: forall r. OptLeaf Options Props r
+progressBar = optLeaf componentName options cpt where
   cpt props _ = do
     -- Computed
     let

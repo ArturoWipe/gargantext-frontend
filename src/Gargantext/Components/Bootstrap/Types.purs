@@ -13,6 +13,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Show.Generic (genericShow)
 import Data.String.Extra (kebabCase)
 
+
 -- | Component status based on UI/UX overall expression
 -- |
 -- |    * `Enabled`: default UI/UX behavior

@@ -223,7 +223,7 @@ layoutCpt = here.component "layout" cpt where
       }
       [
         -- Preloading spinner
-        R2.if' (not isDisplayed) $
+        B.if' (not isDisplayed) $
 
           H.div
           { className: "phylo__spinner-wrapper" }
@@ -237,7 +237,7 @@ layoutCpt = here.component "layout" cpt where
         [
           R2.fragmentWithKey topBarPortalKey
           [
-            R2.if' (isDisplayed) $
+            B.if' (isDisplayed) $
               topBar
               { sources
               , source
@@ -278,7 +278,7 @@ layoutCpt = here.component "layout" cpt where
         ]
       ,
         -- Toolbar
-        R2.if' (toolBarDisplayed) $
+        B.if' (toolBarDisplayed) $
           toolBar
           { resetViewCallback: const RS.resetView
           , exportCallback: const RS.exportViz

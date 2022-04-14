@@ -4,9 +4,8 @@ import Gargantext.Prelude
 
 import Data.Foldable (elem, intercalate)
 import Effect (Effect)
+import Gargantext.Components.Bootstrap.Components (OptLeaf, optLeaf)
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Sizing(..))
-import Gargantext.Utils.Reactix as R2
-import Reactix as R
 import Reactix.DOM.HTML as H
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -33,20 +32,17 @@ options =
   , size        : MediumSize
   }
 
--- | Structural Component for the Bootstrap input
--- |
--- | https://getbootstrap.com/docs/4.1/components/forms/
-formInput :: forall r. R2.OptLeaf Options Props r
-formInput = R2.optLeaf component options
-
 componentName :: String
 componentName = "b-form-input"
 
 bootstrapName :: String
 bootstrapName = "form-control"
 
-component :: R.Component Props
-component = R.hooksComponent componentName cpt where
+-- | Structural Component for the Bootstrap input
+-- |
+-- | https://getbootstrap.com/docs/4.1/components/forms/
+formInput :: forall r. OptLeaf Options Props r
+formInput = optLeaf componentName options cpt where
   cpt props@{ callback
             , status
             } _ = do

@@ -3,8 +3,7 @@ module Gargantext.Components.Bootstrap.Icon (icon) where
 import Gargantext.Prelude
 
 import Data.Foldable (intercalate)
-import Gargantext.Utils.Reactix as R2
-import Reactix as R
+import Gargantext.Components.Bootstrap.Components (OptLeaf, optLeaf)
 import Reactix.DOM.HTML as H
 
 type Props =
@@ -21,20 +20,17 @@ options =
   { className : ""
   }
 
--- | Structural Component for a simple Glyphicon element
--- |
--- | https://forkaweso.me/Fork-Awesome/icons/
-icon :: forall r. R2.OptLeaf Options Props r
-icon = R2.optLeaf component options
-
 componentName :: String
 componentName = "b-icon"
 
 bootstrapName :: String
 bootstrapName = "fa"
 
-component :: R.Component Props
-component = R.hooksComponent componentName cpt where
+-- | Structural Component for a simple Glyphicon element
+-- |
+-- | https://forkaweso.me/Fork-Awesome/icons/
+icon :: forall r. OptLeaf Options Props r
+icon = optLeaf componentName options cpt where
   cpt props _ = do
     -- Computed
     className <- pure $ intercalate " "

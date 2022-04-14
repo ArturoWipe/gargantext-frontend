@@ -4,11 +4,10 @@ import Gargantext.Prelude
 
 import Data.Foldable (elem, intercalate)
 import Effect (Effect)
+import Gargantext.Components.Bootstrap.Components (OptLeaf, optLeaf)
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Variant(..))
 import Gargantext.Utils ((?))
-import Gargantext.Utils.Reactix as R2
 import React.SyntheticEvent as SE
-import Reactix as R
 import Reactix.DOM.HTML as H
 
 type Props =
@@ -34,20 +33,17 @@ options =
   , variant   : Dark
   }
 
--- | Structural Component for a simple Glyphicon element with call-to-action
--- |
--- | https://forkaweso.me/Fork-Awesome/icons/
-iconButton :: forall r. R2.OptLeaf Options Props r
-iconButton = R2.optLeaf component options
-
 componentName :: String
 componentName = "b-icon-button"
 
 bootstrapName :: String
 bootstrapName = "fa"
 
-component :: R.Component Props
-component = R.hooksComponent componentName cpt where
+-- | Structural Component for a simple Glyphicon element with call-to-action
+-- |
+-- | https://forkaweso.me/Fork-Awesome/icons/
+iconButton :: forall r. OptLeaf Options Props r
+iconButton = optLeaf componentName options cpt where
   cpt props@{ callback
             , status
             , name } _ = do

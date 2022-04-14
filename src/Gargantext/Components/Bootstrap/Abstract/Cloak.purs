@@ -9,6 +9,8 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Timer (setTimeout)
+import Gargantext.Components.Bootstrap.Components (OptLeaf, optLeaf)
+import Gargantext.Components.Bootstrap.Conditionals (if')
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -26,6 +28,9 @@ type Options =
   ( idlingPhaseDuration     :: Maybe Int -- Milliseconds
   , sustainingPhaseDuration :: Maybe Int -- Milliseconds
   )
+
+cname :: String
+cname = "b-cloak"
 
 options :: Record Options
 options =
@@ -106,14 +111,8 @@ options =
 -- |      , sustainingPhaseDuration  : Just 400
 -- |      }
 -- |    ```
-cloak :: forall r. R2.OptLeaf Options Props r
-cloak = R2.optLeaf component options
-
-cname :: String
-cname = "b-cloak"
-
-component :: R.Component Props
-component = R.hooksComponent cname cpt where
+cloak :: forall r. OptLeaf Options Props r
+cloak = optLeaf cname options cpt where
   cpt props _ = do
     -- State
     phase /\ phaseBox <- R2.useBox' (Idle :: Phase)
@@ -170,9 +169,9 @@ component = R.hooksComponent cname cpt where
 
       R.fragment
       [
-        R2.if' canCloakBeDisplayed    props.cloakSlot
+        if' canCloakBeDisplayed    props.cloakSlot
       ,
-        R2.if' canContentBeDisplayed  props.defaultSlot
+        if' canContentBeDisplayed  props.defaultSlot
       ]
 
 

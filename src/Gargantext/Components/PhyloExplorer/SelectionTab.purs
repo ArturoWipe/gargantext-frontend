@@ -81,7 +81,7 @@ component = R.hooksComponent componentName cpt where
       { className: "phylo-selection-tab" }
       [
         -- No result
-        R2.if' (not haveSelection) $
+        B.if' (not haveSelection) $
 
           B.caveat
           { className: "phylo-selection-tab__nil" }
@@ -206,7 +206,7 @@ component = R.hooksComponent componentName cpt where
             ]
       ,
         -- (separator)
-        R2.if' (haveSelection) $
+        B.if' (haveSelection) $
 
           H.div
           { className: "phylo-selection-tab__separator" }
@@ -216,7 +216,7 @@ component = R.hooksComponent componentName cpt where
           ]
       ,
         -- No extracted result
-        R2.if' (haveSelection && null extractedTerms) $
+        B.if' (haveSelection && null extractedTerms) $
 
           H.div
           { className: "phylo-selection-tab__selection" }
@@ -229,7 +229,7 @@ component = R.hooksComponent componentName cpt where
           ]
       ,
         -- Extracted Results
-        R2.if' (not null extractedTerms) $
+        B.if' (not null extractedTerms) $
 
           H.div
           { className: "phylo-selection-tab__selection" }
@@ -265,7 +265,7 @@ component = R.hooksComponent componentName cpt where
                 flip mapWithIndex extractedTerms
                   \index (ExtractedTerm { label, ratio }) ->
 
-                    R2.if'
+                    B.if'
                     (
                       truncateResults == false
                     || index < maxTruncateResult
@@ -289,7 +289,7 @@ component = R.hooksComponent componentName cpt where
                         ]
                       ]
               ,
-                R2.if' (truncateResults) $
+                B.if' (truncateResults) $
 
                   B.button
                   { variant: ButtonVariant Light

@@ -326,7 +326,7 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
         [
           updateTermButton
           ( commonProps `Record.merge`
-            { variant: ButtonVariant Success
+            { variant: ButtonVariant Secondary
             , rType: CandidateTerm
             , nodesMap
             }
@@ -427,7 +427,7 @@ neighborhoodCpt = R.memo' $ here.component "neighborhood" cpt where
           {} $
           flip mapWithIndex termList \index node ->
 
-            R2.if'
+            B.if'
             (
                withTruncateResults == false
             || index < maxTruncateResult
@@ -453,7 +453,7 @@ neighborhoodCpt = R.memo' $ here.component "neighborhood" cpt where
                 [ H.text node.label ]
               ]
         ,
-          R2.if' (withTruncateResults) $
+          B.if' (withTruncateResults) $
 
             B.button
             { variant: ButtonVariant Light

@@ -9,7 +9,6 @@ import DOM.Simple.Document (document)
 import DOM.Simple.Element as Element
 import DOM.Simple.Event as DE
 import DOM.Simple.Types (class IsNode, class IsElement, DOMRect)
-import Data.Array (singleton)
 import Data.Array as A
 import Data.Either (hush)
 import Data.Function.Uncurried (Fn1, runFn1, Fn2, runFn2)
@@ -17,7 +16,6 @@ import Data.Maybe (Maybe(..), fromJust, fromMaybe)
 import Data.Nullable (Nullable, null, toMaybe)
 import Data.Tuple (Tuple)
 import Data.Tuple.Nested ((/\))
-import Data.UUID as UUID
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff, launchAff_, killFiber)
 import Effect.Class (liftEffect)
@@ -49,7 +47,7 @@ type Component p = Record p -> Array R.Element -> R.Element
 -- | UI Component type with only required props and no child
 type Leaf p = Record p -> R.Element
 
-leafComponent :: forall cpt p. (R.Component p) -> Record p -> R.Element
+leafComponent :: forall p. (R.Component p) -> Record p -> R.Element
 leafComponent cpt p = R.createElement cpt p []
 
 -- | UI Component type containing optional props and children
@@ -62,7 +60,7 @@ type OptLeaf options props provided = CO.Defaults (Record options) (Record provi
 
 component :: forall cpt p. R.IsComponent cpt p (Array R.Element)
   => cpt -> Record p -> Array R.Element -> R.Element
-component cpt props children = R.createElement cpt props children
+component cpt = R.createElement cpt
 
 leaf :: forall cpt p. R.IsComponent cpt p (Array R.Element)
   => cpt -> Record p -> R.Element
@@ -72,15 +70,17 @@ optComponent :: forall r r' cpt p.
      CO.Defaults r r' (Record p)
   => R.IsComponent cpt p (Array R.Element)
   => cpt -> r -> r' -> Array R.Element -> R.Element
-optComponent cpt options props children = R.createElement cpt props' children where
-  props' = CO.defaults options props
+optComponent cpt options props = R.createElement cpt props'
+  where
+    props' = CO.defaults options props
 
 optLeaf :: forall r r' cpt p.
      CO.Defaults r r' (Record p)
   => R.IsComponent cpt p (Array R.Element)
   => cpt -> r -> r' -> R.Element
-optLeaf cpt options props = R.createElement cpt props' [] where
-  props' = CO.defaults options props
+optLeaf cpt options props = R.createElement cpt props' []
+  where
+    props' = CO.defaults options props
 
 -----------------------------------------
 
@@ -487,16 +487,6 @@ boundingRect els =
 
 --------------------------------------
 
--- | One-liner `if` simplifying render writing
--- | (best for one child)
-if' :: Boolean -> R.Element -> R.Element
-if' = if _ then _ else mempty
-
--- | One-liner `if` simplifying render writing
--- | (best for multiple children)
-if_ :: Boolean -> Array (R.Element) -> R.Element
-if_ pred arr = if pred then (R.fragment arr) else mempty
-
 -- | Toestand `useLive` automatically sets to "unchanged" behavior
 useLive' :: forall box b. T.Read box b => Eq b => box -> R.Hooks b
 useLive' = T.useLive T.unequal
@@ -520,13 +510,6 @@ fragmentWithKey key es = R.rawCreateElement (R.react .. "Fragment") { key } es
 createPortal' :: Maybe DOM.Element -> Array R.Element -> R.Element
 createPortal' Nothing     _        = mempty
 createPortal' (Just host) children = R.createPortal children host
-
--- | Render a `mempty` Element if provided `Maybe` is `Nothing`
-fromMaybe_ :: forall a. Maybe a -> (a -> R.Element) -> R.Element
-fromMaybe_ m render = case m of
-  Nothing -> mempty
-  Just a  -> render a
-
 
 --------------------------------------
 

@@ -6,6 +6,8 @@ import Gargantext.Components.Bootstrap.BaseModal(baseModal) as Exports
 import Gargantext.Components.Bootstrap.Button(button) as Exports
 import Gargantext.Components.Bootstrap.Caveat(caveat) as Exports
 import Gargantext.Components.Bootstrap.Cloak (cloak) as Exports
+import Gargantext.Components.Bootstrap.Components (Tree, tree, tree', OptTree, optTree, optTree', Leaf, leaf, leaf', OptLeaf, optLeaf, optLeaf') as Exports
+import Gargantext.Components.Bootstrap.Conditionals (if', if_, fromMaybe_) as Exports
 import Gargantext.Components.Bootstrap.Fieldset(fieldset) as Exports
 import Gargantext.Components.Bootstrap.FormInput(formInput) as Exports
 import Gargantext.Components.Bootstrap.FormSelect(formSelect, formSelect') as Exports

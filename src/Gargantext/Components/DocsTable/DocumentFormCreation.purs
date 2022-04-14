@@ -84,7 +84,7 @@ component = R.hooksComponent "documentFormCreation" cpt where
             B.formInput $
               bindStateKey "title"
           ,
-            R2.if' (fv.hasError' "title") $
+            B.if' (fv.hasError' "title") $
               H.div { className: "form-group__error" }
               [ H.text "Please enter a title" ]
           ]
@@ -110,7 +110,7 @@ component = R.hooksComponent "documentFormCreation" cpt where
             B.formInput $
               bindStateKey "source"
           ,
-            R2.if' (fv.hasError' "source") $
+            B.if' (fv.hasError' "source") $
               H.div { className: "form-group__error" }
               [ H.text "Please enter a source" ]
           ]
@@ -137,7 +137,7 @@ component = R.hooksComponent "documentFormCreation" cpt where
             { placeholder: "ex: author1, author2, …"
             } `Record.merge` bindStateKey "authors"
           ,
-            R2.if' (fv.hasError' "authors") $
+            B.if' (fv.hasError' "authors") $
               H.div { className: "form-group__error" }
               [ H.text "Please enter at least one author" ]
           ]
@@ -166,7 +166,7 @@ component = R.hooksComponent "documentFormCreation" cpt where
             { type: "date"
             } `Record.merge` bindStateKey "date"
           ,
-            R2.if' (fv.hasError' "date") $
+            B.if' (fv.hasError' "date") $
               H.div { className: "form-group__error" }
               [ H.text "Please enter a valid date" ]
           ]

@@ -113,7 +113,7 @@ graphLayoutCpt = here.component "explorerLayout" cpt where
             { className: "graph-loader__spinner" }
           ]
       , defaultSlot:
-          R2.fromMaybe_ state' handler
+          B.fromMaybe_ state' handler
       }
 
     where

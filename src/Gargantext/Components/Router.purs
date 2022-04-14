@@ -10,6 +10,7 @@ import Data.UUID (UUID)
 import Data.UUID as UUID
 import Effect (Effect)
 import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.ErrorsView (errorsView)
 import Gargantext.Components.Footer (footer)
 import Gargantext.Components.Forest (forestLayout)
@@ -92,7 +93,7 @@ routerCpt = here.component "router" cpt where
       { className: "router" }
       [
         -- loginModal { boxes }
-         R2.if' showLogin' $
+         B.if' showLogin' $
             login' boxes
        , TopBar.topBar { boxes }
        , errorsView { errors: boxes.errors } []
@@ -104,7 +105,7 @@ routerCpt = here.component "router" cpt where
           -- @XXX: ReactJS "display: none" don't exec effect cleaning function
           --       (therefore cannot use the simple "display: none" workaround
           --       to keep below component alive)
-          R2.if' (showTree') $ forest { boxes }
+          B.if' (showTree') $ forest { boxes }
          ,
           mainPage { boxes }
          ,

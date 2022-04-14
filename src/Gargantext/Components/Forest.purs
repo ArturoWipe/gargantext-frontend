@@ -1,6 +1,5 @@
 module Gargantext.Components.Forest
-  ( forest
-  , forestLayout
+  ( forestLayout
   , Props
   ) where
 
@@ -21,8 +20,8 @@ import Reactix as R
 import Reactix.DOM.HTML as H
 import Toestand as T
 
-here :: R2.Here
-here = R2.here "Gargantext.Components.Forest"
+moduleName :: R2.Module
+moduleName = "Gargantext.Components.Forest"
 
 -- Shared by components here with Tree
 type Props =
@@ -30,10 +29,22 @@ type Props =
   , frontends :: Frontends
   )
 
-forest :: R2.Component Props
-forest = R.createElement forestCpt
-forestCpt :: R.Component Props
-forestCpt = here.component "forest" cpt where
+forestLayout :: B.Leaf Props
+forestLayout = B.leaf' (moduleName <> "forestLayout") cpt where
+  cpt p _ = pure $
+
+    H.div
+    { className: "forest-layout" }
+    [
+      H.div { className: "forest-layout__top-teaser" } []
+    ,
+      forest p
+    ,
+      H.div { className: "forest-layout__bottom-teaser" } []
+    ]
+
+forest :: B.Leaf Props
+forest = B.leaf (moduleName <> "forest") cpt where
   cpt { boxes: boxes@{ handed
                      , reloadForest
                      , sessions }
@@ -58,20 +69,22 @@ forestCpt = here.component "forest" cpt where
         H.div
         { className: "forest-layout-tree" }
         [
-          treeLoader { boxes
-                   , frontends
-                   , handed: handed'
-                   , reload: reloadForest
-                   , root: treeId
-                   , session: s } []
+          treeLoader
+          { boxes
+          , frontends
+          , handed: handed'
+          , reload: reloadForest
+          , root: treeId
+          , session: s
+          }
         ]
+
+--------------------------------------------------------
 
 type Plus = ( boxes :: Boxes )
 
-plus :: R2.Leaf Plus
-plus = R2.leafComponent plusCpt
-plusCpt :: R.Component Plus
-plusCpt = here.component "plus" cpt where
+plus :: B.Leaf Plus
+plus = B.leaf (moduleName <> "plus") cpt where
   cpt { boxes: { backend, showLogin } } _ = do
     -- Hooks
     { goToRoute } <- useLinkHandler
@@ -144,20 +157,3 @@ plusCpt = here.component "plus" cpt where
   --, H.div { "type": "", className: "fa fa-minus-circle fa-lg"} []
   -- TODO same as the one in the Login Modal (same CSS)
   -- [ H.i { className: "material-icons md-36"} [] ]
-
-
-forestLayout :: R2.Leaf Props
-forestLayout = R2.leaf forestLayoutCpt
-forestLayoutCpt :: R.Memo Props
-forestLayoutCpt = R.memo' $ here.component "forestLayout" cpt where
-  cpt p _ = pure $
-
-    H.div
-    { className: "forest-layout" }
-    [
-      H.div { className: "forest-layout__top-teaser" } []
-    ,
-      forest p []
-    ,
-      H.div { className: "forest-layout__bottom-teaser" } []
-    ]

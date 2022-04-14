@@ -4,9 +4,8 @@ import Gargantext.Prelude
 
 import Data.Foldable (intercalate)
 import Effect (Effect)
+import Gargantext.Components.Bootstrap.Components (OptLeaf, optLeaf)
 import Gargantext.Utils ((?))
-import Gargantext.Utils.Reactix as R2
-import Reactix as R
 import Reactix.DOM.HTML as H
 
 type Props a =
@@ -25,6 +24,9 @@ options =
   { className : ""
   }
 
+componentName :: String
+componentName = "b-tabs"
+
 -- | Structural molecular component to the Bootstrap <nav-tabs> + <nav-item>
 -- | simplifying a lot of the available UI/UX possibilites (type, disabled
 -- | tabs, etc)
@@ -33,17 +35,8 @@ options =
 tabs :: forall r a.
      Show a
   => Eq a
-  => R2.OptLeaf Options (Props a) r
-tabs = R2.optLeaf component options
-
-componentName :: String
-componentName = "b-tabs"
-
-component :: forall a.
-     Show a
-  => Eq a
-  => R.Component (Props a)
-component = R.hooksComponent componentName cpt where
+  => OptLeaf Options (Props a) r
+tabs = optLeaf componentName options cpt where
   cpt props@{ list, value, callback } _ = do
     -- Computed
     let

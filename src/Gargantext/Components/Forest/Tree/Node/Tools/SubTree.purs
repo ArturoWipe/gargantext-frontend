@@ -8,6 +8,7 @@ import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Forest.Tree.Node.Action (Props, subTreeOut, setTreeOut)
 import Gargantext.Components.Forest.Tree.Node.Action.Types (Action)
 import Gargantext.Components.Forest.Tree.Node.Tools.FTree (FTree, LNode(..), NTree(..))
@@ -154,7 +155,7 @@ subTreeTreeViewCpt = here.ntComponent "subTreeTreeView" cpt where
             [
               H.span { className: GT.fldr nodeType true } []
             ,
-              R2.if' hasChild $
+              B.if' hasChild $
 
                 if isExpanded then
                   H.span { className: "fa fa-chevron-down" } []
@@ -171,7 +172,7 @@ subTreeTreeViewCpt = here.ntComponent "subTreeTreeView" cpt where
             ]
           ]
       ,
-        R2.if' (hasChild && isExpanded) $
+        B.if' (hasChild && isExpanded) $
           H.div { className: "subtree__node__children" }
           children
       ]

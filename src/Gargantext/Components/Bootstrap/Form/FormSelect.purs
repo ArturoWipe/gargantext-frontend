@@ -8,6 +8,7 @@ import Gargantext.Prelude
 import Data.Foldable (elem, intercalate)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
+import Gargantext.Components.Bootstrap.Components (OptTree, optTree)
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Sizing(..))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -37,6 +38,12 @@ options =
   , size        : MediumSize
   }
 
+componentName :: String
+componentName = "b-form-select"
+
+bootstrapName :: String
+bootstrapName = "form-control"
+
 -- | Structural Component for the Bootstrap select
 -- |
 -- |  ```purescript
@@ -57,17 +64,8 @@ options =
 -- |     here. Please use `formSelect'` for any other type
 -- |
 -- | https://getbootstrap.com/docs/4.1/components/forms/
-formSelect :: forall r. R2.OptComponent Options Props r
-formSelect = R2.optComponent component options
-
-componentName :: String
-componentName = "b-form-select"
-
-bootstrapName :: String
-bootstrapName = "form-control"
-
-component :: R.Component Props
-component = R.hooksComponent componentName cpt where
+formSelect :: forall r. OptTree Options Props r
+formSelect = optTree componentName options cpt where
   cpt props@{ callback
             , status
             } children = do

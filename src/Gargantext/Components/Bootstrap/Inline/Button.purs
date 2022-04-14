@@ -5,12 +5,12 @@ import Gargantext.Prelude
 import Data.Array (elem)
 import Data.Foldable (intercalate)
 import Effect (Effect)
+import Gargantext.Components.Bootstrap.Components (OptTree, optTree)
+import Gargantext.Components.Bootstrap.Conditionals (if')
 import Gargantext.Components.Bootstrap.Spinner (spinner)
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), ComponentStatus(..), Sizing(..), Variant(..))
 import Gargantext.Utils ((?))
-import Gargantext.Utils.Reactix as R2
 import React.SyntheticEvent as SE
-import Reactix as R
 import Reactix.DOM.HTML as H
 
 type Props =
@@ -39,20 +39,17 @@ options =
   , title     : ""
   }
 
--- | Structural Component for the Bootstrap button
--- |
--- | https://getbootstrap.com/docs/4.0/components/buttons/
-button :: forall r. R2.OptComponent Options Props r
-button = R2.optComponent component options
-
 componentName :: String
 componentName = "b-button"
 
 bootstrapName :: String
 bootstrapName = "btn"
 
-component :: R.Component Props
-component = R.hooksComponent componentName cpt where
+-- | Structural Component for the Bootstrap button
+-- |
+-- | https://getbootstrap.com/docs/4.0/components/buttons/
+button :: forall r. OptTree Options Props r
+button = optTree componentName options cpt where
   cpt props@{ callback
             , status
             } children = do
@@ -85,7 +82,7 @@ component = R.hooksComponent componentName cpt where
       , title: props.title
       }
 
-      [ R2.if' (status == Deferred) $
+      [ if' (status == Deferred) $
           spinner
           { className: componentName <> "__spinner"
           }

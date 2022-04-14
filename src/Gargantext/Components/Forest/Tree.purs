@@ -1,4 +1,6 @@
-module Gargantext.Components.Forest.Tree where
+module Gargantext.Components.Forest.Tree
+  ( treeLoader
+  ) where
 
 import Gargantext.Prelude
 
@@ -13,7 +15,7 @@ import Effect.Class (liftEffect)
 import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Forest.Tree.Node (blankNodeSpan, nodeSpan)
+import Gargantext.Components.Forest.Tree.Node (blankMainLeaf, mainLeaf)
 import Gargantext.Components.Forest.Tree.Node.Action.Add (AddNodeValue(..), addNode)
 import Gargantext.Components.Forest.Tree.Node.Action.Contact as Contact
 import Gargantext.Components.Forest.Tree.Node.Action.Delete (deleteNode, unpublishNode)
@@ -31,13 +33,13 @@ import Gargantext.Components.Forest.Tree.Node.Tools.SubTree.Types (SubTreeOut(..
 import Gargantext.Config.REST (AffRESTError, logRESTError)
 import Gargantext.Config.Utils (handleRESTError)
 import Gargantext.Ends (Frontends)
-import Gargantext.Hooks.Loader (useLoader, useLoaderEffect)
+import Gargantext.Hooks.Loader (useLoaderEffect)
 import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, get, mkNodeId)
 import Gargantext.Sessions.Types (useOpenNodesMemberBox, openNodesInsert, openNodesDelete)
-import Gargantext.Types (Handed, ID, isPublic, publicize, switchHanded)
+import Gargantext.Types (Handed, ID, isPublic, publicize)
 import Gargantext.Types as GT
-import Gargantext.Utils (nbsp, (?))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
@@ -46,8 +48,11 @@ import Record as Record
 import Record.Extra as RecordE
 import Toestand as T
 
+moduleName :: R2.Module
+moduleName = "Gargantext.Components.Forest.Tree"
+
 here :: R2.Here
-here = R2.here "Gargantext.Components.Forest.Tree"
+here = R2.here moduleName
 
 -- Shared by every component here
 type Common =
@@ -86,7 +91,7 @@ type PACommon =
   , tree       :: FTree
   )
 
--- The properties tree shares in common with nodeSpan
+-- The properties tree shares in common with mainLeaf
 type NSCommon =
   ( frontends :: Frontends
   , handed    :: Handed
@@ -106,10 +111,8 @@ type PerformActionProps =
   | PACommon )
 
 -- | Loads and renders the tree starting at the given root node id.
-treeLoader :: R2.Component LoaderProps
-treeLoader = R.createElement treeLoaderCpt
-treeLoaderCpt :: R.Component LoaderProps
-treeLoaderCpt = here.component "treeLoader" cpt where
+treeLoader :: B.Leaf LoaderProps
+treeLoader = B.leaf (moduleName <> "treeLoader") cpt where
 -- treeLoaderCpt :: R.Memo LoaderProps
 -- treeLoaderCpt = R.memo (here.component "treeLoader" cpt) memoCmp where
 --   memoCmp ({ root: t1 }) ({ root: t2 }) = t1 == t2
@@ -134,27 +137,21 @@ treeLoaderCpt = here.component "treeLoader" cpt where
       { isDisplayed: isJust state
       , sustainingPhaseDuration: Just 50
       , cloakSlot:
-          blankTree {}
+          blankMainTree {}
       , defaultSlot:
-          R2.fromMaybe_ state $ loaded
+          B.fromMaybe_ state $ loaded
       }
       where
-        loaded tree' = tree props where
+        loaded tree' = mainTree props where
           props = Record.merge common extra where
             common = RecordE.pick p :: Record Common
             extra = { reloadTree: p.reload, root, session, tree: tree' }
         errorHandler = logRESTError here "[treeLoader]"
 
-getNodeTree :: Session -> ID -> AffRESTError FTree
-getNodeTree session nodeId = get session $ GR.NodeAPI GT.Tree (Just nodeId) ""
+---------------------------------------------------
 
-getNodeTreeFirstLevel :: Session -> ID -> AffRESTError FTree
-getNodeTreeFirstLevel session nodeId = get session $ GR.TreeFirstLevel (Just nodeId) ""
-
-tree :: R2.Leaf TreeProps
-tree props = R.createElement treeCpt props []
-treeCpt :: R.Component TreeProps
-treeCpt = here.component "tree" cpt where
+mainTree :: B.Leaf TreeProps
+mainTree = B.leaf (moduleName <> "tree") cpt where
   cpt p@{ boxes: boxes@{ forestOpen }
         , frontends
         , reload
@@ -180,7 +177,7 @@ treeCpt = here.component "tree" cpt where
         H.div
         { className: "maintree__node" }
         [
-          nodeSpan
+          mainLeaf
           { boxes
           , dispatch: dispatch setPopoverRef
           , folderOpen
@@ -195,13 +192,13 @@ treeCpt = here.component "tree" cpt where
           , setPopoverRef
           }
         <>
-          R2.if' (folderOpen')
+          B.if' (folderOpen')
           (
             renderTreeChildren $
             { childProps:
                 { children'
                 , folderOpen
-                , render: tree
+                , render: mainTree
                 }
             } `Record.merge` p
           )
@@ -217,12 +214,10 @@ treeCpt = here.component "tree" cpt where
         spr = { setPopoverRef }
   pub (LNode n@{ nodeType: t }) = LNode (n { nodeType = publicize t })
 
+---------------------------------------------------
 
-
-blankTree :: R2.Leaf ()
-blankTree = R2.leaf blankTreeCpt
-blankTreeCpt :: R.Component ()
-blankTreeCpt = here.component "__blank__" cpt where
+blankMainTree :: B.Leaf ()
+blankMainTree = B.leaf (moduleName <> "__blank__") cpt where
   cpt _ _ = pure $
 
     H.div
@@ -231,16 +226,15 @@ blankTreeCpt = here.component "__blank__" cpt where
       H.div
       { className: "maintree__node" }
       [
-        blankNodeSpan
+        blankMainLeaf
         {}
       ]
     ]
 
+---------------------------------------------------
 
-renderTreeChildren :: R2.Leaf ChildrenTreeProps
-renderTreeChildren = R2.leaf renderTreeChildrenCpt
-renderTreeChildrenCpt :: R.Component ChildrenTreeProps
-renderTreeChildrenCpt = here.component "renderTreeChildren" cpt where
+renderTreeChildren :: B.Leaf ChildrenTreeProps
+renderTreeChildren = B.leaf (moduleName <> "renderTreeChildren") cpt where
   cpt p@{ childProps: { children'
                       , render }
         , root } _ = do
@@ -248,14 +242,12 @@ renderTreeChildrenCpt = here.component "renderTreeChildren" cpt where
 
     where
       nodeProps = RecordE.pick p :: Record NodeProps
-      renderChild (NTree (LNode {id: cId}) _) = childLoader props [] where
+      renderChild (NTree (LNode {id: cId}) _) = childLoader props where
         props = Record.merge nodeProps { id: cId, render, root }
 
 
-childLoader :: R2.Component ChildLoaderProps
-childLoader = R.createElement childLoaderCpt
-childLoaderCpt :: R.Component ChildLoaderProps
-childLoaderCpt = here.component "childLoader" cpt where
+childLoader :: B.Leaf ChildLoaderProps
+childLoader = B.leaf (moduleName <> "childLoader") cpt where
   cpt p@{ boxes: { reloadRoot }
         , reloadTree
         , render
@@ -281,9 +273,9 @@ childLoaderCpt = here.component "childLoader" cpt where
       { isDisplayed: isJust state
       , sustainingPhaseDuration: Just 50
       , cloakSlot:
-          blankTree {}
+          blankMainTree {}
       , defaultSlot:
-          R2.fromMaybe_ state $ paint reload
+          B.fromMaybe_ state $ paint reload
       }
 
     where
@@ -293,6 +285,14 @@ childLoaderCpt = here.component "childLoader" cpt where
         base = nodeProps { reload = reload }
         extra = { root, tree: tree' }
         nodeProps = RecordE.pick p :: Record NodeProps
+
+---------------------------------------------------
+
+getNodeTree :: Session -> ID -> AffRESTError FTree
+getNodeTree session nodeId = get session $ GR.NodeAPI GT.Tree (Just nodeId) ""
+
+getNodeTreeFirstLevel :: Session -> ID -> AffRESTError FTree
+getNodeTreeFirstLevel session nodeId = get session $ GR.TreeFirstLevel (Just nodeId) ""
 
 closePopover { setPopoverRef } =
    liftEffect $ traverse_ (\set -> set false) (R.readRef setPopoverRef)

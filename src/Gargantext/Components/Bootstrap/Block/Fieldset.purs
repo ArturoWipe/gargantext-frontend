@@ -5,7 +5,7 @@ module Gargantext.Components.Bootstrap.Fieldset
 import Gargantext.Prelude
 
 import Data.Array (intercalate)
-import Gargantext.Utils.Reactix as R2
+import Gargantext.Components.Bootstrap.Components (OptTree, optTree)
 import Reactix as R
 import Reactix.DOM.HTML as H
 
@@ -25,16 +25,13 @@ options =
   , contentClassName  : ""
   }
 
--- | Component simulating a native <fieldset>
--- | (which has been completly reset by Bootstrap libraries)
-fieldset :: forall r. R2.OptComponent Options Props r
-fieldset = R2.optComponent component options
-
 componentName :: String
 componentName = "b-fieldset"
 
-component :: R.Component Props
-component = R.hooksComponent componentName cpt where
+-- | Component simulating a native <fieldset>
+-- | (which has been completly reset by Bootstrap libraries)
+fieldset :: forall r. OptTree Options Props r
+fieldset = optTree componentName options cpt where
   cpt props@{ titleSlot
             } children = do
     -- Computed

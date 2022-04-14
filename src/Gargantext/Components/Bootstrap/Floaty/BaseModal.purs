@@ -5,7 +5,8 @@ import Gargantext.Prelude
 import DOM.Simple (Window)
 import Data.Foldable (intercalate)
 import Effect (Effect)
-import Effect.Uncurried (EffectFn2, runEffectFn2)
+import Effect.Uncurried (EffectFn2)
+import Gargantext.Components.Bootstrap.Conditionals (if')
 import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -83,7 +84,7 @@ component = R.hooksComponent componentName cpt where
         , data: { show: true }
         }
         [
-          R2.if' (hasBackground) $
+          if' (hasBackground) $
             H.div
             { className: intercalate " "
                 [ componentName <> "__overlay"
@@ -110,7 +111,7 @@ component = R.hooksComponent componentName cpt where
                 ]
             }
             [
-              R2.if' (hasHeader) $
+              if' (hasHeader) $
                 H.div
                 { className: intercalate " "
                     [ componentName <> "__header"
@@ -148,8 +149,8 @@ component = R.hooksComponent componentName cpt where
 toggle :: forall event. T.Box Boolean -> event -> Effect Unit
 toggle box _ = T.modify_ not box
 
-addClassName :: Window -> String -> Effect Unit
-addClassName = runEffectFn2 _addClassName
+-- addClassName :: Window -> String -> Effect Unit
+-- addClassName = runEffectFn2 _addClassName
 
-removeClassName :: Window -> String -> Effect Unit
-removeClassName = runEffectFn2 _removeClassName
+-- removeClassName :: Window -> String -> Effect Unit
+-- removeClassName = runEffectFn2 _removeClassName

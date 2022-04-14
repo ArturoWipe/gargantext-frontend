@@ -124,5 +124,5 @@ phyloLayoutCpt = here.component "main" cpt where
             ]
           ]
       , defaultSlot:
-          R2.fromMaybe_ state' handler
+          B.fromMaybe_ state' handler
       }
