@@ -1,5 +1,5 @@
 module Gargantext.Utils.Console
-  ( Console
+  ( Console, RowConsole
   , encloseContext
   , CalleeType(..)
   , LogType(..)
@@ -29,8 +29,8 @@ data LogType
 
 derive instance eqLogType :: Eq LogType
 
-type Console =
-  { log     :: forall a. a -> Effect Unit
+type RowConsole =
+  ( log     :: forall a. a -> Effect Unit
   , error   :: forall a. a -> Effect Unit
   , warn    :: forall a. a -> Effect Unit
   , info    :: forall a. a -> Effect Unit
@@ -42,7 +42,9 @@ type Console =
   , error3  :: forall a b c. a -> b -> c -> Effect Unit
   , warn3   :: forall a b c. a -> b -> c -> Effect Unit
   , info3   :: forall a b c. a -> b -> c -> Effect Unit
-  }
+  )
+
+type Console = Record RowConsole
 
 -- | Logging as JavaScript fancy way
 -- |
