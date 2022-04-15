@@ -326,7 +326,7 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
         [
           updateTermButton
           ( commonProps `Record.merge`
-            { variant: ButtonVariant Success
+            { variant: ButtonVariant Secondary
             , rType: CandidateTerm
             , nodesMap
             }
