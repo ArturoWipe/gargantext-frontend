@@ -24,6 +24,7 @@ import Effect.Class (liftEffect)
 import Effect.Exception (error)
 import Effect.Uncurried (EffectFn1, EffectFn3, mkEffectFn1, mkEffectFn2, runEffectFn1, runEffectFn3)
 import FFI.Simple (applyTo, args2, args3, defineProperty, delay, getProperty, (..), (...), (.=))
+import Gargantext.Utils.Console as Console
 import Partial.Unsafe (unsafePartial)
 import React (class ReactPropFields, Children, ReactClass, ReactElement)
 import React as React
@@ -88,16 +89,38 @@ type Module = String
 
 type Here =
   { component   :: forall p. String -> R.HooksComponent p -> R.Component p
-  , log         :: forall l. l -> Effect Unit
-  , log2        :: forall l. String -> l -> Effect Unit
-  , ntComponent :: forall p. String -> NTHooksComponent p -> NTComponent p }
+  , ntComponent :: forall p. String -> NTHooksComponent p -> NTComponent p
+  , log     :: forall a. a -> Effect Unit
+  , error   :: forall a. a -> Effect Unit
+  , warn    :: forall a. a -> Effect Unit
+  , info    :: forall a. a -> Effect Unit
+  , log2    :: forall a b. a -> b -> Effect Unit
+  , error2  :: forall a b. a -> b -> Effect Unit
+  , warn2   :: forall a b. a -> b -> Effect Unit
+  , info2   :: forall a b. a -> b -> Effect Unit
+  , log3    :: forall a b c. a -> b -> c -> Effect Unit
+  , error3  :: forall a b c. a -> b -> c -> Effect Unit
+  , warn3   :: forall a b c. a -> b -> c -> Effect Unit
+  , info3   :: forall a b c. a -> b -> c -> Effect Unit
+  }
 
 here :: Module -> Here
 here mod =
-  { component:   R.hooksComponentWithModule mod
-  , log:         log2 ("[" <> mod <> "]")
-  , log2:        \msg -> log2 ("[" <> mod <> "] " <> msg)
-  , ntComponent: ntHooksComponentWithModule mod }
+  { component: R.hooksComponentWithModule mod
+  , ntComponent: ntHooksComponentWithModule mod
+  , log: Console.print Console.Main mod Console.Log
+  , log2: Console.print2 Console.Main mod Console.Log
+  , log3: Console.print3 Console.Main mod Console.Log
+  , error: Console.print Console.Main mod Console.Error
+  , error2: Console.print2 Console.Main mod Console.Error
+  , error3: Console.print3 Console.Main mod Console.Error
+  , warn: Console.print Console.Main mod Console.Warn
+  , warn2: Console.print2 Console.Main mod Console.Warn
+  , warn3: Console.print3 Console.Main mod Console.Warn
+  , info: Console.print Console.Main mod Console.Info
+  , info2: Console.print2 Console.Main mod Console.Info
+  , info3: Console.print3 Console.Main mod Console.Info
+  }
 
 -- newtypes
 type NTHooksComponent props = props -> Array R.Element -> R.Hooks R.Element

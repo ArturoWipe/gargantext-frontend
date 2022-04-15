@@ -126,7 +126,7 @@ tableHeaderWithRenameBoxedLayoutCpt = here.component "tableHeaderWithRenameBoxed
                   renameable {icon: "fa fa-globe", text: desc, onRename: onRenameDesc} []
                 ]
               , H.p {}
-                [ 
+                [
                   renameable {icon: "fa fa-search-plus", text: query, onRename: onRenameQuery} []
                 ]
               , H.p { className: "cache-toggle"
@@ -137,7 +137,7 @@ tableHeaderWithRenameBoxedLayoutCpt = here.component "tableHeaderWithRenameBoxed
               ]
             , H.div {className: "col-md-4 content"}
               [ H.p {}
-                [ 
+                [
                   renameable {icon: "fa fa-user", text: authors, onRename: onRenameAuthors} []
                 ]
               , H.p {}
@@ -188,14 +188,14 @@ tableHeaderWithRenameBoxedLayoutCpt = here.component "tableHeaderWithRenameBoxed
     cacheStateToggle NT.CacheOn = NT.CacheOff
     cacheStateToggle NT.CacheOff = NT.CacheOn
 
-    
+
 save :: {fields :: FTFieldList, session :: Session, nodeId :: Int} -> Effect Unit
 save {fields, session, nodeId} = do
   launchAff_ do
     res <- saveCorpus $ {hyperdata: Hyperdata {fields}, session, nodeId}
     liftEffect $ do
           _ <- case res of
-                Left err -> here.log2 "[corpusLayoutView] onClickSave RESTError" err
+                Left err -> here.warn2 "[corpusLayoutView] onClickSave RESTError" err
                 _ -> pure unit
           pure unit
 
@@ -205,7 +205,7 @@ saveCorpusName {name, session, nodeId} = do
     res <- rename session nodeId $ RenameValue {text: name}
     liftEffect $ do
           _ <- case res of
-                Left err -> here.log2 "[corpusLayoutView] onClickSave RESTError" err
+                Left err -> here.warn2 "[corpusLayoutView] onClickSave RESTError" err
                 _ -> pure unit
           pure unit
 

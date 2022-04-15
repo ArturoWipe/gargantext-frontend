@@ -562,7 +562,7 @@ sendPatches { errors, metaData, nodes, reloadForest, session, termList } = do
       Nothing -> pure unit
       Just (Left err) -> liftEffect $ do
         T.modify_ (A.cons $ FRESTError { error: err }) errors
-        here.log2 "[sendPatches] RESTError" err
+        here.warn2 "[sendPatches] RESTError" err
       Just (Right (NTC.Versioned _patch)) -> do
         liftEffect $ T2.reload reloadForest
 

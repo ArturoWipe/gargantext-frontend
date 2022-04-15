@@ -102,7 +102,7 @@ graphCpt = R.memo' $ here.component "graph" cpt where
             theme <- T.read boxes.theme
             eSigma <- Sigma.sigma {settings: sigmaSettings theme}
             case eSigma of
-              Left err -> here.log2 "[graphCpt] error creating sigma" err
+              Left err -> here.warn2 "[graphCpt] error creating sigma" err
               Right sig -> do
                 Sigmax.writeSigma rSigma $ Just sig
 
