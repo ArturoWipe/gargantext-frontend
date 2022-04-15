@@ -7006,6 +7006,7 @@ a:focus {
   width: inherit;
   height: inherit;
   border-radius: 3px;
+  border: 1px solid #CED4DA;
 }
 .range-slider__knob {
   user-select: none;
