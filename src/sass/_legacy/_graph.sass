@@ -186,6 +186,8 @@ $layout-height: calc(100vh - #{ $topbar-height} )
 .graph-doc-list
 
   &__item
+    @include clickable
+    @include ripple-effect($body-bg, $gray-100)
 
     &__title,
     &__source,

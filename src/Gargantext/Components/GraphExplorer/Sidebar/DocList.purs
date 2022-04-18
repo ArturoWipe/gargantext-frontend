@@ -8,6 +8,7 @@ import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..))
 import Data.Sequence as Seq
 import Data.Tuple.Nested ((/\))
+import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.FacetsTable (DocumentsView(..), PagePath, Rows(..), initialPagePath, loadPage, publicationDate)
 import Gargantext.Components.GraphExplorer.Types (GraphSideCorpus(..))
@@ -33,6 +34,7 @@ type TabsProps =
   , query           :: SearchQuery
   , session         :: Session
   , graphSideCorpus :: GraphSideCorpus
+  , showFocus       :: T.Box Boolean
   )
 
 docList :: R2.Leaf TabsProps
@@ -57,6 +59,7 @@ docListCpt = here.component "main" cpt where
           { corpusId: nodeId
           , listId
           }
+      , showFocus
       } _ = do
     -- | States
     -- |
@@ -125,6 +128,7 @@ docListCpt = here.component "main" cpt where
               , path: path'
               , session
               , documentView: (r :: DocumentsView)
+              , callback: const $ T.write_ (true) showFocus
               }
         ]
 
@@ -136,6 +140,7 @@ type ItemProps =
   , frontends    :: Frontends
   , session      :: Session
   , path         :: PagePath
+  , callback     :: Unit -> Effect Unit
   )
 
 item :: R2.Leaf ItemProps
@@ -147,6 +152,7 @@ itemCpt = here.component "item" cpt where
       , path
       , documentView: dv@(DocumentsView { id, title, source })
       , session
+      , callback
       } _ = do
     -- Computed
     let
@@ -162,6 +168,7 @@ itemCpt = here.component "item" cpt where
           [ "graph-doc-list__item"
           , "list-group-item"
           ]
+      , on: { click: callback unit }
       }
       [
         B.div'

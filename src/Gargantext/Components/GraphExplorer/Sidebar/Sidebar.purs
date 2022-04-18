@@ -61,6 +61,7 @@ type Common =
 type Props =
   ( frontends       :: Frontends
   , graph           :: SigmaxT.SGraph
+  , showFocus       :: T.Box Boolean
   | Common
   )
 
@@ -179,6 +180,7 @@ sideTabDataCpt = here.component "sideTabData" cpt
                 , searchType: SearchDoc
                 , selectedNodeIds: selectedNodeIds'
                 , session: props.session
+                , showFocus: props.showFocus
                 }
               ]
         ]
@@ -240,6 +242,7 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt
                 , searchType: SearchContact
                 , selectedNodeIds: selectedNodeIds'
                 , session: props.session
+                , showFocus: props.showFocus
                 }
               ]
         ]
@@ -613,6 +616,7 @@ type DocListWrapper =
   , searchType      :: SearchType
   , selectedNodeIds :: SigmaxT.NodeIds
   , session         :: Session
+  , showFocus       :: T.Box Boolean
   )
 
 docListWrapper :: R2.Leaf DocListWrapper
@@ -626,6 +630,7 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
       , searchType
       , selectedNodeIds
       , session
+      , showFocus
       } _ = do
     -- States
     query /\ queryBox <- R2.useBox' Nothing
@@ -664,6 +669,7 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
             , query: query'
             , session
             , graphSideCorpus: toGraphSideCorpus corpusId
+            , showFocus
             }
 
           _ /\ _ ->

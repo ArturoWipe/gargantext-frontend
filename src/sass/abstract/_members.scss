@@ -108,10 +108,41 @@
 }
 
 /// Add led effect with the input color
+/// @param {Color} $color
 @mixin led($color) {
   color: $color;
   text-shadow: 0 0 4px brighten($color, 90);
 }
+
+/// Add a base ripple effect on click
+/// @param {Color} $background-color
+/// @param {Color} $wave-color default is a lighten version of bg color
+@mixin ripple-effect(
+  $background-color,
+  $wave-color: lighten($background-color, 15%)
+) {
+  background-position: center;
+  background-color: $background-color;
+  transition: background 0.4s ease-out;
+
+  &:hover {
+    background:
+      $wave-color
+      radial-gradient(
+        circle,
+        transparent 1%,
+        $wave-color 1%
+      )
+      center/15000%;
+  }
+
+  &:active {
+    background-color: $background-color;
+    background-size: 100%;
+    transition: background 0s;
+  }
+}
+
 
 /// Extend element to fit all four positions
 /// @param {value} value [default: 0]

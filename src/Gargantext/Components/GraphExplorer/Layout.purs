@@ -12,12 +12,13 @@ import Data.Nullable (null, Nullable)
 import Data.Sequence as Seq
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
+import Data.Tuple.Nested ((/\))
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Resources as Graph
-import Gargantext.Components.GraphExplorer.Toolbar.Controls as Controls
 import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
+import Gargantext.Components.GraphExplorer.Toolbar.Controls as Controls
 import Gargantext.Components.GraphExplorer.TopBar as GETB
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Config (defaultFrontends)
@@ -83,6 +84,8 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
     _graphVersion' <- T.useLive T.unequal boxes.graphVersion
 
     showSidebar' <- R2.useLive' showSidebar
+
+    showFocus' /\ showFocus <- R2.useBox' false
 
     -- _dataRef <- R.useRef graph
     graphRef <- R.useRef null
@@ -165,6 +168,7 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
               , graphId
               , metaData
               , session
+              , showFocus
               }
         ]
       ,
@@ -178,6 +182,15 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
         [
           Controls.controls controls []
         ]
+      ,
+        -- Doc focus
+        R2.if' (showFocus') $
+
+          H.div
+          { className: "graph-layout__focus" }
+          [
+            H.div {} [ H.text "Hello" ]
+          ]
       ,
         -- Content
         H.div
