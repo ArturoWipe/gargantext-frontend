@@ -23,12 +23,12 @@ import Effect.Class (liftEffect)
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
+import Gargantext.Components.GraphExplorer.Sidebar.DocList (docList)
 import Gargantext.Components.GraphExplorer.Sidebar.Legend as Legend
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Components.Lang (Lang(..))
 import Gargantext.Components.NgramsTable.Core as NTC
-import Gargantext.Components.Nodes.Corpus.Graph.Tabs (tabs) as CGT
 import Gargantext.Components.RandomText (words)
 import Gargantext.Components.Search (SearchType(..), SearchQuery(..))
 import Gargantext.Config.REST (AffRESTError)
@@ -172,7 +172,7 @@ sideTabDataCpt = here.component "sideTabData" cpt
               ,
                 sideBarTabSeparator
               ,
-                query
+                docListWrapper
                 { frontends: props.frontends
                 , metaData: props.metaData
                 , nodesMap: SigmaxT.nodesGraphMap props.graph
@@ -233,7 +233,7 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt
               ,
                 sideBarTabSeparator
               ,
-                query
+                docListWrapper
                 { frontends
                 , metaData: props.metaData
                 , nodesMap: SigmaxT.nodesGraphMap props.graph
@@ -606,7 +606,7 @@ sendPatch termList session (GET.MetaData metaData) node = do
 
 ---------------------------------------------------------
 
-type Query =
+type DocListWrapper =
   ( frontends       :: Frontends
   , metaData        :: GET.MetaData
   , nodesMap        :: SigmaxT.NodesMap
@@ -615,43 +615,77 @@ type Query =
   , session         :: Session
   )
 
-query :: R2.Leaf Query
-query = R2.leaf queryCpt
+docListWrapper :: R2.Leaf DocListWrapper
+docListWrapper = R2.leaf docListWrapperCpt
 
-queryCpt :: R.Component Query
-queryCpt = here.component "query'" cpt where
+docListWrapperCpt :: R.Component DocListWrapper
+docListWrapperCpt = here.component "docListWrapper" cpt where
   cpt { frontends
       , metaData: GET.MetaData metaData
       , nodesMap
       , searchType
       , selectedNodeIds
-      , session } _ = do
-    -- Computed
+      , session
+      } _ = do
+    -- States
+    query /\ queryBox <- R2.useBox' Nothing
+
+    -- Helpers
     let
+      toSearchQuery ids = SearchQuery
+        { expected: searchType
+        , query: concat $ toQuery <$> Set.toUnfoldable ids
+        }
+
       toQuery id = case Map.lookup id nodesMap of
         Nothing -> []
         Just n -> words n.label
 
-      side corpusId = GET.GraphSideCorpus
+      toGraphSideCorpus corpusId = GET.GraphSideCorpus
         { corpusId
         , corpusLabel: metaData.title
         , listId     : metaData.list.listId
         }
 
+    -- Hooks
+    R.useEffect1' selectedNodeIds $
+      T.write_ (selectedNodeIds # toSearchQuery >>> Just) queryBox
+
     -- Render
     pure $
 
-      R2.fromMaybe_ (head metaData.corpusId) \corpusId ->
+      R.fragment
+      [
+        case (head metaData.corpusId) /\ query of
 
-        CGT.tabs
-        { frontends
-        , query: SearchQuery
-            { expected: searchType
-            , query: concat $ toQuery <$> Set.toUnfoldable selectedNodeIds
+          (Just corpusId) /\ (Just query') ->
+            docList
+            { frontends
+            , query: query'
+            , session
+            , graphSideCorpus: toGraphSideCorpus corpusId
             }
-        , session
-        , sides: [side corpusId]
-        }
+
+          _ /\ _ ->
+            B.caveat
+            {}
+            [
+              H.text "You can link a corpus to your Graph to retrieve relative documents when selecting nodes"
+            ]
+
+      ]
+
+
+        -- -- @WIP
+        -- CGT.tabs
+        -- { frontends
+        -- , query: SearchQuery
+        --     { expected: searchType
+        --     , query: concat $ toQuery <$> Set.toUnfoldable selectedNodeIds
+        --     }
+        -- , session
+        -- , sides: [side corpusId]
+        -- }
 
 ------------------------------------------------------------------------
 
