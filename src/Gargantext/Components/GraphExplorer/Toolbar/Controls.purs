@@ -1,4 +1,4 @@
-module Gargantext.Components.GraphExplorer.Controls
+module Gargantext.Components.GraphExplorer.Toolbar.Controls
  ( Controls
  , useGraphControls
  , controls
@@ -15,11 +15,11 @@ import Data.Sequence as Seq
 import Data.Set as Set
 import Effect.Timer (setTimeout)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.GraphExplorer.Buttons (centerButton, cameraButton, edgesToggleButton, louvainToggleButton, pauseForceAtlasButton, multiSelectEnabledButton)
-import Gargantext.Components.GraphExplorer.RangeControl (edgeConfluenceControl, edgeWeightControl, nodeSizeControl)
+import Gargantext.Components.GraphExplorer.Toolbar.Buttons (centerButton, cameraButton, edgesToggleButton, louvainToggleButton, pauseForceAtlasButton, multiSelectEnabledButton)
+import Gargantext.Components.GraphExplorer.Toolbar.RangeControl (edgeConfluenceControl, edgeWeightControl, nodeSizeControl)
 import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
-import Gargantext.Components.GraphExplorer.SlideButton (labelSizeButton, mouseSelectorSizeButton)
+import Gargantext.Components.GraphExplorer.Toolbar.SlideButton (labelSizeButton, mouseSelectorSizeButton)
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Hooks.Sigmax as Sigmax
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
@@ -33,7 +33,7 @@ import Reactix.DOM.HTML as H
 import Toestand as T
 
 here :: R2.Here
-here = R2.here "Gargantext.Components.GraphExplorer.Controls"
+here = R2.here "Gargantext.Components.GraphExplorer.Toolbar.Controls"
 
 type Controls =
   ( edgeConfluence     :: T.Box Range.NumberRange

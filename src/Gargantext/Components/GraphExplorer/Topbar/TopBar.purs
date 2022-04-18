@@ -5,7 +5,7 @@ import Gargantext.Prelude hiding (max, min)
 import Data.Maybe (Maybe)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
-import Gargantext.Components.GraphExplorer.Search (nodeSearchControl)
+import Gargantext.Components.GraphExplorer.Topbar.Search (nodeSearchControl)
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
 import Gargantext.Types as GT
 import Gargantext.Utils ((?))

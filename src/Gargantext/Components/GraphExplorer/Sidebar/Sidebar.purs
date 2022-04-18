@@ -23,7 +23,7 @@ import Effect.Class (liftEffect)
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
-import Gargantext.Components.GraphExplorer.Legend as Legend
+import Gargantext.Components.GraphExplorer.Sidebar.Legend as Legend
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Components.Lang (Lang(..))
@@ -51,15 +51,15 @@ import Toestand as T
 here :: R2.Here
 here = R2.here "Gargantext.Components.GraphExplorer.Sidebar"
 
-type Common = (
-    boxes           :: Boxes
+type Common =
+  ( boxes           :: Boxes
   , graphId         :: NodeID
   , metaData        :: GET.MetaData
   , session         :: Session
   )
 
-type Props = (
-    frontends       :: Frontends
+type Props =
+  ( frontends       :: Frontends
   , graph           :: SigmaxT.SGraph
   | Common
   )
@@ -612,50 +612,46 @@ type Query =
   , nodesMap        :: SigmaxT.NodesMap
   , searchType      :: SearchType
   , selectedNodeIds :: SigmaxT.NodeIds
-  , session         :: Session )
+  , session         :: Session
+  )
 
 query :: R2.Leaf Query
 query = R2.leaf queryCpt
 
 queryCpt :: R.Component Query
-queryCpt = here.component "query" cpt where
-  cpt props@{ selectedNodeIds } _ = do
-
-    pure $ if Set.isEmpty selectedNodeIds
-           then H.div {} []
-           else query' props []
-
-query' :: R2.Component Query
-query' = R.createElement queryCpt'
-
-queryCpt' :: R.Component Query
-queryCpt' = here.component "query'" cpt where
+queryCpt = here.component "query'" cpt where
   cpt { frontends
       , metaData: GET.MetaData metaData
       , nodesMap
       , searchType
       , selectedNodeIds
       , session } _ = do
-    pure $ case (head metaData.corpusId) of
-      Nothing -> H.div {} []
-      Just corpusId ->
-        CGT.tabs { frontends
-                 , query: SearchQuery { expected: searchType
-                                      , query : concat $ toQuery <$> Set.toUnfoldable selectedNodeIds
-                                      }
-                 , session
-                 , sides: [side corpusId]
-                 }
-
-    where
+    -- Computed
+    let
       toQuery id = case Map.lookup id nodesMap of
         Nothing -> []
         Just n -> words n.label
 
-      side corpusId = GET.GraphSideCorpus { corpusId
-                                          , corpusLabel: metaData.title
-                                          , listId     : metaData.list.listId
-                                          }
+      side corpusId = GET.GraphSideCorpus
+        { corpusId
+        , corpusLabel: metaData.title
+        , listId     : metaData.list.listId
+        }
+
+    -- Render
+    pure $
+
+      R2.fromMaybe_ (head metaData.corpusId) \corpusId ->
+
+        CGT.tabs
+        { frontends
+        , query: SearchQuery
+            { expected: searchType
+            , query: concat $ toQuery <$> Set.toUnfoldable selectedNodeIds
+            }
+        , session
+        , sides: [side corpusId]
+        }
 
 ------------------------------------------------------------------------
 
