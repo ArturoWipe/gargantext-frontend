@@ -12,12 +12,12 @@ import Data.Nullable (null, Nullable)
 import Data.Sequence as Seq
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
-import Data.Tuple.Nested ((/\))
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
+import Gargantext.Components.GraphExplorer.Toolbar.Controls (Controls)
 import Gargantext.Components.GraphExplorer.Toolbar.Controls as Controls
 import Gargantext.Components.GraphExplorer.TopBar as GETB
 import Gargantext.Components.GraphExplorer.Types as GET
@@ -44,6 +44,7 @@ type Props =
   , session         :: Session
   , boxes           :: Boxes
   , graphId         :: GET.GraphId
+  , controls        :: Record Controls
   )
 
 here :: R2.Here
@@ -52,14 +53,15 @@ here = R2.here "Gargantext.Components.GraphExplorer.Layout"
 layout :: R2.Leaf Props
 layout = R2.leaf layoutCpt
 
-layoutCpt :: R.Component Props
-layoutCpt = here.component "explorerWriteGraph" cpt where
+layoutCpt :: R.Memo Props
+layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
   cpt props@{ boxes
             , graph
             , mMetaData'
             , graphId
             , session
             , hyperdataGraph
+            , controls
             } _ = do
 
   -- Computed
@@ -68,40 +70,26 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
     let
       topBarPortalKey = "portal-topbar::" <> show graphId
 
-      startForceAtlas = maybe true
-        (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData'
-
-      forceAtlasS = if startForceAtlas
-                    then SigmaxT.InitialRunning
-                    else SigmaxT.InitialStopped
 
   -- States
   -----------------
 
     { mMetaData: mMetaDataBox
     , showSidebar
+    , showDoc
     } <- GEST.focusedSidePanel boxes.sidePanelGraph
+
     _graphVersion' <- T.useLive T.unequal boxes.graphVersion
 
     showSidebar' <- R2.useLive' showSidebar
 
-    showFocus' /\ showFocus <- R2.useBox' false
+    showDoc' <- R2.useLive' showDoc
 
     -- _dataRef <- R.useRef graph
     graphRef <- R.useRef null
 
   -- Hooks
   -----------------
-
-    controls <- Controls.useGraphControls
-      { forceAtlasS
-      , graph
-      , graphId
-      , hyperdataGraph
-      , reloadForest: boxes.reloadForest
-      , session
-      , sidePanel: boxes.sidePanelGraph
-      }
 
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
@@ -146,30 +134,52 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
           ]
         ]
       ,
-        -- Sidebar
+        -- Sidebar + Focus frame
         H.div
-        { className: "graph-layout__sidebar"
-        -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
-        -- @link https://github.com/facebook/react/issues/12039
-        , style: { display: showSidebar' == GT.Opened ? "block" $ "none" }
-        }
+        { className: "graph-layout__frame" }
         [
-          case mMetaData' of
-            Nothing ->
-              B.caveat
-              {}
-              [ H.text "No meta data has been found for this node." ]
+          -- Doc focus
+          R2.fromMaybe_ showDoc' \listId ->
 
-            Just metaData ->
-              GES.sidebar
-              { boxes
-              , frontends: defaultFrontends
-              , graph
-              , graphId
-              , metaData
-              , session
-              , showFocus
-              }
+            H.div
+            { className: "graph-layout__focus" }
+            [
+              H.div
+              { className: "graph-layout__focus__inner" }
+              [
+                H.div {} [ H.text $ show listId ]
+              ]
+            ]
+        ,
+          -- Sidebar
+          H.div
+          { className: "graph-layout__sidebar"
+          -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
+          -- @link https://github.com/facebook/react/issues/12039
+          , style: { display: showSidebar' == GT.Opened ? "block" $ "none" }
+          }
+          [
+            H.div
+            { className: "graph-layout__sidebar__inner" }
+            [
+              case mMetaData' of
+
+                Nothing ->
+                  B.caveat
+                  {}
+                  [ H.text "No meta data has been found for this node." ]
+
+                Just metaData ->
+                  GES.sidebar
+                  { boxes
+                  , frontends: defaultFrontends
+                  , graph
+                  , graphId
+                  , metaData
+                  , session
+                  }
+            ]
+          ]
         ]
       ,
         -- Toolbar
@@ -182,15 +192,6 @@ layoutCpt = here.component "explorerWriteGraph" cpt where
         [
           Controls.controls controls []
         ]
-      ,
-        -- Doc focus
-        R2.if' (showFocus') $
-
-          H.div
-          { className: "graph-layout__focus" }
-          [
-            H.div {} [ H.text "Hello" ]
-          ]
       ,
         -- Content
         H.div
@@ -218,12 +219,12 @@ type GraphProps =
   , graph          :: SigmaxT.SGraph
   , hyperdataGraph :: GET.HyperdataGraph
   , mMetaData      :: T.Box (Maybe GET.MetaData)
-)
+  )
 
 graphView :: R2.Leaf GraphProps
 graphView = R2.leaf graphViewCpt
-graphViewCpt :: R.Component GraphProps
-graphViewCpt = here.component "graphView" cpt
+graphViewCpt :: R.Memo GraphProps
+graphViewCpt = R.memo' $ here.component "graphView" cpt
   where
     cpt { boxes
         , controls
@@ -278,7 +279,7 @@ graphViewCpt = here.component "graphView" cpt
         , stage: controls.graphStage
         , startForceAtlas
         , transformedGraph
-        } []
+        }
 
 --------------------------------------------------------
 

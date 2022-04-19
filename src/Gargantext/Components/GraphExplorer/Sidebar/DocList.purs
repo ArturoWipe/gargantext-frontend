@@ -14,11 +14,12 @@ import Gargantext.Components.FacetsTable (DocumentsView(..), PagePath, Rows(..),
 import Gargantext.Components.GraphExplorer.Types (GraphSideCorpus(..))
 import Gargantext.Components.Search (SearchQuery)
 import Gargantext.Config.REST (RESTError(..))
-import Gargantext.Ends (Frontends, url)
+import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Loader (useLoaderEffect)
 import Gargantext.Hooks.UpdateEffect (useUpdateEffect1')
-import Gargantext.Routes as Routes
-import Gargantext.Sessions (Session, sessionId)
+import Gargantext.Sessions (Session)
+import Gargantext.Types (ListId)
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -34,7 +35,7 @@ type TabsProps =
   , query           :: SearchQuery
   , session         :: Session
   , graphSideCorpus :: GraphSideCorpus
-  , showFocus       :: T.Box Boolean
+  , showDoc         :: T.Box (Maybe ListId)
   )
 
 docList :: R2.Leaf TabsProps
@@ -59,7 +60,7 @@ docListCpt = here.component "main" cpt where
           { corpusId: nodeId
           , listId
           }
-      , showFocus
+      , showDoc
       } _ = do
     -- | States
     -- |
@@ -72,6 +73,9 @@ docListCpt = here.component "main" cpt where
 
     rows' /\ rows <-
       R2.useBox' Nothing
+
+    showDoc' <-
+      R2.useLive' showDoc
 
     -- | Hooks
     -- |
@@ -96,6 +100,20 @@ docListCpt = here.component "main" cpt where
       Just r -> case r of
         Docs { docs } -> T.write_ (Just docs) rows
         _             -> T.write_ (Just Seq.empty) rows
+
+    -- | Computed
+    -- |
+    let
+
+      callback :: Maybe ListId -> ListId -> Effect Unit
+      callback Nothing    new = T.write_ (Just new) showDoc
+      callback (Just old) new
+        | old == new = T.write_ Nothing showDoc
+        | otherwise  = T.write_ (Just new) showDoc
+
+      isSelected :: Maybe ListId -> DocumentsView -> Boolean
+      isSelected Nothing        _                      = false
+      isSelected (Just current) (DocumentsView { id }) = current == id
 
     -- | Render
     -- |
@@ -128,7 +146,8 @@ docListCpt = here.component "main" cpt where
               , path: path'
               , session
               , documentView: (r :: DocumentsView)
-              , callback: const $ T.write_ (true) showFocus
+              , callback: callback showDoc'
+              , isSelected: isSelected showDoc' (r :: DocumentsView)
               }
         ]
 
@@ -140,7 +159,8 @@ type ItemProps =
   , frontends    :: Frontends
   , session      :: Session
   , path         :: PagePath
-  , callback     :: Unit -> Effect Unit
+  , callback     :: ListId -> Effect Unit
+  , isSelected   :: Boolean
   )
 
 item :: R2.Leaf ItemProps
@@ -148,16 +168,18 @@ item = R2.leaf itemCpt
 
 itemCpt :: R.Component ItemProps
 itemCpt = here.component "item" cpt where
-  cpt { frontends
-      , path
-      , documentView: dv@(DocumentsView { id, title, source })
-      , session
+  cpt { documentView: dv@(DocumentsView { id, title, source })
       , callback
+      , isSelected
+      -- , frontends
+      -- , path
+      -- , session
       } _ = do
     -- Computed
-    let
-      documentUrl id' { listId, nodeId } =
-        url frontends $ Routes.CorpusDocument (sessionId session) nodeId listId id'
+    -- let
+      -- Creating a href link
+      -- documentUrl id' { listId, nodeId } =
+      --   url frontends $ Routes.CorpusDocument (sessionId session) nodeId listId id'
 
 
     -- Render
@@ -168,24 +190,34 @@ itemCpt = here.component "item" cpt where
           [ "graph-doc-list__item"
           , "list-group-item"
           ]
-      , on: { click: callback unit }
+      , on: { click: \_ -> callback id }
       }
       [
-        B.div'
-        { className: "graph-doc-list__item__title" }
-        title
+        H.div
+        { className: "graph-doc-list__item__main" }
+        [
+          B.div'
+          { className: "graph-doc-list__item__title" }
+          title
+        ,
+          B.div'
+          { className: "graph-doc-list__item__source" }
+          source
+        ,
+          B.div'
+          { className: "graph-doc-list__item__date" } $
+          publicationDate dv
+        ]
       ,
-        B.div'
-        { className: "graph-doc-list__item__source" }
-        source
-      ,
-        B.div'
-        { className: "graph-doc-list__item__date" } $
-        publicationDate dv
-
-
-        -- H.a
-        -- { target: "_blank"
-        -- , href: documentUrl id path
-        -- }
+        H.div
+        { className: "graph-doc-list__item__aside" }
+        [
+          B.icon
+          { name: "eye-slash"
+          , className: intercalate " "
+              [ "text-info"
+              , isSelected ? "visible" $ "hidden"
+              ]
+          }
+        ]
       ]

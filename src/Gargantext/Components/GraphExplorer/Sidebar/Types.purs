@@ -20,6 +20,7 @@ type SidePanel =
   , showControls       :: Boolean
   , sideTab            :: GET.SideTab
   , showSidebar        :: GT.SidePanelState
+  , showDoc            :: Maybe GT.ListId
   )
 
 initialSidePanel :: Maybe (Record SidePanel)
@@ -35,6 +36,7 @@ focusedSidePanel :: T.Box (Maybe (Record SidePanel))
                             , showControls       :: T.Box Boolean
                             , sideTab            :: T.Box GET.SideTab
                             , showSidebar        :: T.Box GT.SidePanelState
+                            , showDoc            :: T.Box (Maybe GT.ListId)
                             }
 focusedSidePanel sidePanel = do
   mGraph <- T.useFocused
@@ -61,6 +63,10 @@ focusedSidePanel sidePanel = do
   showSidebar <- T.useFocused
                   (maybe GT.InitialClosed _.showSidebar)
                   (\val -> maybe Nothing (\sp -> Just $ sp { showSidebar = val })) sidePanel
+  showDoc <- T.useFocused
+                (maybe Nothing _.showDoc)
+                (\val -> maybe Nothing (\sp -> Just $ sp { showDoc = val }
+                )) sidePanel
 
   pure $ {
     mGraph
@@ -71,4 +77,5 @@ focusedSidePanel sidePanel = do
   , showControls
   , sideTab
   , showSidebar
+  , showDoc
   }

@@ -7264,22 +7264,59 @@ input[type=range]:-moz-focusring {
   width: 100%;
   height: calc(100vh - 56px );
 }
-.graph-layout__sidebar {
-  position: fixed;
-  width: 480px;
-  height: calc(100vh - 56px);
-  z-index: 2;
-}
-.right-handed .graph-layout__sidebar {
+.graph-layout__frame {
+  top: 0;
   right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  display: flex;
+  z-index: 2;
+  width: 100%;
+  height: calc(100vh - 56px);
+  justify-content: flex-end;
+  pointer-events: none;
+}
+.right-handed .graph-layout__frame {
+  flex-direction: row;
+}
+
+.left-handed .graph-layout__frame {
+  flex-direction: row-reverse;
+}
+
+.graph-layout__sidebar {
+  width: 480px;
+  height: inherit;
+  flex-grow: 0;
+  pointer-events: all;
+}
+.graph-layout__sidebar__inner {
+  position: fixed;
+  height: inherit;
+  width: inherit;
+}
+.right-handed .graph-layout__sidebar__inner {
   border-left: 1px solid #dee2e6;
 }
 
-.left-handed .graph-layout__sidebar {
-  left: 0;
+.left-handed .graph-layout__sidebar__inner {
   border-right: 1px solid #dee2e6;
 }
 
+.graph-layout__focus {
+  flex-grow: 1;
+  pointer-events: all;
+  position: relative;
+}
+.graph-layout__focus__inner {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  background-color: #fff;
+}
 .graph-layout__toolbar {
   position: absolute;
   z-index: 1;
@@ -7440,6 +7477,8 @@ input[type=range]:-moz-focusring {
   background-position: center;
   background-color: #fff;
   transition: background 0.4s ease-out;
+  display: flex;
+  align-items: flex-start;
 }
 .graph-doc-list__item:focus {
   outline: 0;
@@ -7451,6 +7490,10 @@ input[type=range]:-moz-focusring {
   background-color: #fff;
   background-size: 100%;
   transition: background 0s;
+}
+.graph-doc-list__item__main {
+  flex-grow: 1;
+  padding-right: 1.25rem;
 }
 .graph-doc-list__item__title, .graph-doc-list__item__source, .graph-doc-list__item__date {
   line-height: 1.3;

@@ -5,13 +5,14 @@ module Gargantext.Components.Nodes.Corpus.Graph
 import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector)
-import Data.Maybe (Maybe(..), isJust)
+import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Layout (convert, layout)
+import Gargantext.Components.GraphExplorer.Toolbar.Controls as Controls
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Config.REST (AffRESTError, logRESTError)
 import Gargantext.Hooks.Loader (useLoaderEffect)
@@ -23,6 +24,7 @@ import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
 import Reactix.DOM.HTML as H
+import Record as Record
 import Toestand as T
 
 
@@ -145,11 +147,39 @@ content = R2.leaf contentCpt
 
 contentCpt :: R.Component ContentProps
 contentCpt = here.component "content" cpt where
-  cpt props@{ boxes, mMetaData', graph } _ = do
-  -- Hooks
+  cpt props@{ boxes
+            , mMetaData'
+            , graph
+            , graphId
+            , session
+            , hyperdataGraph
+            } _ = do
+  -- | Computed
+  -- |
+    let
+      startForceAtlas = maybe true
+        (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData'
 
+      forceAtlasS = if startForceAtlas
+                    then SigmaxT.InitialRunning
+                    else SigmaxT.InitialStopped
+
+  -- | Hooks
+  -- |
+
+    -- Hydrate controls
+    controls <- Controls.useGraphControls
+      { forceAtlasS
+      , graph
+      , graphId
+      , hyperdataGraph
+      , reloadForest: boxes.reloadForest
+      , session
+      , sidePanel: boxes.sidePanelGraph
+      }
+
+    -- Hydrate Boxes
     R.useEffectOnce' $
-      -- Hydrate Boxes
       flip T.write_ boxes.sidePanelGraph $ Just
         { mGraph: Just graph
         , mMetaData: mMetaData'
@@ -159,14 +189,17 @@ contentCpt = here.component "content" cpt where
         , showControls: false
         , sideTab: GET.SideTabLegend
         , showSidebar: Types.InitialClosed
+        , showDoc: Nothing
         }
 
-  -- Render
+  -- | Render
+  -- |
 
     pure $
 
-      layout
-      props
+      layout $
+      { controls
+      } `Record.merge` props
 
 --------------------------------------------------------------
 

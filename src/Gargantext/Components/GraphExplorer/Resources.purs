@@ -52,8 +52,8 @@ type Props sigma forceatlas2 =
   , transformedGraph      :: SigmaxTypes.SGraph
   )
 
-graph :: forall s fa2. R2.Component (Props s fa2)
-graph = R.createElement graphCpt
+graph :: forall s fa2. R2.Leaf (Props s fa2)
+graph = R2.leaf graphCpt
 
 graphCpt :: forall s fa2. R.Memo (Props s fa2)
 graphCpt = R.memo' $ here.component "graph" cpt where

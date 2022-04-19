@@ -36,7 +36,7 @@ import Gargantext.Data.Array (mapMaybe)
 import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
 import Gargantext.Sessions (Session)
-import Gargantext.Types (CTabNgramType, FrontendError(..), NodeID, TabSubType(..), TabType(..), TermList(..), modeTabType)
+import Gargantext.Types (CTabNgramType, FrontendError(..), NodeID, TabSubType(..), TabType(..), TermList(..), ListId, modeTabType)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
@@ -61,7 +61,6 @@ type Common =
 type Props =
   ( frontends       :: Frontends
   , graph           :: SigmaxT.SGraph
-  , showFocus       :: T.Box Boolean
   | Common
   )
 
@@ -72,7 +71,9 @@ sidebarCpt = here.component "sidebar" cpt
   where
     cpt props@{ boxes: { sidePanelGraph } } _ = do
       -- States
-      { sideTab } <- GEST.focusedSidePanel sidePanelGraph
+      { sideTab
+      } <- GEST.focusedSidePanel sidePanelGraph
+
       sideTab' <- T.useLive T.unequal sideTab
 
       -- Computed
@@ -133,7 +134,10 @@ sideTabDataCpt = here.component "sideTabData" cpt
   where
     cpt props@{ boxes: { sidePanelGraph } } _ = do
       -- States
-      { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
+      { selectedNodeIds
+      , showDoc
+      } <- GEST.focusedSidePanel sidePanelGraph
+
       selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
       -- Computed
@@ -180,7 +184,7 @@ sideTabDataCpt = here.component "sideTabData" cpt
                 , searchType: SearchDoc
                 , selectedNodeIds: selectedNodeIds'
                 , session: props.session
-                , showFocus: props.showFocus
+                , showDoc
                 }
               ]
         ]
@@ -195,7 +199,9 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt
     cpt props@{ boxes: { sidePanelGraph }
               , frontends } _ = do
       -- States
-      { selectedNodeIds } <- GEST.focusedSidePanel sidePanelGraph
+      { selectedNodeIds
+      , showDoc
+      } <- GEST.focusedSidePanel sidePanelGraph
       selectedNodeIds' <- T.useLive T.unequal selectedNodeIds
 
       -- Computed
@@ -242,7 +248,7 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt
                 , searchType: SearchContact
                 , selectedNodeIds: selectedNodeIds'
                 , session: props.session
-                , showFocus: props.showFocus
+                , showDoc
                 }
               ]
         ]
@@ -616,7 +622,7 @@ type DocListWrapper =
   , searchType      :: SearchType
   , selectedNodeIds :: SigmaxT.NodeIds
   , session         :: Session
-  , showFocus       :: T.Box Boolean
+  , showDoc         :: T.Box (Maybe ListId)
   )
 
 docListWrapper :: R2.Leaf DocListWrapper
@@ -630,7 +636,7 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
       , searchType
       , selectedNodeIds
       , session
-      , showFocus
+      , showDoc
       } _ = do
     -- States
     query /\ queryBox <- R2.useBox' Nothing
@@ -669,7 +675,7 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
             , query: query'
             , session
             , graphSideCorpus: toGraphSideCorpus corpusId
-            , showFocus
+            , showDoc
             }
 
           _ /\ _ ->
