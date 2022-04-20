@@ -91,6 +91,7 @@ type Module = String
 type Here =
   { component   :: forall p. String -> R.HooksComponent p -> R.Component p
   , ntComponent :: forall p. String -> NTHooksComponent p -> NTComponent p
+  , name        :: Module
   | RowConsole
   }
 
@@ -98,6 +99,7 @@ here :: Module -> Here
 here mod =
   { component   : R.hooksComponentWithModule mod
   , ntComponent : ntHooksComponentWithModule mod
+  , name        : mod
   , log         : Console.print   Console.Main mod Console.Log
   , log2        : Console.print2  Console.Main mod Console.Log
   , log3        : Console.print3  Console.Main mod Console.Log

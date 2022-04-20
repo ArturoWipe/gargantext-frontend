@@ -5,21 +5,24 @@ module Gargantext.Components.Nodes.Corpus.Graph
 import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector)
+import Data.Int as I
 import Data.Maybe (Maybe(..), isJust, maybe)
-import Data.Set as Set
+import Data.Sequence as Seq
 import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Layout (convert, layout)
-import Gargantext.Components.GraphExplorer.Toolbar.Controls as Controls
+import Gargantext.Components.GraphExplorer.Store as GraphStore
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Config.REST (AffRESTError, logRESTError)
 import Gargantext.Hooks.Loader (useLoaderEffect)
+import Gargantext.Hooks.Sigmax as Sigmax
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
 import Gargantext.Routes (SessionRoute(NodeAPI))
 import Gargantext.Sessions (Session, get)
 import Gargantext.Types as Types
+import Gargantext.Utils.Range as Range
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
@@ -123,18 +126,18 @@ graphLayoutCpt = here.component "explorerLayout" cpt where
       handler loaded@(GET.HyperdataGraph { graph: hyperdataGraph }) =
         content { graph
                 , hyperdataGraph: loaded
-                , mMetaData'
+                , mMetaData
                 , session
                 , boxes: props.boxes
                 , graphId
                 }
         where
-          Tuple mMetaData' graph = convert hyperdataGraph
+          Tuple mMetaData graph = convert hyperdataGraph
 
 --------------------------------------------------------
 
 type ContentProps =
-  ( mMetaData'      :: Maybe GET.MetaData
+  ( mMetaData       :: Maybe GET.MetaData
   , graph           :: SigmaxT.SGraph
   , hyperdataGraph  :: GET.HyperdataGraph
   , session         :: Session
@@ -147,59 +150,63 @@ content = R2.leaf contentCpt
 
 contentCpt :: R.Component ContentProps
 contentCpt = here.component "content" cpt where
-  cpt props@{ boxes
-            , mMetaData'
-            , graph
-            , graphId
-            , session
-            , hyperdataGraph
-            } _ = do
-  -- | Computed
-  -- |
-    let
-      startForceAtlas = maybe true
-        (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData'
-
-      forceAtlasS = if startForceAtlas
-                    then SigmaxT.InitialRunning
-                    else SigmaxT.InitialStopped
-
-  -- | Hooks
-  -- |
-
-    -- Hydrate controls
-    controls <- Controls.useGraphControls
-      { forceAtlasS
+  cpt { boxes
+      , mMetaData
       , graph
       , graphId
-      , hyperdataGraph
-      , reloadForest: boxes.reloadForest
       , session
-      , sidePanel: boxes.sidePanelGraph
-      }
+      , hyperdataGraph
+      } _ = do
+    -- | Computed
+    -- |
+    let
+      startForceAtlas = maybe true
+        (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData
 
-    -- Hydrate Boxes
-    R.useEffectOnce' $
-      flip T.write_ boxes.sidePanelGraph $ Just
-        { mGraph: Just graph
-        , mMetaData: mMetaData'
-        , multiSelectEnabled: false
-        , removedNodeIds: Set.empty
-        , selectedNodeIds: Set.empty
-        , showControls: false
-        , sideTab: GET.SideTabLegend
-        , showSidebar: Types.InitialClosed
-        , showDoc: Nothing
-        }
+      forceAtlasState
+        = if startForceAtlas
+          then SigmaxT.InitialRunning
+          else SigmaxT.InitialStopped
 
-  -- | Render
-  -- |
+      -- Hydrate GraphStore
+      state :: Record GraphStore.State
+      state =
+        -- Data
+        { graph
+        , graphId
+        , mMetaData
+        , hyperdataGraph
+        -- Controls
+        , startForceAtlas
+        , forceAtlasState
+        , edgeWeight:  Range.Closed
+            { min: 0.0
+            , max: I.toNumber $ Seq.length $ SigmaxT.graphEdges graph
+            }
+        -- (default options)
+        -- @WIP: testing order of Record.merge
+        } `Record.merge` GraphStore.options
+
+    -- | Hooks
+    -- |
+
+    sigmaRef <- Sigmax.initSigma >>= R.useRef
+
+    -- | Render
+    -- |
 
     pure $
 
-      layout $
-      { controls
-      } `Record.merge` props
+      GraphStore.provide
+      state
+      [
+        layout
+        { session
+        , boxes
+        , sigmaRef
+        , graphId
+        }
+      ]
 
 --------------------------------------------------------------
 

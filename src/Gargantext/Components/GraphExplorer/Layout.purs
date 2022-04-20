@@ -7,7 +7,7 @@ import Data.Array as A
 import Data.FoldableWithIndex (foldMapWithIndex)
 import Data.Int (toNumber)
 import Data.Map as Map
-import Data.Maybe (Maybe(..), fromJust, maybe)
+import Data.Maybe (Maybe(..), fromJust)
 import Data.Nullable (null, Nullable)
 import Data.Sequence as Seq
 import Data.Set as Set
@@ -16,13 +16,13 @@ import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.Sidebar as GES
-import Gargantext.Components.GraphExplorer.Sidebar.Types as GEST
-import Gargantext.Components.GraphExplorer.Toolbar.Controls (Controls)
+import Gargantext.Components.GraphExplorer.Store as GraphStore
 import Gargantext.Components.GraphExplorer.Toolbar.Controls as Controls
 import Gargantext.Components.GraphExplorer.TopBar as GETB
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Config (defaultFrontends)
 import Gargantext.Data.Louvain as Louvain
+import Gargantext.Hooks.Sigmax as Sigmax
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
 import Gargantext.Sessions (Session)
 import Gargantext.Types as GT
@@ -30,25 +30,21 @@ import Gargantext.Types as Types
 import Gargantext.Utils ((?))
 import Gargantext.Utils.Range as Range
 import Gargantext.Utils.Reactix as R2
+import Gargantext.Utils.Stores as Stores
 import Math as Math
 import Partial.Unsafe (unsafePartial)
 import Reactix as R
 import Reactix.DOM.HTML as H
-import Toestand as T
-
-
-type Props =
-  ( mMetaData'      :: Maybe GET.MetaData
-  , graph           :: SigmaxT.SGraph
-  , hyperdataGraph  :: GET.HyperdataGraph
-  , session         :: Session
-  , boxes           :: Boxes
-  , graphId         :: GET.GraphId
-  , controls        :: Record Controls
-  )
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.GraphExplorer.Layout"
+
+type Props =
+  ( session         :: Session
+  , boxes           :: Boxes
+  , sigmaRef        :: R.Ref Sigmax.Sigma
+  , graphId         :: GET.GraphId
+  )
 
 layout :: R2.Leaf Props
 layout = R2.leaf layoutCpt
@@ -56,44 +52,40 @@ layout = R2.leaf layoutCpt
 layoutCpt :: R.Memo Props
 layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
   cpt props@{ boxes
-            , graph
-            , mMetaData'
-            , graphId
             , session
-            , hyperdataGraph
-            , controls
+            , sigmaRef
+            , graphId
             } _ = do
 
-  -- Computed
-  -----------------
+    -- | Computed
+    -- |
 
     let
       topBarPortalKey = "portal-topbar::" <> show graphId
 
 
-  -- States
-  -----------------
+    -- | States
+    -- |
 
-    { mMetaData: mMetaDataBox
-    , showSidebar
+    { showSidebar
     , showDoc
-    } <- GEST.focusedSidePanel boxes.sidePanelGraph
+    , mMetaData
+    , showControls
+    } <- Stores.useStore GraphStore.context
 
-    _graphVersion' <- T.useLive T.unequal boxes.graphVersion
 
-    showSidebar' <- R2.useLive' showSidebar
-
-    showDoc' <- R2.useLive' showDoc
+    showSidebar'  <- R2.useLive' showSidebar
+    showDoc'      <- R2.useLive' showDoc
+    mMetaData'    <- R2.useLive' mMetaData
+    showControls' <- R2.useLive' showControls
 
     -- _dataRef <- R.useRef graph
     graphRef <- R.useRef null
 
-  -- Hooks
-  -----------------
+    -- | Hooks
+    -- |
 
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
-
-    showControls' <- R2.useLive' controls.showControls
 
 
     -- graphVersionRef <- R.useRef graphVersion'
@@ -116,8 +108,8 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
     --     T.write_ Graph.Init controls.graphStage
     --     T.write_ Types.InitialClosed controls.sidePanelState
 
-  -- Render
-  -----------------
+    -- | Render
+    -- |
 
     pure $
 
@@ -130,7 +122,7 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
           R2.fragmentWithKey topBarPortalKey
           [
             GETB.topBar
-            { sidePanelGraph: props.boxes.sidePanelGraph }
+            {}
           ]
         ]
       ,
@@ -173,8 +165,6 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
                   GES.sidebar
                   { boxes
                   , frontends: defaultFrontends
-                  , graph
-                  , graphId
                   , metaData
                   , session
                   }
@@ -190,7 +180,11 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
         , style: { display: showControls' ? "block" $ "none" }
         }
         [
-          Controls.controls controls []
+          Controls.controls
+          { reloadForest: boxes.reloadForest
+          , session
+          , sigmaRef
+          }
         ]
       ,
         -- Content
@@ -201,11 +195,8 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
         [
           graphView
           { boxes: props.boxes
-          , controls
           , elRef: graphRef
-          , graph
-          , hyperdataGraph
-          , mMetaData: mMetaDataBox
+          , sigmaRef
           }
         ]
       ]
@@ -213,73 +204,87 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
 --------------------------------------------------------------
 
 type GraphProps =
-  ( boxes          :: Boxes
-  , controls       :: Record Controls.Controls
-  , elRef          :: R.Ref (Nullable Element)
-  , graph          :: SigmaxT.SGraph
-  , hyperdataGraph :: GET.HyperdataGraph
-  , mMetaData      :: T.Box (Maybe GET.MetaData)
+  ( boxes           :: Boxes
+  , elRef           :: R.Ref (Nullable Element)
+  , sigmaRef        :: R.Ref Sigmax.Sigma
   )
 
 graphView :: R2.Leaf GraphProps
 graphView = R2.leaf graphViewCpt
 graphViewCpt :: R.Memo GraphProps
-graphViewCpt = R.memo' $ here.component "graphView" cpt
-  where
-    cpt { boxes
-        , controls
-        , elRef
-        , graph
-        , hyperdataGraph: GET.HyperdataGraph { mCamera }
-        , mMetaData } _ = do
-      edgeConfluence' <- T.useLive T.unequal controls.edgeConfluence
-      edgeWeight' <- T.useLive T.unequal controls.edgeWeight
-      mMetaData' <- T.useLive T.unequal mMetaData
-      multiSelectEnabled' <- T.useLive T.unequal controls.multiSelectEnabled
-      nodeSize' <- T.useLive T.unequal controls.nodeSize
-      removedNodeIds' <- T.useLive T.unequal controls.removedNodeIds
-      selectedNodeIds' <- T.useLive T.unequal controls.selectedNodeIds
-      showEdges' <- T.useLive T.unequal controls.showEdges
-      showLouvain' <- T.useLive T.unequal controls.showLouvain
+graphViewCpt = R.memo' $ here.component "graphView" cpt where
+  cpt { boxes
+      , elRef
+      , sigmaRef
+      } _ = do
+    -- | States
+    -- |
+    { edgeConfluence
+    , edgeWeight
+    , multiSelectEnabled
+    , nodeSize
+    , removedNodeIds
+    , selectedNodeIds
+    , showEdges
+    , showLouvain
+    , hyperdataGraph
+    , graph
+    } <- Stores.useStore GraphStore.context
 
-      multiSelectEnabledRef <- R.useRef multiSelectEnabled'
+    edgeConfluence'     <- R2.useLive' edgeConfluence
+    edgeWeight'         <- R2.useLive' edgeWeight
+    multiSelectEnabled' <- R2.useLive' multiSelectEnabled
+    nodeSize'           <- R2.useLive' nodeSize
+    removedNodeIds'     <- R2.useLive' removedNodeIds
+    selectedNodeIds'    <- R2.useLive' selectedNodeIds
+    showEdges'          <- R2.useLive' showEdges
+    showLouvain'        <- R2.useLive' showLouvain
+    hyperdataGraph'     <- R2.useLive' hyperdataGraph
+    graph'              <- R2.useLive' graph
 
-      -- TODO Cache this?
-      let louvainGraph =
-            if showLouvain' then
-              let louvain = Louvain.louvain unit in
-              let cluster = Louvain.init louvain (SigmaxT.louvainNodes graph) (SigmaxT.louvainEdges graph) in
-              SigmaxT.louvainGraph graph cluster
-            else
-              graph
-      let transformedGraph = transformGraph louvainGraph { edgeConfluence'
-                                                         , edgeWeight'
-                                                         , nodeSize'
-                                                         , removedNodeIds'
-                                                         , selectedNodeIds'
-                                                         , showEdges' }
-      let startForceAtlas = maybe true (\(GET.MetaData { startForceAtlas: sfa }) -> sfa) mMetaData'
+    multiSelectEnabledRef <- R.useRef multiSelectEnabled'
 
-      R.useEffect1' multiSelectEnabled' $ do
-        R.setRef multiSelectEnabledRef multiSelectEnabled'
+    -- | Computed
+    -- |
 
-      pure $
+    -- TODO Cache this?
+    let louvainGraph =
+          if showLouvain' then
+            let louvain = Louvain.louvain unit in
+            let cluster = Louvain.init louvain (SigmaxT.louvainNodes graph') (SigmaxT.louvainEdges graph') in
+            SigmaxT.louvainGraph graph' cluster
+          else
+            graph'
 
-        Graph.graph
-        { boxes
-        , elRef
-        , forceAtlas2Settings: Graph.forceAtlas2Settings
-        , graph
-        , mCamera
-        , multiSelectEnabledRef
-        , selectedNodeIds: controls.selectedNodeIds
-        , showEdges: controls.showEdges
-        , sigmaRef: controls.sigmaRef
-        , sigmaSettings: Graph.sigmaSettings
-        , stage: controls.graphStage
-        , startForceAtlas
-        , transformedGraph
-        }
+    let transformedGraph = transformGraph louvainGraph { edgeConfluence'
+                                                        , edgeWeight'
+                                                        , nodeSize'
+                                                        , removedNodeIds'
+                                                        , selectedNodeIds'
+                                                        , showEdges' }
+
+    let mCamera' (GET.HyperdataGraph { mCamera }) = mCamera
+
+    -- | Hooks
+    -- |
+
+    R.useEffect1' multiSelectEnabled' $ do
+      R.setRef multiSelectEnabledRef multiSelectEnabled'
+
+    -- | Render
+    -- |
+    pure $
+
+      Graph.drawGraph
+      { boxes
+      , elRef
+      , forceAtlas2Settings: Graph.forceAtlas2Settings
+      , mCamera: mCamera' hyperdataGraph'
+      , multiSelectEnabledRef
+      , sigmaRef
+      , sigmaSettings: Graph.sigmaSettings
+      , transformedGraph
+      }
 
 --------------------------------------------------------
 

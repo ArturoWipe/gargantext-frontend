@@ -1,18 +1,17 @@
 module Gargantext.Components.GraphExplorer.Types where
 
+import Gargantext.Prelude
+
 import Data.Array ((!!), length)
 import Data.Generic.Rep (class Generic)
 import Data.Eq.Generic (genericEq)
 import Data.Maybe (Maybe(..), fromJust)
 import Data.Newtype (class Newtype)
-import Data.Ord
 import Data.Ord.Generic (genericCompare)
 import Data.Symbol (SProxy(..))
 import Partial.Unsafe (unsafePartial)
 import Record as Record
 import Simple.JSON as JSON
-
-import Gargantext.Prelude
 
 type GraphId = Int
 
@@ -164,7 +163,7 @@ instance Ord SelectedNode where compare = genericCompare
 
 instance Show SelectedNode where show (SelectedNode node) = node.label
 
-type State = (
+-- type State = (
   --  corpusId :: R.State Int
   --, filePath :: R.State String
   --, graphData :: R.State GraphData
@@ -177,7 +176,7 @@ type State = (
   --, sigmaGraphData :: R.State (Maybe SigmaxTypes.SGraph)
   --, sigmaSettings :: R.State ({|Graph.SigmaSettings})
     --treeId :: R.State (Maybe TreeId)
-  )
+  -- )
 
 initialGraphData :: GraphData
 initialGraphData = GraphData {
@@ -255,3 +254,7 @@ instance JSON.ReadForeign HyperdataGraph where
     pure $ HyperdataGraph $ Record.rename cameraP mCameraP inst
 instance JSON.WriteForeign HyperdataGraph where
   writeImpl (HyperdataGraph c) = JSON.writeImpl $ Record.rename mCameraP cameraP c
+
+data Stage = Init | Ready | Cleanup
+derive instance Generic Stage _
+derive instance Eq Stage
