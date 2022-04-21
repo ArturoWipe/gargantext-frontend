@@ -219,7 +219,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
     , selectedNodeIds
     , showEdges
     , showLouvain
-    , hyperdataGraph
     , graph
     } <- Stores.useStore GraphStore.context
 
@@ -230,7 +229,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
     selectedNodeIds'    <- R2.useLive' selectedNodeIds
     showEdges'          <- R2.useLive' showEdges
     showLouvain'        <- R2.useLive' showLouvain
-    hyperdataGraph'     <- R2.useLive' hyperdataGraph
     graph'              <- R2.useLive' graph
 
     -- | Computed
@@ -252,8 +250,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
                                                         , selectedNodeIds'
                                                         , showEdges' }
 
-    let mCamera' (GET.HyperdataGraph { mCamera }) = mCamera
-
     -- | Render
     -- |
     pure $
@@ -262,7 +258,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
       { boxes
       , elRef
       , forceAtlas2Settings: Graph.forceAtlas2Settings
-      , mCamera: mCamera' hyperdataGraph'
       , sigmaRef
       , sigmaSettings: Graph.sigmaSettings
       , transformedGraph

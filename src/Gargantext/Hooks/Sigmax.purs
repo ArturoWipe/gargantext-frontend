@@ -1,7 +1,6 @@
 module Gargantext.Hooks.Sigmax
   where
 
-import DOM.Simple.Console (log)
 import DOM.Simple.Types (Element)
 import Data.Array as A
 import Data.Either (either)
@@ -210,7 +209,7 @@ bindSelectedEdgesClick sigmaRef (_ /\ setEdgeIds) =
           Set.insert edge.id eids
 
 selectorWithSize :: Sigma.Sigma -> Int -> Effect Unit
-selectorWithSize sigma size = do
+selectorWithSize _ _ = do
   pure unit
 
 performDiff :: Sigma.Sigma -> ST.SGraph -> Effect Unit

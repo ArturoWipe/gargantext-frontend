@@ -20,6 +20,7 @@ import Gargantext.Components.Themes as Themes
 import Gargantext.Hooks.Sigmax as Sigmax
 import Gargantext.Hooks.Sigmax.Sigma as Sigma
 import Gargantext.Hooks.Sigmax.Types as SigmaxTypes
+import Gargantext.Utils (getter)
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Stores as Stores
 import Reactix as R
@@ -35,7 +36,6 @@ type Props sigma forceatlas2 =
   ( boxes                 :: Boxes
   , elRef                 :: R.Ref (Nullable Element)
   , forceAtlas2Settings   :: forceatlas2
-  , mCamera               :: Maybe GET.Camera
   , sigmaRef              :: R.Ref Sigmax.Sigma
   , sigmaSettings         :: sigma
   , transformedGraph      :: SigmaxTypes.SGraph
@@ -58,12 +58,15 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
     , startForceAtlas
     , selectedNodeIds
     , multiSelectEnabled
+    , hyperdataGraph
     } <- Stores.useStore GraphStore.context
 
     showEdges'        <- R2.useLive' showEdges
     graphStage'       <- R2.useLive' graphStage
     graph'            <- R2.useLive' graph
     startForceAtlas'  <- R2.useLive' startForceAtlas
+    hyperdataGraph'   <- R2.useLive' hyperdataGraph
+
 
     stageHooks
       (
@@ -75,6 +78,7 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
           , startForceAtlas'
           , graph'
           , multiSelectEnabled
+          , hyperdataGraph'
           }
           props
       )
@@ -98,7 +102,6 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
   -- | Stage Hooks
   -- |
   stageHooks { elRef
-             , mCamera
              , selectedNodeIds
              , forceAtlas2Settings: fa2
              , graph'
@@ -108,8 +111,10 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
              , startForceAtlas'
              , boxes
              , multiSelectEnabled
+             , hyperdataGraph'
              } = do
     R.useEffectOnce' $ do
+      let mCamera = getter _.mCamera hyperdataGraph'
       let rSigma = R.readRef sigmaRef
 
       case Sigmax.readSigma rSigma of
