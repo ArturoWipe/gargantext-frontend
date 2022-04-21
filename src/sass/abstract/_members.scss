@@ -121,11 +121,38 @@
   $background-color,
   $wave-color: lighten($background-color, 15%)
 ) {
-  background-position: center;
-  background-color: $background-color;
-  transition: background 0.4s ease-out;
+  position: relative;
 
-  &:hover {
+  /// First layer: classic CTA hover effect
+
+  &::before {
+    @include fit-positions;
+
+    content: "";
+    position: absolute;
+    z-index: 1;
+    background-color: $background-color;
+    transition: background 0.15s ease-in-out;
+  }
+
+  &:hover::before {
+    background-color: $wave-color;
+  }
+
+  /// Second layer: more slower ripple effect
+
+  &::after {
+    @include fit-positions;
+
+    content: "";
+    position: absolute;
+    z-index: 2;
+    background-position: center;
+    background-color: transparent;
+    transition: background 0.6s ease-out;
+  }
+
+  &:hover::after {
     background:
       $wave-color
       radial-gradient(
@@ -136,10 +163,16 @@
       center/15000%;
   }
 
-  &:active {
+  &:active::after {
     background-color: $background-color;
     background-size: 100%;
     transition: background 0s;
+  }
+
+  /// Other layers: container contents
+
+  & > * {
+    z-index: 3;
   }
 }
 
