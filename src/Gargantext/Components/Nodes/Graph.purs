@@ -196,6 +196,5 @@ initGraphCpt = here.component "initGraph" cpt where
         { session
         , boxes
         , sigmaRef
-        , graphId
         }
       ]

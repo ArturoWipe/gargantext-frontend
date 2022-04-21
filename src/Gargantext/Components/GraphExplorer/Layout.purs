@@ -43,7 +43,6 @@ type Props =
   ( session         :: Session
   , boxes           :: Boxes
   , sigmaRef        :: R.Ref Sigmax.Sigma
-  , graphId         :: GET.GraphId
   )
 
 layout :: R2.Leaf Props
@@ -54,16 +53,7 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
   cpt props@{ boxes
             , session
             , sigmaRef
-            , graphId
             } _ = do
-
-    -- | Computed
-    -- |
-
-    let
-      topBarPortalKey = "portal-topbar::" <> show graphId
-
-
     -- | States
     -- |
 
@@ -71,19 +61,22 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
     , showDoc
     , mMetaData
     , showControls
+    , graphId
     } <- Stores.useStore GraphStore.context
-
 
     showSidebar'  <- R2.useLive' showSidebar
     showDoc'      <- R2.useLive' showDoc
     mMetaData'    <- R2.useLive' mMetaData
     showControls' <- R2.useLive' showControls
+    graphId'      <- R2.useLive' graphId
 
     -- _dataRef <- R.useRef graph
     graphRef <- R.useRef null
 
     -- | Hooks
     -- |
+
+    topBarPortalKey <- pure $ "portal-topbar::" <> show graphId'
 
     mTopBarHost <- R.unsafeHooksEffect $ R2.getElementById "portal-topbar"
 
@@ -159,7 +152,7 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
                 Nothing ->
                   B.caveat
                   {}
-                  [ H.text "No meta data has been found for this node." ]
+                  [ H.text "The current node does not contain any meta data" ]
 
                 Just metaData ->
                   GES.sidebar

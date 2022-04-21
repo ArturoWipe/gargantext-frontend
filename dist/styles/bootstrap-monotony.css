@@ -7479,22 +7479,49 @@ input[type=range]:-moz-focusring {
 
 .graph-doc-list__item {
   cursor: pointer;
-  background-position: center;
-  background-color: #fff;
-  transition: background 0.4s ease-out;
+  position: relative;
   display: flex;
   align-items: flex-start;
 }
 .graph-doc-list__item:focus {
   outline: 0;
 }
-.graph-doc-list__item:hover {
+.graph-doc-list__item::before {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  content: "";
+  position: absolute;
+  z-index: 1;
+  background-color: #fff;
+  transition: background 0.15s ease-in-out;
+}
+.graph-doc-list__item:hover::before {
+  background-color: #F8F9FA;
+}
+.graph-doc-list__item::after {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  content: "";
+  position: absolute;
+  z-index: 2;
+  background-position: center;
+  background-color: transparent;
+  transition: background 0.6s ease-out;
+}
+.graph-doc-list__item:hover::after {
   background: #F8F9FA radial-gradient(circle, transparent 1%, #F8F9FA 1%) center/15000%;
 }
-.graph-doc-list__item:active {
+.graph-doc-list__item:active::after {
   background-color: #fff;
   background-size: 100%;
   transition: background 0s;
+}
+.graph-doc-list__item > * {
+  z-index: 3;
 }
 .graph-doc-list__item__main {
   flex-grow: 1;
