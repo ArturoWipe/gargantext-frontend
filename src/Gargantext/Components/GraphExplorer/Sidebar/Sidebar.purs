@@ -691,17 +691,6 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
       ]
 
 
-        -- -- @WIP
-        -- CGT.tabs
-        -- { frontends
-        -- , query: SearchQuery
-        --     { expected: searchType
-        --     , query: concat $ toQuery <$> Set.toUnfoldable selectedNodeIds
-        --     }
-        -- , session
-        -- , sides: [side corpusId]
-        -- }
-
 ------------------------------------------------------------------------
 
             {-, H.div { className: "col-md-12", id: "horizontal-checkbox" }

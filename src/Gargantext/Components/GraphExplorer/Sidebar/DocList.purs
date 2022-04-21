@@ -28,8 +28,6 @@ import Toestand as T
 here :: R2.Here
 here = R2.here "Gargantext.Components.GraphExplorer.Sidebar.DocList"
 
--- @WIP: SIMULATING <Gargantext.Components.Nodes.Corpus.Graph.Tabs>
-
 type TabsProps =
   ( frontends       :: Frontends
   , query           :: SearchQuery

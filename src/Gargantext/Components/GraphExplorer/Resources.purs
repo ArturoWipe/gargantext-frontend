@@ -66,7 +66,6 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
     startForceAtlas'  <- R2.useLive' startForceAtlas
 
     stageHooks
-      -- @WIP: record merge
       (
         Record.merge
           { showEdges'

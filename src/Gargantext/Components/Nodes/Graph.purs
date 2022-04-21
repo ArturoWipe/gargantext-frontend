@@ -182,7 +182,6 @@ initGraphCpt = here.component "initGraph" cpt where
           , max: I.toNumber $ Seq.length $ SigmaxT.graphEdges graph
           }
       -- (default options)
-      -- @WIP: testing order of Record.merge
       } `Record.merge` GraphStore.options
 
     -- | Render
