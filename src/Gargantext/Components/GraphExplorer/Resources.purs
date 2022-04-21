@@ -36,7 +36,6 @@ type Props sigma forceatlas2 =
   , elRef                 :: R.Ref (Nullable Element)
   , forceAtlas2Settings   :: forceatlas2
   , mCamera               :: Maybe GET.Camera
-  , multiSelectEnabledRef :: R.Ref Boolean
   , sigmaRef              :: R.Ref Sigmax.Sigma
   , sigmaSettings         :: sigma
   , transformedGraph      :: SigmaxTypes.SGraph
@@ -58,6 +57,7 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
     , graph
     , startForceAtlas
     , selectedNodeIds
+    , multiSelectEnabled
     } <- Stores.useStore GraphStore.context
 
     showEdges'        <- R2.useLive' showEdges
@@ -74,6 +74,7 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
           , graphStage
           , startForceAtlas'
           , graph'
+          , multiSelectEnabled
           }
           props
       )
@@ -98,7 +99,6 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
   -- |
   stageHooks { elRef
              , mCamera
-             , multiSelectEnabledRef
              , selectedNodeIds
              , forceAtlas2Settings: fa2
              , graph'
@@ -107,6 +107,7 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
              , graphStage': GET.Init
              , startForceAtlas'
              , boxes
+             , multiSelectEnabled
              } = do
     R.useEffectOnce' $ do
       let rSigma = R.readRef sigmaRef
@@ -132,7 +133,7 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
 
               Sigmax.dependOnSigma (R.readRef sigmaRef) "[graphCpt (Ready)] no sigma" $ \sigma -> do
                 -- bind the click event only initially, when ref was empty
-                Sigmax.bindSelectedNodesClick sigma selectedNodeIds multiSelectEnabledRef
+                Sigmax.bindSelectedNodesClick sigma selectedNodeIds multiSelectEnabled
                 _ <- Sigma.bindMouseSelectorPlugin sigma
                 pure unit
 

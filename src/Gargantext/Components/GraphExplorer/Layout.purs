@@ -214,7 +214,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
     -- |
     { edgeConfluence
     , edgeWeight
-    , multiSelectEnabled
     , nodeSize
     , removedNodeIds
     , selectedNodeIds
@@ -226,7 +225,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
 
     edgeConfluence'     <- R2.useLive' edgeConfluence
     edgeWeight'         <- R2.useLive' edgeWeight
-    multiSelectEnabled' <- R2.useLive' multiSelectEnabled
     nodeSize'           <- R2.useLive' nodeSize
     removedNodeIds'     <- R2.useLive' removedNodeIds
     selectedNodeIds'    <- R2.useLive' selectedNodeIds
@@ -234,8 +232,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
     showLouvain'        <- R2.useLive' showLouvain
     hyperdataGraph'     <- R2.useLive' hyperdataGraph
     graph'              <- R2.useLive' graph
-
-    multiSelectEnabledRef <- R.useRef multiSelectEnabled'
 
     -- | Computed
     -- |
@@ -258,12 +254,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
 
     let mCamera' (GET.HyperdataGraph { mCamera }) = mCamera
 
-    -- | Hooks
-    -- |
-
-    R.useEffect1' multiSelectEnabled' $ do
-      R.setRef multiSelectEnabledRef multiSelectEnabled'
-
     -- | Render
     -- |
     pure $
@@ -273,7 +263,6 @@ graphViewCpt = R.memo' $ here.component "graphView" cpt where
       , elRef
       , forceAtlas2Settings: Graph.forceAtlas2Settings
       , mCamera: mCamera' hyperdataGraph'
-      , multiSelectEnabledRef
       , sigmaRef
       , sigmaSettings: Graph.sigmaSettings
       , transformedGraph

@@ -1,6 +1,7 @@
 module Gargantext.Hooks.Sigmax
   where
 
+import DOM.Simple.Console (log)
 import DOM.Simple.Types (Element)
 import Data.Array as A
 import Data.Either (either)
@@ -188,12 +189,12 @@ multiSelectUpdate new selected = foldl fld selected new
         Set.insert item selectedAcc
 
 
-bindSelectedNodesClick :: Sigma.Sigma -> T.Box ST.NodeIds -> R.Ref Boolean -> Effect Unit
-bindSelectedNodesClick sigma selectedNodeIds multiSelectEnabledRef =
+bindSelectedNodesClick :: Sigma.Sigma -> T.Box ST.NodeIds -> T.Box Boolean -> Effect Unit
+bindSelectedNodesClick sigma selectedNodeIds multiSelectEnabled =
   Sigma.bindClickNodes sigma $ \nodes -> do
-    let multiSelectEnabled = R.readRef multiSelectEnabledRef
     let nodeIds = Set.fromFoldable $ map _.id nodes
-    if multiSelectEnabled then
+    multiSelectEnabled' <- T.read multiSelectEnabled
+    if multiSelectEnabled' then
       T.modify_ (multiSelectUpdate nodeIds) selectedNodeIds
     else
       T.write_ nodeIds selectedNodeIds
