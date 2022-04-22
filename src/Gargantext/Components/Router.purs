@@ -32,7 +32,6 @@ import Gargantext.Components.Tile (tileBlock)
 import Gargantext.Components.TopBar as TopBar
 import Gargantext.Config (defaultFrontends, defaultBackends)
 import Gargantext.Ends (Backend)
-import Gargantext.Hooks.FirstEffect (useFirstEffect)
 import Gargantext.Hooks.Resize (ResizeType(..), useResizeHandler)
 import Gargantext.Routes (AppRoute, Tile)
 import Gargantext.Routes as GR
@@ -216,7 +215,7 @@ forestCpt = R.memo' $ here.component "forest" cpt where
     resizeHandler <- useResizeHandler
 
     -- Effects
-    useFirstEffect do
+    R.useLayoutEffect1' [] do
       resizeHandler.add ".router__handle__action" ".router__aside" Vertical
       pure $ resizeHandler.remove ".router__handle__action"
 
@@ -267,9 +266,10 @@ type RenderRouteProps =
   )
 
 renderRoute :: R2.Leaf RenderRouteProps
-renderRoute = R2.leafComponent renderRouteCpt
-renderRouteCpt :: R.Component RenderRouteProps
-renderRouteCpt = here.component "renderRoute" cpt where
+renderRoute = R2.leaf renderRouteCpt
+
+renderRouteCpt :: R.Memo RenderRouteProps
+renderRouteCpt = R.memo' $ here.component "renderRoute" cpt where
   cpt { boxes, route } _ = do
     let sessionNodeProps sId nId =
           { nodeId: nId

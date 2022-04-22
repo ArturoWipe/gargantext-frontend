@@ -24,9 +24,7 @@ import Gargantext.Utils (getter)
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Stores as Stores
 import Reactix as R
-import Reactix.DOM.HTML as RH
 import Record (merge)
-import Record as Record
 import Toestand as T
 
 here :: R2.Here
@@ -48,9 +46,12 @@ drawGraphCpt :: forall s fa2. R.Memo (Props s fa2)
 drawGraphCpt = R.memo' $ here.component "graph" cpt where
   -- | Component
   -- |
-  cpt props@{ elRef
-            , sigmaRef
-            } _ = do
+  cpt { elRef
+      , sigmaRef
+      , boxes
+      , forceAtlas2Settings: fa2
+      , transformedGraph
+      } _ = do
 
     { showEdges
     , graphStage
@@ -66,23 +67,12 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
     graph'            <- R2.useLive' graph
     startForceAtlas'  <- R2.useLive' startForceAtlas
     hyperdataGraph'   <- R2.useLive' hyperdataGraph
+    selectedNodeIds'  <- R2.useLive' selectedNodeIds
 
+    -- | Hooks
+    -- |
 
-    stageHooks
-      (
-        Record.merge
-          { showEdges'
-          , graphStage'
-          , selectedNodeIds
-          , graphStage
-          , startForceAtlas'
-          , graph'
-          , multiSelectEnabled
-          , hyperdataGraph'
-          }
-          props
-      )
-
+    -- Clean up
     R.useEffectOnce $ do
       pure $ do
         here.log "[graphCpt (Cleanup)]"
@@ -92,104 +82,96 @@ drawGraphCpt = R.memo' $ here.component "graph" cpt where
           Sigma.kill sigma
           here.log "[graphCpt (Cleanup)] sigma killed"
 
+    -- Stage Init
+    R.useEffect1' graphStage' $ case graphStage' of
+
+      GET.Init -> do
+        let mCamera = getter _.mCamera hyperdataGraph'
+        let rSigma = R.readRef sigmaRef
+
+        case Sigmax.readSigma rSigma of
+          Nothing -> do
+            theme <- T.read boxes.theme
+            eSigma <- Sigma.sigma {settings: sigmaSettings theme}
+            case eSigma of
+              Left err -> here.warn2 "[graphCpt] error creating sigma" err
+              Right sig -> do
+                Sigmax.writeSigma rSigma $ Just sig
+
+                Sigmax.dependOnContainer elRef "[graphCpt (Ready)] container not found" $ \c -> do
+                  _ <- Sigma.addRenderer sig {
+                      "type": "canvas"
+                    , container: c
+                    , additionalContexts: ["mouseSelector"]
+                    }
+                  pure unit
+
+                Sigmax.refreshData sig $ Sigmax.sigmafy graph'
+
+                Sigmax.dependOnSigma (R.readRef sigmaRef) "[graphCpt (Ready)] no sigma" $ \sigma -> do
+                  -- bind the click event only initially, when ref was empty
+                  Sigmax.bindSelectedNodesClick sigma selectedNodeIds multiSelectEnabled
+                  _ <- Sigma.bindMouseSelectorPlugin sigma
+                  pure unit
+
+                Sigmax.setEdges sig false
+
+                -- here.log2 "[graph] startForceAtlas" startForceAtlas
+                if startForceAtlas' then
+                  Sigma.startForceAtlas2 sig fa2
+                else
+                  Sigma.stopForceAtlas2 sig
+
+                case mCamera of
+                  Just (GET.Camera { ratio, x, y }) -> do
+                    Sigma.updateCamera sig { ratio, x, y }
+                  -- Default camera: slightly de-zoom the graph to avoid
+                  -- nodes sticking to the container borders
+                  Nothing                           ->
+                    Sigma.updateCamera sig { ratio: 1.1, x: 0.0, y: 0.0 }
+
+                -- Reload Sigma on Theme changes
+                _ <- flip T.listen boxes.theme \{ old, new } ->
+                  if (eq old new) then pure unit
+                  else Sigma.proxySetSettings window sig $ sigmaSettings new
+
+                pure unit
+          Just _sig -> do
+            pure unit
+
+        T.write_ GET.Ready graphStage
+
+      _ -> pure unit
+
+    -- Stage ready
+    -- (?) Probably this can be optimized to re-mark selected nodes only when
+    --     they changed → done on #375
+    R.useEffect1' selectedNodeIds' case graphStage' of
+
+      GET.Ready -> do
+        let tEdgesMap = SigmaxTypes.edgesGraphMap transformedGraph
+        let tNodesMap = SigmaxTypes.nodesGraphMap transformedGraph
+
+        Sigmax.dependOnSigma (R.readRef sigmaRef) "[graphCpt (Ready)] no sigma" $ \sigma -> do
+          Sigmax.performDiff sigma transformedGraph
+          Sigmax.updateEdges sigma tEdgesMap
+          Sigmax.updateNodes sigma tNodesMap
+          let edgesState = not $ SigmaxTypes.edgeStateHidden showEdges'
+          here.log2 "[graphCpt] edgesState" edgesState
+          Sigmax.setEdges sigma edgesState
+
+      _ -> pure unit
+
+
+    -- | Render
+    -- |
+    pure $
+
+      R2.fromMaybe_ (R.readNullableRef elRef) (R.createPortal [])
+
     -- NOTE: This div is not empty after sigma initializes.
     -- When we change state, we make it empty though.
     --pure $ RH.div { ref: elRef, style: {height: "95%"} } []
-    pure $ case R.readNullableRef elRef of
-      Nothing -> RH.div {} []
-      Just el -> R.createPortal [] el
-
-  -- | Stage Hooks
-  -- |
-  stageHooks { elRef
-             , selectedNodeIds
-             , forceAtlas2Settings: fa2
-             , graph'
-             , sigmaRef
-             , graphStage
-             , graphStage': GET.Init
-             , startForceAtlas'
-             , boxes
-             , multiSelectEnabled
-             , hyperdataGraph'
-             } = do
-    R.useEffectOnce' $ do
-      let mCamera = getter _.mCamera hyperdataGraph'
-      let rSigma = R.readRef sigmaRef
-
-      case Sigmax.readSigma rSigma of
-        Nothing -> do
-          theme <- T.read boxes.theme
-          eSigma <- Sigma.sigma {settings: sigmaSettings theme}
-          case eSigma of
-            Left err -> here.warn2 "[graphCpt] error creating sigma" err
-            Right sig -> do
-              Sigmax.writeSigma rSigma $ Just sig
-
-              Sigmax.dependOnContainer elRef "[graphCpt (Ready)] container not found" $ \c -> do
-                _ <- Sigma.addRenderer sig {
-                    "type": "canvas"
-                  , container: c
-                  , additionalContexts: ["mouseSelector"]
-                  }
-                pure unit
-
-              Sigmax.refreshData sig $ Sigmax.sigmafy graph'
-
-              Sigmax.dependOnSigma (R.readRef sigmaRef) "[graphCpt (Ready)] no sigma" $ \sigma -> do
-                -- bind the click event only initially, when ref was empty
-                Sigmax.bindSelectedNodesClick sigma selectedNodeIds multiSelectEnabled
-                _ <- Sigma.bindMouseSelectorPlugin sigma
-                pure unit
-
-              Sigmax.setEdges sig false
-
-              -- here.log2 "[graph] startForceAtlas" startForceAtlas
-              if startForceAtlas' then
-                Sigma.startForceAtlas2 sig fa2
-              else
-                Sigma.stopForceAtlas2 sig
-
-              case mCamera of
-                Just (GET.Camera { ratio, x, y }) -> do
-                  Sigma.updateCamera sig { ratio, x, y }
-                -- Default camera: slightly de-zoom the graph to avoid
-                -- nodes sticking to the container borders
-                Nothing                           ->
-                  Sigma.updateCamera sig { ratio: 1.1, x: 0.0, y: 0.0 }
-
-              -- Reload Sigma on Theme changes
-              _ <- flip T.listen boxes.theme \{ old, new } ->
-                if (eq old new) then pure unit
-                else Sigma.proxySetSettings window sig $ sigmaSettings new
-
-              pure unit
-        Just _sig -> do
-          pure unit
-
-      T.write GET.Ready graphStage
-
-
-  stageHooks { showEdges'
-              , sigmaRef
-              , graphStage': GET.Ready
-              , transformedGraph
-              } = do
-    let tEdgesMap = SigmaxTypes.edgesGraphMap transformedGraph
-    let tNodesMap = SigmaxTypes.nodesGraphMap transformedGraph
-
-    -- TODO Probably this can be optimized to re-mark selected nodes only when they changed
-    R.useEffect' $ do
-      Sigmax.dependOnSigma (R.readRef sigmaRef) "[graphCpt (Ready)] no sigma" $ \sigma -> do
-        Sigmax.performDiff sigma transformedGraph
-        Sigmax.updateEdges sigma tEdgesMap
-        Sigmax.updateNodes sigma tNodesMap
-        let edgesState = not $ SigmaxTypes.edgeStateHidden showEdges'
-        here.log2 "[graphCpt] edgesState" edgesState
-        Sigmax.setEdges sigma edgesState
-
-
-  stageHooks _ = pure unit
 
 
 type SigmaSettings =
