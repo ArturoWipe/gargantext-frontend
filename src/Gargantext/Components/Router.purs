@@ -38,6 +38,7 @@ import Gargantext.Routes as GR
 import Gargantext.Sessions (Session, WithSession)
 import Gargantext.Sessions as Sessions
 import Gargantext.Types (CorpusId, Handed(..), ListId, NodeID, NodeType(..), SessionId, SidePanelState(..))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix (getElementById)
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -62,11 +63,10 @@ router :: R2.Leaf Props
 router = R2.leafComponent routerCpt
 routerCpt :: R.Component Props
 routerCpt = here.component "router" cpt where
-  cpt { boxes: boxes@{ handed, showLogin, showTree } } _ = do
+  cpt { boxes: boxes@{ handed, showLogin } } _ = do
     -- States
     handed'     <- R2.useLive' handed
     showLogin'  <- R2.useLive' showLogin
-    showTree'   <- R2.useLive' showTree
 
     -- Effects
     let
@@ -99,11 +99,7 @@ routerCpt = here.component "router" cpt where
          [
           -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
           -- @link https://github.com/facebook/react/issues/12039
-          --   ↓
-          -- @XXX: ReactJS "display: none" don't exec effect cleaning function
-          --       (therefore cannot use the simple "display: none" workaround
-          --       to keep below component alive)
-          R2.if' (showTree') $ forest { boxes }
+          forest { boxes }
          ,
           mainPage { boxes }
          ,
@@ -208,9 +204,13 @@ mainPageCpt = here.component "mainPage" cpt where
 
 forest :: R2.Leaf Props
 forest = R2.leaf forestCpt
+
 forestCpt :: R.Memo Props
 forestCpt = R.memo' $ here.component "forest" cpt where
   cpt { boxes } _ = do
+    -- States
+    showTree' <- R2.useLive' boxes.showTree
+
     -- Hooks
     resizeHandler <- useResizeHandler
 
@@ -223,7 +223,11 @@ forestCpt = R.memo' $ here.component "forest" cpt where
     pure $
 
       H.div
-      { className: "router__aside" }
+      { className: intercalate " "
+          [ "router__aside"
+          , showTree' ? "" $ "d-none"
+          ]
+      }
       [
         forestLayout
         { boxes
