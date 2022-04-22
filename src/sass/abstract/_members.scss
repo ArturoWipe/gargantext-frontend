@@ -114,7 +114,13 @@
   text-shadow: 0 0 4px brighten($color, 90);
 }
 
-/// Add a base ripple effect on click
+/// Add a basic ripple effect based on CSS pseudo class
+///
+///   * Not as qualitative as a dedicated ripple HTML element
+///   * One design flaw on "mouseover" where the transition will be the one
+///     one the ripple layer (instead of the first classic CTA layer)
+///   * Offers a YAGNI solution when only CSS is available)
+///
 /// @param {Color} $background-color
 /// @param {Color} $wave-color default is a lighten version of bg color
 @mixin ripple-effect(

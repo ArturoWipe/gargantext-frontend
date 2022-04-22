@@ -10,6 +10,7 @@ import Data.Sequence as Seq
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.Bootstrap.Types (Variant(..))
 import Gargantext.Components.FacetsTable (DocumentsView(..), PagePath, Rows(..), initialPagePath, loadPage, publicationDate)
 import Gargantext.Components.GraphExplorer.Types (GraphSideCorpus(..))
 import Gargantext.Components.Search (SearchQuery)
@@ -191,31 +192,35 @@ itemCpt = here.component "item" cpt where
       , on: { click: \_ -> callback id }
       }
       [
-        H.div
-        { className: "graph-doc-list__item__main" }
+        B.ripple
+        { variant: Dark }
         [
-          B.div'
-          { className: "graph-doc-list__item__title" }
-          title
+          H.div
+          { className: "graph-doc-list__item__main" }
+          [
+            B.div'
+            { className: "graph-doc-list__item__title" }
+            title
+          ,
+            B.div'
+            { className: "graph-doc-list__item__source" }
+            source
+          ,
+            B.div'
+            { className: "graph-doc-list__item__date" } $
+            publicationDate dv
+          ]
         ,
-          B.div'
-          { className: "graph-doc-list__item__source" }
-          source
-        ,
-          B.div'
-          { className: "graph-doc-list__item__date" } $
-          publicationDate dv
-        ]
-      ,
-        H.div
-        { className: "graph-doc-list__item__aside" }
-        [
-          B.icon
-          { name: "eye-slash"
-          , className: intercalate " "
-              [ "text-info"
-              , isSelected ? "visible" $ "hidden"
-              ]
-          }
+          H.div
+          { className: "graph-doc-list__item__aside" }
+          [
+            B.icon
+            { name: "eye-slash"
+            , className: intercalate " "
+                [ "text-info"
+                , isSelected ? "visible" $ "hidden"
+                ]
+            }
+          ]
         ]
       ]

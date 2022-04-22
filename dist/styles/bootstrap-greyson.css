@@ -5863,6 +5863,59 @@ h3 {
   margin-right: 16px;
 }
 
+.b-ripple {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  overflow: hidden;
+}
+.b-ripple:after {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #000 10%, transparent 10%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  opacity: 0;
+  transition: transform 0.6s, opacity 0.6s;
+  transform: scale(10);
+}
+.b-ripple:active:after {
+  transform: scale(0);
+  opacity: 0.2;
+  transition: transform 0s, opacity 0s;
+}
+.b-ripple--primary:after {
+  background-image: radial-gradient(circle, #2f3c48 10%, transparent 10%);
+}
+.b-ripple--secondary:after {
+  background-image: radial-gradient(circle, #6f7f8c 10%, transparent 10%);
+}
+.b-ripple--success:after {
+  background-image: radial-gradient(circle, #3e4d59 10%, transparent 10%);
+}
+.b-ripple--info:after {
+  background-image: radial-gradient(circle, #5c8f94 10%, transparent 10%);
+}
+.b-ripple--warning:after {
+  background-image: radial-gradient(circle, #6e9fa5 10%, transparent 10%);
+}
+.b-ripple--danger:after {
+  background-image: radial-gradient(circle, #cc330d 10%, transparent 10%);
+}
+.b-ripple--light:after {
+  background-image: radial-gradient(circle, #eceeec 10%, transparent 10%);
+}
+.b-ripple--dark:after {
+  background-image: radial-gradient(circle, #1e2b37 10%, transparent 10%);
+}
+
 html {
   box-sizing: border-box;
   height: 100%;
@@ -7230,49 +7283,11 @@ input[type=range]:-moz-focusring {
 
 .graph-doc-list__item {
   cursor: pointer;
-  position: relative;
   display: flex;
   align-items: flex-start;
 }
 .graph-doc-list__item:focus {
   outline: 0;
-}
-.graph-doc-list__item::before {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  content: "";
-  position: absolute;
-  z-index: 1;
-  background-color: #fff;
-  transition: background 0.15s ease-in-out;
-}
-.graph-doc-list__item:hover::before {
-  background-color: #F8F9FA;
-}
-.graph-doc-list__item::after {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  content: "";
-  position: absolute;
-  z-index: 2;
-  background-position: center;
-  background-color: transparent;
-  transition: background 0.6s ease-out;
-}
-.graph-doc-list__item:hover::after {
-  background: #F8F9FA radial-gradient(circle, transparent 1%, #F8F9FA 1%) center/15000%;
-}
-.graph-doc-list__item:active::after {
-  background-color: #fff;
-  background-size: 100%;
-  transition: background 0s;
-}
-.graph-doc-list__item > * {
-  z-index: 3;
 }
 .graph-doc-list__item__main {
   flex-grow: 1;
