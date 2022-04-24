@@ -7533,9 +7533,13 @@ input[type=range]:-moz-focusring {
   cursor: pointer;
   display: flex;
   align-items: flex-start;
+  transition: all 0.2s ease-in-out;
 }
 .graph-doc-list__item:focus {
   outline: 0;
+}
+.graph-doc-list__item:hover {
+  background-color: #FCFCFC;
 }
 .graph-doc-list__item__main {
   flex-grow: 1;

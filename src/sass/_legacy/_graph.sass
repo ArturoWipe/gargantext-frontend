@@ -217,10 +217,13 @@ $layout-height: calc(100vh - #{ $topbar-height} )
 
   &__item
     @include clickable
-    // @include ripple-effect($body-bg, $gray-100)
 
     display: flex
     align-items: flex-start
+    transition: $transition-base
+
+    &:hover
+      background-color: $gray-50
 
     &__main
       flex-grow: 1

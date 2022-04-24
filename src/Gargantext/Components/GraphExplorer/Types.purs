@@ -98,6 +98,7 @@ type ListId      = Int
 type Version     = Int
 type CorpusId    = Int
 type CorpusLabel = String
+type DocId       = Int
 
 newtype GraphSideCorpus = GraphSideCorpus
   { corpusId    :: CorpusId
@@ -106,6 +107,14 @@ newtype GraphSideCorpus = GraphSideCorpus
   }
 derive instance Generic GraphSideCorpus _
 instance Eq GraphSideCorpus where eq = genericEq
+
+newtype GraphSideDoc = GraphSideDoc
+  { docId     :: DocId
+  , corpusId  :: CorpusId
+  , listId    :: ListId
+  }
+derive instance Generic GraphSideDoc _
+instance Eq GraphSideDoc where eq = genericEq
 
 newtype GraphData = GraphData
   { nodes :: Array Node

@@ -12,14 +12,13 @@ import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (Variant(..))
 import Gargantext.Components.FacetsTable (DocumentsView(..), PagePath, Rows(..), initialPagePath, loadPage, publicationDate)
-import Gargantext.Components.GraphExplorer.Types (GraphSideCorpus(..))
+import Gargantext.Components.GraphExplorer.Types (GraphSideCorpus(..), GraphSideDoc(..), DocId)
 import Gargantext.Components.Search (SearchQuery)
 import Gargantext.Config.REST (RESTError(..))
 import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Loader (useLoaderEffect)
 import Gargantext.Hooks.UpdateEffect (useUpdateEffect1')
 import Gargantext.Sessions (Session)
-import Gargantext.Types (ListId)
 import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -34,7 +33,7 @@ type TabsProps =
   , query           :: SearchQuery
   , session         :: Session
   , graphSideCorpus :: GraphSideCorpus
-  , showDoc         :: T.Box (Maybe ListId)
+  , showDoc         :: T.Box (Maybe GraphSideDoc)
   )
 
 docList :: R2.Leaf TabsProps
@@ -104,15 +103,35 @@ docListCpt = here.component "main" cpt where
     -- |
     let
 
-      callback :: Maybe ListId -> ListId -> Effect Unit
-      callback Nothing    new = T.write_ (Just new) showDoc
-      callback (Just old) new
-        | old == new = T.write_ Nothing showDoc
-        | otherwise  = T.write_ (Just new) showDoc
+      callback :: Maybe GraphSideDoc -> DocId -> Effect Unit
+      callback
+        Nothing
+        new
+          = setGraphSideDoc new # Just # flip T.write_ showDoc
 
-      isSelected :: Maybe ListId -> DocumentsView -> Boolean
-      isSelected Nothing        _                      = false
-      isSelected (Just current) (DocumentsView { id }) = current == id
+      callback
+        (Just (GraphSideDoc { docId }))
+        new
+        | docId == new = T.write_ Nothing showDoc
+        | otherwise    = setGraphSideDoc new # Just # flip T.write_ showDoc
+
+      setGraphSideDoc :: DocId -> GraphSideDoc
+      setGraphSideDoc docId = GraphSideDoc
+        { docId
+        , listId
+        , corpusId: nodeId
+        }
+
+      isSelected :: Maybe GraphSideDoc -> DocumentsView -> Boolean
+      isSelected
+        (Just (GraphSideDoc { docId }))
+        (DocumentsView { id })
+          = docId == id
+
+      isSelected
+        _
+        _
+          = false
 
     -- | Render
     -- |
@@ -158,7 +177,7 @@ type ItemProps =
   , frontends    :: Frontends
   , session      :: Session
   , path         :: PagePath
-  , callback     :: ListId -> Effect Unit
+  , callback     :: DocId -> Effect Unit
   , isSelected   :: Boolean
   )
 

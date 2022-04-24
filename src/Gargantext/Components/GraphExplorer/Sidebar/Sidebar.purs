@@ -35,7 +35,7 @@ import Gargantext.Data.Array (mapMaybe)
 import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
 import Gargantext.Sessions (Session)
-import Gargantext.Types (CTabNgramType, FrontendError(..), NodeID, TabSubType(..), TabType(..), TermList(..), ListId, modeTabType)
+import Gargantext.Types (CTabNgramType, FrontendError(..), NodeID, TabSubType(..), TabType(..), TermList(..), modeTabType)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Stores as Stores
@@ -127,7 +127,6 @@ sideTabDataCpt = here.component "sideTabData" cpt where
   cpt props _ = do
     -- States
     { selectedNodeIds
-    , showDoc
     , graph
     } <- Stores.useStore GraphStore.context
 
@@ -178,7 +177,6 @@ sideTabDataCpt = here.component "sideTabData" cpt where
               , searchType: SearchDoc
               , selectedNodeIds: selectedNodeIds'
               , session: props.session
-              , showDoc
               }
             ]
       ]
@@ -193,7 +191,6 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt where
   cpt props@{ frontends } _ = do
     -- States
     { selectedNodeIds
-    , showDoc
     , graph
     } <- Stores.useStore GraphStore.context
 
@@ -244,7 +241,6 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt where
               , searchType: SearchContact
               , selectedNodeIds: selectedNodeIds'
               , session: props.session
-              , showDoc
               }
             ]
       ]
@@ -625,7 +621,6 @@ type DocListWrapper =
   , searchType      :: SearchType
   , selectedNodeIds :: SigmaxT.NodeIds
   , session         :: Session
-  , showDoc         :: T.Box (Maybe ListId)
   )
 
 docListWrapper :: R2.Leaf DocListWrapper
@@ -639,9 +634,11 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
       , searchType
       , selectedNodeIds
       , session
-      , showDoc
       } _ = do
     -- States
+    { showDoc
+    } <- Stores.useStore GraphStore.context
+
     query /\ queryBox <- R2.useBox' Nothing
 
     -- Helpers

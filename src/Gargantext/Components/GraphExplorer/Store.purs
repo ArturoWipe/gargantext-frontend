@@ -33,7 +33,7 @@ type Store =
   , showControls       :: T.Box Boolean
   , sideTab            :: T.Box GET.SideTab
   , showSidebar        :: T.Box GT.SidePanelState
-  , showDoc            :: T.Box (Maybe GT.ListId)
+  , showDoc            :: T.Box (Maybe GET.GraphSideDoc)
   -- Controls
   , multiSelectEnabled :: T.Box Boolean
   , edgeConfluence     :: T.Box Range.NumberRange
@@ -61,7 +61,7 @@ type State =
   , showControls       :: Boolean
   , sideTab            :: GET.SideTab
   , showSidebar        :: GT.SidePanelState
-  , showDoc            :: Maybe GT.ListId
+  , showDoc            :: Maybe GET.GraphSideDoc
   -- Controls
   , multiSelectEnabled :: Boolean
   , edgeConfluence     :: Range.NumberRange
@@ -86,7 +86,7 @@ options ::
   , removedNodeIds      :: SigmaxT.NodeIds
   , selectedNodeIds     :: SigmaxT.NodeIds
   , showControls        :: Boolean
-  , showDoc             :: Maybe GT.ListId
+  , showDoc             :: Maybe GET.GraphSideDoc
   , showSidebar         :: GT.SidePanelState
   , sideTab             :: GET.SideTab
   , edgeConfluence      :: Range.NumberRange

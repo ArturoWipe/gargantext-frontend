@@ -162,27 +162,6 @@ controlsCpt = R.memo' $ here.component "controls" cpt where
           H.div
           { className: "d-flex" }
           [
-            -- View Settings
-            B.fieldset
-            { className: "graph-toolbar__section"
-            , titleSlot: H.text "View settings"
-            }
-            [
-              -- change type button (?)
-              centerButton sigmaRef
-            ,
-              gap
-            ,
-              edgesToggleButton
-              { state: showEdges
-              , stateAtlas: forceAtlasState
-              }
-            ,
-              gap
-            ,
-              louvainToggleButton { state: showLouvain }
-            ]
-          ,
             -- Actions
             B.fieldset
             { className: "graph-toolbar__section"
@@ -201,6 +180,26 @@ controlsCpt = R.memo' $ here.component "controls" cpt where
               , sigmaRef: sigmaRef
               , reloadForest
               }
+            ]
+          ,
+            -- View Settings
+            B.fieldset
+            { className: "graph-toolbar__section"
+            , titleSlot: H.text "View settings"
+            }
+            [
+              centerButton sigmaRef
+            ,
+              gap
+            ,
+              edgesToggleButton
+              { state: showEdges
+              , stateAtlas: forceAtlasState
+              }
+            ,
+              gap
+            ,
+              louvainToggleButton { state: showLouvain }
             ]
           ]
         ,

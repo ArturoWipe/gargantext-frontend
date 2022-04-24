@@ -14,11 +14,13 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.GraphExplorer.Frame.DocFocus (docFocus)
 import Gargantext.Components.GraphExplorer.Resources as Graph
 import Gargantext.Components.GraphExplorer.Sidebar as GES
 import Gargantext.Components.GraphExplorer.Store as GraphStore
 import Gargantext.Components.GraphExplorer.Toolbar.Controls as Controls
 import Gargantext.Components.GraphExplorer.TopBar as GETB
+import Gargantext.Components.GraphExplorer.Types (GraphSideDoc)
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Config (defaultFrontends)
 import Gargantext.Data.Louvain as Louvain
@@ -124,17 +126,14 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
         { className: "graph-layout__frame" }
         [
           -- Doc focus
-          R2.fromMaybe_ showDoc' \listId ->
+          R2.fromMaybe_ showDoc' \(graphSideDoc :: GraphSideDoc) ->
 
-            H.div
-            { className: "graph-layout__focus" }
-            [
-              H.div
-              { className: "graph-layout__focus__inner" }
-              [
-                H.div {} [ H.text $ show listId ]
-              ]
-            ]
+            docFocus
+            { session
+            , graphSideDoc
+            }
+
+
         ,
           -- Sidebar
           H.div
