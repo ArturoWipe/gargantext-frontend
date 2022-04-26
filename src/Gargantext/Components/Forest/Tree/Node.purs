@@ -18,7 +18,7 @@ import Effect.Class (liftEffect)
 import Gargantext.AsyncTasks as GAT
 import Gargantext.Components.App.Store (Boxes)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), TooltipEffect(..), Variant(..))
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Elevation(..), TooltipEffect(..), Variant(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Types (Action(..))
 import Gargantext.Components.Forest.Tree.Node.Action.Upload (DroppedFile(..), fileTypeView)
 import Gargantext.Components.Forest.Tree.Node.Action.Upload.Types (FileType(..), UploadFileBlob(..))
@@ -331,7 +331,7 @@ nodeSpanCpt = here.component "nodeSpan" cpt
                     "Each node of the Tree can perform some actions.\n"
                   <> "Click here to execute one of them."
               , variant: Secondary
-              , overlay: true
+              , overlay: Level1
               }
             ,
               nodePopupView

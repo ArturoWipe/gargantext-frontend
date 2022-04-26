@@ -12,6 +12,7 @@ import Data.Nullable (null, Nullable)
 import Data.Sequence as Seq
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
+import Effect (Effect)
 import Gargantext.Components.App.Store as AppStore
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Frame.DocFocus (docFocus)
@@ -36,6 +37,7 @@ import Math as Math
 import Partial.Unsafe (unsafePartial)
 import Reactix as R
 import Reactix.DOM.HTML as H
+import Toestand as T
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.GraphExplorer.Layout"
@@ -103,6 +105,12 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
     --     T.write_ Graph.Init controls.graphStage
     --     T.write_ Types.InitialClosed controls.sidePanelState
 
+    -- | Computed
+    -- |
+    let
+      closeDoc :: Unit -> Effect Unit
+      closeDoc _ = T.write_ Nothing showDoc
+
     -- | Render
     -- |
 
@@ -128,12 +136,19 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
           -- Doc focus
           R2.fromMaybe_ showDoc' \(graphSideDoc :: GraphSideDoc) ->
 
-            docFocus
-            { session
-            , graphSideDoc
-            }
-
-
+            H.div
+            { className: "graph-layout__focus" }
+            [
+              H.div
+              { className: "graph-layout__focus__inner" }
+              [
+                docFocus
+                { session
+                , graphSideDoc
+                , closeCallback: closeDoc
+                }
+              ]
+            ]
         ,
           -- Sidebar
           H.div

@@ -4,8 +4,7 @@ import Gargantext.Prelude
 
 import Data.Foldable (elem, intercalate)
 import Effect (Effect)
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Variant(..))
-import Gargantext.Utils ((?))
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Elevation(..), Variant(..))
 import Gargantext.Utils.Reactix as R2
 import React.SyntheticEvent as SE
 import Reactix as R
@@ -21,7 +20,7 @@ type Options =
   ( className :: String
   , status    :: ComponentStatus
   , title     :: String
-  , overlay   :: Boolean
+  , overlay   :: Elevation
   , variant   :: Variant
   )
 
@@ -30,7 +29,7 @@ options =
   { className : ""
   , status    : Enabled
   , title     : ""
-  , overlay   : false
+  , overlay   : Level0
   , variant   : Dark
   }
 
@@ -60,9 +59,7 @@ component = R.hooksComponent componentName cpt where
         , componentName
         , componentName <> "--" <> show status
         , componentName <> "--" <> show props.variant
-        , props.overlay ?
-            componentName <> "--overlay" $
-            ""
+        , componentName <> "--overlay-" <> show props.overlay
         ]
 
       contentClassName = intercalate " "
@@ -82,11 +79,15 @@ component = R.hooksComponent componentName cpt where
       , disabled: elem status [ Disabled, Deferred ]
       }
       [
-        H.i
-        { title: props.title
-        , className: contentClassName
-        }
-        []
+        H.span
+        { className: componentName <> "__inner" }
+        [
+          H.i
+          { title: props.title
+          , className: contentClassName
+          }
+          []
+        ]
       ]
 
 -- | Clicked event will effectively be triggered according to the

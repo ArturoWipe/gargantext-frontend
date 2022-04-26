@@ -494,7 +494,7 @@ $decreasing-color: #11638F;
 ////////////////////////////////////////////////////////////////
 
 .phylo-sidebar {
-  @include sidebar;
+  @include term-window;
 }
 
 .phylo-details-tab {

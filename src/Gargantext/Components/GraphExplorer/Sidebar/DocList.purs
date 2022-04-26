@@ -206,6 +206,7 @@ itemCpt = here.component "item" cpt where
       H.div
       { className: intercalate " "
           [ "graph-doc-list__item"
+          , isSelected ? "graph-doc-list__item--selected" $ ""
           , "list-group-item"
           ]
       , on: { click: \_ -> callback id }
