@@ -19,7 +19,7 @@ import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.App.Store as AppStore
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
 import Gargantext.Components.GraphExplorer.Sidebar.DocList (docList)
@@ -38,7 +38,6 @@ import Gargantext.Sessions (Session)
 import Gargantext.Types (CTabNgramType, FrontendError(..), NodeID, TabSubType(..), TabType(..), TermList(..), modeTabType)
 import Gargantext.Utils (nbsp)
 import Gargantext.Utils.Reactix as R2
-import Gargantext.Utils.Stores as Stores
 import Gargantext.Utils.Toestand as T2
 import Math as Math
 import Partial.Unsafe (unsafePartial)
@@ -51,8 +50,7 @@ here :: R2.Here
 here = R2.here "Gargantext.Components.GraphExplorer.Sidebar"
 
 type Props =
-  ( boxes           :: Boxes
-  , metaData        :: GET.MetaData
+  ( metaData        :: GET.MetaData
   , session         :: Session
   , frontends       :: Frontends
   )
@@ -65,7 +63,7 @@ sidebarCpt = here.component "sidebar" cpt where
   cpt props _ = do
     -- States
     { sideTab
-    } <- Stores.useStore GraphStore.context
+    } <- GraphStore.use
 
     sideTab'  <- R2.useLive' sideTab
 
@@ -128,7 +126,7 @@ sideTabDataCpt = here.component "sideTabData" cpt where
     -- States
     { selectedNodeIds
     , graph
-    } <- Stores.useStore GraphStore.context
+    } <- GraphStore.use
 
     selectedNodeIds'  <- R2.useLive' selectedNodeIds
     graph'            <- R2.useLive' graph
@@ -192,7 +190,7 @@ sideTabCommunityCpt = here.component "sideTabCommunity" cpt where
     -- States
     { selectedNodeIds
     , graph
-    } <- Stores.useStore GraphStore.context
+    } <- GraphStore.use
 
     selectedNodeIds'  <- R2.useLive' selectedNodeIds
     graph'            <- R2.useLive' graph
@@ -274,7 +272,7 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
     -- States
     { selectedNodeIds
     , graph
-    } <- Stores.useStore GraphStore.context
+    } <- GraphStore.use
 
     selectedNodeIds' <- R2.useLive' selectedNodeIds
     graph'           <- R2.useLive' graph
@@ -353,7 +351,7 @@ neighborhoodCpt = R.memo' $ here.component "neighborhood" cpt where
     -- States
     { selectedNodeIds
     , graph
-    } <- Stores.useStore GraphStore.context
+    } <- GraphStore.use
 
     selectedNodeIds' <-
       R2.useLive' selectedNodeIds
@@ -482,21 +480,21 @@ updateTermButton = R2.component updateTermButtonCpt
 
 updateTermButtonCpt :: R.Component UpdateTermButtonProps
 updateTermButtonCpt = here.component "updateTermButton" cpt where
-  cpt { boxes:
-          { errors
-          , reloadForest
-          }
-      , variant
+  cpt { variant
       , metaData
       , nodesMap
       , rType
       , session
       } children = do
     -- States
+    { errors
+    , reloadForest
+    } <- AppStore.use
+
     { removedNodeIds
     , selectedNodeIds
     , graphId
-    } <- Stores.useStore GraphStore.context
+    } <- GraphStore.use
 
     selectedNodeIds' <- R2.useLive' selectedNodeIds
     graphId'         <- R2.useLive' graphId
@@ -637,7 +635,7 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
       } _ = do
     -- States
     { showDoc
-    } <- Stores.useStore GraphStore.context
+    } <- GraphStore.use
 
     query /\ queryBox <- R2.useBox' Nothing
 

@@ -10,7 +10,7 @@ import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Sequence as Seq
 import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
-import Gargantext.Components.App.Data (Boxes)
+import Gargantext.Components.App.Store as AppStore
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.API as GraphAPI
 import Gargantext.Components.GraphExplorer.Layout (convert, layout)
@@ -18,9 +18,9 @@ import Gargantext.Components.GraphExplorer.Store as GraphStore
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Config.REST (logRESTError)
 import Gargantext.Hooks.Loader (useLoaderEffect)
+import Gargantext.Hooks.Session (useSession)
 import Gargantext.Hooks.Sigmax as Sigmax
 import Gargantext.Hooks.Sigmax.Types as SigmaxT
-import Gargantext.Sessions (Session)
 import Gargantext.Utils.Range as Range
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -29,26 +29,27 @@ import Record as Record
 
 
 type Props =
-  ( key       :: String
-  , session   :: Session
-  , boxes     :: Boxes
-  , graphId   :: GET.GraphId
+  ( graphId   :: GET.GraphId
   )
 
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Corpus.Graph"
 
-graphLayout :: R2.Leaf Props
+graphLayout :: R2.Leaf ( key :: String | Props )
 graphLayout = R2.leaf graphLayoutCpt
 
-graphLayoutCpt :: R.Component Props
+graphLayoutCpt :: R.Component ( key :: String | Props )
 graphLayoutCpt = here.component "explorerLayout" cpt where
-  cpt props@{ boxes: { graphVersion }, graphId, session } _ = do
+  cpt { graphId } _ = do
     -- | States
     -- |
+    { graphVersion
+    } <- AppStore.use
+
+    session <- useSession
+
     graphVersion'   <- R2.useLive' graphVersion
     state' /\ state <- R2.useBox' Nothing
-
 
     -- | Hooks
     -- |
@@ -119,12 +120,10 @@ graphLayoutCpt = here.component "explorerLayout" cpt where
       errorHandler = logRESTError here "[explorerLayout]"
       handler loaded@(GET.HyperdataGraph { graph: hyperdataGraph }) =
         initGraph { graph
-                , hyperdataGraph: loaded
-                , mMetaData
-                , session
-                , boxes: props.boxes
-                , graphId
-                }
+                  , hyperdataGraph: loaded
+                  , mMetaData
+                  , graphId
+                  }
         where
           Tuple mMetaData graph = convert hyperdataGraph
 
@@ -134,8 +133,6 @@ type InitGraphProps =
   ( mMetaData       :: Maybe GET.MetaData
   , graph           :: SigmaxT.SGraph
   , hyperdataGraph  :: GET.HyperdataGraph
-  , session         :: Session
-  , boxes           :: Boxes
   , graphId         :: GET.GraphId
   )
 
@@ -144,11 +141,9 @@ initGraph = R2.leaf initGraphCpt
 
 initGraphCpt :: R.Component InitGraphProps
 initGraphCpt = here.component "initGraph" cpt where
-  cpt { boxes
-      , mMetaData
+  cpt { mMetaData
       , graph
       , graphId
-      , session
       , hyperdataGraph
       } _ = do
     -- | Computed
@@ -193,8 +188,5 @@ initGraphCpt = here.component "initGraph" cpt where
       state
       [
         layout
-        { session
-        , boxes
-        , sigmaRef
-        }
+        { sigmaRef }
       ]

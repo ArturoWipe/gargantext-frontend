@@ -7,14 +7,13 @@ import Gargantext.Prelude
 import DOM.Simple (document, querySelector)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple.Nested ((/\))
-import Gargantext.Components.App.Data (Boxes)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.PhyloExplorer.API (get)
 import Gargantext.Components.PhyloExplorer.Layout (layout)
 import Gargantext.Components.PhyloExplorer.Types (PhyloDataSet)
 import Gargantext.Config.REST (logRESTError)
 import Gargantext.Hooks.Loader (useLoaderEffect)
-import Gargantext.Sessions (Session)
+import Gargantext.Hooks.Session (useSession)
 import Gargantext.Types (NodeID)
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -22,8 +21,6 @@ import Reactix.DOM.HTML as H
 
 type MainProps =
   ( nodeId      :: NodeID
-  , session     :: Session
-  , boxes       :: Boxes
   )
 
 here :: R2.Here
@@ -34,13 +31,12 @@ phyloLayout = R2.leaf phyloLayoutCpt
 
 phyloLayoutCpt :: R.Component MainProps
 phyloLayoutCpt = here.component "main" cpt where
-  cpt { nodeId, session } _ = do
-
+  cpt { nodeId } _ = do
     -- | States
     -- |
+    session <- useSession
 
     state' /\ state <- R2.useBox' Nothing
-
 
     -- | Computed
     -- |
