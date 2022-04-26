@@ -119,28 +119,29 @@ graphLayoutCpt = here.component "explorerLayout" cpt where
     where
       errorHandler = logRESTError here "[explorerLayout]"
       handler loaded@(GET.HyperdataGraph { graph: hyperdataGraph }) =
-        initGraph { graph
-                  , hyperdataGraph: loaded
-                  , mMetaData
-                  , graphId
-                  }
+        hydrateStore
+        { graph
+        , hyperdataGraph: loaded
+        , mMetaData
+        , graphId
+        }
         where
           Tuple mMetaData graph = convert hyperdataGraph
 
 --------------------------------------------------------
 
-type InitGraphProps =
+type HydrateStoreProps =
   ( mMetaData       :: Maybe GET.MetaData
   , graph           :: SigmaxT.SGraph
   , hyperdataGraph  :: GET.HyperdataGraph
   , graphId         :: GET.GraphId
   )
 
-initGraph :: R2.Leaf InitGraphProps
-initGraph = R2.leaf initGraphCpt
+hydrateStore:: R2.Leaf HydrateStoreProps
+hydrateStore = R2.leaf hydrateStoreCpt
 
-initGraphCpt :: R.Component InitGraphProps
-initGraphCpt = here.component "initGraph" cpt where
+hydrateStoreCpt :: R.Component HydrateStoreProps
+hydrateStoreCpt = here.component "hydrateStore" cpt where
   cpt { mMetaData
       , graph
       , graphId
@@ -181,7 +182,6 @@ initGraphCpt = here.component "initGraph" cpt where
 
     -- | Render
     -- |
-
     pure $
 
       GraphStore.provide

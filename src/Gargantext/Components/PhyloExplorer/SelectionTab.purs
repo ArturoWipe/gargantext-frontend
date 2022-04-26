@@ -46,8 +46,8 @@ component = R.hooksComponent componentName cpt where
       , selectedSource
       } _ = do
 
-  -- State
-  --------
+    -- | State
+    -- |
 
     showMore /\ showMoreBox <- R2.useBox' false
 
@@ -65,16 +65,15 @@ component = R.hooksComponent componentName cpt where
          = termCount > maxTruncateResult
         && not showMore
 
-  -- Effects
-  ----------
+    -- | Effects
+    -- |
 
     -- reset "show more" button to hidding mode on selected terms change
     R.useEffect1' extractedTerms $
       T.write_ false showMoreBox
 
-  -- Render
-  ---------
-
+    -- | Render
+    -- |
     pure $
 
       H.div
@@ -321,7 +320,7 @@ detailsCount value label weighty =
     H.span
     { className: intercalate " "
         [ "phylo-selection-tab__counter__value"
-        , weighty ? "font-weight-bold" $ ""
+        , weighty ? "text-bold" $ ""
         ]
     }
     [
@@ -331,7 +330,7 @@ detailsCount value label weighty =
     H.span
     { className: intercalate " "
         [ "phylo-selection-tab__counter__label"
-        , weighty ? "font-weight-bold" $ ""
+        , weighty ? "text-bold" $ ""
         ]
     }
     [

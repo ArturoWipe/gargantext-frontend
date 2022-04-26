@@ -5,7 +5,6 @@ module Gargantext.Components.PhyloExplorer.SideBar
 import Gargantext.Prelude
 
 import Data.Maybe (Maybe)
-import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.PhyloExplorer.DetailsTab (detailsTab)
@@ -18,7 +17,7 @@ import Reactix.DOM.HTML as H
 import Toestand as T
 
 type Props =
-  ( nodeId                :: NodeID
+  ( phyloId               :: NodeID
 
   , docCount              :: Int
   , foundationCount       :: Int
@@ -26,6 +25,8 @@ type Props =
   , termCount             :: Int
   , groupCount            :: Int
   , branchCount           :: Int
+
+  , sideBarTabView        :: T.Box TabView
 
   , selectedTerm          :: Maybe String
   , selectedBranch        :: Maybe String
@@ -45,7 +46,7 @@ component :: R.Component Props
 component = R.hooksComponent componentName cpt where
   cpt props _ = do
     -- States
-    tabView /\ tabViewBox <- R2.useBox' DetailsTab
+    sideBarTabView' <- R2.useLive' props.sideBarTabView
 
     -- Computed
     let
@@ -59,17 +60,17 @@ component = R.hooksComponent componentName cpt where
       [
         -- Menu
         B.tabs
-        { value: tabView
+        { value: sideBarTabView'
         , list: tabList
-        , callback: flip T.write_ tabViewBox
+        , callback: flip T.write_ props.sideBarTabView
         }
       ,
         -- Content
-        case tabView of
+        case sideBarTabView' of
 
           DetailsTab ->
             detailsTab
-            { key: (show props.nodeId) <> "-details"
+            { key: (show props.phyloId) <> "-details"
             , docCount: props.docCount
             , foundationCount: props.foundationCount
             , periodCount: props.periodCount
@@ -80,7 +81,7 @@ component = R.hooksComponent componentName cpt where
 
           SelectionTab ->
             selectionTab
-            { key: (show props.nodeId) <> "-selection"
+            { key: (show props.phyloId) <> "-selection"
             , extractedTerms: props.extractedTerms
             , extractedCount: props.extractedCount
             , selectedTerm: props.selectedTerm
