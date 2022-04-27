@@ -7643,6 +7643,15 @@ input[type=range]:-moz-focusring {
   color: #6C757D;
 }
 
+.graph-contact-list__item__title, .graph-contact-list__item__subtitle {
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+.graph-contact-list__item__subtitle {
+  font-size: 15px;
+  color: #495057;
+}
+
 .graph-toolbar {
   display: flex;
   padding: 8px;
