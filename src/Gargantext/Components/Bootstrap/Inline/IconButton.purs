@@ -5,6 +5,7 @@ import Gargantext.Prelude
 import Data.Foldable (elem, intercalate)
 import Effect (Effect)
 import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Elevation(..), Variant(..))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import React.SyntheticEvent as SE
 import Reactix as R
@@ -20,7 +21,8 @@ type Options =
   ( className :: String
   , status    :: ComponentStatus
   , title     :: String
-  , overlay   :: Elevation
+  , overlay   :: Boolean
+  , elevation :: Elevation
   , variant   :: Variant
   )
 
@@ -29,7 +31,8 @@ options =
   { className : ""
   , status    : Enabled
   , title     : ""
-  , overlay   : Level0
+  , overlay   : true
+  , elevation : Level0
   , variant   : Dark
   }
 
@@ -49,7 +52,8 @@ component :: R.Component Props
 component = R.hooksComponent componentName cpt where
   cpt props@{ callback
             , status
-            , name } _ = do
+            , name
+            } _ = do
     -- Computed
     let
       wrapperClassName = intercalate " "
@@ -59,7 +63,10 @@ component = R.hooksComponent componentName cpt where
         , componentName
         , componentName <> "--" <> show status
         , componentName <> "--" <> show props.variant
-        , componentName <> "--overlay-" <> show props.overlay
+        , props.overlay ?
+            componentName <> "--overlay" $
+            ""
+        , componentName <> "--" <> show props.elevation
         ]
 
       contentClassName = intercalate " "

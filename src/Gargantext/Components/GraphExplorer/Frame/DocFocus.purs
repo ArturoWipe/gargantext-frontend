@@ -48,7 +48,7 @@ docFocusCpt = here.component "main" cpt where
         [
           B.iconButton
           { name: "times"
-          , overlay: Level2
+          , elevation: Level2
           , callback: closeCallback
           }
         ]

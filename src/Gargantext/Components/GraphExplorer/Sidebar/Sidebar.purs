@@ -650,12 +650,6 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
         Nothing -> []
         Just n -> words n.label
 
-      toGraphSideCorpus corpusId = GET.GraphSideCorpus
-        { corpusId
-        , corpusLabel: metaData.title
-        , listId     : metaData.list.listId
-        }
-
     -- Hooks
     R.useEffect1' selectedNodeIds $
       T.write_ (selectedNodeIds # toSearchQuery >>> Just) queryBox
@@ -672,7 +666,8 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
             { frontends
             , query: query'
             , session
-            , graphSideCorpus: toGraphSideCorpus corpusId
+            , corpusId
+            , listId: metaData.list.listId
             , showDoc
             }
 
@@ -680,7 +675,7 @@ docListWrapperCpt = here.component "docListWrapper" cpt where
             B.caveat
             {}
             [
-              H.text "You can link a corpus to your Graph to retrieve relative documents when selecting nodes"
+              H.text "You can link a corpus to retrieve relative documents about your selection"
             ]
 
       ]

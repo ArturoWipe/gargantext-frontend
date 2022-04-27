@@ -10,6 +10,7 @@ import Data.Foldable (intercalate)
 import Data.Int as Int
 import Data.Maybe (Maybe(..))
 import Data.String (null)
+import Effect (Effect)
 import FFI.Simple ((..), (.=))
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.PhyloExplorer.Resources (PubSubEvent(..))
@@ -18,7 +19,7 @@ import Gargantext.Components.PhyloExplorer.SideBar (sideBar)
 import Gargantext.Components.PhyloExplorer.Store as PhyloStore
 import Gargantext.Components.PhyloExplorer.ToolBar (toolBar)
 import Gargantext.Components.PhyloExplorer.TopBar (topBar)
-import Gargantext.Components.PhyloExplorer.Types (ExtractedCount, PhyloDataSet(..), TabView(..), sortSources)
+import Gargantext.Components.PhyloExplorer.Types (DisplayView, ExtractedCount, FrameDoc, PhyloDataSet(..), TabView(..), Term, sortSources)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
 import Gargantext.Hooks.UpdateEffect (useUpdateEffect1', useUpdateEffect3')
 import Gargantext.Types (SidePanelState(..))
@@ -59,25 +60,22 @@ layoutCpt = here.component "layout" cpt where
     , extractedCount
     , phyloId
     , phyloDataSet
+    , frameDoc
     } <- PhyloStore.use
 
     (PhyloDataSet o)    <- R2.useLive' phyloDataSet
     phyloId'            <- R2.useLive' phyloId
     sources'            <- R2.useLive' sources
     terms'              <- R2.useLive' terms
-    result'             <- R2.useLive' result
     displayView'        <- R2.useLive' displayView
     isIsolineDisplayed' <- R2.useLive' isIsolineDisplayed
     sideBarDisplayed'   <- R2.useLive' sideBarDisplayed
     toolBarDisplayed'   <- R2.useLive' toolBarDisplayed
     isBuilt'            <- R2.useLive' isBuilt
-    source'             <- R2.useLive' source
-    search'             <- R2.useLive' search
-    extractedTerms'     <- R2.useLive' extractedTerms
-    extractedCount'     <- R2.useLive' extractedCount
     selectedTerm'       <- R2.useLive' selectedTerm
     selectedBranch'     <- R2.useLive' selectedBranch
     selectedSource'     <- R2.useLive' selectedSource
+    frameDoc'           <- R2.useLive' frameDoc
 
     -- | Hooks
     -- |
@@ -90,47 +88,60 @@ layoutCpt = here.component "layout" cpt where
 
     -- (!) do not rely on the JavaScript `Resources.js:resetSelection`,
     --     as it will lead to potential circular computations
-    resetSelection <- pure $ const do
-      T.write_ Nothing selectedBranch
-      T.write_ Nothing selectedTerm
-      T.write_ ""      source
-      T.write_ Nothing selectedSource
-      T.write_ Nothing extractedCount
-      T.write_ mempty  extractedTerms
+    --
+    -- (!) same idea for Box content mutation: eg. due the reset notion
+    --     triggered at each selection (cf. `resetSelection`), a call via
+    --     `T.write` + `T.listen` will also create an infinite loop
+    let
 
-      void $ pure $ (window .= "branchFocus") []
+      resetSelection :: Unit -> Effect Unit
+      resetSelection _ = do
+        T.write_ Nothing selectedBranch
+        T.write_ Nothing selectedTerm
+        T.write_ ""      source
+        T.write_ Nothing selectedSource
+        T.write_ Nothing extractedCount
+        T.write_ mempty  extractedTerms
 
-    changeViewCallback <- pure $
-          flip T.write displayView
-      >=> RS.changeDisplayView
+        void $ pure $ (window .= "branchFocus") []
 
-    sourceCallback <- pure \id -> do
-      -- (!) upcoming value from a `B.formSelect`, so simple <String> format
-      let mSource = RS.findSourceById sources' =<< Int.fromString id
-      let mLabel  = pure <<< getter _.label =<< mSource
+      changeViewCallback :: DisplayView -> Effect Unit
+      changeViewCallback =
+            flip T.write displayView
+        >=> RS.changeDisplayView
 
-      resetSelection unit
-      T.write_ id source
-      T.write_ mLabel selectedSource
-      RS.selectSource window mSource
+      sourceCallback :: String -> Effect Unit
+      sourceCallback id = do
+        -- (!) upcoming value from a `B.formSelect`, so simple <String> format
+        let mSource = RS.findSourceById sources' =<< Int.fromString id
+        let mLabel  = pure <<< getter _.label =<< mSource
 
-    searchCallback <- pure $
-          flip T.write search
-      >=> RS.autocompleteSearch terms'
-      >=> flip T.write_ result
+        resetSelection unit
+        T.write_ id source
+        T.write_ mLabel selectedSource
+        RS.selectSource window mSource
 
-    resultCallback <- pure $ const $
-          resetSelection unit
-       *> RS.autocompleteSubmit displayView result'
+      searchCallback :: String -> Effect Unit
+      searchCallback =
+            flip T.write search
+        >=> RS.autocompleteSearch terms'
+        >=> flip T.write_ result
 
-    unselectCallback <- pure $ const $
-          resetSelection unit
-       *> RS.doubleClick
+      resultCallback :: Maybe Term -> Effect Unit
+      resultCallback mTerm =
+            resetSelection unit
+        *> RS.autocompleteSubmit displayView mTerm
 
-    selectTermCallback <- pure $ \s -> do
-      resetSelection unit
-      mTerm <- RS.autocompleteSearch terms' s
-      RS.autocompleteSubmit displayView mTerm
+      unselectCallback :: Unit -> Effect Unit
+      unselectCallback _ =
+            resetSelection unit
+        *> RS.doubleClick
+
+      selectTermCallback :: String -> Effect Unit
+      selectTermCallback s = do
+        resetSelection unit
+        mTerm <- RS.autocompleteSearch terms' s
+        RS.autocompleteSubmit displayView mTerm
 
     -- | Effects
     -- |
@@ -236,46 +247,45 @@ layoutCpt = here.component "layout" cpt where
           [
             R2.if' (isBuilt') $
               topBar
-              { sources       : sources'
-              , source        : source'
-              , sourceCallback
-
-              , search        : search'
+              { sourceCallback
               , searchCallback
-
-              , result        : result'
               , resultCallback
-
-              , toolBar       : toolBarDisplayed
-              , sideBar       : sideBarDisplayed
               }
           ]
         ]
       ,
-        -- Sidebar
+        -- Sidebar + Focus frame
         H.div
-        { className: "phylo__sidebar"
-        -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
-        -- @link https://github.com/facebook/react/issues/12039
-        , style: { display: sideBarDisplayed' == Opened ? "block" $ "none" }
-        }
+        { className: "phylo__frame" }
         [
-          sideBar
-          { phyloId         : phyloId'
-          , docCount        : o.nbDocs
-          , foundationCount : o.nbFoundations
-          , periodCount     : o.nbPeriods
-          , termCount       : o.nbTerms
-          , groupCount      : o.nbGroups
-          , branchCount     : o.nbBranches
-          , extractedTerms  : extractedTerms'
-          , extractedCount  : extractedCount'
-          , selectedTerm    : selectedTerm'
-          , selectedBranch  : selectedBranch'
-          , selectedSource  : selectedSource'
-          , sideBarTabView
-          , selectTermCallback
+          -- Doc focus
+          R2.fromMaybe_ frameDoc' \(frameDoc :: FrameDoc) ->
+
+            H.div
+            { className: "phylo__focus" }
+            [
+              H.div
+              { className: "phylo__focus__inner" }
+              [
+                H.text $ "hello"
+              ]
+            ]
+        ,
+          -- Sidebar
+          H.div
+          { className: "phylo__sidebar"
+          -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
+          -- @link https://github.com/facebook/react/issues/12039
+          , style: { display: sideBarDisplayed' == Opened ? "block" $ "none" }
           }
+          [
+            H.div
+            { className: "phylo__sidebar__inner" }
+            [
+              sideBar
+              { selectTermCallback }
+            ]
+          ]
         ]
       ,
         -- Toolbar
@@ -284,9 +294,7 @@ layoutCpt = here.component "layout" cpt where
           { resetViewCallback : const RS.resetView
           , exportCallback    : const RS.exportViz
           , unselectCallback  : unselectCallback
-          , displayView       : displayView'
           , changeViewCallback
-          , isolineBox        : isIsolineDisplayed
           }
       ,
         -- Iso Line

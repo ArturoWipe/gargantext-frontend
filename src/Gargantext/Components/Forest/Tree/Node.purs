@@ -291,6 +291,7 @@ nodeSpanCpt = here.component "nodeSpan" cpt
                     "check-circle" $
                     "exclamation-circle"
                 , callback: const $ T.modify_ (not) folderOpen
+                , overlay: false
                 }
           ]
         ,
@@ -331,7 +332,7 @@ nodeSpanCpt = here.component "nodeSpan" cpt
                     "Each node of the Tree can perform some actions.\n"
                   <> "Click here to execute one of them."
               , variant: Secondary
-              , overlay: Level1
+              , elevation: Level1
               }
             ,
               nodePopupView
@@ -390,6 +391,7 @@ nodeIconCpt = here.component "nodeIcon" cpt where
         , callback
         , status: isLeaf ? Idled $ Enabled
         , variant: isSelected ? Primary $ Dark
+        , overlay: false
         }
       ]
         <> children
@@ -421,6 +423,7 @@ folderIconCpt = here.component "folderIcon" cpt where
     B.iconButton
     { className: "mainleaf__folder-icon"
     , name: isOpened ? "caret-down" $ "caret-right"
+    , overlay: false
     , callback
     }
 

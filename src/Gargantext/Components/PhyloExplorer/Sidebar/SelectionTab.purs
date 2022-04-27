@@ -12,7 +12,8 @@ import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
-import Gargantext.Components.PhyloExplorer.Types (ExtractedTerm(..), ExtractedCount(..))
+import Gargantext.Components.PhyloExplorer.Store as PhyloStore
+import Gargantext.Components.PhyloExplorer.Types (ExtractedCount(..), ExtractedTerm(..))
 import Gargantext.Utils (nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -21,12 +22,6 @@ import Toestand as T
 
 type Props =
   ( key                 :: String
-
-  , extractedTerms      :: Array ExtractedTerm
-  , extractedCount      :: Maybe ExtractedCount
-  , selectedTerm        :: Maybe String
-  , selectedBranch      :: Maybe String
-  , selectedSource      :: Maybe String
   , selectTermCallback  :: String -> Effect Unit
   )
 
@@ -39,17 +34,18 @@ componentName = "Gargantext.Components.PhyloExplorer.SideBar.SelectionTab"
 component :: R.Component Props
 component = R.hooksComponent componentName cpt where
   cpt { selectTermCallback
-      , extractedTerms
-      , extractedCount
-      , selectedTerm
-      , selectedBranch
-      , selectedSource
       } _ = do
-
     -- | State
     -- |
+    store <- PhyloStore.use
 
-    showMore /\ showMoreBox <- R2.useBox' false
+    extractedTerms <- R2.useLive' store.extractedTerms
+    extractedCount <- R2.useLive' store.extractedCount
+    selectedTerm   <- R2.useLive' store.selectedTerm
+    selectedBranch <- R2.useLive' store.selectedBranch
+    selectedSource <- R2.useLive' store.selectedSource
+
+    showMore' /\ showMore <- R2.useBox' false
 
     let
       haveSelection
@@ -63,14 +59,14 @@ component = R.hooksComponent componentName cpt where
 
       truncateResults
          = termCount > maxTruncateResult
-        && not showMore
+        && not showMore'
 
     -- | Effects
     -- |
 
     -- reset "show more" button to hidding mode on selected terms change
     R.useEffect1' extractedTerms $
-      T.write_ false showMoreBox
+      T.write_ false showMore
 
     -- | Render
     -- |
@@ -292,7 +288,7 @@ component = R.hooksComponent componentName cpt where
 
                   B.button
                   { variant: ButtonVariant Light
-                  , callback: \_ -> T.modify_ not showMoreBox
+                  , callback: \_ -> T.modify_ not showMore
                   , block: true
                   , className: "phylo-selection-tab__selection__show-more"
                   }
@@ -302,6 +298,19 @@ component = R.hooksComponent componentName cpt where
               ]
             ]
           ]
+      -- ,
+        -- (separator)
+        -- R2.if' (not null extractedTerms) $
+
+        --   H.div
+        --   { className: "phylo-selection-tab__separator" }
+        --   [
+        --     B.icon
+        --     { name: "angle-down" }
+        --   ]
+      -- ,
+        -- Extracted Docs
+        -- R2.if' (not null extractedTerms) $
       ]
 
 termFontSize :: Number -> String

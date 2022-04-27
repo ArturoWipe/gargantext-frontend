@@ -11,7 +11,7 @@ module Gargantext.Components.PhyloExplorer.Store
 import Gargantext.Prelude
 
 import Data.Maybe (Maybe(..))
-import Gargantext.Components.PhyloExplorer.Types (DisplayView(..), ExtractedCount, ExtractedTerm, PhyloDataSet, Source, TabView(..), Term)
+import Gargantext.Components.PhyloExplorer.Types (DisplayView(..), ExtractedCount, ExtractedTerm, FrameDoc, PhyloDataSet, Source, TabView(..), Term)
 import Gargantext.Types (NodeID, SidePanelState(..))
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Stores as Stores
@@ -32,6 +32,7 @@ type Store =
   , isIsolineDisplayed :: T.Box Boolean
   , sideBarDisplayed   :: T.Box SidePanelState
   , sideBarTabView     :: T.Box TabView
+  , frameDoc           :: T.Box (Maybe FrameDoc)
   -- Topbar
   , source             :: T.Box String
   , sources            :: T.Box (Array Source)
@@ -58,6 +59,7 @@ type State =
   , isIsolineDisplayed :: Boolean
   , sideBarDisplayed   :: SidePanelState
   , sideBarTabView     :: TabView
+  , frameDoc           :: Maybe FrameDoc
   -- Topbar
   , source             :: String
   , sources            :: Array Source
@@ -81,6 +83,7 @@ options ::
   , isIsolineDisplayed :: Boolean
   , sideBarDisplayed   :: SidePanelState
   , sideBarTabView     :: TabView
+  , frameDoc           :: Maybe FrameDoc
   -- Topbar
   , source             :: String
   , sources            :: Array Source
@@ -104,6 +107,7 @@ options =
   , isIsolineDisplayed : false
   , sideBarDisplayed   : InitialClosed
   , sideBarTabView     : DetailsTab
+  , frameDoc           : Nothing
   -- Topbar
   , source             : ""
   , sources            : mempty

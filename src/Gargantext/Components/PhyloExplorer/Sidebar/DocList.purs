@@ -1,40 +1,96 @@
-module Gargantext.Components.GraphExplorer.Sidebar.DocList
-  ( docList
-  ) where
+module Gargantext.Components.PhyloExplorer.Sidebar.DocList
+  where
+{-
 
 import Gargantext.Prelude
 
+import Control.Parallel (parTraverse)
+import Data.Array (concat, head, last, mapWithIndex)
+import Data.Array as A
+import Data.Either (Either(..))
 import Data.Foldable (intercalate)
-import Data.Maybe (Maybe(..))
+import Data.Foldable as F
+import Data.Int (fromString)
+import Data.Map as Map
+import Data.Maybe (Maybe(..), fromJust)
 import Data.Sequence as Seq
+import Data.Set as Set
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
+import Effect.Aff (launchAff_)
+import Effect.Class (liftEffect)
+import Gargantext.Components.App.Store as AppStore
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Bootstrap.Types (Variant(..))
-import Gargantext.Components.FacetsTable (DocumentsView(..), PagePath, Rows(..), initialPagePath, loadPage, publicationDate)
-import Gargantext.Components.GraphExplorer.Types (CorpusId, DocId, GraphSideDoc(..), ListId)
-import Gargantext.Components.Search (SearchQuery)
-import Gargantext.Config.REST (RESTError(..))
+import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
+import Gargantext.Components.GraphExplorer.Sidebar.DocList (docList)
+import Gargantext.Components.GraphExplorer.Sidebar.Legend as Legend
+import Gargantext.Components.GraphExplorer.Store as GraphStore
+import Gargantext.Components.GraphExplorer.Types as GET
+import Gargantext.Components.Lang (Lang(..))
+import Gargantext.Components.NgramsTable.Core as NTC
+import Gargantext.Components.PhyloExplorer.Store as PhyloStore
+import Gargantext.Components.RandomText (words)
+import Gargantext.Components.Search (SearchQuery(..), SearchType(..))
+import Gargantext.Config (defaultFrontends)
+import Gargantext.Config.REST (AffRESTError)
+import Gargantext.Data.Array (mapMaybe)
 import Gargantext.Ends (Frontends)
-import Gargantext.Hooks.Loader (useLoaderEffect)
-import Gargantext.Hooks.UpdateEffect (useUpdateEffect1')
+import Gargantext.Hooks.Session (useSession)
+import Gargantext.Hooks.Sigmax.Types as SigmaxT
 import Gargantext.Sessions (Session)
-import Gargantext.Utils ((?))
+import Gargantext.Types (CTabNgramType, FrontendError(..), NodeID, TabSubType(..), TabType(..), TermList(..), modeTabType)
+import Gargantext.Utils (getter, nbsp)
 import Gargantext.Utils.Reactix as R2
+import Gargantext.Utils.Toestand as T2
+import Math as Math
+import Partial.Unsafe (unsafePartial)
 import Reactix as R
 import Reactix.DOM.HTML as H
+import Record as Record
 import Toestand as T
 
 here :: R2.Here
-here = R2.here "Gargantext.Components.GraphExplorer.Sidebar.DocList"
+here = R2.here "Gargantext.Components.PhyloExplorer.Sidebar.DocList"
 
-type TabsProps =
-  ( frontends       :: Frontends
-  , query           :: SearchQuery
-  , session         :: Session
-  , corpusId        :: CorpusId
-  , listId          :: ListId
-  , showDoc         :: T.Box (Maybe GraphSideDoc)
+docListWrapper :: R2.Leaf ()
+docListWrapper = R2.leaf docListWrapperCpt
+
+docListWrapperCpt :: R.Memo ()
+docListWrapperCpt = R.memo' $ here.component "wrapper" cpt where
+  cpt _ _ = do
+    -- | States
+    -- |
+    store <- PhyloStore.use
+
+    extractedTerms <- R2.useLive' store.extractedTerms
+
+    query' /\ query <- R2.useBox' Nothing
+
+    -- | Helpers
+    -- |
+    let
+      toSearchQuery ids = SearchQuery
+        { expected: SearchDoc
+        , query: map (getter _.label) ids
+        }
+
+      searchQuery
+        = extractedTerms
+        # toSearchQuery
+        # Just
+        # flip T.write_ query
+
+    -- | Render
+    --
+    pure $
+
+      docList
+      { searchQuery }
+
+--------------------------------------------------------------
+
+type ListProps =
+  ( searchQuery :: SearchQuery
   )
 
 docList :: R2.Leaf TabsProps
@@ -52,12 +108,7 @@ docListCpt = here.component "main" cpt where
       _ -> pure unit
   -- | Component
   -- |
-  cpt { frontends
-      , query
-      , session
-      , corpusId: nodeId
-      , listId
-      , showDoc
+  cpt { searchQuery
       } _ = do
     -- | States
     -- |
@@ -102,35 +153,35 @@ docListCpt = here.component "main" cpt where
     -- |
     let
 
-      callback :: Maybe GraphSideDoc -> DocId -> Effect Unit
-      callback
-        Nothing
-        new
-          = setGraphSideDoc new # Just # flip T.write_ showDoc
+      -- callback :: Maybe GraphSideDoc -> DocId -> Effect Unit
+      -- callback
+      --   Nothing
+      --   new
+      --     = setGraphSideDoc new # Just # flip T.write_ showDoc
 
-      callback
-        (Just (GraphSideDoc { docId }))
-        new
-        | docId == new = T.write_ Nothing showDoc
-        | otherwise    = setGraphSideDoc new # Just # flip T.write_ showDoc
+      -- callback
+      --   (Just (GraphSideDoc { docId }))
+      --   new
+      --   | docId == new = T.write_ Nothing showDoc
+      --   | otherwise    = setGraphSideDoc new # Just # flip T.write_ showDoc
 
-      setGraphSideDoc :: DocId -> GraphSideDoc
-      setGraphSideDoc docId = GraphSideDoc
-        { docId
-        , listId
-        , corpusId: nodeId
-        }
+      -- setGraphSideDoc :: DocId -> GraphSideDoc
+      -- setGraphSideDoc docId = GraphSideDoc
+      --   { docId
+      --   , listId
+      --   , corpusId: nodeId
+      --   }
 
-      isSelected :: Maybe GraphSideDoc -> DocumentsView -> Boolean
-      isSelected
-        (Just (GraphSideDoc { docId }))
-        (DocumentsView { id })
-          = docId == id
+      -- isSelected :: Maybe GraphSideDoc -> DocumentsView -> Boolean
+      -- isSelected
+      --   (Just (GraphSideDoc { docId }))
+      --   (DocumentsView { id })
+      --     = docId == id
 
-      isSelected
-        _
-        _
-          = false
+      -- isSelected
+      --   _
+      --   _
+      --     = false
 
     -- | Render
     -- |

@@ -5716,7 +5716,6 @@ h3 {
   position: relative;
 }
 .b-icon-button::before {
-  content: "";
   left: -10px;
   right: -10px;
   top: -6px;
@@ -5725,13 +5724,16 @@ h3 {
   position: absolute;
   transition: background-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
 }
-.b-icon-button--overlay-level-1:hover::before {
+.b-icon-button--overlay::before {
+  content: "";
+}
+.b-icon-button--level-1:hover::before {
   background-color: #F8F9FA;
 }
-.b-icon-button--overlay-level-2::before {
+.b-icon-button--level-2::before {
   background-color: #F8F9FA;
 }
-.b-icon-button--overlay-level-2:hover::before {
+.b-icon-button--level-2:hover::before {
   background-color: #dae0e5;
 }
 .b-icon-button--enabled, .b-icon-button--muted, .b-icon-button--idled {
@@ -8699,19 +8701,43 @@ select.form-control {
   top: calc( 50% - 50px );
   left: calc( 50% - 50px );
 }
-.phylo__sidebar {
-  position: fixed;
-  width: 480px;
-  height: calc(100vh - 56px);
-  z-index: 1;
-}
-.right-handed .phylo__sidebar {
+.phylo__frame {
+  top: 0;
   right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  display: flex;
+  z-index: 1;
+  width: 100%;
+  height: calc(100vh - 56px);
+  justify-content: flex-end;
+  pointer-events: none;
+}
+.right-handed .phylo__frame {
+  flex-direction: row;
+}
+
+.left-handed .phylo__frame {
+  flex-direction: row-reverse;
+}
+
+.phylo__sidebar {
+  width: 480px;
+  height: inherit;
+  flex-grow: 0;
+  pointer-events: all;
+}
+.phylo__sidebar__inner {
+  position: fixed;
+  height: inherit;
+  width: inherit;
+}
+.right-handed .phylo__sidebar__inner {
   border-left: 1px solid #dee2e6;
 }
 
-.left-handed .phylo__sidebar {
-  left: 0;
+.left-handed .phylo__sidebar__inner {
   border-right: 1px solid #dee2e6;
 }
 

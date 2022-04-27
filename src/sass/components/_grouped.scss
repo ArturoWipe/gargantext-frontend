@@ -120,35 +120,41 @@
   transition: color 150ms ease-in-out;
 
   &__inner {
-    // (see below "overlay")
+    // (due to overlay via pseudo element)
     z-index: 1;
     position: relative;
   }
 
   // overlay preparation
   &::before {
-    content: "";
     left: $overlay-offset-x;
     right: $overlay-offset-x;
     top: $overlay-offset-y;
     bottom: $overlay-offset-y;
     border-radius: $overlay-radius;
     position: absolute;
-    transition: background-color 150ms ease-in-out,
-                box-shadow 150ms ease-in-out;
+    transition:
+      background-color 150ms ease-in-out,
+      box-shadow 150ms ease-in-out;
   }
 
-  &--overlay-level-1:hover::before {
+  &--overlay::before {
+    content: "";
+  }
+
+  // elevation levels
+  &--level-1:hover::before {
     background-color: $gray-100;
   }
 
-  &--overlay-level-2::before {
+  &--level-2::before {
     background-color: $gray-100;
   }
-  &--overlay-level-2:hover::before {
+  &--level-2:hover::before {
     background-color: darken($gray-100, 10%);
   }
 
+  // component status UI changes
   &--enabled,
   &--muted,
   &--idled {

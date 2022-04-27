@@ -62,7 +62,7 @@ graphUpdateButtonCpt = here.component "graphUpdateButton" cpt
         B.iconButton
         { className: "mainleaf__update-icon"
         , variant: Secondary
-        , overlay: Level1
+        , elevation: Level1
         , status: enabled' ? Enabled $ Disabled
         , callback: const $ onClick enabled' enabled
         , name: "refresh"

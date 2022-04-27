@@ -55,7 +55,6 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
       } _ = do
     -- | States
     -- |
-
     { reloadForest
     } <- AppStore.use
 
@@ -324,10 +323,10 @@ convert (GET.GraphData r) = Tuple r.metaData $ SigmaxT.Graph {nodes, edges}
 
 -- | See sigmajs/plugins/sigma.renderers.customShapes/shape-library.js
 modeGraphType :: Types.Mode -> String
-modeGraphType Types.Authors = "square"
-modeGraphType Types.Institutes = "equilateral"
-modeGraphType Types.Sources = "star"
-modeGraphType Types.Terms = "def"
+modeGraphType Types.Authors     = "square"
+modeGraphType Types.Institutes  = "equilateral"
+modeGraphType Types.Sources     = "star"
+modeGraphType Types.Terms       = "def"
 
 --------------------------------------------------------------
 
