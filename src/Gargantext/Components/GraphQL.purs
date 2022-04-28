@@ -10,6 +10,7 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Foreign (unsafeToForeign, ForeignError)
+import Gargantext.Components.GraphQL.Annuaire as GQLA
 import Gargantext.Components.GraphQL.IMT as GQLIMT
 import Gargantext.Components.GraphQL.Node (Node)
 import Gargantext.Components.GraphQL.Tree (TreeFirstLevel)
@@ -69,7 +70,8 @@ queryGql session name q = do
 
 -- Schema
 type Schema
-  = { imt_schools :: {} ==> Array GQLIMT.School
+  = { annuaire_contacts :: { contact_id :: Int } ==> Array GQLA.AnnuaireContact
+    , imt_schools :: {} ==> Array GQLIMT.School
     , node_parent :: { node_id :: Int, parent_type :: String } ==> Array Node  -- TODO: parent_type :: NodeType
     , user_infos :: { user_id :: Int } ==> Array UserInfo
     , users :: { user_id :: Int } ==> Array User

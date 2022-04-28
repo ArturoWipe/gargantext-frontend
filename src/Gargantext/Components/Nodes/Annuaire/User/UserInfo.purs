@@ -1,4 +1,4 @@
-module Gargantext.Components.Nodes.Annuaire.User.Contact
+module Gargantext.Components.Nodes.Annuaire.User.UserInfo
   ( module Gargantext.Components.Nodes.Annuaire.User.Contacts.Types
   , contactInfos
   , contactLayout
@@ -38,7 +38,7 @@ import Record as Record
 import Toestand as T
 
 here :: R2.Here
-here = R2.here "Gargantext.Components.Nodes.Annuaire.User.Contact"
+here = R2.here "Gargantext.Components.Nodes.Annuaire.User.UserInfo"
 
 type DisplayProps = ( title :: String )
 
@@ -66,7 +66,7 @@ displayCpt = here.component "display" cpt
         ]
 
 -- | TODO format data in better design (UI) shape
-contactInfos :: AnnuaireContact -> (AnnuaireContact -> Effect Unit) -> Array R.Element
+contactInfos :: UserInfo -> (UserInfo -> Effect Unit) -> Array R.Element
 contactInfos userInfo onUpdateUserInfo = item <$> contactInfoItems where
   item { label, lens, defaultVal } =
     contactInfoItem { defaultVal, label, lens, onUpdateUserInfo, userInfo }
@@ -226,10 +226,10 @@ type AnnuaireKeyLayoutProps =
   | LayoutProps
   )
 
-contactLayout :: R2.Component AnnuaireLayoutProps
-contactLayout = R.createElement contactLayoutCpt
-contactLayoutCpt :: R.Component AnnuaireLayoutProps
-contactLayoutCpt = here.component "contactLayout" cpt where
+userLayout :: R2.Component AnnuaireLayoutProps
+userLayout = R.createElement userLayoutCpt
+userLayoutCpt :: R.Component AnnuaireLayoutProps
+userLayoutCpt = here.component "userLayout" cpt where
   cpt props@{ nodeId
             , session } _ = do
     let key = show (sessionId session) <> "-" <> show nodeId
@@ -249,13 +249,12 @@ contactLayoutWithKeyCpt = here.component "contactLayoutWithKey" cpt where
       _ <- T.useLive T.unequal reload
       cacheState <- T.useBox LT.CacheOn
       useLoader { errorHandler
-                --, loader: getAnnuaireContact session annuaireId
-                , loader: getAnnuaireContact session
+                , loader: getUserInfo session
                 , path: nodeId
                 , render: \annuaireContact@{ ac_id } ->
                     H.ul { className: "col-md-12 list-group" }
                       [ display { title: show ac_id }
-                        (contactInfos userInfo (onUpdateAnnuaireContact reload))
+                        (contactInfos userInfo (onUpdateUserInfo reload))
                       , Tabs.tabs
                         { boxes
                         , cacheState
@@ -269,15 +268,14 @@ contactLayoutWithKeyCpt = here.component "contactLayoutWithKey" cpt where
                 }
       where
         errorHandler = logRESTError here "[contactLayoutWithKey]"
-        onUpdateAnnuaireContact :: T2.ReloadS -> AnnuaireContact -> Effect Unit
-        onUpdateAnnuaireContact _ _ = pure unit
-        -- onUpdateAnnuaireContact reload ui = do
-        --   launchAff_ $ do
-        --     _ <- saveAnnuaireContact session nodeId ui
-        --     liftEffect (T2.reload reload)
+        onUpdateUserInfo :: T2.ReloadS -> UserInfo -> Effect Unit
+        onUpdateUserInfo reload ui = do
+          launchAff_ $ do
+            _ <- saveUserInfo session nodeId ui
+            liftEffect (T2.reload reload)
 
-getAnnuaireContact :: Session -> Int -> Int -> AffRESTError ContactData'
-getAnnuaireContact session annuaireId id = do
+getUserInfo :: Session -> Int -> Int -> AffRESTError ContactData'
+getUserInfo session annuaireId id = do
   eContactNode <- get session $ Routes.NodeAPI Annuaire (Just annuaireId) $ show id
   -- TODO: we need a default list for the pairings
   --defaultListIds <- get $ toUrl endConfigStateful Back (Children NodeList 0 1 Nothing) $ Just id

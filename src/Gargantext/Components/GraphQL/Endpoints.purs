@@ -1,5 +1,6 @@
 module Gargantext.Components.GraphQL.Endpoints where
 
+import Gargantext.Components.GraphQL.Annuaire
 import Gargantext.Components.GraphQL.Node
 import Gargantext.Components.GraphQL.User
 import Gargantext.Components.GraphQL.Tree
@@ -40,6 +41,15 @@ getNodeParent session nodeId parentType = do
                                                 , parent_type: show parentType }  -- TODO: remove "show"
   liftEffect $ here.log2 "[getNodeParent] node_parent" node_parent
   pure node_parent
+
+getAnnuaireContact :: Session -> Int -> AffRESTError AnnuaireContact
+getAnnuaireContact session id = do
+  { annuaire_contacts } <- queryGql session "get annuaire contacts" $ annuaireContactQuery `withVars` { id }
+  liftEffect $ here.log2 "[getAnnuaireContact] annuaire_contacts" annuaire_contacts
+  pure $ case A.head annuaire_contacts of
+    Nothing -> Left (CustomError $ "contact with id " <> show id <> " not found")
+    -- NOTE Contact is at G.C.N.A.U.C.Types
+    Just ui -> Right ui
 
 getUserInfo :: Session -> Int -> AffRESTError UserInfo
 getUserInfo session id = do
