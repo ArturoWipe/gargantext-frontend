@@ -1,5 +1,5 @@
 module Gargantext.Components.Nodes.Corpus.Graph
-  ( graphLayout
+  ( node
   ) where
 
 import Gargantext.Prelude
@@ -33,11 +33,11 @@ type Props =
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Corpus.Graph"
 
-graphLayout :: R2.Leaf ( key :: String | Props )
-graphLayout = R2.leaf graphLayoutCpt
+node :: R2.Leaf ( key :: String | Props )
+node = R2.leaf nodeCpt
 
-graphLayoutCpt :: R.Component ( key :: String | Props )
-graphLayoutCpt = here.component "explorerLayout" cpt where
+nodeCpt :: R.Component ( key :: String | Props )
+nodeCpt = here.component "node" cpt where
   cpt { graphId } _ = do
     -- | States
     -- |

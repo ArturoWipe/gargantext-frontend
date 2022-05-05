@@ -1,5 +1,5 @@
 module Gargantext.Components.Nodes.Frame
-  ( frameLayout
+  ( node
   ) where
 
 import Gargantext.Prelude
@@ -28,11 +28,11 @@ type Props =
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Frame"
 
-frameLayout :: R2.Leaf ( key :: String | Props )
-frameLayout = R2.leaf frameLayoutCpt
+node :: R2.Leaf ( key :: String | Props )
+node = R2.leaf nodeCpt
 
-frameLayoutCpt :: R.Component ( key :: String | Props )
-frameLayoutCpt = here.component "main" cpt where
+nodeCpt :: R.Component ( key :: String | Props )
+nodeCpt = here.component "node" cpt where
   cpt { nodeId
       , nodeType
       } _ = do

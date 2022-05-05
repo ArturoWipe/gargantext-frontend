@@ -21,7 +21,14 @@ $annotation-stop-color: #F5949931
     background-image: linear-gradient(rgba($color1, 0.34), rgba($color1, 0.34)), linear-gradient(rgba($color2, 0.33), rgba($color2, 0.33)), linear-gradient(rgba($color3, 0.33), rgba($color3, 0.33))
 
 .annotation-run
-  cursor: pointer
+  @include clickable
+
+  display: inline-block
+
+  // allowing a slight margin of colorisation (more would better, but as
+  // n-grams can be overlapped together, it would also be disgracious)
+  padding: 0 1px
+  margin: 0 -1px
 
   &.candidate-term.graph-term.stop-term
     @include lg3($annotation-candidate-color, $annotation-graph-color, $annotation-stop-color)

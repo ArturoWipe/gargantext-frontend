@@ -8427,7 +8427,7 @@ a:focus, a:hover {
   top: 3.7em;
   position: fixed;
 }
-.side-panel .corpus-doc-view .annotated-field-wrapper .annotated-field-runs {
+.side-panel .annotated-field-wrapper .annotated-field-runs {
   max-height: 200px;
   overflow-y: scroll;
 }
@@ -8674,6 +8674,12 @@ select.form-control {
 
 .annotation-run {
   cursor: pointer;
+  display: inline-block;
+  padding: 0 1px;
+  margin: 0 -1px;
+}
+.annotation-run:focus {
+  outline: 0;
 }
 .annotation-run.candidate-term.graph-term.stop-term {
   color: #000;
@@ -9204,6 +9210,43 @@ select.form-control {
   position: relative;
   width: 100%;
   height: calc(100vh - 56px );
+}
+
+.document-layout {
+  position: relative;
+  width: 780px;
+  margin: 0 auto;
+}
+.document-layout__title {
+  font-size: 26px;
+  font-weight: bold;
+  line-height: 1.4;
+  word-wrap: break-word;
+  margin-bottom: 24px;
+}
+.document-layout__authors {
+  line-height: 1.2;
+  color: #343A40;
+  margin-bottom: 16px;
+}
+.document-layout__publication {
+  font-size: 15px;
+  color: #6C757D;
+  margin-bottom: 16px;
+}
+.document-layout__abstract {
+  margin-top: 32px;
+}
+.document-layout__abstract__title {
+  font-weight: bold;
+  border-bottom: 1px solid #E9ECEF;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+.document-layout__abstract__content {
+  color: #343A40;
+  font-size: 18px;
+  line-height: 1.4;
 }
 
 /*# sourceMappingURL=bootstrap-monotony.css.map */

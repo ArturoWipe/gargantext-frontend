@@ -1,5 +1,5 @@
 module Gargantext.Components.Nodes.Corpus.Phylo
-  ( phyloLayout
+  ( node
   ) where
 
 import Gargantext.Prelude
@@ -28,11 +28,11 @@ type MainProps =
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Corpus.Phylo"
 
-phyloLayout :: R2.Leaf MainProps
-phyloLayout = R2.leaf phyloLayoutCpt
+node :: R2.Leaf MainProps
+node = R2.leaf nodeCpt
 
-phyloLayoutCpt :: R.Component MainProps
-phyloLayoutCpt = here.component "main" cpt where
+nodeCpt :: R.Component MainProps
+nodeCpt = here.component "node" cpt where
   cpt { nodeId } _ = do
     -- | States
     -- |

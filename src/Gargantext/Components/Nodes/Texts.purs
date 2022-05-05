@@ -26,7 +26,7 @@ import Gargantext.Components.Table as Table
 import Gargantext.Config.REST (logRESTError)
 import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Loader (useLoader)
-import Gargantext.Sessions (WithSession, Session, getCacheState)
+import Gargantext.Sessions (Session, WithSession, getCacheState, sessionId)
 import Gargantext.Types (CTabNgramType(..), ListId, NodeID, SidePanelState(..), TabSubType(..), TabType(..))
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
@@ -483,7 +483,10 @@ sidePanelDocViewCpt = here.component "sidePanelDocView" cpt
       pure $ H.div {} []
     cpt { mSidePanel: Just { corpusId, listId, nodeId }
         , session } _ = do
-      pure $ D.documentLayout { listId
-                              , mCorpusId: Just corpusId
-                              , nodeId
-                              , session } []
+      pure $
+        D.node
+        { listId
+        , mCorpusId: Just corpusId
+        , nodeId
+        , key: show (sessionId session) <> "-" <> show nodeId
+        }

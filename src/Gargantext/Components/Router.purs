@@ -20,11 +20,11 @@ import Gargantext.Components.Nodes.Annuaire.User.Contact (contactLayout)
 import Gargantext.Components.Nodes.Corpus (corpusLayout)
 import Gargantext.Components.Nodes.Corpus.Code (corpusCodeLayout)
 import Gargantext.Components.Nodes.Corpus.Dashboard (dashboardLayout)
-import Gargantext.Components.Nodes.Corpus.Document (documentMainLayout)
-import Gargantext.Components.Nodes.Corpus.Graph (graphLayout)
-import Gargantext.Components.Nodes.Corpus.Phylo (phyloLayout)
+import Gargantext.Components.Nodes.Corpus.Document as Document
+import Gargantext.Components.Nodes.Corpus.Graph as Graph
+import Gargantext.Components.Nodes.Corpus.Phylo as Phylo
 import Gargantext.Components.Nodes.File (fileLayout)
-import Gargantext.Components.Nodes.Frame (frameLayout)
+import Gargantext.Components.Nodes.Frame as Frame
 import Gargantext.Components.Nodes.Home (homeLayout)
 import Gargantext.Components.Nodes.Lists as Lists
 import Gargantext.Components.Nodes.Texts as Texts
@@ -424,16 +424,27 @@ type CorpusDocumentProps =
 
 corpusDocument :: R2.Component CorpusDocumentProps
 corpusDocument = R.createElement corpusDocumentCpt
+
 corpusDocumentCpt :: R.Component CorpusDocumentProps
-corpusDocumentCpt = here.component "corpusDocument" cpt
-  where
-    cpt props@{ corpusId: corpusId', listId, nodeId } _ = do
-      let sessionProps = RE.pick props :: Record SessionProps
-      pure $ authed (Record.merge { content: \session ->
-                                     documentMainLayout { mCorpusId: Just corpusId'
-                                                        , listId: listId
-                                                        , nodeId
-                                                        , session } [] } sessionProps )[]
+corpusDocumentCpt = here.component "corpusDocument" cpt where
+  cpt props@{ corpusId, listId, nodeId } _ = do
+    let
+      sessionProps = (RE.pick props :: Record SessionProps)
+
+      authedProps =
+        Record.merge
+        { content:
+            \session ->
+              Document.node
+              { mCorpusId: Just corpusId
+              , listId
+              , nodeId
+              , key: show (sessionId session) <> "-" <> show nodeId
+              }
+        }
+        sessionProps
+
+    pure $ authed authedProps []
 
 --------------------------------------------------------------
 
@@ -449,19 +460,34 @@ dashboardCpt = here.component "dashboard" cpt
 
 --------------------------------------------------------------
 
-type DocumentProps = ( listId :: ListId | SessionNodeProps )
+type DocumentProps =
+  ( listId :: ListId
+  | SessionNodeProps
+  )
 
 document :: R2.Component DocumentProps
 document = R.createElement documentCpt
+
 documentCpt :: R.Component DocumentProps
 documentCpt = here.component "document" cpt where
   cpt props@{ listId, nodeId } _ = do
-    let sessionProps = RE.pick props :: Record SessionProps
-    pure $ authed (Record.merge { content: \session ->
-                                   documentMainLayout { listId
-                                                      , nodeId
-                                                      , mCorpusId: Nothing
-                                                      , session } [] } sessionProps) []
+    let
+      sessionProps = (RE.pick props :: Record SessionProps)
+
+      authedProps =
+        Record.merge
+        { content:
+            \session ->
+              Document.node
+              { mCorpusId: Nothing
+              , listId
+              , nodeId
+              , key: show (sessionId session) <> "-" <> show nodeId
+              }
+        }
+        sessionProps
+
+    pure $ authed authedProps []
 
 --------------------------------------------------------------
 
@@ -477,7 +503,7 @@ graphExplorerCpt = here.component "graphExplorer" cpt where
       authedProps =
         Record.merge
         { content:
-            \_ -> graphLayout
+            \_ -> Graph.node
                   { graphId: nodeId
                   , key: "graphId-" <> show nodeId
                   }
@@ -501,7 +527,7 @@ phyloExplorerCpt = here.component "phylo" cpt where
       authedProps =
         Record.merge
         { content:
-            \_ -> phyloLayout
+            \_ -> Phylo.node
                   { nodeId
                   }
         }
@@ -573,7 +599,7 @@ routeFrameCpt = here.component "routeFrame" cpt where
         Record.merge
         { content:
             \session ->
-              frameLayout
+              Frame.node
               { nodeId
               , nodeType
               , key: show (sessionId session) <> "-" <> show nodeId
