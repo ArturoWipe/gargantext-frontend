@@ -6824,9 +6824,6 @@ a:focus {
 #app .text-italic {
   font-style: italic;
 }
-#app .text-underline {
-  text-decoration: underline;
-}
 #app .text-justify {
   text-align: justify;
 }
@@ -6853,9 +6850,6 @@ a:focus {
 }
 #app .text-capitalize {
   text-transform: capitalize;
-}
-#app .font-italic {
-  font-style: italic;
 }
 #app .text-decoration-none {
   text-decoration: none;
