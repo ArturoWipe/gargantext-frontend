@@ -56,29 +56,7 @@ layoutCpt = here.component "main" cpt where
 
       afterSync = \_ -> pure unit
 
-      syncResetBtns =
-        [
-          syncResetButtons
-          { afterSync
-          , ngramsLocalPatch
-          , performAction: dispatch
-          }
-        ]
-
       withAutoUpdate = false
-
-      autoUpd :: Array R.Element
-      autoUpd =
-        if withAutoUpdate
-        then
-          [
-            autoUpdate
-            { duration: 5000
-            , effect: dispatch $ Synchronize { afterSync }
-            }
-          ]
-        else
-          []
 
       ngrams = applyNgramsPatches state' initTable
 
@@ -105,16 +83,32 @@ layoutCpt = here.component "main" cpt where
     pure $
 
       H.div
-      { className: "document-layout" } $
+      { className: "document-layout" }
       -- @WIP
-      --    autoUpd
-      -- <> syncResetBtns
+      --
       -- <>
       --DEBUG
       --[ H.pre { rows: 30 } [
       --    H.text (stringifyWithIndent 2 (encodeJson (fst state)))
       --  ] ] <>
       [
+        H.div
+        { className: "document-layout__controls" }
+        [
+          R2.if' withAutoUpdate $
+
+            autoUpdate
+            { duration: 5000
+            , effect: dispatch $ Synchronize { afterSync }
+            }
+        ,
+          syncResetButtons
+          { afterSync
+          , ngramsLocalPatch
+          , performAction: dispatch
+          }
+        ]
+      ,
         H.div
         { className: "document-layout__title" }
         [

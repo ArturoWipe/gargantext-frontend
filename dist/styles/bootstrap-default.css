@@ -9216,6 +9216,9 @@ select.form-control {
   max-width: 780px;
   margin: 0 auto;
 }
+.document-layout__controls {
+  margin-bottom: 32px;
+}
 .document-layout__title {
   font-size: 26px;
   font-weight: bold;
