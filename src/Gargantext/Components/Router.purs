@@ -11,7 +11,6 @@ import Data.UUID as UUID
 import Effect (Effect)
 import Gargantext.Components.App.Store (Boxes)
 import Gargantext.Components.ErrorsView (errorsView)
-import Gargantext.Components.Footer (footer)
 import Gargantext.Components.Forest (forestLayout)
 import Gargantext.Components.Login (login)
 import Gargantext.Components.Nodes.Annuaire (annuaireLayout)
@@ -330,13 +329,10 @@ authedCpt = here.component "authed" cpt where
       T.write_ session' session
 
     case session' of
-      Nothing -> pure $ home homeProps []
+      Nothing -> pure $
+        home homeProps []
       Just s -> pure $
-        R.provideContext SessionContext.context s
-        [ content s
-        -- @TODO: used? (cf. other notes regarding footer)
-        , footer {} []
-        ]
+        R.provideContext SessionContext.context s [ content s ]
     where
       homeProps = RE.pick props :: Record Props
 

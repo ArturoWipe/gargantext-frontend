@@ -187,7 +187,6 @@ layoutCpt = R.memo' $ here.component "explorerWriteGraph" cpt where
         [
           Controls.controls
           { reloadForest: reloadForest
-          , session
           , sigmaRef
           }
         ]

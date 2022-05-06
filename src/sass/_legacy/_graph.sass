@@ -60,6 +60,13 @@
     .b-fieldset
       background-color: $body-bg
 
+    .toolbar-atlas-button
+      // @XXX Glyphicon icons lack of homogeneous width
+      //  ↳ empirically value matching every button icon width
+      $toolbar-atlas-button-width: 40px
+
+      width: $toolbar-atlas-button-width
+
   &__content
     width: 100%
     height: 100%
