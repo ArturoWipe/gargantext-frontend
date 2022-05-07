@@ -58,4 +58,13 @@
   &.stop-term {
     @include light-bulb($annotation-stop-color);
   }
+
+  &.disabled-term {
+    // slightly dissolving the icon colour, this will dissociate the semantic
+    // from the "traffic lights" chart towards a web one (where diluted
+    // gray means disabled element)
+    $color: mix-alpha($list-group-disabled-color, 20%);
+
+    @include light-bulb($color);
+  }
 }

@@ -6,17 +6,18 @@ module Gargantext.Components.Bootstrap.ContextMenu
 import Gargantext.Prelude
 
 import DOM.Simple as DOM
+import DOM.Simple as Element
 import DOM.Simple.Event as DE
 import DOM.Simple.Types (DOMRect)
 import DOM.Simple.Window (window)
-import Data.Foldable (intercalate)
-import Data.Maybe (Maybe(..), maybe)
-import Data.Nullable (Nullable, null)
-import Data.Tuple.Nested ((/\))
+import Data.Foldable (for_, intercalate)
+import Data.Maybe (Maybe, maybe)
+import Data.Nullable (Nullable, null, toMaybe)
 import Data.UUID as UUID
 import Effect (Effect)
-import FFI.Simple ((..))
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import FFI.Simple (setProperty', (..))
+import Gargantext.Components.Bootstrap.Ripple (ripple)
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Variant(..))
 import Gargantext.Hooks.Scrollbar (useScrollbar)
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -38,23 +39,15 @@ componentName = "b-context-menu"
 
 component :: R.Component Props
 component = R.hooksComponent componentName cpt where
-  cpt props@{ closeCallback
-            , x
-            , y
-            } children
+  cpt { closeCallback
+      , x
+      , y
+      } children
       = R.unsafeHooksEffect (UUID.genUUID >>= pure <<< UUID.toString)
     >>= \uuid -> do
     -- | States
     -- |
-    rootRef <- R.useRef (null :: Nullable DOM.Element)
-
-    -- NOTE: Just some dummy width/height here, it should be set properly in the effect function later
-    rect' /\ _ <- R2.useBox' $ Just $ R2.domRectFromRect
-      { x
-      , y
-      , width: 100.0
-      , height: 100.0
-      }
+    ref <- R.useRef (null :: Nullable DOM.Element)
 
     -- | Hooks
     -- |
@@ -65,6 +58,21 @@ component = R.hooksComponent componentName cpt where
       disableScroll
       -- Unmount
       pure enableScroll
+
+    -- /!\ for some reason we have to use the hook's effect with cleanup
+    --     function (even if empty)
+    R.useLayoutEffect1 (R.readRef ref) do
+      for_ (toMaybe $ R.readRef ref) \el -> do
+
+        let rect  = Element.boundingRect el
+        let pos   = position { x, y } rect
+        let style = el .. "style"
+
+        void $ pure $ setProperty' style "left" [ show pos.left ]
+        void $ pure $ setProperty' style "top" [ show pos.top ]
+
+
+      R.nothing # R.thenNothing
 
     -- | Computed
     -- |
@@ -93,33 +101,28 @@ component = R.hooksComponent componentName cpt where
         , on: { click: containerCallback }
         , key: uuid
         , id: containerId
-        , ref: rootRef
         }
         [
-          case rect' of
-            Nothing ->
-              H.div
-              { key: componentName
-              , className: componentName <> "__inner"
-              , data: { placement: "right", toggle: "popover" }
-              }
-              children
-
-            Just r ->
-              H.div
-              { key: componentName
-              , className: componentName <> "__inner"
-              , style: position props r
-              , data: { placement: "right", toggle: "popover" }
-              }
-              children
+          H.div
+          { className: componentName <> "__inner"
+          , data: { placement: "right", toggle: "popover" }
+          , ref
+          }
+          children
         ]
       ]
       <$> R2.getPortalHost
 
 
-position :: Record Props -> DOMRect -> { left :: Number, top :: Number }
-position mouse {width: menuWidth, height: menuHeight} = {left, top}
+position ::
+     { x :: Number
+     , y :: Number
+     }
+  -> DOMRect
+  -> { left :: Number
+     , top  :: Number
+     }
+position mouse { width: menuWidth, height: menuHeight } = { left, top }
   where
     left = if isRight then mouse.x else mouse.x - menuWidth
     top = if isAbove then mouse.y else mouse.y - menuHeight
@@ -175,8 +178,14 @@ itemCpt = R.hooksComponent itemComponentName cpt where
       H.div
       { className
       , on: { click }
-      }
-      children
+      } $
+      [
+        ripple
+        { status
+        , variant: Dark
+        }
+        children
+      ]
 
 -- | Clicked event will effectively be triggered according to the
 -- | component status props

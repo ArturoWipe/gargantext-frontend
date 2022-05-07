@@ -5928,6 +5928,9 @@ h3 {
 .b-ripple--dark:after {
   background-image: radial-gradient(circle, #1e2b37 10%, transparent 10%);
 }
+.b-ripple--disabled:after, .b-ripple--deferred:after, .b-ripple--muted:after {
+  content: none;
+}
 
 .b-preloader {
   width: 100%;
@@ -5966,6 +5969,7 @@ h3 {
   position: relative;
   background-color: #fff;
   padding: 0.75rem 1.25rem;
+  font-size: 15px;
 }
 .b-context-menu-item:focus {
   outline: 0;
@@ -8658,6 +8662,10 @@ select.form-control {
 }
 .b-icon.stop-term {
   color: #EE3311;
+  text-shadow: 0 0 4px;
+}
+.b-icon.disabled-term {
+  color: rgba(108, 117, 125, 0.2);
   text-shadow: 0 0 4px;
 }
 

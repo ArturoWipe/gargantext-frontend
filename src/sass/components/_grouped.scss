@@ -332,6 +332,12 @@
         );
     }
   }
+
+  &--disabled:after,
+  &--deferred:after,
+  &--muted:after {
+    content: none;
+  }
 }
 
 /// Preloader
@@ -386,6 +392,7 @@
   position: relative;
   background-color: $body-bg;
   padding: $list-group-item-padding-y $list-group-item-padding-x;
+  font-size: 15px;
 
   &--disabled,
   &--deferred,

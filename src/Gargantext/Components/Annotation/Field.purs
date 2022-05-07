@@ -9,11 +9,10 @@
 -- |
 -- | 1. We must only re-search the text when the ngrams change for performance
 -- | 2. We will need a more ambitious search algorithm for skipgrams.
-module Gargantext.Components.Annotation.AnnotatedField where
+module Gargantext.Components.Annotation.Field where
 
 import Gargantext.Prelude
 
-import DOM.Simple.Console (log)
 import DOM.Simple.Event as DE
 import Data.Array as A
 import Data.List (List(..), (:))
@@ -22,7 +21,7 @@ import Data.String.Common (joinWith)
 import Data.Tuple (Tuple(..), snd)
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
-import Gargantext.Components.Annotation.Menu (annotationMenuWrapper, AnnotationMenu)
+import Gargantext.Components.Annotation.Menu (annotationMenu, AnnotationMenu)
 import Gargantext.Components.Annotation.Types (termClass, MenuType(..))
 import Gargantext.Components.NgramsTable.Core (NgramsTable, NgramsTerm, findNgramTermList, highlightNgrams, normNgram)
 import Gargantext.Types (CTabNgramType(..), TermList)
@@ -86,7 +85,7 @@ annotatedFieldInnerCpt = here.component "annotatedFieldInner" cpt where
       H.div
       { className: "annotated-field-wrapper" }
       [
-        annotationMenuWrapper { menuRef }
+        annotationMenu { menuRef }
       ,
         H.div
         { className: "annotated-field-runs" }

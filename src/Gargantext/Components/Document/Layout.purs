@@ -7,7 +7,7 @@ import Gargantext.Prelude
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.String as String
 import Data.Tuple.Nested ((/\))
-import Gargantext.Components.Annotation.AnnotatedField as AnnotatedField
+import Gargantext.Components.Annotation.Field as AnnotatedField
 import Gargantext.Components.AutoUpdate (autoUpdate)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Document.Types (DocPath, Document(..), LoadedData, initialState)

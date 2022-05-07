@@ -6,7 +6,7 @@ import Gargantext.Prelude
 
 import DOM.Simple (document, querySelector, window)
 import Data.Either (Either(..))
-import Data.Foldable (intercalate)
+import Data.Foldable (for_, intercalate)
 import Data.Int as Int
 import Data.Maybe (Maybe(..))
 import Data.String (null)
@@ -194,12 +194,11 @@ layoutCpt = here.component "layout" cpt where
 
     R.useEffect1' isIsolineDisplayed' do
       mEl <- querySelector document ".phylo-isoline"
-      case mEl of
-        Nothing -> R.nothing
-        Just el -> do
-          style <- pure $ (el .. "style")
-          pure $ (style .= "display") $
-            isIsolineDisplayed' ? "flex" $ "none"
+      for_ mEl \el -> do
+        let style = el .. "style"
+        pure $ (style .= "display") $ isIsolineDisplayed' ?
+          "flex" $
+          "none"
 
     -- @NOTE #219: handling global variables (eg. via `window`)
     --             (see `Resources.js` how they are being used)
@@ -210,13 +209,11 @@ layoutCpt = here.component "layout" cpt where
     useUpdateEffect3'
       selectedTerm'
       selectedBranch'
-      selectedSource'
-        if (sideBarDisplayed' == InitialClosed)
-        then
-             T.write_ Opened sideBarDisplayed
-          *> T.write_ SelectionTab sideBarTabView
-        else
-          R.nothing
+      selectedSource' $
+        when (sideBarDisplayed' == InitialClosed) do
+          T.write_ Opened sideBarDisplayed
+          T.write_ SelectionTab sideBarTabView
+
 
     -- | Render
     -- |
@@ -259,7 +256,7 @@ layoutCpt = here.component "layout" cpt where
         { className: "phylo__frame" }
         [
           -- Doc focus
-          R2.fromMaybe_ frameDoc' \(frameDoc :: FrameDoc) ->
+          R2.fromMaybe_ frameDoc' \(f :: FrameDoc) ->
 
             H.div
             { className: "phylo__focus" }
