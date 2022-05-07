@@ -11,7 +11,8 @@
 /// @https://sebastiandedeyne.com/why-we-use-important-with-tailwind/
 /// @https://css-tricks.com/css-cascade-layers/
 
-#app {
+#app,
+#portal {
 
   // Width
   .w-0 { width: 0;          }
@@ -258,9 +259,7 @@
   .float-right  { float: right; }
   .float-none   { float: none;  }
 
-
   // Visibility
   .visible  { visibility: visible; }
   .hidden   { visibility: hidden;  }
-
 }

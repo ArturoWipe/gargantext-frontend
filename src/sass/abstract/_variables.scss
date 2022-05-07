@@ -25,6 +25,7 @@ $black:    #000000;
 /// @link https://medium.com/alistapart/sassier-z-index-management-for-complex-layouts-4540717a9488
 $z-indexes: (
   main: (
+    "context-menu",
   ),
   forest-layout: (
     "teaser",

@@ -58,27 +58,16 @@ nodeCpt = here.component "node" cpt where
       , state
       }
 
-    -- @XXX: Runtime odd behavior
-    --       cannot use the `useEffect` + its cleanup function within the
-    --       same `Effect`, otherwise the below cleanup example will be
-    --       execute at mount
-
     -- @XXX: reset "main-page__main-route" wrapper margin
     --       see Gargantext.Components.Router) (@TODO?)
-    R.useEffectOnce' do
-      mEl <- querySelector document ".main-page__main-route"
-
-      case mEl of
-        Nothing -> R.nothing
-        Just el -> R2.addClass el [ "p-0" ]
-
-    R.useEffectOnce do
-      pure do
-        mEl <- querySelector document ".main-page__main-route"
-
-        case mEl of
-          Nothing -> R.nothing
-          Just el -> R2.removeClass el [ "p-0" ]
+    R.useLayoutEffect1 [] do
+      let mEl = querySelector document ".main-page__main-route"
+      -- Mount
+      here.info mEl
+      mEl >>= maybe R.nothing (flip R2.addClass ["p-0"])
+      -- Unmount
+      pure $
+        mEl >>= maybe R.nothing (flip R2.removeClass ["p-0"])
 
     -- | Render
     -- |

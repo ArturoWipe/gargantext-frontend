@@ -355,3 +355,53 @@
     left: calc( 50% - #{ $size / 2 } );
   }
 }
+
+
+/// Context Menu
+///-----------------------------------------------------------------------------
+
+.b-context-menu {
+  $minimum-width: 280px;
+
+  @include fit-positions();
+
+  position: fixed;
+  z-index: z-index("main", "context-menu");
+  background-color: transparent;
+
+  &__inner {
+    position: fixed;
+    box-shadow: $box-shadow-lg;
+    border: 1px solid $gray-100;
+    word-wrap: break-word;
+    background-color: $body-bg;
+    border-radius: $card-border-radius;
+    min-width: $minimum-width;
+  }
+}
+
+.b-context-menu-item {
+  @include clickable();
+
+  position: relative;
+  // display: block;
+  background-color: $body-bg;
+  padding: $list-group-item-padding-y $list-group-item-padding-x;
+  // font-family: $font-family-base;
+  // font-size: $font-size-base;
+  // font-weight: $font-weight-base;
+  // color: $body-color;
+
+  &--disabled,
+  &--deferred,
+  &--idled {
+    @include unclickable();
+
+    color: $list-group-disabled-color;
+  }
+
+  &--enabled:hover,
+  &--muted:hover {
+    background-color: $list-group-hover-bg;
+  }
+}

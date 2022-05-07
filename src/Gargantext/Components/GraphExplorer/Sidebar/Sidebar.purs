@@ -313,19 +313,39 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
         [
           updateTermButton
           ( props `Record.merge`
-            { variant: ButtonVariant Secondary
+            { variant: ButtonVariant Light
+            -- { variant: ButtonVariant Secondary
             , rType: CandidateTerm
             }
           )
-          [ H.text "Move as candidate" ]
+          -- @WIP: managing colors
+          -- [ H.text "Move as candidate" ]
+          [
+            B.icon
+            { name: "pencil-square"
+            , className: "mr-1 candidate-term"
+            }
+          ,
+            H.text "Move as candidate"
+          ]
         ,
           updateTermButton
           ( props `Record.merge`
-            { variant: ButtonVariant Danger
+            { variant: ButtonVariant Light
+            -- { variant: ButtonVariant Danger
             , rType: StopTerm
             }
           )
-          [ H.text "Move as stop" ]
+          -- @WIP: managing colors
+          -- [ H.text "Move as stop" ]
+          [
+            B.icon
+            { name: "pencil-square"
+            , className: "mr-1 stop-term"
+            }
+          ,
+            H.text "Move as stop"
+          ]
         ]
       ]
 

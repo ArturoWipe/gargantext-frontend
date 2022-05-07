@@ -6,6 +6,7 @@ import Gargantext.Components.Bootstrap.BaseModal(baseModal) as Exports
 import Gargantext.Components.Bootstrap.Button(button) as Exports
 import Gargantext.Components.Bootstrap.Caveat(caveat) as Exports
 import Gargantext.Components.Bootstrap.Cloak (cloak) as Exports
+import Gargantext.Components.Bootstrap.ContextMenu(contextMenu, contextMenuItem) as Exports
 import Gargantext.Components.Bootstrap.Fieldset(fieldset) as Exports
 import Gargantext.Components.Bootstrap.FormInput(formInput) as Exports
 import Gargantext.Components.Bootstrap.FormSelect(formSelect, formSelect') as Exports

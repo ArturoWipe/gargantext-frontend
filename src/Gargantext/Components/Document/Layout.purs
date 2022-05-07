@@ -112,7 +112,7 @@ layoutCpt = here.component "main" cpt where
         H.div
         { className: "document-layout__title" }
         [
-          annotate doc.title []
+          annotate doc.title
         ]
       ,
         R2.fromMaybe_ doc.authors \authors ->
@@ -121,7 +121,7 @@ layoutCpt = here.component "main" cpt where
           { className: "document-layout__authors" }
           [
             -- TODO add href to /author/ if author present in
-            annotate (Just authors) []
+            annotate (Just authors)
           ]
       ,
         R2.if' hasPublication $
@@ -148,7 +148,7 @@ layoutCpt = here.component "main" cpt where
             H.div
             { className: "document-layout__abstract__content" }
             [
-              annotate doc.abstract []
+              annotate doc.abstract
             ]
           ]
       -- (?) remove "Full text" block (unused feature for now,
