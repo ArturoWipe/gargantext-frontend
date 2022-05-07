@@ -91,8 +91,8 @@ addToList {menuType, setList} t = Just $
   { callback: click }
   [
     B.icon
-    { name: "pencil-square"
-    , className: "mr-1 " <> termClass t
+    { name: "circle"
+    , className: "mr-2 " <> termClass t
     }
   ,
     H.text (label menuType)

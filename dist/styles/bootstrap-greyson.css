@@ -5948,7 +5948,7 @@ h3 {
   bottom: 0;
   left: 0;
   position: fixed;
-  z-index: 1;
+  z-index: 4;
   background-color: transparent;
 }
 .b-context-menu__inner {
@@ -6028,15 +6028,6 @@ html {
 img {
   max-width: 100%;
   display: block;
-}
-
-html.disable-scroll {
-  overflow-y: scroll;
-}
-
-html.disable-scroll body {
-  overflow-y: hidden;
-  height: 100vh;
 }
 
 .form-group {
@@ -7178,7 +7169,7 @@ input[type=range]:-moz-focusring {
 .main-topbar {
   position: sticky;
   top: 0;
-  z-index: 910;
+  z-index: 2;
 }
 .main-topbar__theme-switcher, .main-topbar__lang-switcher, .main-topbar__tree-switcher {
   margin-right: 8px;
@@ -7688,7 +7679,7 @@ li#rename #rename-a {
   left: 96px;
   top: -64px;
   background-color: white;
-  z-index: 1000;
+  z-index: 4;
 }
 #create-node-tooltip .card-body input {
   min-width: 200px;
@@ -7700,7 +7691,7 @@ li#rename #rename-a {
   transform: translateX(-50%) translateY(-50%);
   position: absolute;
   background-color: white;
-  z-index: 1000;
+  z-index: 4;
 }
 
 .glyphitem {
@@ -8137,7 +8128,7 @@ a:focus, a:hover {
 }
 
 .forest-layout {
-  z-index: 909;
+  z-index: 1;
   height: inherit;
   width: inherit;
   min-width: inherit;
@@ -8159,7 +8150,6 @@ a:focus, a:hover {
 
 .forest-layout__bottom-teaser {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
-  z-index: 1;
   pointer-events: none;
   position: sticky;
   bottom: 0;
@@ -8168,7 +8158,6 @@ a:focus, a:hover {
 }
 .forest-layout__top-teaser {
   background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
-  z-index: 1;
   pointer-events: none;
   position: sticky;
   top: 0;
@@ -8474,7 +8463,7 @@ select.form-control {
   width: inherit;
   height: inherit;
   position: fixed;
-  z-index: 99999999999;
+  z-index: 3;
   pointer-events: none;
 }
 .router__handle__action {
@@ -8655,29 +8644,17 @@ select.form-control {
   background-color: #F5949931;
 }
 
-.context-menu .candidate-term {
-  color: #000;
-  background-color: #B8B8B876;
+*:not(.annotation-run).graph-term {
+  color: #11AA11;
+  text-shadow: 0 0 4px;
 }
-.context-menu .graph-term {
-  color: #000;
-  background-color: #95D29593;
+*:not(.annotation-run).candidate-term {
+  color: #33AAEE;
+  text-shadow: 0 0 4px;
 }
-.context-menu .stop-term {
-  color: #000;
-  background-color: #F5949931;
-}
-
-.candidate-term {
-  color: #aaa;
-}
-
-.graph-term {
-  color: #0f0;
-}
-
-.stop-term {
-  color: #f00;
+*:not(.annotation-run).stop-term {
+  color: #EE3311;
+  text-shadow: 0 0 4px;
 }
 
 .fv.folders {

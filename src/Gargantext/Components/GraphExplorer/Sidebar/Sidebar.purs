@@ -322,7 +322,7 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
           -- [ H.text "Move as candidate" ]
           [
             B.icon
-            { name: "pencil-square"
+            { name: "circle"
             , className: "mr-1 candidate-term"
             }
           ,
@@ -340,7 +340,7 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
           -- [ H.text "Move as stop" ]
           [
             B.icon
-            { name: "pencil-square"
+            { name: "circle"
             , className: "mr-1 stop-term"
             }
           ,

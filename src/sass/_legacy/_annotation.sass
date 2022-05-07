@@ -52,21 +52,29 @@ $annotation-stop-color: #F5949931
     @include lg1($annotation-stop-color)
 
 
-.context-menu
-  .candidate-term
-    @include lg1($annotation-candidate-color)
+// .context-menu
+//   .candidate-term
+//     @include lg1($annotation-candidate-color)
 
-  .graph-term
-    @include lg1($annotation-graph-color)
+//   .graph-term
+//     @include lg1($annotation-graph-color)
 
-  .stop-term
-    @include lg1($annotation-stop-color)
+//   .stop-term
+//     @include lg1($annotation-stop-color)
 
 
 // @WIP: homogenization needed
-.candidate-term
-  color: #aaa
-.graph-term
-  color: #0f0
-.stop-term
-  color: #f00
+// .candidate-term
+//   color: #aaa
+// .graph-term
+//   color: #0f0
+// .stop-term
+//   color: #f00
+
+*:not(.annotation-run)
+  &.graph-term
+    @include light-bulb(#11AA11)
+  &.candidate-term
+    @include light-bulb(#33AAEE)
+  &.stop-term
+    @include light-bulb(#EE3311)

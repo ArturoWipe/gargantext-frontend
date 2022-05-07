@@ -366,7 +366,7 @@
   @include fit-positions();
 
   position: fixed;
-  z-index: z-index("main", "context-menu");
+  z-index: z-index('main', 'floaty');
   background-color: transparent;
 
   &__inner {
