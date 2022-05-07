@@ -8615,50 +8615,48 @@ select.form-control {
 .annotation-run {
   cursor: pointer;
   display: inline-block;
-  padding: 0 1px;
-  margin: 0 -1px;
 }
 .annotation-run:focus {
   outline: 0;
 }
 .annotation-run.candidate-term.graph-term.stop-term {
-  color: #000;
-  background-image: linear-gradient(rgba(184, 184, 184, 0.34), rgba(184, 184, 184, 0.34)), linear-gradient(rgba(149, 210, 149, 0.33), rgba(149, 210, 149, 0.33)), linear-gradient(rgba(245, 148, 153, 0.33), rgba(245, 148, 153, 0.33));
+  color: #000000;
+  background-image: linear-gradient(rgba(51, 170, 238, 0.1), rgba(51, 170, 238, 0.1)), linear-gradient(rgba(17, 170, 17, 0.1), rgba(17, 170, 17, 0.1)), linear-gradient(rgba(238, 51, 17, 0.1), rgba(238, 51, 17, 0.1));
 }
 .annotation-run.candidate-term.graph-term {
-  color: #000;
-  background-image: linear-gradient(rgba(184, 184, 184, 0.5), rgba(184, 184, 184, 0.5)), linear-gradient(rgba(149, 210, 149, 0.5), rgba(149, 210, 149, 0.5));
+  color: #000000;
+  background-image: linear-gradient(rgba(51, 170, 238, 0.2), rgba(51, 170, 238, 0.2)), linear-gradient(rgba(17, 170, 17, 0.2), rgba(17, 170, 17, 0.2));
 }
 .annotation-run.candidate-term.stop-term {
-  color: #000;
-  background-image: linear-gradient(rgba(184, 184, 184, 0.5), rgba(184, 184, 184, 0.5)), linear-gradient(rgba(245, 148, 153, 0.5), rgba(245, 148, 153, 0.5));
+  color: #000000;
+  background-image: linear-gradient(rgba(51, 170, 238, 0.2), rgba(51, 170, 238, 0.2)), linear-gradient(rgba(238, 51, 17, 0.2), rgba(238, 51, 17, 0.2));
 }
 .annotation-run.graph-term.stop-term {
-  color: #000;
-  background-image: linear-gradient(rgba(149, 210, 149, 0.5), rgba(149, 210, 149, 0.5)), linear-gradient(rgba(245, 148, 153, 0.5), rgba(245, 148, 153, 0.5));
+  color: #000000;
+  background-image: linear-gradient(rgba(17, 170, 17, 0.2), rgba(17, 170, 17, 0.2)), linear-gradient(rgba(238, 51, 17, 0.2), rgba(238, 51, 17, 0.2));
 }
 .annotation-run.candidate-term {
-  color: #000;
-  background-color: #B8B8B876;
+  color: #000000;
+  background-color: rgba(51, 170, 238, 0.175);
 }
 .annotation-run.graph-term {
-  color: #000;
-  background-color: #95D29593;
+  color: #000000;
+  background-color: rgba(17, 170, 17, 0.175);
 }
 .annotation-run.stop-term {
-  color: #000;
-  background-color: #F5949931;
+  color: #000000;
+  background-color: rgba(238, 51, 17, 0.175);
 }
 
-*:not(.annotation-run).graph-term {
+.b-icon.graph-term {
   color: #11AA11;
   text-shadow: 0 0 4px;
 }
-*:not(.annotation-run).candidate-term {
+.b-icon.candidate-term {
   color: #33AAEE;
   text-shadow: 0 0 4px;
 }
-*:not(.annotation-run).stop-term {
+.b-icon.stop-term {
   color: #EE3311;
   text-shadow: 0 0 4px;
 }
@@ -9180,6 +9178,7 @@ select.form-control {
 }
 .document-layout__abstract {
   margin-top: 32px;
+  margin-bottom: 24px;
 }
 .document-layout__abstract__title {
   font-weight: bold;
