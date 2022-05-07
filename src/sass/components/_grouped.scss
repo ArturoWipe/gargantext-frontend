@@ -384,13 +384,8 @@
   @include clickable();
 
   position: relative;
-  // display: block;
   background-color: $body-bg;
   padding: $list-group-item-padding-y $list-group-item-padding-x;
-  // font-family: $font-family-base;
-  // font-size: $font-size-base;
-  // font-weight: $font-weight-base;
-  // color: $body-color;
 
   &--disabled,
   &--deferred,
@@ -403,5 +398,24 @@
   &--enabled:hover,
   &--muted:hover {
     background-color: $list-group-hover-bg;
+  }
+}
+
+
+/// Button Group
+///-----------------------------------------------------------------------------
+
+.b-button-group {
+  $gutter: 2px;
+
+  &--no-collapse {
+
+    .btn:not(:first-child) {
+      margin-left: calc( #{ $gutter } / 2 );
+    }
+
+    .btn:not(:last-child) {
+      margin-right: calc( #{ $gutter } / 2 );
+    }
   }
 }

@@ -6225,6 +6225,13 @@ h3 {
   background-color: #f8f9fa;
 }
 
+.b-button-group--no-collapse .btn:not(:first-child) {
+  margin-left: calc( 2px / 2 );
+}
+.b-button-group--no-collapse .btn:not(:last-child) {
+  margin-right: calc( 2px / 2 );
+}
+
 html {
   box-sizing: border-box;
   height: 100%;
@@ -7758,12 +7765,11 @@ input[type=range]:-moz-focusring {
   white-space: normal;
   word-break: break-word;
 }
-.graph-selected-nodes__actions {
-  display: flex;
-  justify-content: space-around;
+.graph-selected-nodes__actions .b-button-group {
+  width: 100%;
 }
 .graph-selected-nodes__actions .b-button {
-  width: calc(50% - 8px );
+  width: 50%;
 }
 
 .graph-neighborhood__counter {

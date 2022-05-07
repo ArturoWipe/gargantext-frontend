@@ -4,6 +4,7 @@ module Gargantext.Components.Bootstrap
 
 import Gargantext.Components.Bootstrap.BaseModal(baseModal) as Exports
 import Gargantext.Components.Bootstrap.Button(button) as Exports
+import Gargantext.Components.Bootstrap.ButtonGroup(buttonGroup) as Exports
 import Gargantext.Components.Bootstrap.Caveat(caveat) as Exports
 import Gargantext.Components.Bootstrap.Cloak (cloak) as Exports
 import Gargantext.Components.Bootstrap.ContextMenu(contextMenu, contextMenuItem) as Exports
