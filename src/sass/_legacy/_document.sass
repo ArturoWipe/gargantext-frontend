@@ -5,6 +5,8 @@ $document-container-width: 780px
 ///////////////////////////////////////////////////////////
 
 .document-layout
+  $label-column-size: 96px
+
   position: relative
   width: 100%
   max-width: $document-container-width
@@ -13,32 +15,50 @@ $document-container-width: 780px
   &__controls
     margin-bottom: space-x(4)
 
+  &__separator-label
+    font-weight: bold
+    border-bottom: 1px solid $gray-200
+    padding-bottom: space-x(0.5)
+    margin-bottom: space-x(1.5)
+
   &__title
     font-size: 26px
     font-weight: bold
     line-height: 1.4
     word-wrap: break-word
     margin-bottom: space-x(3)
+    font-family: $headings-font-family
 
   &__authors
-    line-height: 1.2
-    color: $gray-800
-    margin-bottom: space-x(2)
+    display: flex
+    margin-bottom: space-x(0.5)
 
-  &__publication
-    font-size: 15px
-    color: $gray-600
-    margin-bottom: space-x(2)
+    &__label
+      font-weight: bold
+      width: $label-column-size
+      font-size: 15px
+
+    &__content
+      line-height: 1.2
+      color: $gray-800
+
+  &__source,
+  &__date
+    display: flex
+    margin-bottom: space-x(0.5)
+
+    &__label
+      font-weight: bold
+      width: $label-column-size
+      font-size: 15px
+
+    &__content
+      font-size: 15px
+      color: $gray-600
 
   &__abstract
     margin-top: space-x(4)
     margin-bottom: space-x(3)
-
-    &__title
-      font-weight: bold
-      border-bottom: 1px solid $gray-200
-      padding-bottom: space-x(0.5)
-      margin-bottom: space-x(1.5)
 
     &__content
       color: $gray-800

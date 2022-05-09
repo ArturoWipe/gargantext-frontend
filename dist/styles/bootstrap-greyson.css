@@ -9167,32 +9167,49 @@ select.form-control {
 .document-layout__controls {
   margin-bottom: 32px;
 }
+.document-layout__separator-label {
+  font-weight: bold;
+  border-bottom: 1px solid #E9ECEF;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
 .document-layout__title {
   font-size: 26px;
   font-weight: bold;
   line-height: 1.4;
   word-wrap: break-word;
   margin-bottom: 24px;
+  font-family: "Oswald";
 }
 .document-layout__authors {
+  display: flex;
+  margin-bottom: 4px;
+}
+.document-layout__authors__label {
+  font-weight: bold;
+  width: 96px;
+  font-size: 15px;
+}
+.document-layout__authors__content {
   line-height: 1.2;
   color: #343A40;
-  margin-bottom: 16px;
 }
-.document-layout__publication {
+.document-layout__source, .document-layout__date {
+  display: flex;
+  margin-bottom: 4px;
+}
+.document-layout__source__label, .document-layout__date__label {
+  font-weight: bold;
+  width: 96px;
+  font-size: 15px;
+}
+.document-layout__source__content, .document-layout__date__content {
   font-size: 15px;
   color: #6C757D;
-  margin-bottom: 16px;
 }
 .document-layout__abstract {
   margin-top: 32px;
   margin-bottom: 24px;
-}
-.document-layout__abstract__title {
-  font-weight: bold;
-  border-bottom: 1px solid #E9ECEF;
-  padding-bottom: 4px;
-  margin-bottom: 12px;
 }
 .document-layout__abstract__content {
   color: #343A40;

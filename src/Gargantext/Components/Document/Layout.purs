@@ -4,7 +4,7 @@ module Gargantext.Components.Document.Layout
 
 import Gargantext.Prelude
 
-import Data.Maybe (Maybe(..), isJust, maybe)
+import Data.Maybe (Maybe(..), maybe)
 import Data.String as String
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.Annotation.Field as AnnotatedField
@@ -13,7 +13,6 @@ import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Document.Types (DocPath, Document(..), LoadedData, initialState)
 import Gargantext.Components.NgramsTable.Core (CoreAction(..), Versioned(..), addNewNgramA, applyNgramsPatches, coreDispatch, replace, setTermListA, syncResetButtons, findNgramRoot)
 import Gargantext.Components.Node (NodePoly(..))
-import Gargantext.Utils (nbsp)
 import Gargantext.Utils as U
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
@@ -74,8 +73,6 @@ layoutCpt = here.component "main" cpt where
       setTermList ngram mOldList =
         dispatch <<< setTermListOrAddA (findNgramRoot ngrams ngram) mOldList
 
-      hasPublication = (isJust doc.source) || (isJust doc.publication_date)
-
       hasAbstract =  maybe false (not String.null) doc.abstract
 
     -- | Render
@@ -109,6 +106,10 @@ layoutCpt = here.component "main" cpt where
           }
         ]
       ,
+        B.div'
+        { className: "document-layout__separator-label" }
+        "Title"
+      ,
         H.div
         { className: "document-layout__title" }
         [
@@ -120,20 +121,42 @@ layoutCpt = here.component "main" cpt where
           H.div
           { className: "document-layout__authors" }
           [
-            -- TODO add href to /author/ if author present in
-            annotate (Just authors)
+            B.div'
+            { className: "document-layout__authors__label" }
+            "Authors"
+          ,
+            H.div
+            { className: "document-layout__authors__content" }
+            [
+              -- TODO add href to /author/ if author present in
+              annotate (Just authors)
+            ]
           ]
       ,
-        R2.if' hasPublication $
+        R2.fromMaybe_ doc.source \source ->
 
           H.div
-          { className: "document-layout__publication" }
+          { className: "document-layout__source" }
           [
-            R2.fromMaybe_ doc.source \source ->
-
-              H.text $ source <> "," <> nbsp 1
+            B.div'
+            { className: "document-layout__source__label" }
+            "Source"
           ,
-            H.text $ publicationDate $ Document doc
+            B.div'
+            { className: "document-layout__source__content" }
+            source
+          ]
+      ,
+          H.div
+          { className: "document-layout__date" }
+          [
+            B.div'
+            { className: "document-layout__date__label" }
+            "Date"
+          ,
+            B.div'
+            { className: "document-layout__date__content" }
+            (publicationDate $ Document doc)
           ]
       ,
         R2.if' hasAbstract $
@@ -142,7 +165,7 @@ layoutCpt = here.component "main" cpt where
           { className: "document-layout__abstract" }
           [
             B.div'
-            { className: "document-layout__abstract__title" }
+            { className: "document-layout__separator-label" }
             "Abstract"
           ,
             H.div
