@@ -4,11 +4,13 @@ module Gargantext.Components.Nodes.Corpus.Document
 
 import Gargantext.Prelude
 
+import DOM.Simple.Console (log)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Document.API (loadData)
 import Gargantext.Components.Document.Layout (layout)
+import Gargantext.Components.Document.Types (LoadedData, DocPath)
 import Gargantext.Config.REST (logRESTError)
 import Gargantext.Hooks.Loader (useLoaderEffect)
 import Gargantext.Hooks.Session (useSession)
@@ -38,18 +40,21 @@ nodeCpt = here.component "node" cpt where
     -- |
     session <- useSession
 
-    state' /\ state <- R2.useBox' Nothing
+    state' /\ state <- R2.useBox' (Nothing :: Maybe LoadedData)
 
     -- | Computed
     -- |
     let
+      tabType :: TabType
+      tabType = TabDocument (TabNgramType CTabTerms)
 
+      path :: DocPath
       path = { listIds: [listId], mCorpusId, nodeId, session, tabType }
 
     -- | Hooks
     -- |
     useLoaderEffect
-      { errorHandler
+      { errorHandler: logRESTError here "[documentLayoutWithKey]"
       , loader: loadData
       , path
       , state
@@ -73,7 +78,3 @@ nodeCpt = here.component "node" cpt where
             , path
             }
       }
-
-    where
-      tabType = TabDocument (TabNgramType CTabTerms)
-      errorHandler = logRESTError here "[documentLayoutWithKey]"

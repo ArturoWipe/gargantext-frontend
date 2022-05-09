@@ -79,7 +79,7 @@ listsLayoutWithKeyCpt = here.component "listsLayoutWithKey" cpt where
                               , nodeId: corpusId
                               , session
                               , key: "listsLayoutWithKey-header-" <> (show cacheState')
-                                } []
+                                }
                             , Tabs.tabs {
                                 activeTab
                               , boxes

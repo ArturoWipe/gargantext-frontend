@@ -33,9 +33,10 @@ import Gargantext.Config (defaultFrontends, defaultBackends)
 import Gargantext.Context.Session as SessionContext
 import Gargantext.Ends (Backend)
 import Gargantext.Hooks.Resize (ResizeType(..), useResizeHandler)
+import Gargantext.Hooks.Session (useSession)
 import Gargantext.Routes (AppRoute, Tile)
 import Gargantext.Routes as GR
-import Gargantext.Sessions (Session, WithSession, sessionId)
+import Gargantext.Sessions (Session, sessionId)
 import Gargantext.Sessions as Sessions
 import Gargantext.Types (CorpusId, Handed(..), ListId, NodeID, NodeType(..), SessionId, SidePanelState(..))
 import Gargantext.Utils ((?))
@@ -259,7 +260,9 @@ sidePanelCpt = here.component "sidePanel" cpt where
       Nothing -> pure $ H.div {} []
       Just s  ->
         case sidePanelState' of
-          Opened -> pure $ openedSidePanel (Record.merge { session: s } props) []
+          Opened -> pure $
+            R.provideContext SessionContext.context s
+            [ openedSidePanel props ]
           _      -> pure $ H.div {} []
 
 --------------------------------------------------------------
@@ -338,14 +341,17 @@ authedCpt = here.component "authed" cpt where
 
 --------------------------------------------------------------
 
-openedSidePanel :: R2.Component (WithSession Props)
-openedSidePanel = R.createElement openedSidePanelCpt
-openedSidePanelCpt :: R.Component (WithSession Props)
+openedSidePanel :: R2.Leaf Props
+openedSidePanel = R2.leaf openedSidePanelCpt
+
+openedSidePanelCpt :: R.Component Props
 openedSidePanelCpt = here.component "openedSidePanel" cpt where
-  cpt { boxes: boxes@{ route
-                     , sidePanelState
-                     , sidePanelTexts }
-      , session } _ = do
+  cpt { boxes:
+        { route
+        , sidePanelState
+        }
+      } _ = do
+    session <- useSession
 
     route' <- T.useLive T.unequal route
 
@@ -356,11 +362,8 @@ openedSidePanelCpt = here.component "openedSidePanel" cpt where
         pure $ wrapper
           [ Lists.sidePanel { session
                             , sidePanelState } [] ]
-      GR.NodeTexts _s _n -> do
-        pure $ wrapper
-          [ Texts.textsSidePanel { boxes
-                                 , session
-                                 , sidePanel: sidePanelTexts } [] ]
+      GR.NodeTexts _s _n ->
+        pure $ wrapper [ Texts.textsSidePanel {} ]
       _ -> pure $ wrapper []
 
 --------------------------------------------------------------
@@ -623,17 +626,24 @@ teamCpt = here.component "team" cpt where
 
 texts :: R2.Component SessionNodeProps
 texts = R.createElement textsCpt
+
 textsCpt :: R.Component SessionNodeProps
-textsCpt = here.component "texts" cpt
-  where
-    cpt props@{ boxes
-              , nodeId } _ = do
-      let sessionProps = RE.pick props :: Record SessionProps
-      pure $ authed (Record.merge { content: \session ->
-                                     Texts.textsLayout { boxes
-                                                       , frontends: defaultFrontends
-                                                       , nodeId
-                                                       , session } [] } sessionProps) []
+textsCpt = here.component "texts" cpt where
+  cpt props@{ nodeId } _ = do
+    let
+      sessionProps = (RE.pick props :: Record SessionProps)
+
+      authedProps =
+        Record.merge
+        { content:
+            \_ -> Texts.textsLayout
+                  { frontends: defaultFrontends
+                  , nodeId
+                  }
+        }
+        sessionProps
+
+    pure $ authed authedProps []
 
 --------------------------------------------------------------
 

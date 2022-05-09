@@ -42,16 +42,7 @@ nodeCpt = here.component "node" cpt where
 
     -- | Computed
     -- |
-    let
-
-      errorHandler = logRESTError here "[phylo]"
-
-      handler (phyloDataSet :: PhyloDataSet) =
-        hydrateStore
-        { phyloId: nodeId
-        , phyloDataSet
-        }
-
+    let errorHandler = logRESTError here "[phylo]"
 
     -- | Hooks
     -- |
@@ -94,42 +85,22 @@ nodeCpt = here.component "node" cpt where
             ]
           ]
       , defaultSlot:
-          R2.fromMaybe_ state' handler
+          R2.fromMaybe_ state' \(phyloDataSet :: PhyloDataSet) ->
+
+            let
+              state_ :: Record PhyloStore.State
+              state_ =
+                -- Data
+                { phyloDataSet
+                , phyloId: nodeId
+                -- (default options)
+                } `Record.merge` PhyloStore.options
+
+            in
+              PhyloStore.provide
+              state_
+              [
+                layout
+                {}
+              ]
       }
-
---------------------------------------------------------
-
-type HydrateStoreProps =
-  ( phyloDataSet :: PhyloDataSet
-  , phyloId      :: NodeID
-  )
-
-hydrateStore :: R2.Leaf HydrateStoreProps
-hydrateStore = R2.leaf hydrateStoreCpt
-
-hydrateStoreCpt :: R.Component HydrateStoreProps
-hydrateStoreCpt = here.component "layout" cpt where
-  cpt { phyloDataSet
-      , phyloId
-      } _ = do
-    -- | Computed
-    -- |
-    let
-      state :: Record PhyloStore.State
-      state =
-        -- Data
-        { phyloDataSet
-        , phyloId
-        -- (default options)
-        } `Record.merge` PhyloStore.options
-
-    -- | Render
-    -- |
-    pure $
-
-      PhyloStore.provide
-      state
-      [
-        layout
-        {}
-      ]
