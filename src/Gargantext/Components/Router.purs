@@ -92,7 +92,7 @@ routerCpt = here.component "router" cpt where
       { className: "router" }
       [
         -- loginModal { boxes }
-         R2.if' showLogin' $
+         R2.when showLogin' $
             login' boxes
        , TopBar.topBar { boxes }
        , errorsView { errors: boxes.errors } []

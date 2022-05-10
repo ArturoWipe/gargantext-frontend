@@ -43,7 +43,7 @@ annotationMenuCpt = here.component "main" cpt where
     -- Render
     pure $
 
-      R2.fromMaybe_ (R.readRef menuRef) \props' ->
+      R2.fromMaybe (R.readRef menuRef) \props' ->
 
         B.contextMenu
         { x: props'.x

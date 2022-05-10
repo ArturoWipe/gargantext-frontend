@@ -433,7 +433,7 @@ neighborhoodCpt = R.memo' $ here.component "neighborhood" cpt where
           {} $
           flip mapWithIndex termList \index node ->
 
-            R2.if'
+            R2.when
             (
                withTruncateResults == false
             || index < maxTruncateResult
@@ -459,7 +459,7 @@ neighborhoodCpt = R.memo' $ here.component "neighborhood" cpt where
                 [ H.text node.label ]
               ]
         ,
-          R2.if' (withTruncateResults) $
+          R2.when (withTruncateResults) $
 
             B.button
             { variant: ButtonVariant Light

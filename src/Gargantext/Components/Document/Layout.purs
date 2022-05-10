@@ -92,7 +92,7 @@ layoutCpt = here.component "main" cpt where
         H.div
         { className: "document-layout__controls" }
         [
-          R2.if' withAutoUpdate $
+          R2.when withAutoUpdate $
 
             autoUpdate
             { duration: 5000
@@ -116,7 +116,7 @@ layoutCpt = here.component "main" cpt where
           annotate doc.title
         ]
       ,
-        R2.fromMaybe_ doc.authors \authors ->
+        R2.fromMaybe doc.authors \authors ->
 
           H.div
           { className: "document-layout__authors" }
@@ -133,7 +133,7 @@ layoutCpt = here.component "main" cpt where
             ]
           ]
       ,
-        R2.fromMaybe_ doc.source \source ->
+        R2.fromMaybe doc.source \source ->
 
           H.div
           { className: "document-layout__source" }
@@ -159,7 +159,7 @@ layoutCpt = here.component "main" cpt where
             (publicationDate $ Document doc)
           ]
       ,
-        R2.if' hasAbstract $
+        R2.when hasAbstract $
 
           H.div
           { className: "document-layout__abstract" }

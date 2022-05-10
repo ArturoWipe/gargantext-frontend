@@ -68,7 +68,7 @@ nodeCpt = here.component "node" cpt where
           {}
 
       , defaultSlot:
-          R2.fromMaybe_ state' \frame ->
+          R2.fromMaybe state' \frame ->
             layout
             { frame
             , nodeId

@@ -12,6 +12,7 @@ import DOM.Simple.Types (class IsNode, class IsElement, DOMRect)
 import Data.Array as A
 import Data.Either (hush)
 import Data.Function.Uncurried (Fn1, runFn1, Fn2, runFn2)
+import Data.Maybe as Maybe
 import Data.Maybe (Maybe(..), fromJust, fromMaybe)
 import Data.Nullable (Nullable, null, toMaybe)
 import Data.Tuple (Tuple)
@@ -404,7 +405,7 @@ loadLocalStorageState key cell = do
   item :: Maybe String <- getItem key storage
   -- let json = hush <<< Argonaut.jsonParser =<< item
   -- let parsed = hush <<< Argonaut.decodeJson =<< json
-  let parsed = hush <<< JSON.readJSON $ fromMaybe "" item
+  let parsed = hush <<< JSON.readJSON $ Maybe.fromMaybe "" item
   case parsed of
     Nothing -> pure unit
     Just p  -> void $ T.write p cell
@@ -501,15 +502,17 @@ boundingRect els =
 
 --------------------------------------
 
--- | One-liner `if` simplifying render writing
+-- | One-liner `when` simplifying render writing
 -- | (best for one child)
-if' :: Boolean -> R.Element -> R.Element
-if' = if _ then _ else mempty
+when :: Boolean -> R.Element -> R.Element
+when true m  = m
+when false _ = mempty
 
--- | One-liner `if` simplifying render writing
+-- | One-liner `when` simplifying render writing
 -- | (best for multiple children)
-if_ :: Boolean -> Array (R.Element) -> R.Element
-if_ pred arr = if pred then (R.fragment arr) else mempty
+when' :: Boolean -> Array (R.Element) -> R.Element
+when' true m  = R.fragment m
+when' false _ = mempty
 
 -- | Toestand `useLive` automatically sets to "unchanged" behavior
 useLive' :: forall box b. T.Read box b => Eq b => box -> R.Hooks b
@@ -536,8 +539,8 @@ createPortal' Nothing     _        = mempty
 createPortal' (Just host) children = R.createPortal children host
 
 -- | Render a `mempty` Element if provided `Maybe` is `Nothing`
-fromMaybe_ :: forall a. Maybe a -> (a -> R.Element) -> R.Element
-fromMaybe_ m render = case m of
+fromMaybe :: forall a. Maybe a -> (a -> R.Element) -> R.Element
+fromMaybe m render = case m of
   Nothing -> mempty
   Just a  -> render a
 

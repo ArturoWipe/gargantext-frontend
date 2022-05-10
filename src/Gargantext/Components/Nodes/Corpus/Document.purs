@@ -71,7 +71,7 @@ nodeCpt = here.component "node" cpt where
           {}
 
       , defaultSlot:
-          R2.fromMaybe_ state' \loaded ->
+          R2.fromMaybe state' \loaded ->
             layout
             { loaded
             , path

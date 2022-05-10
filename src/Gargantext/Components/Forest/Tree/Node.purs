@@ -313,7 +313,7 @@ nodeSpanCpt = here.component "nodeSpan" cpt
           , session
           } []
         ,
-          R2.if' (showBox) $
+          R2.when (showBox) $
 
             Popover.popover
             { arrow: false
@@ -580,7 +580,7 @@ graphNodeActionsCpt = here.component "graphNodeActions" cpt where
       }
 
     -- Render
-    pure $ R2.fromMaybe_ state \gv ->
+    pure $ R2.fromMaybe state \gv ->
 
       nodeActionsGraph
       { graphVersions: gv, session, id, refresh }
@@ -607,7 +607,7 @@ listNodeActionsCpt = here.component "listNodeActions" cpt where
       }
 
     -- Render
-    pure $ R2.fromMaybe_ state \{ corpusId } ->
+    pure $ R2.fromMaybe state \{ corpusId } ->
 
       nodeActionsNodeList
       { listId: id

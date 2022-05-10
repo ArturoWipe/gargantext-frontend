@@ -228,7 +228,7 @@ layoutCpt = here.component "layout" cpt where
       }
       [
         -- Preloading spinner
-        R2.if' (not isBuilt') $
+        R2.when (not isBuilt') $
 
           H.div
           { className: "phylo__spinner-wrapper" }
@@ -242,7 +242,7 @@ layoutCpt = here.component "layout" cpt where
         [
           R2.fragmentWithKey topBarPortalKey
           [
-            R2.if' (isBuilt') $
+            R2.when (isBuilt') $
               topBar
               { sourceCallback
               , searchCallback
@@ -256,7 +256,7 @@ layoutCpt = here.component "layout" cpt where
         { className: "phylo__frame" }
         [
           -- Doc focus
-          R2.fromMaybe_ frameDoc' \(f :: FrameDoc) ->
+          R2.fromMaybe frameDoc' \(f :: FrameDoc) ->
 
             H.div
             { className: "phylo__focus" }
@@ -286,7 +286,7 @@ layoutCpt = here.component "layout" cpt where
         ]
       ,
         -- Toolbar
-        R2.if' (toolBarDisplayed') $
+        R2.when (toolBarDisplayed') $
           toolBar
           { resetViewCallback : const RS.resetView
           , exportCallback    : const RS.exportViz

@@ -8082,6 +8082,7 @@ a:focus, a:hover {
 .mainleaf__folder-icon {
   font-size: 14px;
   width: 16px;
+  z-index: 1;
 }
 .mainleaf__folder-icon--leaf {
   color: #CED4DA;

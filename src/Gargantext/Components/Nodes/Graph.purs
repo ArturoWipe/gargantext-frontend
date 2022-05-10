@@ -81,7 +81,7 @@ nodeCpt = here.component "node" cpt where
           {}
 
       , defaultSlot:
-          R2.fromMaybe_ state' handler
+          R2.fromMaybe state' handler
       }
 
     where

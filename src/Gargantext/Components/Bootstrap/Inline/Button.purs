@@ -87,7 +87,7 @@ component = R.hooksComponent componentName cpt where
       , title: props.title
       }
       [
-        R2.if' (status == Deferred) $
+        R2.when (status == Deferred) $
           spinner
           { className: componentName <> "__spinner" }
       ,
