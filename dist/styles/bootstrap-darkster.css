@@ -8179,6 +8179,7 @@ a:focus, a:hover {
   border-radius: 50%;
   bottom: -8px;
   right: -4px;
+  z-index: 1;
 }
 .mainleaf__version-badge--matched.b-icon-button, .mainleaf__version-badge--matched.b-icon-button:hover {
   color: #015668;
@@ -8686,6 +8687,31 @@ a:focus, a:hover {
 }
 .left-handed .side-panel .header {
   float: left;
+}
+
+.side-panel .texts-sidepanel__header {
+  padding: 0.75rem 1.25rem;
+  font-size: 20px;
+}
+.right-handed .side-panel .texts-sidepanel__header {
+  float: right;
+}
+
+.left-handed .side-panel .texts-sidepanel__header {
+  float: left;
+}
+
+.side-panel .texts-sidepanel__body {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+.side-panel .texts-sidepanel__body .document-layout__title {
+  font-size: 23px;
+}
+.side-panel .texts-sidepanel__body .document-layout__abstract__content {
+  max-height: 200px;
+  overflow-y: scroll;
+  font-size: 16px;
 }
 
 .simple-layout {
@@ -9478,7 +9504,8 @@ select.form-control {
 }
 .document-layout__authors__label {
   font-weight: bold;
-  width: 96px;
+  flex-basis: 96px;
+  flex-shrink: 0;
   font-size: 15px;
 }
 .document-layout__authors__content {
@@ -9491,7 +9518,8 @@ select.form-control {
 }
 .document-layout__source__label, .document-layout__date__label {
   font-weight: bold;
-  width: 96px;
+  flex-basis: 96px;
+  flex-shrink: 0;
   font-size: 15px;
 }
 .document-layout__source__content, .document-layout__date__content {

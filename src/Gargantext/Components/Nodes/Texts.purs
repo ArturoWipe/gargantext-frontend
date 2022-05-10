@@ -9,6 +9,8 @@ import Data.Tuple.Nested ((/\))
 import Effect.Aff (launchAff_)
 import Gargantext.Components.App.Store (Boxes)
 import Gargantext.Components.App.Store as AppStore
+import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.Bootstrap.Types (Elevation(..))
 import Gargantext.Components.Charts.Options.ECharts (dispatchAction)
 import Gargantext.Components.Charts.Options.Type (EChartsInstance, EChartActionData)
 import Gargantext.Components.DocsTable as DT
@@ -30,11 +32,11 @@ import Gargantext.Hooks.Loader (useLoader)
 import Gargantext.Hooks.Session (useSession)
 import Gargantext.Sessions (Session, getCacheState, sessionId)
 import Gargantext.Types (CTabNgramType(..), ListId, NodeID, SidePanelState(..), TabSubType(..), TabType(..))
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
 import Reactix as R
 import Reactix.DOM.HTML as H
-import Record as Record
 import Toestand as T
 
 here :: R2.Here
@@ -445,44 +447,51 @@ textsSidePanelCpt = here.component "sidePanel" cpt where
       --   -- log "[sidePanel] clearing triggerAnnotatedDocIdChange"
       --   R2.clearTrigger triggerAnnotatedDocIdChange
 
-    let mainStyle = case sidePanelState' of
-          Opened -> { display: "block" }
-          _      -> { display: "none" }
-
     let closeSidePanel _ = do
           -- T.modify_ (\sp -> sp { mCurrentDocId = Nothing
           --                     , state = Closed }) sidePanelTexts
           T.write_ Closed sidePanelState
           T.write_ Nothing sidePanelTexts
 
-    pure $ H.div { style: mainStyle } [
-      H.div { className: "header" } [
-        H.span { className: "btn btn-danger"
-                , on: { click: closeSidePanel } } [
-          H.span { className: "fa fa-times" } []
+
+    pure $
+
+      H.div
+      -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
+      -- @link https://github.com/facebook/react/issues/12039
+      { className: "texts-sidepanel"
+      , style: { display: sidePanelState' == Opened ? "block" $ "none" }
+      }
+      [
+        H.div
+        { className: "texts-sidepanel__inner" }
+        [
+          H.div
+          { className: "texts-sidepanel__header" }
+          [
+            B.iconButton
+            { name: "times"
+            , elevation: Level2
+            , callback: closeSidePanel
+            }
+          ]
+        ,
+          H.div
+          { className: "texts-sidepanel__body" }
+          [
+            case sidePanelTexts' of
+              Nothing ->
+                B.caveat
+                {}
+                [ H.text $ "You can select a document to see its content" ]
+
+              Just { corpusId, listId, nodeId } ->
+                D.node
+                { listId
+                , mCorpusId: Just corpusId
+                , nodeId
+                , key: show (sessionId session) <> "-" <> show nodeId
+                }
+          ]
         ]
       ]
-    , sidePanelDocView { mSidePanel: sidePanelTexts', session } []
-    ]
-
-type SidePanelDocView = (
-    mSidePanel :: Maybe (Record TT.SidePanel)
-  , session    :: Session
-  )
-
-sidePanelDocView :: R2.Component SidePanelDocView
-sidePanelDocView = R.createElement sidePanelDocViewCpt
-sidePanelDocViewCpt :: R.Component SidePanelDocView
-sidePanelDocViewCpt = here.component "sidePanelDocView" cpt
-  where
-    cpt { mSidePanel: Nothing } _ = do
-      pure $ H.div {} []
-    cpt { mSidePanel: Just { corpusId, listId, nodeId }
-        , session } _ = do
-      pure $
-        D.node
-        { listId
-        , mCorpusId: Just corpusId
-        , nodeId
-        , key: show (sessionId session) <> "-" <> show nodeId
-        }
