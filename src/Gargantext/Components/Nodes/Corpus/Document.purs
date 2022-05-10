@@ -4,7 +4,6 @@ module Gargantext.Components.Nodes.Corpus.Document
 
 import Gargantext.Prelude
 
-import DOM.Simple.Console (log)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.Bootstrap as B

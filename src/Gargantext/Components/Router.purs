@@ -258,10 +258,10 @@ sidePanelCpt = here.component "sidePanel" cpt where
 
     case session' of
       Nothing -> pure $ H.div {} []
-      Just s  ->
+      Just _  ->
         case sidePanelState' of
           Opened -> pure $
-            R.provideContext SessionContext.context s
+            R.provideContext SessionContext.context session'
             [ openedSidePanel props ]
           _      -> pure $ H.div {} []
 
@@ -335,7 +335,7 @@ authedCpt = here.component "authed" cpt where
       Nothing -> pure $
         home homeProps []
       Just s -> pure $
-        R.provideContext SessionContext.context s [ content s ]
+        R.provideContext SessionContext.context session' [ content s ]
     where
       homeProps = RE.pick props :: Record Props
 
