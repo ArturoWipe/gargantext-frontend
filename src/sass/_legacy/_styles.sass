@@ -114,32 +114,37 @@ select.form-control
     $offset-y: 56px
     $min-width: 280px
 
-    position: relative
     flex-grow: 0
     flex-shrink: 0
     width: $min-width
     min-width: $min-width
     height: calc(100vh - #{ $offset-y })
+    z-index: z-index('main', 'sidebar')
 
-
-  &__handle
-    min-width: inherit
-    width: inherit
-    height: inherit
-    position: fixed
-    z-index: z-index('main', 'handlebar')
-    pointer-events: none
-
-    &__action
-      $handle-width: 8px
-
-      width: $handle-width
+    &__inner
       height: inherit
-      background: transparent
-      cursor: col-resize
-      position: absolute
-      right: - #{ $handle-width / 2 }
-      pointer-events: all
+      width: inherit
+      min-width: inherit
+      position: fixed
+
+    &__handle
+      min-width: inherit
+      width: inherit
+      height: inherit
+      position: fixed
+      z-index: z-index('main', 'handlebar')
+      pointer-events: none
+
+      &__action
+        $handle-width: 8px
+
+        width: $handle-width
+        height: inherit
+        background: transparent
+        cursor: col-resize
+        position: absolute
+        right: - #{ $handle-width / 2 }
+        pointer-events: all
 
 
   &__body

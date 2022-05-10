@@ -98,8 +98,6 @@ routerCpt = here.component "router" cpt where
        , errorsView { errors: boxes.errors } []
        , H.div { className: "router__inner" }
          [
-          -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
-          -- @link https://github.com/facebook/react/issues/12039
           forest { boxes }
          ,
           mainPage { boxes }
@@ -217,30 +215,38 @@ forestCpt = R.memo' $ here.component "forest" cpt where
 
     -- Effects
     R.useLayoutEffect1' [] do
-      resizeHandler.add ".router__handle__action" ".router__aside" Vertical
-      pure $ resizeHandler.remove ".router__handle__action"
+      resizeHandler.add
+        ".router__aside__handle__action"
+        ".router__aside"
+        Vertical
+      pure $ resizeHandler.remove
+        ".router__aside__handle__action"
 
     -- Render
     pure $
 
       H.div
-      { className: intercalate " "
-          [ "router__aside"
-          , showTree' ? "" $ "d-none"
-          ]
+      { className: "router__aside"
+      -- @XXX: ReactJS lack of "keep-alive" feature workaround solution
+      -- @link https://github.com/facebook/react/issues/12039
+      , style: { display: showTree' ? "block" $ "none" }
       }
       [
-        forestLayout
-        { boxes
-        , frontends: defaultFrontends
-        }
+        H.div
+        { className: "router__aside__inner" }
+        [
+          forestLayout
+          { boxes
+          , frontends: defaultFrontends
+          }
+        ]
       ,
         H.div
-        { className: "router__handle"
+        { className: "router__aside__handle"
         }
         [
           H.div
-          { className: "router__handle__action" }
+          { className: "router__aside__handle__action" }
           []
         ]
       ]

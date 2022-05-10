@@ -8045,6 +8045,7 @@ a:focus, a:hover {
   position: absolute;
   font-size: 11px;
   top: 2px;
+  z-index: 1;
 }
 .right-handed .maintree--with-child > .maintree__node > .maintree::before {
   content: "└";
@@ -8159,7 +8160,6 @@ a:focus, a:hover {
 
 .mainleaf__node-link::before {
   position: absolute;
-  z-index: -1;
   top: -2px;
   bottom: -2px;
   border-radius: 5px;
@@ -8174,6 +8174,9 @@ a:focus, a:hover {
   left: calc( -2px + -12px);
 }
 
+.mainleaf__node-link a {
+  position: relative;
+}
 .mainleaf__settings-icon {
   visibility: hidden;
 }
@@ -8213,7 +8216,6 @@ a:focus, a:hover {
   left: -3px;
   content: "";
   position: absolute;
-  z-index: -1;
   border: 1px solid #515151;
   border-radius: 5px;
 }
@@ -8388,17 +8390,40 @@ a:focus, a:hover {
 }
 
 .forest-layout {
-  z-index: 1;
-  height: inherit;
-  width: inherit;
-  min-width: inherit;
-  position: fixed;
   scrollbar-width: none;
   overflow-y: scroll;
+  background-color: #fff;
+  height: 100%;
+  position: relative;
   overflow-x: clip;
 }
 .forest-layout::-webkit-scrollbar {
   display: none;
+}
+.forest-layout::before {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
+  content: "";
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  top: 0;
+  height: 16px;
+  width: 100%;
+  display: block;
+}
+.forest-layout::after {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
+  content: "";
+  z-index: 1;
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 16px;
+  width: 100%;
+  display: block;
+}
+.forest-layout::before, .forest-layout::after {
+  z-index: 2;
 }
 .right-handed .forest-layout {
   border-right: 2px solid #dee2e6;
@@ -8408,58 +8433,41 @@ a:focus, a:hover {
   border-left: 2px solid #dee2e6;
 }
 
-.forest-layout__bottom-teaser {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
-  pointer-events: none;
-  position: sticky;
-  bottom: 0;
-  height: 24px;
-  width: 100%;
-}
-.forest-layout__top-teaser {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
-  pointer-events: none;
-  position: sticky;
-  top: 0;
-  height: 24px;
-  width: 100%;
-}
-
-.forest-layout-action {
+.forest-layout__action {
   display: flex;
 }
-.right-handed .forest-layout-action {
+.right-handed .forest-layout__action {
   flex-direction: row;
   padding-left: 16px;
   padding-right: 8px;
 }
-.right-handed .forest-layout-action__button {
+.right-handed .forest-layout__action__button {
   margin-right: 16px;
 }
 
-.left-handed .forest-layout-action {
+.left-handed .forest-layout__action {
   flex-direction: row-reverse;
   padding-left: 8px;
   padding-right: 16px;
 }
-.left-handed .forest-layout-action__button {
+.left-handed .forest-layout__action__button {
   margin-left: 16px;
 }
 
-.forest-layout-tree {
+.forest-layout__tree {
   margin-top: 24px;
 }
-.forest-layout-tree:last-child {
+.forest-layout__tree:last-child {
   margin-bottom: 24px;
 }
-.forest-layout-tree > .maintree--with-children > .maintree__node::before, .forest-layout-tree > .maintree--with-children > .maintree__node::after {
+.forest-layout__tree > .maintree--with-children > .maintree__node::before, .forest-layout__tree > .maintree--with-children > .maintree__node::after {
   content: none;
 }
-.right-handed .forest-layout-tree > .maintree > .maintree__node {
+.right-handed .forest-layout__tree > .maintree > .maintree__node {
   margin-left: 16px;
 }
 
-.left-handed .forest-layout-tree > .maintree > .maintree__node {
+.left-handed .forest-layout__tree > .maintree > .maintree__node {
   margin-right: 16px;
 }
 
@@ -8736,14 +8744,20 @@ select.form-control {
 }
 
 .router__aside {
-  position: relative;
   flex-grow: 0;
   flex-shrink: 0;
   width: 280px;
   min-width: 280px;
   height: calc(100vh - 56px);
+  z-index: 1;
 }
-.router__handle {
+.router__aside__inner {
+  height: inherit;
+  width: inherit;
+  min-width: inherit;
+  position: fixed;
+}
+.router__aside__handle {
   min-width: inherit;
   width: inherit;
   height: inherit;
@@ -8751,7 +8765,7 @@ select.form-control {
   z-index: 3;
   pointer-events: none;
 }
-.router__handle__action {
+.router__aside__handle__action {
   width: 8px;
   height: inherit;
   background: transparent;
