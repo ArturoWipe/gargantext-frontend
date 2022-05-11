@@ -189,6 +189,16 @@
     white-space: normal
     word-break: break-word
 
+  &__expand
+    // Following <list-group-item> spacing
+    $position-x: $list-group-item-padding-x
+    // Empirical: fit well with icon overlay
+    $position-y: 1rem
+
+    position: absolute
+    right: $position-x
+    bottom: $position-y
+
   &__actions
 
     .b-button-group
@@ -201,6 +211,16 @@
 
   &__counter
     font-weight: bold
+
+  &__expand
+    // Following <list-group-item> spacing
+    $position-x: $list-group-item-padding-x
+    // Empirical: fit well with icon overlay
+    $position-y: 1rem
+
+    position: absolute
+    right: $position-x
+    bottom: $position-y
 
   &__badge
     white-space: normal

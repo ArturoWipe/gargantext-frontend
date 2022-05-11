@@ -7773,6 +7773,11 @@ input[type=range]:-moz-focusring {
   white-space: normal;
   word-break: break-word;
 }
+.graph-selected-nodes__expand {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1rem;
+}
 .graph-selected-nodes__actions .b-button-group {
   width: 100%;
 }
@@ -7782,6 +7787,11 @@ input[type=range]:-moz-focusring {
 
 .graph-neighborhood__counter {
   font-weight: bold;
+}
+.graph-neighborhood__expand {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1rem;
 }
 .graph-neighborhood__badge {
   white-space: normal;
