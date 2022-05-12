@@ -1,5 +1,6 @@
 .graph-layout
   position: relative
+  z-index: 0 // new stacking context "graph"
   width: 100%
   height: $layout-height
 
@@ -42,7 +43,7 @@
     // (?) last resort solution to have a fixed scrollable child, with
     //     its dimension relative to its parent
     //     (flaw: no overflow)
-    content: layout
+    // contain: layout
 
     &__inner
       @include fit-positions
@@ -101,8 +102,8 @@
   @include term-window
 
   &__header
-    padding: $card-spacer-y $card-spacer-x
-    font-size: 20px
+    padding: 0.5rem 1.5rem
+    z-index: z-index('tile', 'navbar')
 
     @include right-handed
       float: right
@@ -110,6 +111,11 @@
       float: left
 
   &__body
+    // extra position fitting the document title separator with the graph
+    // sidebar tabs nav border
+    $offset-top: 13px
+
+    padding-top: $offset-top
     padding-left: $card-spacer-x
     padding-right: $card-spacer-x
 

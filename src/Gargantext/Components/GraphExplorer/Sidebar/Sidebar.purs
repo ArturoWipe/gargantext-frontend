@@ -240,7 +240,7 @@ sideBarTabSeparator =
   { className: "graph-sidebar__separator" }
   [
     B.icon
-    { name: "angle-down" }
+    { name: "angle-double-down" }
   ]
 
 -------------------------------------------

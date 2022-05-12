@@ -7532,6 +7532,7 @@ input[type=range]:-moz-focusring {
 
 .graph-layout {
   position: relative;
+  z-index: 0;
   width: 100%;
   height: calc(100vh - 56px );
 }
@@ -7579,7 +7580,6 @@ input[type=range]:-moz-focusring {
   flex-grow: 1;
   pointer-events: all;
   position: relative;
-  content: layout;
 }
 .graph-layout__focus__inner {
   top: 0;
@@ -7642,6 +7642,7 @@ input[type=range]:-moz-focusring {
   background-color: #fff;
   height: 100%;
   position: relative;
+  z-index: 0;
 }
 .graph-doc-focus::-webkit-scrollbar {
   display: none;
@@ -7649,7 +7650,7 @@ input[type=range]:-moz-focusring {
 .graph-doc-focus::before {
   background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
   content: "";
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
   position: sticky;
   top: 0;
@@ -7660,7 +7661,6 @@ input[type=range]:-moz-focusring {
 .graph-doc-focus::after {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
   content: "";
-  z-index: 1;
   pointer-events: none;
   position: sticky;
   bottom: 0;
@@ -7669,8 +7669,7 @@ input[type=range]:-moz-focusring {
   display: block;
 }
 .graph-doc-focus__header {
-  padding: 0.75rem 1.25rem;
-  font-size: 20px;
+  padding: 0.5rem 1.5rem;
 }
 .right-handed .graph-doc-focus__header {
   float: right;
@@ -7681,6 +7680,7 @@ input[type=range]:-moz-focusring {
 }
 
 .graph-doc-focus__body {
+  padding-top: 13px;
   padding-left: 1.25rem;
   padding-right: 1.25rem;
 }
@@ -7691,6 +7691,7 @@ input[type=range]:-moz-focusring {
   background-color: #fff;
   height: 100%;
   position: relative;
+  z-index: 0;
 }
 .graph-sidebar::-webkit-scrollbar {
   display: none;
@@ -7698,7 +7699,7 @@ input[type=range]:-moz-focusring {
 .graph-sidebar::before {
   background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
   content: "";
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
   position: sticky;
   top: 0;
@@ -7709,7 +7710,6 @@ input[type=range]:-moz-focusring {
 .graph-sidebar::after {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
   content: "";
-  z-index: 1;
   pointer-events: none;
   position: sticky;
   bottom: 0;
@@ -8031,6 +8031,7 @@ a:focus, a:hover {
 
 .maintree {
   position: relative;
+  z-index: 0;
   animation: 15ms fade-in;
 }
 .maintree__node {
@@ -8149,7 +8150,7 @@ a:focus, a:hover {
   border-radius: 50%;
   bottom: -8px;
   right: -4px;
-  z-index: 1;
+  z-index: 2;
 }
 .mainleaf__version-badge--matched.b-icon-button, .mainleaf__version-badge--matched.b-icon-button:hover {
   color: #333333;
@@ -8406,6 +8407,7 @@ a:focus, a:hover {
   background-color: #fff;
   height: 100%;
   position: relative;
+  z-index: 0;
   overflow-x: clip;
 }
 .forest-layout::-webkit-scrollbar {
@@ -8414,7 +8416,7 @@ a:focus, a:hover {
 .forest-layout::before {
   background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
   content: "";
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
   position: sticky;
   top: 0;
@@ -8425,16 +8427,12 @@ a:focus, a:hover {
 .forest-layout::after {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
   content: "";
-  z-index: 1;
   pointer-events: none;
   position: sticky;
   bottom: 0;
   height: 16px;
   width: 100%;
   display: block;
-}
-.forest-layout::before, .forest-layout::after {
-  z-index: 2;
 }
 .right-handed .forest-layout {
   border-right: 2px solid #dee2e6;
@@ -8918,22 +8916,21 @@ select.form-control {
 
 .annotation-run {
   cursor: pointer;
-  display: inline-block;
 }
 .annotation-run:focus {
   outline: 0;
 }
 .annotation-run.candidate-term.graph-term.stop-term {
   color: #000000;
-  background-image: linear-gradient(rgba(51, 170, 238, 0.1), rgba(51, 170, 238, 0.1)), linear-gradient(rgba(17, 170, 17, 0.1), rgba(17, 170, 17, 0.1)), linear-gradient(rgba(238, 51, 17, 0.1), rgba(238, 51, 17, 0.1));
+  background-image: linear-gradient(rgba(90, 144, 182, 0.1), rgba(90, 144, 182, 0.1)), linear-gradient(rgba(17, 170, 17, 0.1), rgba(17, 170, 17, 0.1)), linear-gradient(rgba(238, 51, 17, 0.1), rgba(238, 51, 17, 0.1));
 }
 .annotation-run.candidate-term.graph-term {
   color: #000000;
-  background-image: linear-gradient(rgba(51, 170, 238, 0.2), rgba(51, 170, 238, 0.2)), linear-gradient(rgba(17, 170, 17, 0.2), rgba(17, 170, 17, 0.2));
+  background-image: linear-gradient(rgba(90, 144, 182, 0.2), rgba(90, 144, 182, 0.2)), linear-gradient(rgba(17, 170, 17, 0.2), rgba(17, 170, 17, 0.2));
 }
 .annotation-run.candidate-term.stop-term {
   color: #000000;
-  background-image: linear-gradient(rgba(51, 170, 238, 0.2), rgba(51, 170, 238, 0.2)), linear-gradient(rgba(238, 51, 17, 0.2), rgba(238, 51, 17, 0.2));
+  background-image: linear-gradient(rgba(90, 144, 182, 0.2), rgba(90, 144, 182, 0.2)), linear-gradient(rgba(238, 51, 17, 0.2), rgba(238, 51, 17, 0.2));
 }
 .annotation-run.graph-term.stop-term {
   color: #000000;
@@ -8941,7 +8938,7 @@ select.form-control {
 }
 .annotation-run.candidate-term {
   color: #000000;
-  background-color: rgba(51, 170, 238, 0.175);
+  background-color: rgba(90, 144, 182, 0.175);
 }
 .annotation-run.graph-term {
   color: #000000;
@@ -8957,7 +8954,7 @@ select.form-control {
   text-shadow: 0 0 4px;
 }
 .b-icon.candidate-term {
-  color: #33AAEE;
+  color: #5a90b6;
   text-shadow: 0 0 4px;
 }
 .b-icon.stop-term {
@@ -9174,6 +9171,7 @@ select.form-control {
 
 .phylo {
   position: relative;
+  z-index: 0;
   width: 100%;
   height: calc(100vh - 56px );
 }
@@ -9343,6 +9341,7 @@ select.form-control {
   background-color: #fff;
   height: 100%;
   position: relative;
+  z-index: 0;
 }
 .phylo-sidebar::-webkit-scrollbar {
   display: none;
@@ -9350,7 +9349,7 @@ select.form-control {
 .phylo-sidebar::before {
   background: linear-gradient(to top, rgba(255, 255, 255, 0) 0%, white 45%);
   content: "";
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
   position: sticky;
   top: 0;
@@ -9361,7 +9360,6 @@ select.form-control {
 .phylo-sidebar::after {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, white 45%);
   content: "";
-  z-index: 1;
   pointer-events: none;
   position: sticky;
   bottom: 0;
@@ -9473,8 +9471,8 @@ select.form-control {
   font-style: italic;
   font-size: 14px;
   animation-name: fade-in;
-  animation-delay: 200ms;
-  animation-duration: 800ms;
+  animation-delay: 400ms;
+  animation-duration: 600ms;
   animation-timing-function: ease-in-out;
   animation-direction: alternate;
   animation-iteration-count: infinite;

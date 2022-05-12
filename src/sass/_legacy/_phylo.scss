@@ -310,6 +310,7 @@ $decreasing-color: #11638F;
 
 .phylo {
   position: relative;
+  z-index: 0; // new stacking context "phylo"
   width: 100%;
   height: $layout-height;
 

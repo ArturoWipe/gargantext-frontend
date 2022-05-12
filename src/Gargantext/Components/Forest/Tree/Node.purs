@@ -313,6 +313,10 @@ nodeSpanCpt = here.component "nodeSpan" cpt
           , session
           } []
         ,
+          -- @XXX: React Awesome Popover not suited for the feature UX
+          --       We SHOULD use a more common `Modal` type of thing
+          --       As of now, we have issues on z-index management and erratic
+          --       popup close action
           R2.when (showBox) $
 
             Popover.popover

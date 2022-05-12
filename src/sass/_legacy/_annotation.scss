@@ -1,8 +1,6 @@
 .annotation-run {
   @include clickable();
 
-  display: inline-block;
-
   &.candidate-term.graph-term.stop-term {
     @include annotation-field-3(
       $annotation-candidate-color,

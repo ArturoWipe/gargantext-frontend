@@ -12,6 +12,7 @@ $node-popup-width: 544px
   $caret-y-offset: 2px
 
   position: relative
+  z-index: 0 // new stacking context "tree"
 
   &__node
     margin-bottom: space-x(0.25)
@@ -34,7 +35,8 @@ $node-popup-width: 544px
     position: absolute
     font-size: 11px
     top: $caret-y-offset
-    z-index: 1 // z-index macro-management due to "node__link::before" overlay
+    // z-index macro-management due to "node__link::before" overlay
+    z-index: z-index("tree", "content")
 
     @include right-handed
       content: "└"
@@ -87,7 +89,8 @@ $node-popup-width: 544px
     font-size: 14px
     // @XXX Glyphicon icons lack of homogeneous width
     width: 16px
-    z-index: 1 // z-index macro-management due to "node__link::before" overlay
+    // z-index macro-management due to "node__link::before" overlay
+    z-index: z-index("tree", "content")
 
     &--leaf
       color: $gray-400
@@ -146,7 +149,7 @@ $node-popup-width: 544px
     border-radius: 50%
     bottom: $offset-y
     right: $offset-x
-    z-index: 1
+    z-index: z-index("tree", "badge")
 
     // (remove hover effect to maintain continuity with folder + node icon
     // lack of hover effect)
@@ -486,12 +489,6 @@ $node-popup-width: 544px
   @include term-window
 
   overflow-x: clip // due to resizing content
-
-  // (!) convoluted z-index management, empirical value needed
-  $teaser-z-index: 2
-  &::before,
-  &::after
-    z-index: $teaser-z-index
 
   @include right-handed
     border-right: 2px solid $border-color

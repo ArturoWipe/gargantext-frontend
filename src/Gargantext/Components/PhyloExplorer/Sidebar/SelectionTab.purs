@@ -207,7 +207,7 @@ component = R.hooksComponent componentName cpt where
           { className: "phylo-selection-tab__separator" }
           [
             B.icon
-            { name: "angle-down" }
+            { name: "angle-double-down" }
           ]
       ,
         -- No extracted result
@@ -306,7 +306,7 @@ component = R.hooksComponent componentName cpt where
         --   { className: "phylo-selection-tab__separator" }
         --   [
         --     B.icon
-        --     { name: "angle-down" }
+        --     { name: "angle-double-down" }
         --   ]
       -- ,
         -- Extracted Docs

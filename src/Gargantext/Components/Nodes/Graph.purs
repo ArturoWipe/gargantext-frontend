@@ -63,7 +63,6 @@ nodeCpt = here.component "node" cpt where
     R.useLayoutEffect1 [] do
       let mEl = querySelector document ".main-page__main-route"
       -- Mount
-      here.info mEl
       mEl >>= maybe R.nothing (flip R2.addClass ["p-0"])
       -- Unmount
       pure $
