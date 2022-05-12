@@ -4,14 +4,15 @@ module Gargantext.Components.Document.Layout
 
 import Gargantext.Prelude
 
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.String as String
 import Data.Tuple.Nested ((/\))
 import Gargantext.Components.Annotation.Field as AnnotatedField
 import Gargantext.Components.AutoUpdate (autoUpdate)
 import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.Bootstrap.Types (SpinnerTheme(..))
 import Gargantext.Components.Document.Types (DocPath, Document(..), LoadedData, initialState)
-import Gargantext.Components.NgramsTable.Core (CoreAction(..), Versioned(..), addNewNgramA, applyNgramsPatches, coreDispatch, replace, setTermListA, syncResetButtons, findNgramRoot)
+import Gargantext.Components.NgramsTable.Core (CoreAction(..), Versioned(..), addNewNgramA, applyNgramsPatches, coreDispatch, findNgramRoot, replace, setTermListA, syncResetButtons, useAutoSync)
 import Gargantext.Components.Node (NodePoly(..))
 import Gargantext.Utils as U
 import Gargantext.Utils.Reactix as R2
@@ -47,14 +48,18 @@ layoutCpt = here.component "main" cpt where
     state'@{ ngramsLocalPatch } /\ state <-
       R2.useBox' $ initialState { loaded }
 
+    -- | Hooks
+    -- |
+    let dispatch = coreDispatch path state
+
+    { onPending, result } <- useAutoSync { state, action: dispatch }
+
+    onPending' <- R2.useLive' onPending
+    result'    <- R2.useLive' result
+
     -- | Computed
     -- |
     let
-
-      dispatch = coreDispatch path state
-
-      afterSync = \_ -> pure unit
-
       withAutoUpdate = false
 
       ngrams = applyNgramsPatches state' initTable
@@ -81,9 +86,6 @@ layoutCpt = here.component "main" cpt where
 
       H.div
       { className: "document-layout" }
-      -- @WIP
-      --
-      -- <>
       --DEBUG
       --[ H.pre { rows: 30 } [
       --    H.text (stringifyWithIndent 2 (encodeJson (fst state)))
@@ -94,16 +96,46 @@ layoutCpt = here.component "main" cpt where
         [
           R2.when withAutoUpdate $
 
+          --   -- (?) purpose? would still working with current code?
             autoUpdate
             { duration: 5000
-            , effect: dispatch $ Synchronize { afterSync }
+            , effect: dispatch $ Synchronize
+              { afterSync: \_ -> pure unit
+              }
             }
+
+        -- @NOTE #386: revert manual for automatic sync
+        --   syncResetButtons
+        --   { afterSync
+        --   , ngramsLocalPatch
+        --   , performAction: dispatch
+        --   }
+
         ,
-          syncResetButtons
-          { afterSync
-          , ngramsLocalPatch
-          , performAction: dispatch
-          }
+          R2.when' onPending'
+          [
+            B.cloak
+            { isDisplayed: true
+            , idlingPhaseDuration: Just 400
+            , cloakSlot: (mempty :: R.Element)
+            , defaultSlot:
+                B.span'
+                { className: "document-layout__controls__hint" }
+                "currently saving"
+            }
+          ,
+            B.spinner
+            { theme: GrowTheme
+            , className: "document-layout__controls__spinner"
+            }
+          ]
+        ,
+          R2.when (not onPending' && isJust result') $
+
+            B.icon
+            { name: "check-circle-o"
+            , className: "document-layout__controls__icon"
+            }
         ]
       ,
         B.div'
@@ -128,7 +160,7 @@ layoutCpt = here.component "main" cpt where
             H.div
             { className: "document-layout__authors__content" }
             [
-              -- TODO add href to /author/ if author present in
+              -- @NOTE #386: annotate for "Authors" ngrams list
               annotate (Just authors)
             ]
           ]

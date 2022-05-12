@@ -46,7 +46,7 @@ nodeCpt = here.component "node" cpt where
     -- | Hooks
     -- |
     useLoaderEffect
-      { errorHandler: logRESTError here "[frameLayoutWithKey]"
+      { errorHandler: logRESTError here "[frameLayout]"
       , loader: loadframeWithReload
       , path:
           { nodeId
@@ -80,8 +80,6 @@ nodeCpt = here.component "node" cpt where
 
 
 -----------------------------------------------------------
-
--- @WIP: test reload
 
 type LoadProps =
   ( nodeId  :: Int

@@ -36,6 +36,7 @@ import Toestand as T
 here :: R2.Here
 here = R2.here "Gargantext.Components.Annotation.AnnotatedField"
 
+-- @NOTE #386: add parameter "type" ("Authors", "Terms")
 type Props =
   ( ngrams       :: NgramsTable
   , setTermList  :: NgramsTerm -> Maybe TermList -> TermList -> Effect Unit

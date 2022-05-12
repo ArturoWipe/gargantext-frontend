@@ -9460,7 +9460,28 @@ select.form-control {
   margin: 0 auto;
 }
 .document-layout__controls {
-  margin-bottom: 32px;
+  float: right;
+  color: #005a9a;
+}
+.document-layout__controls__hint {
+  margin-right: 8px;
+  font-style: italic;
+  font-size: 14px;
+  animation-name: fade-in;
+  animation-delay: 200ms;
+  animation-duration: 800ms;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  opacity: 0;
+}
+.document-layout__controls__spinner {
+  width: 16px;
+  height: 16px;
+}
+.document-layout__controls__icon {
+  font-size: 20px;
+  animation: fade-in 200ms ease-in-out;
 }
 .document-layout__separator-label {
   font-weight: bold;
