@@ -47,6 +47,7 @@ component = here.component "main" cpt where
     selectedBranch      <- R2.useLive' store.selectedBranch
     selectedSource      <- R2.useLive' store.selectedSource
     expandNeighborhood  <- R2.useLive' store.expandNeighborhood
+    expandSelection     <- R2.useLive' store.expandSelection
 
     showMore' /\ showMore <- R2.useBox' false
 
@@ -79,8 +80,8 @@ component = here.component "main" cpt where
     -- | Behaviors
     -- |
     let
-      onExpandClick _ = T.modify_ (not) store.expandNeighborhood
-
+      onExpandNeighborhoodClick _ = T.modify_ (not) store.expandNeighborhood
+      onExpandSelectionClick _ = T.modify_ (not) store.expandSelection
 
     -- | Render
     -- |
@@ -195,6 +196,15 @@ component = here.component "main" cpt where
                     [
                       H.text "term"
                     ]
+                  ,
+                    -- Expand Selection actions
+                    B.iconButton
+                    { name: expandSelection' ?
+                        "caret-up" $
+                        "caret-down"
+                    , className: "phylo-selection-tab__highlight__expand"
+                    , callback: onExpandSelectionClick
+                    }
                   ]
                 ,
                   H.li
@@ -270,7 +280,7 @@ component = here.component "main" cpt where
                         "caret-up" $
                         "caret-down"
                     , className: "phylo-selection-tab__counter__expand"
-                    , callback: onExpandClick
+                    , callback: onExpandNeighborhoodClick
                     }
                   ]
             ,
