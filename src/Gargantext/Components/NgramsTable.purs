@@ -166,7 +166,7 @@ tableContainerCpt { addCallback
               }
               [ R2.row
                 [ H.div { className: "col-md-2", style: {marginTop: "6px" } }
-                  [ H.div {} syncResetButton
+                  [ H.li { className: "list-group-item" } syncResetButton
                   , if (not queryExactMatches || A.null props.tableBody) && searchQuery /= "" then
                   -- , if (not $ Set.member (normNgram tabNgramType searchQuery) ngramsSelection) && searchQuery /= "" then
                       H.li { className: "list-group-item" }
@@ -201,7 +201,7 @@ tableContainerCpt { addCallback
                         [
                           props.pageSizeControl
                         ,
-                          B.wad_ [ "mr-1", "d-inline-block" ]
+                          B.wad_ [ "mr-2", "d-inline-block" ]
                         ,
                           H.label {} [ H.text "items" ]
                           --   H.div { className: "col-md-6" } [ props.pageSizeControl ]

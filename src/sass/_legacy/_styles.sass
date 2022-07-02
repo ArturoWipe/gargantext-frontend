@@ -103,14 +103,14 @@
   // is a deep feature reveals to zim
   $gutter: 2.5em
 
-  padding: ($card-spacer-y * 2) ($card-spacer-y * 2)
+  padding: $card-spacer-y $card-spacer-x
   margin-left: $gutter
   margin-right: $gutter
   border-left: 1px solid $border-color
   border-right: 1px solid $border-color
 
   &__header
-    margin-bottom: space-x(0.5)
+    margin-bottom: space-x(1)
 
   &__body
     // empirical value fitting the best size of the render tree
@@ -118,7 +118,7 @@
 
     min-width: 400px
     width: fit-content
-    margin-bottom: space-x(1)
+    margin-bottom: space-x(1.5)
     padding: $card-spacer-y $card-spacer-x
 
 
