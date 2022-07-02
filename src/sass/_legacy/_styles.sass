@@ -96,6 +96,39 @@
           width: 14px
           margin-right: space-x(1)
 
+
+.ngrams-tree-edit-real
+  // empirical value corresponding to the glass search icon of the above search
+  // bar, this will add an nested alignment telling the user that this feature
+  // is a deep feature reveals to zim
+  $gutter: 2.5em
+
+  padding: ($card-spacer-y * 2) ($card-spacer-y * 2)
+  margin-left: $gutter
+  margin-right: $gutter
+  border-left: 1px solid $border-color
+  border-right: 1px solid $border-color
+
+  &__header
+    margin-bottom: space-x(0.5)
+
+  &__body
+    // empirical value fitting the best size of the render tree
+    $body-min-with: 400px
+
+    min-width: 400px
+    width: fit-content
+    margin-bottom: space-x(1)
+    padding: $card-spacer-y $card-spacer-x
+
+
+  &__footer
+    display: flex
+
+    .b-button
+      margin-right: space-x(1)
+
+
 .action-search
   margin: 10px
 

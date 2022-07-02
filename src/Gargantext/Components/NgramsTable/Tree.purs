@@ -57,7 +57,9 @@ renderNgramsTreeCpt :: R.Component RenderNgramsTree
 renderNgramsTreeCpt = here.component "renderNgramsTree" cpt
   where
     cpt { getNgramsChildren, ngramsClick, ngramsDepth, ngramsEdit, ngramsStyle } _ = do
-      pure $ H.ul {}
+      pure $
+        H.ul
+        { className: "render-ngrams-tree" }
         [ H.span { className: "tree" }
           [ H.span { className: "righthanded" }
             [ tree { getNgramsChildren

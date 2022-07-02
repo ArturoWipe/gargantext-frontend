@@ -18,7 +18,7 @@ import Data.Lens.At (at)
 import Data.Lens.Common (_Just)
 import Data.Lens.Fold (folded)
 import Data.Lens.Index (ix)
-import Data.List (List)
+import Data.List (List, intercalate)
 import Data.List as List
 import Data.Map (Map)
 import Data.Map as Map
@@ -35,17 +35,17 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Gargantext.Components.App.Store (Boxes)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
-import Gargantext.Core.NgramsTable.Functions (addNewNgramA, applyNgramsPatches, chartsAfterSync, commitPatch, convOrderBy, coreDispatch, filterTermSize, ngramsRepoElementToNgramsElement, normNgram, patchSetFromMap, setTermListA, singletonNgramsTablePatch, tablePatchHasNgrams, toVersioned)
+import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Sizing(..), Variant(..))
+import Gargantext.Components.NgramsTable.Loader (useLoaderWithCacheAPI)
 import Gargantext.Components.NgramsTable.Search as NTS
 import Gargantext.Components.NgramsTable.SelectionCheckbox as NTSC
-import Gargantext.Components.NgramsTable.Tree (renderNgramsItem, renderNgramsTree)
-import Gargantext.Components.NgramsTable.Loader (useLoaderWithCacheAPI)
 import Gargantext.Components.NgramsTable.SyncResetButton (syncResetButtons)
+import Gargantext.Components.NgramsTable.Tree (renderNgramsItem, renderNgramsTree)
 import Gargantext.Components.Nodes.Lists.Types as NT
 import Gargantext.Components.Table as TT
 import Gargantext.Components.Table.Types as TT
 import Gargantext.Config.REST (AffRESTError, RESTError, logRESTError)
+import Gargantext.Core.NgramsTable.Functions (addNewNgramA, applyNgramsPatches, chartsAfterSync, commitPatch, convOrderBy, coreDispatch, filterTermSize, ngramsRepoElementToNgramsElement, normNgram, patchSetFromMap, setTermListA, singletonNgramsTablePatch, tablePatchHasNgrams, toVersioned)
 import Gargantext.Core.NgramsTable.Types (Action(..), CoreAction(..), CoreState, Dispatch, NgramsActionRef, NgramsClick, NgramsDepth, NgramsElement(..), NgramsPatch(..), NgramsTable, NgramsTablePatch(..), NgramsTerm(..), PageParams, PatchMap(..), Versioned(..), VersionedNgramsTable, VersionedWithCountNgramsTable, _NgramsElement, _NgramsRepoElement, _NgramsTable, _children, _list, _ngrams, _ngrams_repo_elements, _ngrams_scores, _occurrences, _root, applyPatchSet, ngramsTermText, replace)
 import Gargantext.Hooks.Loader (useLoaderBox)
 import Gargantext.Routes (SessionRoute(..)) as R
@@ -155,7 +155,15 @@ tableContainerCpt { addCallback
       pure $ H.div {className: "container-fluid"}
         [ R2.row
           [ H.div {className: "card col-12"}
-            [ H.div {className: "card-header"}
+            [ H.div
+              { className: "card-header"
+                -- horrendous KISS hack suppressing "col-12" parent gutter
+                -- to better alignment
+              , style:
+                  { marginLeft: "-16px"
+                  , marginRight: "-16px"
+                  }
+              }
               [ R2.row
                 [ H.div { className: "col-md-2", style: {marginTop: "6px" } }
                   [ H.div {} syncResetButton
@@ -190,8 +198,12 @@ tableContainerCpt { addCallback
                   [ H.li {className: "list-group-item"}
                     [ H.div { className: "form-inline" }
                       [ H.div { className: "form-group" }
-                        [ props.pageSizeControl
-                        , H.label {} [ H.text " items" ]
+                        [
+                          props.pageSizeControl
+                        ,
+                          B.wad_ [ "mr-1", "d-inline-block" ]
+                        ,
+                          H.label {} [ H.text "items" ]
                           --   H.div { className: "col-md-6" } [ props.pageSizeControl ]
                           -- , H.div { className: "col-md-6" } [
                           --    ]
@@ -280,14 +292,26 @@ loadedNgramsTableHeader :: R2.Component LoadedNgramsTableHeaderProps
 loadedNgramsTableHeader = R.createElement loadedNgramsTableHeaderCpt
 loadedNgramsTableHeaderCpt :: R.Component LoadedNgramsTableHeaderProps
 loadedNgramsTableHeaderCpt = here.component "loadedNgramsTableHeader" cpt where
-  cpt { searchQuery } _ = do
-    pure $ R.fragment
-      [ H.h4 { style: { textAlign : "center" } }
-        [ H.span { className: "fa fa-hand-o-down" } []
-        , H.text "Extracted Terms" ]
-      , NTS.searchInput { key: "search-input"
-                        , searchQuery }
+  cpt { searchQuery } _ = pure $
+
+    R.fragment
+    [
+      H.h4
+      { className: "text-center pt-2 pb-2" }
+      [
+        B.icon
+        { name: "hand-o-down" }
+      ,
+        B.wad_ [ "mr-1", "d-inline-block" ]
+      ,
+        B.span_ "Extracted Terms"
       ]
+    ,
+      NTS.searchInput
+      { key: "search-input"
+      , searchQuery
+      }
+    ]
 
 loadedNgramsTableBody :: R2.Component PropsNoReload
 loadedNgramsTableBody = R.createElement loadedNgramsTableBodyCpt
@@ -441,7 +465,12 @@ loadedNgramsTableBodyCpt = here.component "loadedNgramsTableBody" cpt where
         , wrapColElts:
           wrapColElts { allNgramsSelected, dispatch: performAction, ngramsSelection } scoreType
         }
-      , syncResetButton
+      ,
+        B.wad
+        [ "mt-2", "d-inline-block" ]
+        [
+          syncResetButton
+        ]
       ]
       where
         colNames = TT.ColumnName <$> ["Show", "Select", "Map", "Stop", "Terms", "Score"] -- see convOrderBy
@@ -613,7 +642,7 @@ mainNgramsTableCpt = here.component "mainNgramsTable" cpt
       --                , getNgramsChildren: getNgramsChildrenAff session nodeId' tabType
       --                , onCancelRef
       --                , onNgramsClickRef
-      --                , onSaveRef 
+      --                , onSaveRef
       --                }
 
       -- let path = initialPageParams session nodeId [defaultListId] tabType
@@ -650,11 +679,14 @@ ngramsTreeEditCpt = here.component "ngramsTreeEdit" cpt where
     ngramsParentFocused <- T.useFocused (_.ngramsParent) (\a b -> b { ngramsParent = a}) box
     ngramsParentFocused' <- T.useLive T.unequal ngramsParentFocused
 
+    let
+      gutter = B.wad_ [ "mb-2", "d-inline-block" ]
+
     pure $ if isEditingFocused'
       then case ngramsParentFocused' of
-                Nothing -> H.div {} []
+                Nothing -> gutter
                 Just ngramsParent' -> ngramsTreeEditReal (Record.merge props { ngramsParent' }) []
-      else H.div {} []
+      else gutter
 
 type NgramsTreeEditRealProps =
   ( ngramsParent' :: NgramsTerm
@@ -669,40 +701,91 @@ ngramsTreeEditRealCpt = here.component "ngramsTreeEditReal" cpt where
       , ngramsParent'
       , onCancelRef
       , onNgramsClickRef
-      , onSaveRef } _ = do
-    { ngramsChildren, ngramsChildrenDiff } <- T.useLive T.unequal box
+      , onSaveRef
+      } _ = do
+    -- | States
+    -- |
+    { ngramsChildren
+    , ngramsChildrenDiff
+    } <- T.useLive T.unequal box
 
-    let ngramsDepth = { depth: 0, ngrams: ngramsParent' }
-        ngramsChildrenPatched :: Set NgramsTerm
-        ngramsChildrenPatched = applyPatchSet (patchSetFromMap ngramsChildrenDiff) $ Set.fromFoldable ngramsChildren
-        -- A patched version of getNgramsChildren. This is used
-        -- because we're editing the tree and so won't fetch the API
-        -- ngrams children.
-        gnc ngrams = if ngrams == ngramsParent'
-                       then do
-                         pure $ A.fromFoldable ngramsChildrenPatched
-                       else do
-                         pure []
+    -- | Computed
+    -- |
+    let
+      ngramsDepth = { depth: 0, ngrams: ngramsParent' }
 
-    pure $ H.div {}
-      [ H.p {}
-        [ H.text $ "Editing " <> ngramsTermText ngramsDepth.ngrams ]
-      , renderNgramsTree { getNgramsChildren: gnc
-                         , ngramsClick
-                         , ngramsDepth
-                         , ngramsEdit
-                         , ngramsStyle: []
-                         , key: show ngramsParent'
-                                 <> "-" <> show ngramsChildren
-                                 <> "-" <> show ngramsChildrenDiff
-                         }
-      , H.button { className: "btn btn-primary"
-                 , on: { click: onSaveClick } --(const $ dispatch AddTermChildren)}
-                 } [ H.text "Save" ]
-      , H.button { className: "btn btn-primary"
-                 , on: { click: onCancelClick } --(const $ dispatch ClearTreeEdit)}
-                 } [ H.text "Cancel" ]
+      ngramsChildrenPatched :: Set NgramsTerm
+      ngramsChildrenPatched = applyPatchSet (patchSetFromMap ngramsChildrenDiff) $ Set.fromFoldable ngramsChildren
+      -- A patched version of getNgramsChildren. This is used
+      -- because we're editing the tree and so won't fetch the API
+      -- ngrams children.
+      gnc ngrams =
+        if ngrams == ngramsParent'
+        then do
+          pure $ A.fromFoldable ngramsChildrenPatched
+        else do
+          pure []
+
+
+    -- | Render
+    -- |
+    pure $
+
+      H.div
+      { className: "ngrams-tree-edit-real" }
+      [
+        H.div
+        { className: "ngrams-tree-edit-real__header" }
+        [
+          B.icon
+          { name: "pencil"
+          }
+        ,
+          B.wad_
+          [ "mr-1", "d-inline-block" ]
+        ,
+          B.span_ $ ngramsTermText ngramsDepth.ngrams
+        ]
+      ,
+        H.div
+        { className: intercalate " "
+            [ "ngrams-tree-edit-real__body",
+              "card"
+            ]
+        }
+        [
+          renderNgramsTree
+          { getNgramsChildren: gnc
+          , ngramsClick
+          , ngramsDepth
+          , ngramsEdit
+          , ngramsStyle: []
+          , key: show ngramsParent'
+                  <> "-" <> show ngramsChildren
+                  <> "-" <> show ngramsChildrenDiff
+          }
+        ]
+      ,
+        H.div
+        { className: "ngrams-tree-edit-real__footer" }
+        [
+          B.button
+          { variant: ButtonVariant Light
+          , callback: onCancelClick --(const $ dispatch ClearTreeEdit)}
+          , size: SmallSize
+          }
+          [ H.text "Cancel" ]
+        ,
+          B.button
+          { variant: ButtonVariant Primary
+          , callback: onSaveClick --(const $ dispatch AddTermChildren)}
+          , size: SmallSize
+          }
+          [ H.text "Save" ]
+        ]
       ]
+      -- | Helpers
+      -- |
       where
         --ngramsClick {depth: 1, ngrams: child} = Just $ dispatch $ ToggleChild false child
         --ngramsClick _ = Nothing
@@ -712,11 +795,11 @@ ngramsTreeEditRealCpt = here.component "ngramsTreeEditReal" cpt where
           Just ngc -> ngc nd
         ngramsEdit :: NgramsClick
         ngramsEdit  _ = Nothing
-        onCancelClick :: forall e. e -> Effect Unit
+        onCancelClick :: Unit -> Effect Unit
         onCancelClick _ = case R.readRef onCancelRef of
           Nothing -> pure unit
           Just onCancel -> onCancel unit
-        onSaveClick :: forall e. e -> Effect Unit
+        onSaveClick :: Unit -> Effect Unit
         onSaveClick _ = case R.readRef onSaveRef of
           Nothing -> pure unit
           Just onSave -> onSave unit

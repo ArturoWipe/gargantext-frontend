@@ -59,4 +59,3 @@ syncResetButtonsCpt = here.component "syncResetButtons" cpt
                      } [ H.text "Sync" ]
           ]
         ]
-
