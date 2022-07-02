@@ -27,7 +27,7 @@ import Effect.Class (liftEffect)
 import Effect.Timer (setTimeout)
 import Gargantext.Components.App.Store (Boxes)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Bootstrap.Types (ComponentStatus(..))
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Variant(..))
 import Gargantext.Components.Category (rating)
 import Gargantext.Components.Category.Types (Star(..))
 import Gargantext.Components.DocsTable.DocumentFormCreation as DFC
@@ -582,10 +582,17 @@ pagePaintRawCpt = here.component "pagePaintRaw" cpt where
                 --, H.input { type: "checkbox", defaultValue: checked, on: {click: click Trash} }
                 -- TODO show date: Year-Month-Day only
                 , H.div { className: tClassName } [ R2.showText r.date ]
-                , H.div { className: tClassName }
-                        [ H.a { href: url frontends $ corpusDocument r._id, target: "_blank" }
-                              [ H.text r.title ]
-                        ]
+                ,
+                  H.div
+                  { className: tClassName }
+                  [
+                    H.a
+                    { href: url frontends $ corpusDocument r._id
+                    , target: "_blank"
+                    , className: "text-primary"
+                    }
+                    [ H.text r.title ]
+                  ]
                 , H.div { className: tClassName } [ H.text $ showSource r.source ]
                 , H.div {} [ H.text $ maybe "-" show r.ngramCount ]
                 ]
@@ -623,11 +630,19 @@ docChooserCpt = here.component "docChooser" cpt
       mCurrentDocId' <- T.useLive T.unequal mCurrentDocId
 
       let selected = mCurrentDocId' == Just nodeId
-          eyeClass = if selected then "fa-eye" else "fa-eye-slash"
+          eyeClass = selected ? "eye" $ "eye-slash"
+          variant = selected ? Info $ Dark
 
-      pure $ H.div { className: "btn" } [
-        H.span { className: "fa " <> eyeClass
-               , on: { click: onClick selected } } []
+      pure $
+        H.div
+        { className: "doc-chooser" }
+        [
+          B.iconButton
+          { name: eyeClass
+          , overlay: false
+          , variant
+          , callback: onClick selected
+          }
       ]
       where
         onClick selected _ = do

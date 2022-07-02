@@ -1,5 +1,6 @@
 module Gargantext.Components.NgramsTable.Tree where
 
+import DOM.Simple as DOM
 import Data.Array as A
 import Data.Either (Either(..))
 import Data.Lens ((^..), (^.), view)
@@ -14,14 +15,15 @@ import Data.Maybe (Maybe(..), maybe, isJust)
 import Data.Nullable (Nullable, null, toMaybe)
 import Data.Set (Set)
 import Data.Set as Set
-import DOM.Simple as DOM
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
-import Gargantext.Core.NgramsTable.Functions (applyNgramsPatches, setTermListA, tablePatchHasNgrams)
-import Gargantext.Core.NgramsTable.Types (Action(..), NgramsClick, NgramsDepth, NgramsElement, NgramsTable, NgramsTablePatch(..), NgramsTerm, _NgramsElement, _NgramsRepoElement, _PatchMap, _children, _list, _ngrams, _occurrences, ngramsTermText, replace)
+import Gargantext.Components.Bootstrap as B
+import Gargantext.Components.Bootstrap.Types (Variant(..))
 import Gargantext.Components.Table as Tbl
 import Gargantext.Config.REST (logRESTError)
+import Gargantext.Core.NgramsTable.Functions (applyNgramsPatches, setTermListA, tablePatchHasNgrams)
+import Gargantext.Core.NgramsTable.Types (Action(..), NgramsClick, NgramsDepth, NgramsElement, NgramsTable, NgramsTablePatch(..), NgramsTerm, _NgramsElement, _NgramsRepoElement, _PatchMap, _children, _list, _ngrams, _occurrences, ngramsTermText, replace)
 import Gargantext.Hooks.Loader (useLoader)
 import Gargantext.Prelude (Unit, bind, const, discard, map, mempty, not, otherwise, pure, show, unit, ($), (+), (/=), (<<<), (<>), (==), (>), (||))
 import Gargantext.Types as GT
@@ -133,10 +135,16 @@ treeLoadedCpt = here.component "treeLoaded" cpt where
             a (ngramsStyle <> [DOM.onClick $ const effect])
           Nothing ->
             span ngramsStyle
-      edit effect = [ H.text " "
-                    , H.i { className: "fa fa-pencil"
-                          , on: { click: const effect } } []
-                    ]
+      edit effect =
+        [
+          B.iconButton
+          { name: "pencil"
+          , className: "ml-1"
+          , variant: Secondary
+          , callback: const effect
+          , overlay: false
+          }
+        ]
       leaf = L.null ngramsChildren
       className = "fa fa-chevron-" <> if open then "down" else "right"
       style = if leaf then {color: "#adb5bd"} else {color: ""}
@@ -177,7 +185,7 @@ renderNgramsItemCpt = here.component "renderNgramsItem" cpt
         , ngramsTable
         } _ = do
       isEditing' <- T.useLive T.unequal isEditing
-      
+
       pure $ Tbl.makeRow
         [ H.div { className: "ngrams-selector" }
           [ H.span { className: "ngrams-chooser fa fa-eye-slash"
@@ -188,16 +196,30 @@ renderNgramsItemCpt = here.component "renderNgramsItem" cpt
         , checkbox GT.StopTerm
         , H.div {}
           ( if isEditing'
-            then [ H.a { on: { click: const $ dispatch $ ToggleChild true ngrams } }
-                   [ H.i { className: "fa fa-plus" } [] ]
-                 , R2.buff $ tag [ text $ " " <> ngramsTermText ngramsDepth.ngrams ]
-                 ]
-            else [ renderNgramsTree { getNgramsChildren: getNgramsChildren'
-                                    , ngramsClick
-                                    , ngramsDepth
-                                    , ngramsEdit
-                                    , ngramsStyle
-                                    , key: "" } ]
+            then
+              [
+                B.iconButton
+                { name: "plus"
+                , className: "mr-1 align-bottom"
+                , overlay: false
+                , variant: Primary
+                , callback: const $ dispatch $ ToggleChild true ngrams
+                }
+              ,
+                R2.buff $
+                tag [ text $ " " <> ngramsTermText ngramsDepth.ngrams ]
+              ]
+            else
+              [
+                renderNgramsTree
+                { getNgramsChildren: getNgramsChildren'
+                , ngramsClick
+                , ngramsDepth
+                , ngramsEdit
+                , ngramsStyle
+                , key: ""
+                }
+              ]
           )
         , H.text $ show (ngramsElement ^. _NgramsElement <<< _occurrences)
       ]

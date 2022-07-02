@@ -64,9 +64,11 @@
     top: 50%
 
 .table
+  $row-min-height: 48px
   tr
     td
-      color: #005a9aff
+      height: $row-min-height
+
       .active
         font-weight: bold
         text-decoration: underline
@@ -76,6 +78,23 @@
           padding: 3px
       .trash
         text-decoration: line-through
+
+      .doc-chooser
+        $offset-top: 3px // flex alignment won't work, hence empirical value
+
+        padding-top: $offset-top
+        text-align: center
+
+      .rating-group
+        $offset-top: 3px // flex alignment won't work, hence empirical value
+
+        display: flex
+        padding-top: $offset-top
+
+        &__action
+          // @XXX Glyphicon icons lack of homogeneous width
+          width: 14px
+          margin-right: space-x(1)
 
 .action-search
   margin: 10px

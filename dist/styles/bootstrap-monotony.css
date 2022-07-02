@@ -8706,7 +8706,7 @@ a:focus, a:hover {
 }
 
 .table tr td {
-  color: #005a9aff;
+  height: 48px;
 }
 .table tr td .active {
   font-weight: bold;
@@ -8720,6 +8720,18 @@ a:focus, a:hover {
 }
 .table tr td .trash {
   text-decoration: line-through;
+}
+.table tr td .doc-chooser {
+  padding-top: 3px;
+  text-align: center;
+}
+.table tr td .rating-group {
+  display: flex;
+  padding-top: 3px;
+}
+.table tr td .rating-group__action {
+  width: 14px;
+  margin-right: 8px;
 }
 
 .action-search {
