@@ -56,7 +56,7 @@ ratingCpt = here.component "rating" cpt where
 
       variant' Star_0 Star_0 = Dark
       variant' _      Star_0 = Dark
-      variant' _      _      = Secondary
+      variant' _      _      = Dark
 
       className' Star_0 Star_0 = "rating-group__action"
       className' _      Star_0 = "rating-group__action"

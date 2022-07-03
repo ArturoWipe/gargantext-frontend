@@ -856,7 +856,7 @@ ngramsTreeEditRealCpt = here.component "ngramsTreeEditReal" cpt where
         { className: "card-header" }
         [
           B.icon
-          { name: "pencil"
+          { name: "pencil-square-o"
           }
         ,
           B.wad_

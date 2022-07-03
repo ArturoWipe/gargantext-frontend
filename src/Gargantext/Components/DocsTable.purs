@@ -6,7 +6,6 @@ import Gargantext.Prelude
 import DOM.Simple.Event as DE
 import Data.Array (any)
 import Data.Array as A
-import Data.Either (Either)
 import Data.Generic.Rep (class Generic)
 import Data.Lens ((^.))
 import Data.Lens.At (at)
@@ -540,6 +539,9 @@ pagePaintRawCpt = here.component "pagePaintRaw" cpt where
     reload <- T.useBox GUT.newReload
     localCategories' <- T.useLive T.unequal localCategories
 
+    let
+      selected = mCurrentDocId' == Just nodeId
+
     pure $ TT.table
       { colNames
       , container: TT.defaultContainer
@@ -551,9 +553,9 @@ pagePaintRawCpt = here.component "pagePaintRaw" cpt where
       }
       where
         sid = sessionId session
-        trashClassName Star_0 _ = "trash"
-        trashClassName _ true = "active"
-        trashClassName _ false = ""
+        trashClassName Star_0 _ = "page-paint-row page-paint-row--trash"
+        trashClassName _ true   = "page-paint-row page-paint-row--active"
+        trashClassName _ false  = ""
         corpusDocument
           | Just cid <- mCorpusId = Routes.CorpusDocument sid cid listId
           | otherwise = Routes.Document sid listId
@@ -563,7 +565,14 @@ pagePaintRawCpt = here.component "pagePaintRaw" cpt where
           where
             row dv@(DocumentsView r@{ _id, category }) =
               { row:
-                TT.makeRow [ -- H.div {} [ H.a { className, style, on: {click: click Favorite} } [] ]
+                TT.makeRow'
+                { className: "page-paint-raw " <>
+                    (selected ?
+                      "page-paint-raw--selected" $
+                      ""
+                    )
+                }
+                [ -- H.div {} [ H.a { className, style, on: {click: click Favorite} } [] ]
                             H.div { className: "" }
                                   [ docChooser { boxes
                                                , listId

@@ -1,31 +1,25 @@
 module Gargantext.Components.NgramsTable.Tree where
 
-import DOM.Simple as DOM
 import Data.Array as A
 import Data.Either (Either(..))
 import Data.Lens ((^..), (^.), view)
-import Data.Lens.At (at)
 import Data.Lens.Fold (folded)
 import Data.Lens.Index (ix)
 import Data.List (List)
 import Data.List as L
-import Data.Map (Map)
-import Data.Map as Map
-import Data.Maybe (Maybe(..), maybe, isJust)
-import Data.Nullable (Nullable, null, toMaybe)
+import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set)
 import Data.Set as Set
 import Effect (Effect)
-import Effect.Aff (Aff, launchAff_)
-import Effect.Class (liftEffect)
+import Effect.Aff (Aff)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (Variant(..))
 import Gargantext.Components.Table as Tbl
 import Gargantext.Config.REST (logRESTError)
 import Gargantext.Core.NgramsTable.Functions (applyNgramsPatches, setTermListA, tablePatchHasNgrams)
-import Gargantext.Core.NgramsTable.Types (Action(..), NgramsClick, NgramsDepth, NgramsElement, NgramsTable, NgramsTablePatch(..), NgramsTerm, _NgramsElement, _NgramsRepoElement, _PatchMap, _children, _list, _ngrams, _occurrences, ngramsTermText, replace)
+import Gargantext.Core.NgramsTable.Types (Action(..), NgramsClick, NgramsDepth, NgramsElement, NgramsTable, NgramsTablePatch, NgramsTerm, _NgramsElement, _NgramsRepoElement, _children, _list, _ngrams, _occurrences, ngramsTermText, replace)
 import Gargantext.Hooks.Loader (useLoader)
-import Gargantext.Prelude (Unit, bind, const, discard, map, mempty, not, otherwise, pure, show, unit, ($), (+), (/=), (<<<), (<>), (==), (>), (||))
+import Gargantext.Prelude (Unit, bind, const, map, mempty, not, otherwise, pure, show, unit, ($), (+), (<<<), (<>), (==), (>), (||))
 import Gargantext.Types as GT
 import Gargantext.Utils.Reactix as R2
 import React.DOM (a, span, text)
@@ -189,8 +183,8 @@ renderNgramsItemCpt = here.component "renderNgramsItem" cpt
       isEditing' <- T.useLive T.unequal isEditing
 
       pure $ Tbl.makeRow
-        [ H.div { className: "ngrams-selector" }
-          [ H.span { className: "ngrams-chooser fa fa-eye-slash"
+        [ H.div {}
+          [ H.span { className: "fa fa-eye-slash"
                    , on: { click: onClick } } []
           ]
         , selected
