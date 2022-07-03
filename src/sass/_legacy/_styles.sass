@@ -96,38 +96,84 @@
           width: 14px
           margin-right: space-x(1)
 
+///////////////////////////////////////////////////:
 
-.ngrams-tree-edit-real
-  // empirical value corresponding to the glass search icon of the above search
-  // bar, this will add an nested alignment telling the user that this feature
-  // is a deep feature reveals to zim
-  $gutter: 2.5em
+.search-button-prepend
 
-  padding: $card-spacer-y $card-spacer-x
-  margin-left: $gutter
-  margin-right: $gutter
-  border-left: 1px solid $border-color
-  border-right: 1px solid $border-color
+  .input-group-text
+    // @XXX Glyphicon icons lack of homogeneous width
+    width: 41px
+
+    // @XXX Bootstrap adding unwanted `z-index` on "_input-group.scss"
+    z-index: initial
+
+///////////////////////////////////////////////////:
+
+.ngrams-table-container
 
   &__header
-    margin-bottom: space-x(1)
+    display: flex
+    align-items: flex-start
 
-  &__body
-    // empirical value fitting the best size of the render tree
-    $body-min-with: 400px
+    &__item
+      padding: $card-spacer-y $card-spacer-x
 
-    min-width: 400px
-    width: fit-content
-    margin-bottom: space-x(1.5)
-    padding: $card-spacer-y $card-spacer-x
+      &:not(:first-child)
+        margin-left: space-x(1)
+      &:not(:last-child)
+        margin-right: space-x(1)
 
+  &__add-term
+    // struggling to create harmonious vertical gutters due to Bootstrap adding
+    // helper classes surrounding the element
+    $offset-top: -8px
+    $offset-bottom: 12px
+
+    margin-top: $offset-top
+    margin-bottom: $offset-bottom
 
   &__footer
+    padding: $card-spacer-y $card-spacer-x
+
+    &__item
+      text-align: center
+
+///////////////////////////////////////////////////:
+
+.ngrams-tree-edit-real
+  // empirical value fitting the best size of the render tree
+  $min-with: 416px
+
+  min-width: $min-with
+  width: fit-content // growing purpose
+  border-color: $primary
+  margin-top: space-x(2)
+  margin-bottom: space-x(2)
+
+
+  &__actions
     display: flex
+    margin-top: space-x(2)
 
     .b-button
       margin-right: space-x(1)
 
+//////////////////////////////////////////////////
+
+.loaded-ngrams-table-header
+  text-align: center
+  margin-top: space-x(1.5)
+  margin-bottom: space-x(1.5)
+
+  &__icon
+    font-size: 16px
+
+  &__text
+    font-size: 22px
+    font-weight: bold
+    font-family: $headings-font-family
+
+//////////////////////////////////////////////////
 
 .action-search
   margin: 10px

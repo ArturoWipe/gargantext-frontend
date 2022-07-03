@@ -8733,27 +8733,62 @@ a:focus, a:hover {
   margin-right: 8px;
 }
 
-.ngrams-tree-edit-real {
-  padding: 0.75rem 1.25rem;
-  margin-left: 2.5em;
-  margin-right: 2.5em;
-  border-left: 1px solid #dee2e6;
-  border-right: 1px solid #dee2e6;
+.search-button-prepend .input-group-text {
+  width: 41px;
+  z-index: initial;
 }
-.ngrams-tree-edit-real__header {
-  margin-bottom: 8px;
-}
-.ngrams-tree-edit-real__body {
-  min-width: 400px;
-  width: fit-content;
-  margin-bottom: 12px;
-  padding: 0.75rem 1.25rem;
-}
-.ngrams-tree-edit-real__footer {
+
+.ngrams-table-container__header {
   display: flex;
+  align-items: flex-start;
 }
-.ngrams-tree-edit-real__footer .b-button {
+.ngrams-table-container__header__item {
+  padding: 0.75rem 1.25rem;
+}
+.ngrams-table-container__header__item:not(:first-child) {
+  margin-left: 8px;
+}
+.ngrams-table-container__header__item:not(:last-child) {
   margin-right: 8px;
+}
+.ngrams-table-container__add-term {
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+.ngrams-table-container__footer {
+  padding: 0.75rem 1.25rem;
+}
+.ngrams-table-container__footer__item {
+  text-align: center;
+}
+
+.ngrams-tree-edit-real {
+  min-width: 416px;
+  width: fit-content;
+  border-color: #083358;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+.ngrams-tree-edit-real__actions {
+  display: flex;
+  margin-top: 16px;
+}
+.ngrams-tree-edit-real__actions .b-button {
+  margin-right: 8px;
+}
+
+.loaded-ngrams-table-header {
+  text-align: center;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.loaded-ngrams-table-header__icon {
+  font-size: 16px;
+}
+.loaded-ngrams-table-header__text {
+  font-size: 22px;
+  font-weight: bold;
+  font-family: "Crete Round";
 }
 
 .action-search {
