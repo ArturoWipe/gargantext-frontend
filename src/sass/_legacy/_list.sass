@@ -128,9 +128,23 @@
     font-family: $headings-font-family
 
 //////////////////////////////////////////////////
-///
-/// .action-search
-  margin: 10px
 
-  .search-bar
-    margin: 10px
+.ngrams-tree-loaded-node
+  // empirical value where the child separator aligns with its parent text
+  $child-offset: 13px
+
+  &--child,
+  &--subchild
+
+    &::before
+      color: $gray-400
+      font-size: 11px
+      margin-right: space-x(0.5)
+
+      @include right-handed
+        content: "└"
+      @include left-handed
+        content: "┘"
+
+  &--subchild
+    padding-left: $child-offset

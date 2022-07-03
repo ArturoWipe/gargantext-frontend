@@ -1,11 +1,13 @@
 module Gargantext.Components.NgramsTable.Tree where
 
+import Gargantext.Prelude
+
 import Data.Array as A
 import Data.Either (Either(..))
 import Data.Lens ((^..), (^.), view)
 import Data.Lens.Fold (folded)
 import Data.Lens.Index (ix)
-import Data.List (List)
+import Data.List (List, intercalate)
 import Data.List as L
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set)
@@ -21,6 +23,7 @@ import Gargantext.Core.NgramsTable.Types (Action(..), NgramsClick, NgramsDepth, 
 import Gargantext.Hooks.Loader (useLoader)
 import Gargantext.Prelude (Unit, bind, const, map, mempty, not, otherwise, pure, show, unit, ($), (+), (<<<), (<>), (==), (>), (||))
 import Gargantext.Types as GT
+import Gargantext.Utils ((?))
 import Gargantext.Utils.Reactix as R2
 import React.DOM (a, span, text)
 import React.DOM.Props as DOM
@@ -116,13 +119,37 @@ treeLoaded :: Record TreeLoaded -> R.Element
 treeLoaded p = R.createElement treeLoadedCpt p []
 treeLoadedCpt :: R.Component TreeLoaded
 treeLoadedCpt = here.component "treeLoaded" cpt where
-  cpt params@{ ngramsChildren, ngramsClick, ngramsDepth, ngramsEdit, ngramsStyle } _ = do
+  cpt params@{ ngramsChildren
+             , ngramsClick
+             , ngramsDepth
+             , ngramsEdit
+             , ngramsStyle
+             } _ = do
     pure $
-      H.li { style: { width : "100%" } }
-      ([ H.i { className, style } [] ]
-       <> [ R2.buff $ tag [ text $ " " <> ngramsTermText ngramsDepth.ngrams ] ]
-       <> maybe [] edit (ngramsEdit ngramsDepth)
-       <> [ forest ngramsChildren ]
+
+      H.li
+      -- { className: "ngrams-tree-loaded-node" }
+      { className: intercalate " "
+          [ "ngrams-tree-loaded-node"
+          , ngramsDepth.depth == 1 ?
+              "ngrams-tree-loaded-node--child" $
+              ""
+          , ngramsDepth.depth > 1 ?
+              "ngrams-tree-loaded-node--subchild" $
+              ""
+          ]
+      }
+      (
+        -- @NOTE #414: currently commenting this, as the below icon is not
+        --             a call-to-action, thus deceiving the user of possible
+        --             yet-to-become reveal/collapse node children feature
+        -- [ H.i { className, style } [] ]
+      -- <>
+        [ R2.buff $ tag [ text $ " " <> ngramsTermText ngramsDepth.ngrams ] ]
+      <>
+        maybe [] edit (ngramsEdit ngramsDepth)
+      <>
+        [ forest ngramsChildren ]
       )
     where
       tag =

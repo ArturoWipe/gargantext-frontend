@@ -8983,6 +8983,23 @@ select.form-control {
   font-family: "Open Sans";
 }
 
+.ngrams-tree-loaded-node--child::before, .ngrams-tree-loaded-node--subchild::before {
+  color: #CED4DA;
+  font-size: 11px;
+  margin-right: 4px;
+}
+.right-handed .ngrams-tree-loaded-node--child::before, .right-handed .ngrams-tree-loaded-node--subchild::before {
+  content: "└";
+}
+
+.left-handed .ngrams-tree-loaded-node--child::before, .left-handed .ngrams-tree-loaded-node--subchild::before {
+  content: "┘";
+}
+
+.ngrams-tree-loaded-node--subchild {
+  padding-left: 13px;
+}
+
 .annotation-run {
   cursor: pointer;
 }
