@@ -15,7 +15,7 @@ import Data.Set as Set
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Gargantext.Components.Bootstrap as B
-import Gargantext.Components.Bootstrap.Types (Variant(..))
+import Gargantext.Components.Bootstrap.Types (ComponentStatus(..), Variant(..))
 import Gargantext.Components.Table as Tbl
 import Gargantext.Config.REST (logRESTError)
 import Gargantext.Core.NgramsTable.Functions (applyNgramsPatches, setTermListA, tablePatchHasNgrams)
@@ -132,10 +132,10 @@ treeLoadedCpt = here.component "treeLoaded" cpt where
       { className: intercalate " "
           [ "ngrams-tree-loaded-node"
           , ngramsDepth.depth == 1 ?
-              "ngrams-tree-loaded-node--child" $
+              "ngrams-tree-loaded-node--first-child" $
               ""
           , ngramsDepth.depth > 1 ?
-              "ngrams-tree-loaded-node--subchild" $
+              "ngrams-tree-loaded-node--grand-child" $
               ""
           ]
       }
@@ -210,9 +210,18 @@ renderNgramsItemCpt = here.component "renderNgramsItem" cpt
       isEditing' <- T.useLive T.unequal isEditing
 
       pure $ Tbl.makeRow
-        [ H.div {}
-          [ H.span { className: "fa fa-eye-slash"
-                   , on: { click: onClick } } []
+        [
+          H.div
+          { className: "text-center"
+          , style: { marginTop: "6px" }
+          }
+          [
+            B.iconButton
+            { name: "eye-slash"
+            , status: Disabled -- see `onClick` behavior
+            , callback: onClick
+            , className: ""
+            }
           ]
         , selected
         , checkbox GT.MapTerm
@@ -244,7 +253,10 @@ renderNgramsItemCpt = here.component "renderNgramsItem" cpt
                 }
               ]
           )
-        , H.text $ show (ngramsElement ^. _NgramsElement <<< _occurrences)
+        ,
+          B.wad'
+          [ "pl-3" ] $
+          show (ngramsElement ^. _NgramsElement <<< _occurrences)
       ]
       where
         ngramsDepth = { ngrams, depth: 0 }
@@ -277,21 +289,42 @@ renderNgramsItemCpt = here.component "renderNgramsItem" cpt
           -- | ngramsTransient = const Nothing
           -- | otherwise       = Just <<< dispatch <<< cycleTermListItem <<< view _ngrams
         selected    =
-          H.input { checked: Set.member ngrams ngramsSelection
-                  , className: "checkbox"
-                  , on: { change: const $ dispatch $ ToggleSelect ngrams }
-                  , type: "checkbox"
-                  }
+          B.wad
+          [ "text-center" ]
+          [
+            H.input
+            { checked: Set.member ngrams ngramsSelection
+            , className: "checkbox"
+            , on: { change: const $ dispatch $ ToggleSelect ngrams }
+            , type: "checkbox"
+            , style:
+                { cursor: "pointer"
+                , marginTop: "6px"
+                }
+            }
+          ]
+
         checkbox termList' =
           let chkd = termList == termList'
               termList'' = if chkd then GT.CandidateTerm else termList'
           in
-          H.input { checked: chkd
-                  , className: "checkbox"
-                  , on: { change: const $ dispatch $ CoreAction $
-                          setTermListA ngrams (replace termList termList'') }
-                  , readOnly: ngramsTransient
-                  , type: "checkbox" }
+            B.wad
+            [ "text-center" ]
+            [
+              H.input
+              { checked: chkd
+              , className: "checkbox"
+              , on: { change: const $ dispatch $ CoreAction $
+                      setTermListA ngrams (replace termList termList'') }
+              , readOnly: ngramsTransient
+              , type: "checkbox"
+              , style:
+                  { cursor: "pointer"
+                  , marginTop: "6px"
+                  }
+              }
+            ]
+
         ngramsTransient = tablePatchHasNgrams ngramsLocalPatch ngrams
           -- ^ TODO here we do not look at ngramsNewElems, shall we?
         ngramsOpacity
