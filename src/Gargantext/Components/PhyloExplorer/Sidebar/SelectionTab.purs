@@ -13,6 +13,7 @@ import Effect (Effect)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.Bootstrap.Types (ButtonVariant(..), Variant(..))
 import Gargantext.Components.PhyloExplorer.Sidebar.DocList (docListWrapper)
+import Gargantext.Components.PhyloExplorer.Sidebar.UpdateTerms (updateTerms)
 import Gargantext.Components.PhyloExplorer.Store as PhyloStore
 import Gargantext.Components.PhyloExplorer.Types (ExtractedCount(..), ExtractedTerm(..), defaultCacheParams)
 import Gargantext.Hooks.FirstEffect (useFirstEffect')
@@ -199,7 +200,7 @@ component = here.component "main" cpt where
                   ,
                     -- Expand Selection actions
                     B.iconButton
-                    { name: expandSelection' ?
+                    { name: expandSelection ?
                         "caret-up" $
                         "caret-down"
                     , className: "phylo-selection-tab__highlight__expand"
@@ -207,19 +208,31 @@ component = here.component "main" cpt where
                     }
                   ]
                 ,
-                  H.li
-                  { className: "list-group-item" }
-                  [
-                    H.a
-                    { href: "https://en.wikipedia.org/w/index.php?search=\""
-                        <> s
-                        <> "\""
-                    , target: "_blank"
-                    }
+                  -- Selection actions
+                  R2.when expandSelection $
+
+                    H.li
+                    { className: "list-group-item" }
                     [
-                      H.text "Click here for more info"
+                      -- Wikipedia informations
+                      H.a
+                      { href: "https://en.wikipedia.org/w/index.php?search=\""
+                          <> s
+                          <> "\""
+                      , target: "_blank"
+                      }
+                      [
+                        H.text "Click here for more info"
+                      ]
+                    ,
+                      -- NGrams edition
+                      H.div
+                      { className: "phylo-selection-tab__highlight__actions" }
+                      [
+                        updateTerms
+                        {}
+                      ]
                     ]
-                  ]
                 ]
               ]
             ]
