@@ -8998,6 +8998,9 @@ select.form-control {
 .ngrams-tree-edit-real__actions .b-button {
   margin-right: 8px;
 }
+.ngrams-tree-edit-real .ngrams-tree-loaded-node a:hover {
+  text-decoration: line-through;
+}
 
 .loaded-ngrams-table-header {
   text-align: center;
