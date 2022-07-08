@@ -8664,7 +8664,7 @@ select.form-control {
   margin-right: 8px;
 }
 
-.search-button-prepend .input-group-text {
+.ngrams-table-search-button .input-group-text {
   width: 41px;
   z-index: initial;
 }
