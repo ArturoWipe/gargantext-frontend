@@ -9001,7 +9001,7 @@ select.form-control {
   align-items: center;
 }
 .table-header-rename__header__line {
-  border-bottom: 1px dashed #dee2e6;
+  border-bottom: 1px solid #E9ECEF;
   border-top: none;
   height: 0;
   flex-grow: 1;
