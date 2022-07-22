@@ -67,7 +67,7 @@ nodePopupCpt = here.component "nodePopupView" cpt where
         ]
       ]
   closePopover p = p.onPopoverClose <<< R.unsafeEventTarget
-  tooltipProps = { id: "node-popup-tooltip", title: "Node settings"
+  tooltipProps = { className: "node-popup-tooltip", title: "Node settings"
                  , data: { toggle: "tooltip", placement: "right" } }
   panelHeading renameIsOpen open p@{ dispatch, id, name, nodeType } =
     H.div { className: "card-header" }
