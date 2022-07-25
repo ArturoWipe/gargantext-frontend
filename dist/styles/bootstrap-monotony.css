@@ -8361,42 +8361,33 @@ a:focus, a:hover {
   max-width: 100vw;
 }
 
-.node-popup-tooltip .panel-actions .almost-useable {
+.node-popup-tooltip .panel-actions__almost-useable {
   color: orange;
 }
-.node-popup-tooltip .panel-actions .development-in-progress {
+.node-popup-tooltip .panel-actions__development-in-progress {
   color: red;
 }
-.node-popup-tooltip .panel-actions .ok-to-use {
+.node-popup-tooltip .panel-actions__ok-to-use {
   color: black;
 }
 .node-popup-tooltip .popup-container {
   display: flex;
   flex-direction: column;
 }
-.node-popup-tooltip .popup-container > .card {
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  margin-bottom: initial;
-}
-.node-popup-tooltip .popup-container > .card .fa-pencil {
+.node-popup-tooltip .popup-container__header .fa-pencil {
   color: black;
 }
-.node-popup-tooltip .popup-container > .card .card-body {
+.node-popup-tooltip .popup-container__body {
   display: flex;
   justify-content: center;
-  background-color: white;
-  border: none;
+  background-color: #fff;
 }
-.node-popup-tooltip .popup-container > .card .card-body .spacer {
-  margin: 8px;
-}
-.node-popup-tooltip .popup-container .frame-search.card {
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  height: 600px;
+
+.frame-search.card {
   width: 1000px;
+  height: 600px;
 }
+
 .forest-layout {
   scrollbar-width: none;
   overflow-y: scroll;

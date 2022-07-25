@@ -22,5 +22,6 @@ function hide(window, querySelector) {
   // @XXX Bootstrap not removing some modal elements on "hide" method
   // @https://stackoverflow.com/questions/50168312/bootstrap-4-close-modal-backdrop-doesnt-disappear
   window.$('body').removeClass('modal-open');
+  window.$('body').css('padding-right', '0');
   window.$('.modal-backdrop').remove();
 }

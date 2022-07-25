@@ -440,11 +440,11 @@ $node-popup-width: 544px
 .node-popup-tooltip
 
   .panel-actions
-    .almost-useable
+    &__almost-useable
       color: orange
-    .development-in-progress
+    &__development-in-progress
       color: red
-    .ok-to-use
+    &__ok-to-use
       color: black
 
 
@@ -452,31 +452,24 @@ $node-popup-width: 544px
     display: flex
     flex-direction: column
 
-    & > .card
-
-      border: 1px solid rgba(0,0,0,0.2)
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2)
-      margin-bottom: initial
+    &__header
 
       .fa-pencil
         color: black
 
-      .card-body
-        display: flex
-        justify-content: center
-        background-color: white
-        border: none
-        .spacer
-          margin: space-x(1)
+    &__body
+      display: flex
+      justify-content: center
+      background-color: $body-bg
 
-    .frame-search.card
-      $frame-width: 1000px
-      $frame-height: 600px
+/////////////////////////////////////////
 
-      border: 1px solid rgba(0,0,0,0.2)
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2)
-      width: $frame-width
-      height: $frame-height
+.frame-search.card
+  $frame-width: 1000px
+  $frame-height: 600px
+
+  width: $frame-width
+  height: $frame-height
 
 /////////////////////////////////////////
 

@@ -67,10 +67,9 @@ router :: R2.Leaf Props
 router = R2.leafComponent routerCpt
 routerCpt :: R.Component Props
 routerCpt = here.component "router" cpt where
-  cpt { boxes: boxes@{ handed, showLogin } } _ = do
+  cpt { boxes: boxes@{ handed } } _ = do
     -- States
     handed'     <- R2.useLive' handed
-    showLogin'  <- R2.useLive' showLogin
 
     -- Computed
     let
@@ -100,9 +99,7 @@ routerCpt = here.component "router" cpt where
       H.div
       { className: "router" }
       [
-        -- loginModal { boxes }
-         R2.when showLogin' $
-            login' boxes
+        login' boxes
        , TopBar.topBar { boxes }
        , errorsView { errors: boxes.errors } []
        , H.div { className: "router__inner" }

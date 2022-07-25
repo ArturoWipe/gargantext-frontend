@@ -328,43 +328,6 @@ nodeSpanCpt = here.component "nodeSpan" cpt
             , elevation: Level1
             }
         ,
-          -- @XXX: React Awesome Popover not suited for the feature UX
-          --       We SHOULD use a more common `Modal` type of thing
-          --       As of now, we have issues on z-index management and erratic
-          --       popup close action
-        --   R2.when (showBox) $
-
-        --     Popover.popover
-        --     { arrow: false
-        --     , open: false
-        --     , onClose: \_ -> pure unit
-        --     , onOpen:  \_ -> pure unit
-        --     , ref: popoverRef
-        --     }
-        --     [
-        --       B.iconButton
-        --       { name: "cog"
-        --       , className: "mainleaf__settings-icon"
-        --       -- (cf. Popover callbacks)
-        --       , callback: const R.nothing
-        --       , title:
-        --             "Each node of the Tree can perform some actions.\n"
-        --           <> "Click here to execute one of them."
-        --       , variant: Secondary
-        --       , elevation: Level1
-        --       }
-        --     ,
-        --       nodePopupView
-        --       { boxes
-        --       , dispatch
-        --       , id
-        --       , name
-        --       , nodeType
-        --       , onPopoverClose: const $ onPopoverClose popoverRef
-        --       , session
-        --       }
-        --     ]
-        -- ,
           R.fragment $ flip map currentTasks' \task ->
 
             asyncProgress
@@ -395,7 +358,6 @@ nodeSpanCpt = here.component "nodeSpan" cpt
             , id
             , name
             , nodeType
-            -- , onPopoverClose: const $ onPopoverClose popoverRef
             , onPopoverClose: \_ -> toggleSettingsModal unit
             , session
             }
