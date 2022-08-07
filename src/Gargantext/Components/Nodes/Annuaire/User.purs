@@ -56,7 +56,15 @@ displayCpt = here.component "display" cpt
         , H.div { className: "row", id: "contact-page-info" }
           [ H.div { className: "col-md-12" }
             [ H.div { className: "row" }
-              [ H.div { className: "col-md-2" } [ H.img { src: "/images/Gargantextuel-212x300.jpg"} ]
+              [ H.div { className: "col-md-2" } [ H.div { className: "container-fluid" } 
+                [ H.div { className: "row" } [ H.img { src: "/images/Gargantextuel-212x300.jpg"} ] 
+                , H.form { className: "row", enctype: "multipart/form-data" } 
+                  [ H.label { for: "avatar" } [H.text "Choose your profile picture:"]
+                  , H.input { type: "file", id: "avatar", accept: "image/png, image/jpeg" }
+                  , H.button {} [ H.text "save" ]
+                  ]
+                ]
+              ]
               , H.div { className: "col-md-1"} []
               , H.div { className: "col-md-8"} children
               ]
