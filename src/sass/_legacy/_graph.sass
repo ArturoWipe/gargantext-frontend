@@ -142,8 +142,10 @@
   $legend-code-height: 12px
 
   &__item
+    display: flex
+    align-items: baseline
     list-style: none
-    margin-bottom: space-x(0.75)
+    margin-bottom: space-x(1)
 
   &__code
     width: $legend-code-width
@@ -152,8 +154,18 @@
     margin-right: space-x(2.5)
     border: 1px solid $gray-500
 
-  &__caption
-    vertical-align: top
+
+.graph-legend-nodes
+
+  &__item
+
+    &:not(:last-child)
+      margin-bottom: space-x(0.5)
+
+  &__badge
+    font-size: $font-size-base
+    white-space: normal
+    word-break: break-word
 
 
 .graph-documentation
