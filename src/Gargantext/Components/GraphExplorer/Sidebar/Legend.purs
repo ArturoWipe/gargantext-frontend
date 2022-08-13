@@ -12,7 +12,7 @@ import Data.Traversable (foldMap, intercalate)
 import Gargantext.Components.Bootstrap as B
 import Gargantext.Components.GraphExplorer.Types as GET
 import Gargantext.Hooks.Sigmax.Types as ST
-import Gargantext.Utils (getter, (?))
+import Gargantext.Utils (getter, nbsp, (?))
 import Gargantext.Utils.Reactix as R2
 import Reactix as R
 import Reactix.DOM.HTML as H
@@ -59,27 +59,18 @@ legendCpt = here.component "legend" cpt where
             }
             []
           ,
-            H.div
-            {}
+            B.wad
+            [ "flex-grow-1" ]
             [
-              H.div
+              B.div'
               { className: "graph-legend__title" }
-              [
-                B.wad'
-                [ "d-inline", "text-bold", "color-gray-700" ] $
-                label
-              ,
-                B.wad'
-                [ "d-inline", "color-gray-600", "font-size-80", "float-right" ]
-                (
-                  show $ getClusterNodeCount nodeCountList id_
-                )
-              ]
+              label
             ,
               selectedNodes
               { selectedNodeIds
               , extractedNodeList
               , clusterId: id_
+              , nodeCount: getClusterNodeCount nodeCountList id_
               }
             ]
           ]
@@ -110,6 +101,7 @@ type SelectedNodesProps =
   ( extractedNodeList     :: Array GET.Node
   , selectedNodeIds       :: T.Box ST.NodeIds
   , clusterId             :: Int
+  , nodeCount             :: Int
   )
 
 selectedNodes :: R2.Leaf SelectedNodesProps
@@ -120,6 +112,7 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
   cpt { extractedNodeList
       , selectedNodeIds
       , clusterId
+      , nodeCount
       } _ = do
     -- | States
     -- |
@@ -134,6 +127,11 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
             ( eq id
             )
         # isJust
+
+      countValue
+        =   extractedNodeList
+        #   A.length
+        #   (nodeCount - _)
 
     -- | Behaviors
     -- |
@@ -156,11 +154,46 @@ selectedNodesCpt = here.component "selectedNodes" cpt where
             H.a
             { className: intercalate " "
                 [ "graph-legend-nodes__badge"
-                , "badge"
-                , (isSelected nodeId) ? "badge-info" $ "badge-light"
+                , (isSelected nodeId) ?
+                    "graph-legend-nodes__badge--selected" $
+                    ""
+                , "badge badge-light"
                 ]
             , on: { click: onBadgeClick nodeId }
             }
             [ H.text nodeLabel ]
+          ]
+
+      ,
+        R2.when (eq countValue 0) $
+
+          H.li
+          { className: intercalate " "
+              [ "graph-legend-nodes__item"
+              , "graph-legend-nodes__item--count"
+              ]
+          }
+          [
+            H.text "0 node"
+          ]
+      ,
+        R2.when (not $ eq countValue 0) $
+
+          H.li
+          { className: intercalate " "
+              [ "graph-legend-nodes__item"
+              , "graph-legend-nodes__item--count"
+              ]
+          }
+          [
+            H.text "+"
+          ,
+            H.text $ nbsp 1
+          ,
+            H.text $ show countValue
+          ,
+            H.text $ nbsp 1
+          ,
+            H.text $ eq countValue 1 ? "node" $ "nodes"
           ]
       ]

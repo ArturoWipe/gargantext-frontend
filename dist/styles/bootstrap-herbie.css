@@ -9010,7 +9010,16 @@ input[type=range]:-moz-focusring {
   display: flex;
   align-items: baseline;
   list-style: none;
-  margin-bottom: 8px;
+  position: relative;
+}
+.graph-legend__item:not(:first-child) {
+  margin-top: 24px;
+}
+.graph-legend__title {
+  color: #343A40;
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 2px;
 }
 .graph-legend__code {
   width: 24px;
@@ -9020,13 +9029,28 @@ input[type=range]:-moz-focusring {
   border: 1px solid #ADB5BD;
 }
 
+.graph-legend-nodes__item {
+  display: inline-block;
+}
+.graph-legend-nodes__item:first-child {
+  margin-top: 6px;
+}
 .graph-legend-nodes__item:not(:last-child) {
   margin-bottom: 4px;
+  margin-right: 4px;
+}
+.graph-legend-nodes__item--count {
+  color: #343A40;
+  font-size: 12px;
+  font-weight: bold;
 }
 .graph-legend-nodes__badge {
-  font-size: 1rem;
+  font-size: 13px;
   white-space: normal;
   word-break: break-word;
+}
+.graph-legend-nodes__badge--selected {
+  background-color: #dadad5;
 }
 
 .graph-documentation__text-section {
