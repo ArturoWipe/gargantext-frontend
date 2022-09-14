@@ -1,13 +1,28 @@
 -- | A module for authenticating to create sessions and handling them
 module Gargantext.Sessions
-  ( module Gargantext.Sessions.Types
-  , WithSession, WithSessionContext
-  , load, change
-  , Action(..), act, delete, get, post, put, put_
-  , postAuthRequest, postForgotPasswordRequest
-  , deleteWithBody, postWwwUrlencoded
-  , getCacheState, setCacheState
-  ) where
+  ( Action(..)
+  , WithSession
+  , WithSessionContext
+  , act
+  , change
+  , delete
+  , deleteWithBody
+  , get
+  , getCacheState
+  , load
+  , module Gargantext.Sessions.Types
+  , post
+  , postAuthRequest
+  , postForgotPasswordRequest
+  , postMultipart
+  , postWwwUrlencoded
+  , put
+  , put_
+  , setCacheState
+  )
+  where
+
+import Gargantext.Prelude
 
 import DOM.Simple.Console (log2)
 import Data.Either (Either(..), hush)
@@ -15,19 +30,16 @@ import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Reactix as R
-import Simple.JSON as JSON
-import Toestand as T
-import Web.Storage.Storage (getItem, removeItem, setItem)
-
-import Gargantext.Prelude
-
 import Gargantext.Components.Login.Types (AuthData(..), AuthInvalid(..), AuthRequest(..), AuthResponse(..))
 import Gargantext.Components.Nodes.Lists.Types as NT
 import Gargantext.Config.REST as REST
 import Gargantext.Ends (class ToUrl, Backend, toUrl)
 import Gargantext.Sessions.Types (Session(..), Sessions(..), OpenNodes, NodeId, mkNodeId, sessionUrl, sessionId, empty, null, unSessions, lookup, cons, tryCons, update, remove, tryRemove)
 import Gargantext.Utils.Reactix as R2
+import Reactix as R
+import Simple.JSON as JSON
+import Toestand as T
+import Web.Storage.Storage (getItem, removeItem, setItem)
 
 type WithSession c =
   ( session :: Session
@@ -157,3 +169,7 @@ post session@(Session {token}) p = REST.post (Just token) (toUrl session p)
 postWwwUrlencoded :: forall b p. JSON.ReadForeign b => ToUrl Session p =>
                      Session -> p -> REST.FormDataParams -> REST.AffRESTError b
 postWwwUrlencoded session@(Session {token}) p = REST.postWwwUrlencoded (Just token) (toUrl session p)
+
+postMultipart :: forall b p. JSON.ReadForeign b => ToUrl Session p =>
+                 Session -> p -> String -> REST.AffRESTError b
+postMultipart session@(Session {token}) p = REST.postMultipartFormData (Just token) (toUrl session p)

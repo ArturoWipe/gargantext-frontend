@@ -7,9 +7,12 @@ module Gargantext.Components.Nodes.Annuaire.User
 
 import Gargantext.Prelude
 
+import DOM.Simple as DOM
+import DOM.Simple.Event as DE
 import Data.Either (Either(..))
 import Data.Lens as L
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Nullable (Nullable, null)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
@@ -21,11 +24,11 @@ import Gargantext.Components.InputWithEnter (inputWithEnter)
 import Gargantext.Components.Nodes.Annuaire.Tabs as Tabs
 import Gargantext.Components.Nodes.Annuaire.User.Contacts.Types (Contact(..), ContactData, ContactTouch(..), ContactWhere(..), ContactWho(..), HyperdataContact(..), HyperdataUser(..), _city, _country, _firstName, _labTeamDeptsJoinComma, _lastName, _mail, _office, _organizationJoinComma, _ouFirst, _phone, _role, _shared, _touch, _who, defaultContactTouch, defaultContactWhere, defaultContactWho, defaultHyperdataContact, defaultHyperdataUser)
 import Gargantext.Components.Nodes.Lists.Types as LT
-import Gargantext.Config.REST (AffRESTError, logRESTError)
+import Gargantext.Config.REST (AffRESTError, RESTError, logRESTError)
 import Gargantext.Config.Utils (handleRESTError)
 import Gargantext.Ends (Frontends)
 import Gargantext.Hooks.Loader (useLoader)
-import Gargantext.Sessions (Session(..), WithSession, WithSessionContext, sessionId)
+import Gargantext.Sessions (Session(..), WithSession, WithSessionContext, postMultipart, sessionId, sessionUrl)
 import Gargantext.Types (FrontendError)
 import Gargantext.Utils.Reactix as R2
 import Gargantext.Utils.Toestand as T2
@@ -36,17 +39,21 @@ import Reactix.DOM.HTML as H
 import Record as Record
 import Toestand as T
 
+foreign import handleRef :: R.Ref (Nullable DOM.Element) -> String
+
 here :: R2.Here
 here = R2.here "Gargantext.Components.Nodes.Annuaire.User"
 
-type DisplayProps = ( title :: String )
+type DisplayProps = ( title :: String, image :: String, session :: Session)
 
 display :: R2.Component DisplayProps
 display = R.createElement displayCpt
 displayCpt :: R.Component DisplayProps
 displayCpt = here.component "display" cpt
   where
-    cpt { title } children = do
+    cpt { title, image, session } children = do
+      fileRef <- R.useRef null
+
       pure $ H.div { className: "container-fluid" }
         [ H.div { className: "row", id: "contact-page-header" }
           [ H.div { className: "col-md-6"} [ H.h3 {} [ H.text title ] ]
@@ -57,11 +64,11 @@ displayCpt = here.component "display" cpt
           [ H.div { className: "col-md-12" }
             [ H.div { className: "row" }
               [ H.div { className: "col-md-2" } [ H.div { className: "container-fluid" } 
-                [ H.div { className: "row" } [ H.img { src: "/images/Gargantextuel-212x300.jpg"} ] 
-                , H.form { className: "row", enctype: "multipart/form-data" } 
+                [ H.div { className: "row" } [ H.img { src: image} ] 
+                , H.form { on: {submit: onSubmit session fileRef}, className: "row", encType: "multipart/form-data" } 
                   [ H.label { for: "avatar" } [H.text "Choose your profile picture:"]
-                  , H.input { type: "file", id: "avatar", accept: "image/png, image/jpeg" }
-                  , H.button {} [ H.text "save" ]
+                  , H.input { type: "file", ref: fileRef, accept: "image/png, image/jpeg" }
+                  , H.button { className: "btn btn-secondary" } [ H.text "save" ]
                   ]
                 ]
               ]
@@ -71,6 +78,14 @@ displayCpt = here.component "display" cpt
             ]
           ]
         ]
+      where
+        onSubmit :: Session -> R.Ref (Nullable DOM.Element) -> DE.Event -> Effect Unit
+        onSubmit session fileRef e = do
+          let body = handleRef fileRef
+          R2.preventDefault e
+          launchAff_ $ do
+            aff :: Either RESTError Int <- postMultipart session "image" body
+            pure aff
 
 {-
 listElement :: Array R.Element -> R.Element
@@ -116,9 +131,9 @@ userLayoutWithKeyCpt = here.component "userLayoutWithKey" cpt where
     useLoader { errorHandler
               , loader: getUserInfoWithReload
               , path: { nodeId: userId, reload: reload', session }
-              , render: \userInfo@{ ui_username } ->
+              , render: \userInfo@{ ui_username, ui_cwImagePath} ->
                   H.ul { className: "col-md-12 list-group" } [
-                    display { title: fromMaybe "no name" (Just ui_username) }
+                    display { session, title: fromMaybe "no name" (Just ui_username), image: fromMaybe "/images/Gargantextuel-212x300.jpg" ui_cwImagePath}
                     (contactInfos userInfo (onUpdateUserInfo boxes.errors reload))
                     , Tabs.tabs {
                          boxes

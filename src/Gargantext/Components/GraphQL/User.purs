@@ -25,7 +25,8 @@ type UserInfo
     , ui_cwRole         :: Maybe String
     , ui_cwTouchPhone   :: Maybe String
     , ui_cwTouchMail    :: Maybe String
-    , ui_cwDescription  :: Maybe String }
+    , ui_cwDescription  :: Maybe String
+    , ui_cwImagePath    :: Maybe String }
 type UserInfoM
   = { token             :: NotNull String
     , ui_id             :: NotNull Int
@@ -43,7 +44,8 @@ type UserInfoM
     , ui_cwRole         :: String
     , ui_cwTouchPhone   :: String
     , ui_cwTouchMail    :: String
-    , ui_cwDescription  :: String }
+    , ui_cwDescription  :: String
+    , ui_cwImagePath    :: String }
 
 userInfoQuery = { user_infos: { user_id: Var :: _ "id" Int } =>>
                   { ui_id: unit
@@ -61,7 +63,8 @@ userInfoQuery = { user_infos: { user_id: Var :: _ "id" Int } =>>
                   , ui_cwRole: unit
                   , ui_cwTouchMail: unit
                   , ui_cwTouchPhone: unit
-                  , ui_cwDescription: unit }
+                  , ui_cwDescription: unit
+                  , ui_cwImagePath: unit }
                 }
 
 _ui_cwFirstName :: Lens' UserInfo String
@@ -128,8 +131,14 @@ _ui_cwTouchPhone = lens getter setter
 _ui_cwDescription :: Lens' UserInfo String
 _ui_cwDescription = lens getter setter
   where
-    getter ({ui_cwDescription: val}) = fromMaybe "" val
+    getter ({ ui_cwDescription: val }) = fromMaybe "" val
     setter ui val = ui { ui_cwDescription = Just val }
+
+_ui_cwImagePath :: Lens' UserInfo String
+_ui_cwImagePath = lens getter setter
+  where
+    getter ({ ui_cwImagePath: val }) = fromMaybe "" val
+    setter ui val = ui { ui_cwImagePath = Just val }
 
 type User
   = { u_id        :: Int
